@@ -3,7 +3,7 @@ const async = require('async');
 const debug = require('debug')('core');
 
 const fileIndex = require('./lib/file-index');
-const sha1sum = require('./lib/sha1');
+const checksum = require('./lib/checksum');
 
 const args = process.argv.slice(2);
 
@@ -35,7 +35,7 @@ async.waterfall([
   (callback) => fileIndex(options.base, options.indexFilename, callback),
   (index, callback) => {
     if (options.checksum) {
-      return sha1sum(options.indexFilename, index, callback)
+      return checksum(options.indexFilename, index, callback)
     } else {
       return callback(null, index);
     }
