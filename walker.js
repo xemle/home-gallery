@@ -15,22 +15,55 @@ function forEachStat(dir, files, done, cb) {
 
   files.forEach(file => {
     const filename = path.join(dir, file);
-    fs.stat(filename, (err, stat) => {
+    fs.lstat(filename, (err, stat) => {
       cb(err, stat, filename);
     })
   })
 }
 
-function decrementCounter(counter, done) {
-  if (counter === 0) {
-    return counter;
-  }
+function CountDownLatch(count, done) {
+  this.counter = count;
+  this.done = done;
+}
 
-  counter--;
-  if (counter === 0) {
-    done()
+CountDownLatch.prototype.down = function() {
+  this.counter--;
+  if (!this.counter) {
+    this.done();
   }
-  return counter;
+}
+
+CountDownLatch.prototype.up = function() {
+  this.counter++;
+}
+
+function walkDirectory(filename, counter, cb, done) {
+  counter.up();
+  walk(filename, cb, (err) => {
+    if (err) {
+      return done(err);
+    }
+    counter.down();
+  });
+}
+
+function statFiles(dir, files, cb, done) {
+  let counter = new CountDownLatch(files.length, done);
+  forEachStat(dir, files, done, (err, stat, filename) => {
+    if (err) {
+      if (err.code === 'EACCES') {
+        return counter.down();
+      }
+      return done(err);
+    }
+
+    const readDirectory = cb(filename, stat);
+
+    if (readDirectory && stat.isDirectory()) {
+      walkDirectory(filename, counter, cb, done);
+    }
+    counter.down();
+  })
 }
 
 function walk(dir, cb, done) {
@@ -39,29 +72,9 @@ function walk(dir, cb, done) {
       return handleReaddirError(err, done);
     }
 
-    let counter = files.length;
-    forEachStat(dir, files, done, (err, stat, filename) => {
-      if (err) {
-        if (err.code === 'EACCES') {
-          counter = decrementCounter(counter, done)
-          return;
-        }
-        return done(err);
-      }
+    files.sort();
 
-      cb(filename, stat);
-
-      if (stat.isDirectory()) {
-        counter++;
-        walk(filename, cb, (err) => {
-          if (err) {
-            return done(err);
-          }
-          counter = decrementCounter(counter, done);
-        });
-      }
-      counter = decrementCounter(counter, done);
-    })
+    statFiles(dir, files, cb, done);
   })
 }
 
