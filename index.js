@@ -3,6 +3,7 @@ const async = require('async');
 const debug = require('debug')('core');
 
 const fileIndex = require('./lib/file-index');
+const writeIndex = require('./lib/index/write');
 const checksum = require('./lib/checksum');
 
 const args = process.argv.slice(2);
@@ -35,7 +36,12 @@ async.waterfall([
   (callback) => fileIndex(options.base, options.indexFilename, callback),
   (index, callback) => {
     if (options.checksum) {
-      return checksum(options.indexFilename, index, callback)
+      return checksum(index, (err, index) => {
+        if (err) {
+          return callback(err);
+        }
+        writeIndex(options.indexFilename, index, callback);
+      })
     } else {
       return callback(null, index);
     }
