@@ -26,7 +26,7 @@ while (args.length) {
     debug(`Enable checksum calculation`);
     options.checksum = true;
   } else if (arg === '-h' || arg === '--help') {
-    console.log(`-d|--directory <directory> -i|--index <index file> [-c|--checksum]`);
+    console.log(`-d|--directory <directory> -i|--index <file index> [-c|--checksum]`);
     process.exit(0);
   }
 }
