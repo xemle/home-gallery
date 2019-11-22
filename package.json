@@ -16,6 +16,7 @@
   "dependencies": {
     "exiftool-vendored": "^9.3.0",
     "handbrake-js": "^4.0.3",
-    "sharp": "^0.23.2"
+    "sharp": "^0.23.2",
+    "through2": "^3.0.1"
   }
 }

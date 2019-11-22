@@ -1,6 +1,3 @@
-const heapdump = require('heapdump');
-console.log(`kill -USR2 ${process.pid} to create heapdump`);
-
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
