@@ -14,7 +14,7 @@ while (args.length) {
     options.indexFilename = args.shift();
   } else if (arg === '-s') {
     options.storageDir = args.shift();
-  } else if (arg === '-o') {
+  } else if (arg === '-d') {
     options.catalogFilename = args.shift();
   }
 }

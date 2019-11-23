@@ -10,7 +10,7 @@ const options = {
 
 while (args.length) {
   const arg = args.shift();
-  if (arg === '-c') {
+  if (arg === '-d') {
     options.catalogFilename = args.shift();
   } else if (arg === '-s') {
     options.storageDir = args.shift();

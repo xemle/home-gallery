@@ -17,6 +17,10 @@
     "compression": "^1.7.4",
     "exiftool-vendored": "^9.3.0",
     "express": "^4.17.1",
+    "ffmpeg-static": "^2.7.0",
+    "ffprobe": "^1.1.0",
+    "ffprobe-static": "^3.0.0",
+    "fluent-ffmpeg": "^2.1.2",
     "handbrake-js": "^4.0.3",
     "sharp": "^0.23.2",
     "through2": "^3.0.1"
