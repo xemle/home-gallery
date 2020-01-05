@@ -1,0 +1,13 @@
+.media-view {
+  height: 100%;
+  width: auto;
+  display: flex;
+  align-content: center;
+}
+
+.media-view__media {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
+}

@@ -12,11 +12,21 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/react": "^16.9.11",
+    "@types/react-dom": "^16.9.4",
     "async": "^3.1.0",
-    "debug": "^4.1.1"
+    "axios": "^0.19.0",
+    "debug": "^4.1.1",
+    "http-proxy-middleware": "^0.20.0",
+    "parcel-bundler": "^1.12.4",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "sass": "^1.23.7",
+    "typescript": "^3.7.2"
   },
   "dependencies": {
     "compression": "^1.7.4",
+    "cors": "^2.8.5",
     "exiftool-vendored": "^9.3.0",
     "express": "^4.17.1",
     "ffmpeg-static": "^2.7.0",
@@ -25,10 +35,15 @@
     "fluent-ffmpeg": "^2.1.2",
     "merge-stream": "^2.0.0",
     "node-vibrant": "^3.1.5",
+    "react-router-dom": "^5.1.2",
+    "react-use-dimensions": "^1.2.1",
+    "react-window": "^1.8.5",
     "request": "^2.88.0",
     "sharp": "^0.23.2",
     "sharp-phash": "^1.0.2",
+    "split2": "^3.1.1",
     "through2": "^3.0.1",
+    "use-in-view": "^1.0.15",
     "yargs": "^15.0.2"
   }
 }

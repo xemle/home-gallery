@@ -1,0 +1,25 @@
+.media {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+}
+
+.media--120 .media__description {
+  display: none;
+}
+
+.media__preview {
+  display: flex;
+  flex: 100% 1;
+  justify-content: center;
+  align-items: center;
+  line-height: 1;
+  img {
+    width: 100%;
+    object-fit: contain;
+  }
+}
+
+.media__description {
+  width: 100%;
+}
