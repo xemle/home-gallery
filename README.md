@@ -1,24 +1,32 @@
 # Example
 
-Setup media catalog 
+Setup Cloud Galery
 
 ```
-export MEDIA_DIR=$HOME/Pictures
-export INDEX=./data/home-pictures.idx
-export STORAGE=./data/storage
-export CATALOG=$STORAGE/catalog.db
+export PICTURES_DIR=$HOME/Pictures
+export PICTURES_INDEX=./data/home-pictures.idx
+export STORAGE_DIR=./data/storage
+export DATABASE=./data/catalog.db
 ```
 
-Build index, preview and catalog
+index, extract, build and serve the Cloud Gallery
 
 ```
-DEBUG=* node index.js -i $INDEX -d $MEDIA_DIR -c
-DEBUG=* node exif.js -i $INDEX -s $STORAGE
-DEBUG=* node preview.js -i $INDEX -s $STORAGE
-DEBUG=* node video.js -i $INDEX -s $STORAGE
-DEBUG=* node catalog-extractor.js -i $INDEX -s $STORAGE -o $CATALOG
+npm install
+DEBUG=* node index.js index -i $PICTURES_INDEX -d $PICTURES_DIR -c
+DEBUG=* node index.js extract -i $PICTURES_INDEX -s $STORAGE_DIR
+DEBUG=* node index.js build -i $PICTURES_INDEX -s $STORAGE_DIR -d $DATABASE
+DEBUG=* node index.js serve -s $STORAGE -d $DATABASE
 ```
 
-Start server
+# Development
 
-DEBUG=* node server.js -s $STORAGE -c $CATALOG -p 3000
+## WebApp
+
+```
+API_PROXY=http://localhost:3000 npm run dev
+```
+
+```
+API_PROXY=http://api.host:3000 npm run dev
+```
