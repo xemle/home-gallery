@@ -1,0 +1,14 @@
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+
+  background-color: blue;
+  z-index: 10;
+}
+
+.nav-link {
+  padding: 0 5px;
+}

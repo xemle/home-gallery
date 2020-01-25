@@ -1,18 +1,26 @@
 import * as React from "react";
 import {
-    Link
+    Link,
+    useLocation
 } from "react-router-dom";
 
 export interface IMediaProps {
-    media: any;
+    media: any[];
+    index: number
     style: any;
     size: number;
 }
 
 export const Media = (props: IMediaProps) => {
-    const {id, width, height, date, files, previews, type} = props.media;
+    const location = useLocation();
+    const { index, media } = props;
+    const {id, width, height, date, files, previews, type} = media[index];
     const imgStyle = {
         'maxHeight': props.size
+    }
+
+    const linkState = {
+        uppathname: location.pathname
     }
 
     let preview = <img src={'/files/' + previews.filter(p => p.match(/image-preview-320/)).pop()} style={imgStyle}/>
@@ -21,7 +29,7 @@ export const Media = (props: IMediaProps) => {
         <>
             <div className={`media media--${type} media--${props.size}`} style={props.style}>
                 <div className={`media__preview`} >
-                    <Link to={`/view/${id}`}>
+                    <Link to={{pathname:`/view/${id}`, state: linkState}}>
                         {preview}
                     </Link>
                 </div>

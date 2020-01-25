@@ -6,45 +6,60 @@ import {
     Route,
     Link
   } from "react-router-dom";
+import { LastLocationProvider } from 'react-router-last-location';
 import axios from 'axios';
+
+import { StoreProvider } from 'easy-peasy';
+import { useStoreActions, useStoreState } from './store/hooks';
+import { store } from './store/store';
 
 import { Grid } from "./components/Grid";
 import { MediaView } from './components/MediaView';
+import { Years, YearView } from './components/Years';
 
-export const Main = (props) => {
+export const Root = () => {
+  return (
+    <StoreProvider store={store}>
+      <Main />
+    </StoreProvider>
+  )
+}
+
+export const Main = () => {
     const [ media, setMedia ] = useState([]);
-
+    const entries = useStoreState(state => state.entries.entries);
+    const load = useStoreActions(actions => actions.entries.load);
     useEffect(() => {
-        const t0 = Date.now();
         axios.get(`/api`)
         .then(res => {
-          const t1 = Date.now();
           const map = res.data.media.reduce((result, value) => {
-              if (!result[value.id]) {
-                result[value.id] = value;
-              }
+            if (!result[value.id]) {
+              result[value.id] = value;
+            }
             return result;
           }, Object.create({}));
-          const ids = Object.keys(map);
-          const media = Object.values(map);
-            const t2 = Date.now();
+          const entries = Object.values(map);
       
-          media.sort((a: {date: string}, b: {date:string}) => a.date < b.date ? 1 : -1);
-          const t3 = Date.now();
-          console.log(`Load took ${t3 - t0} ms, request took ${t1 - t0}ms, filtering took ${t2 - t1} ms, sorting took ${t3 - t2}ms`);
-          setMedia(media);
+          entries.sort((a: {date: string}, b: {date:string}) => a.date < b.date ? 1 : -1);
+          setMedia(entries);
+          load(entries);
         })
     
       }, [])
     
     return (
         <Router>
+          {entries.length}
+          <LastLocationProvider>
             <Switch>
                 <Route exact path="/" children={<Grid media={media}/>} />
                 <Route exact path="/images" children={<Grid media={media.filter(m => m.type === 'image' || m.type === 'rawImage')}/>} />
                 <Route exact path="/videos" children={<Grid media={media.filter(m => m.type === 'video')}/>} />
+                <Route exact path="/years" children={<Years media={media}/>} />
+                <Route exact path="/years/:year" children={<YearView media={media}/>} />
                 <Route path="/view/:id" children={<MediaView media={media}/>} />
             </Switch>
+          </LastLocationProvider>
         </Router>
     );
 }

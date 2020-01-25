@@ -27,6 +27,7 @@
   "dependencies": {
     "compression": "^1.7.4",
     "cors": "^2.8.5",
+    "easy-peasy": "^3.2.6",
     "exiftool-vendored": "^9.3.0",
     "express": "^4.17.1",
     "ffmpeg-static": "^2.7.0",
@@ -36,6 +37,7 @@
     "merge-stream": "^2.0.0",
     "node-vibrant": "^3.1.5",
     "react-router-dom": "^5.1.2",
+    "react-router-last-location": "^2.0.1",
     "react-use-dimensions": "^1.2.1",
     "react-window": "^1.8.5",
     "request": "^2.88.0",
