@@ -3,12 +3,38 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 40px;
+  height: $nav-height;
 
-  background-color: blue;
+  display: flex;
+  align-items: center;
+  background-color: #333;
   z-index: 10;
 }
 
-.nav-link {
-  padding: 0 5px;
+.nav__link {
+  padding: 8px 10px;
+  text-decoration: none;
+
+  &:hover {
+    background-color: #444;
+  }
+}
+
+.nav__search {
+  border: 1px solid $black;
+  border-radius: 2px;
+  background-color: $nav-background-color;
+
+  input {
+    background-color: transparent;
+    border: none;
+    padding: 0 10px;
+  }
+
+  button {
+    height: 100%;
+    background-color: lighten($nav-background-color, 10%);
+    border: none;
+    padding: 5px 10px;
+  }
 }

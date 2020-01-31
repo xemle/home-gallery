@@ -52,9 +52,7 @@ export const Main = () => {
           {entries.length}
           <LastLocationProvider>
             <Switch>
-                <Route exact path="/" children={<Grid media={media}/>} />
-                <Route exact path="/images" children={<Grid media={media.filter(m => m.type === 'image' || m.type === 'rawImage')}/>} />
-                <Route exact path="/videos" children={<Grid media={media.filter(m => m.type === 'video')}/>} />
+                <Route exact path="/" children={<Grid media={entries}/>} />
                 <Route exact path="/years" children={<Years media={media}/>} />
                 <Route exact path="/years/:year" children={<YearView media={media}/>} />
                 <Route path="/view/:id" children={<MediaView media={media}/>} />

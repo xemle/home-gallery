@@ -35,6 +35,8 @@
     "ffprobe-static": "^3.0.0",
     "fluent-ffmpeg": "^2.1.2",
     "merge-stream": "^2.0.0",
+    "moo": "^0.5.1",
+    "nearley": "^2.19.1",
     "node-vibrant": "^3.1.5",
     "react-router-dom": "^5.1.2",
     "react-router-last-location": "^2.0.1",
