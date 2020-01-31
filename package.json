@@ -34,6 +34,7 @@
     "ffprobe": "^1.1.0",
     "ffprobe-static": "^3.0.0",
     "fluent-ffmpeg": "^2.1.2",
+    "ignore": "^5.1.4",
     "merge-stream": "^2.0.0",
     "moo": "^0.5.1",
     "nearley": "^2.19.1",
