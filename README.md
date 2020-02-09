@@ -4,6 +4,8 @@ Clould Gallery is a web gallery to serve private photos and videos from your loc
 
 Note: This software is a spare time project without any warranty or any support. Take it or leave it! If you have any problem, fork the project and fix it by your own. Maybe valuable pull requests are merged if spare time and mood is available.
 
+MIT License
+
 ## Motivation
 
 * The source of all my private images and videos are stored on my local NAS at home
