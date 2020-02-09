@@ -4,12 +4,20 @@ Clould Gallery is a web gallery to serve private photos and videos from your loc
 
 Note: This software is a spare time project without any warranty or any support. Take it or leave it! If you have any problem, fork the project and fix it by your own. Maybe valuable pull requests are merged if spare time and mood is available.
 
+## Motivation
+
+* The source of all my private images and videos are stored on my local NAS at home
+* Cloud service do not cover my privacy concerns
+* All gallery software are lacking to have a fast user experience on mobile phones
+* The gallery software should help to browse or discover forgotten memories from the image archive
+
 ## Target Users
 
-* Linux affine users who solve their own problems, familiar with git and node
+* Linux/Unix affine users who solve their own problems, familiar with shell, git and node
 * Serve your local data without usage of cloud services
 * One user only - all files are served
 * Watch your photos and videos from mobile phone
+* Serve all your images from multiple SOURCE (hard drive, camara files, mobile phone files, etc)
 
 ## General Architecture
 
@@ -24,26 +32,44 @@ The gallery has several components:
 
 The general workflow is to index your directories -> extract meta data and calculate previews -> build the database -> serve the Web App.
 
+## Requirements
+
+* [node](https://nodejs.org)
+
+## Installation
+
+```
+# Install required packages
+npm install
+# Build web app to ./dist directory
+npm run build
+```
+
 ## Setup Cloud Gallery
 
 See `node index.js -h` for details
 
+The example serves all images and videos from $HOME/SOURCE
+
 ```
-export PICTURES_DIR=$HOME/Pictures
+export SOURCE_DIR=$HOME/Pictures
 export GALLERY_HOME=./data
-export PICTURES_INDEX=$GALLERY_HOME/home-pictures.idx
+export SOURCE_INDEX=$GALLERY_HOME/home-pictures.idx
 export STORAGE_DIR=$GALLERY_HOME/storage
 export DATABASE=$GALLERY_HOME/catalog.db
 ```
 
-index, extract, build and serve the Cloud Gallery
+Now index, extract, build and serve the Cloud Gallery
 
 ```
-npm install
-DEBUG=* node index.js index -i $PICTURES_INDEX -d $PICTURES_DIR -c
-DEBUG=* node index.js extract -i $PICTURES_INDEX -s $STORAGE_DIR
-DEBUG=* node index.js build -i $PICTURES_INDEX -s $STORAGE_DIR -d $DATABASE
-DEBUG=* node index.js serve -s $STORAGE -d $DATABASE
+# Index filesystem and generate SHA1 sums of files
+DEBUG=* node index.js index -i $SOURCE_INDEX -d $SOURCE_DIR -c
+# Generate preview images/videos and extract meta data like EXIF or GEO names
+DEBUG=* node index.js extract -i $SOURCE_INDEX -s $STORAGE_DIR
+# Build database for web app
+DEBUG=* node index.js build -i $SOURCE_INDEX -s $STORAGE_DIR -d $DATABASE
+# Serve gallery
+DEBUG=server* node index.js serve -s $STORAGE -d $DATABASE
 ```
 
 Note: `extract` and `build` consume multiple indices (multiple media source directories). Use exclude patterns if required.
