@@ -26,36 +26,50 @@ export const Root = () => {
 }
 
 export const Main = () => {
-    const [ media, setMedia ] = useState([]);
     const entries = useStoreState(state => state.entries.entries);
+    const allEntries = useStoreState(state => state.entries.allEntries);
     const load = useStoreActions(actions => actions.entries.load);
+    const basename = location.pathname.replace(/\/$/, '');
+    console.log(`Set route basename to ${basename}`);
     useEffect(() => {
-        axios.get(`/api`)
-        .then(res => {
-          const map = res.data.media.reduce((result, value) => {
-            if (!result[value.id]) {
-              result[value.id] = value;
-            }
-            return result;
-          }, Object.create({}));
-          const entries = Object.values(map);
-      
-          entries.sort((a: {date: string}, b: {date:string}) => a.date < b.date ? 1 : -1);
-          setMedia(entries);
-          load(entries);
-        })
-    
+        const chunkLimits = [5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000];
+        let chunkIndex = 0;
+
+        const next = () => {
+          let url = './api';
+          let limit = 0;
+          if (chunkIndex < chunkLimits.length) {
+            const offset = chunkIndex > 0 ? chunkLimits[chunkIndex - 1] : 0;
+            limit = chunkLimits[chunkIndex++] - offset;
+            url += `?offset=${offset}&limit=${limit}`;
+          } else if (chunkLimits.length) {
+            const offset = chunkLimits[chunkLimits.length - 1];
+            url += `?offset=${offset}`;
+          }
+          return axios.get(url)
+            .then(res => {
+              if (!res.data.media) {
+                return;
+              }
+              load(res.data.media);
+              if (limit && res.data.media.length == limit) {
+                return next();
+              }
+            })
+        }
+
+        next();
       }, [])
     
     return (
-        <Router>
+        <Router basename={basename}>
           {entries.length}
           <LastLocationProvider>
             <Switch>
                 <Route exact path="/" children={<Grid media={entries}/>} />
-                <Route exact path="/years" children={<Years media={media}/>} />
-                <Route exact path="/years/:year" children={<YearView media={media}/>} />
-                <Route path="/view/:id" children={<MediaView media={media}/>} />
+                <Route exact path="/years" children={<Years media={allEntries}/>} />
+                <Route exact path="/years/:year" children={<YearView media={allEntries}/>} />
+                <Route path="/view/:id" children={<MediaView media={entries}/>} />
             </Switch>
           </LastLocationProvider>
         </Router>

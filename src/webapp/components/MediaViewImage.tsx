@@ -6,7 +6,7 @@ export const MediaViewImage = (props) => {
   return (
     <>
       <div className="media-view media-view--video">
-        <img className="media-view__media" src={'/files/' + previews.filter(p => p.match(/image-preview-1920/)).pop()} />
+        <img className="media-view__media" src={'files/' + previews.filter(p => p.match(/image-preview-1920/)).pop()} />
       </div>
     </>
   )

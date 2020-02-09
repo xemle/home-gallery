@@ -46,6 +46,7 @@ export const entryModel : EntryModel = {
   load: thunk((actions, payload, {getState}) => {
     const state = getState();
     state.allEntries = state.allEntries.concat(payload);
+    state.allEntries.sort((a: {date: string}, b: {date:string}) => a.date < b.date ? 1 : -1);
     actions.search(state.query);
   }),
   search: thunk(async (actions, payload, {getState}) => {
