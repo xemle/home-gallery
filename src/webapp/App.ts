@@ -5,7 +5,7 @@ import { Root } from "./Main";
 import { StoreProvider, createStore } from "easy-peasy";
 
 export class App {
-    private _appName: string = "Cloud Gallery";
+    private _appName: string = "Home Gallery";
 
     constructor() {
         this.render();

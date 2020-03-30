@@ -1,8 +1,11 @@
-# Cloud Gallery
+# Home Gallery
 
-Clould Gallery is a web gallery to serve private photos and videos from your local NAS
+Home Gallery is a web gallery to serve private photos and videos from your local NAS
 
-Note: This software is a spare time project without any warranty or any support. Take it or leave it! If you have any problem, fork the project and fix it by your own. Maybe valuable pull requests are merged if spare time and mood is available.
+Note: This software is a spare time project without any warranty or any
+support. Take it or leave it! If you have any problem, fork the project and fix
+it by your own. Maybe valuable pull requests are merged if spare time and mood
+is available.
 
 MIT License
 
@@ -47,7 +50,7 @@ npm install
 npm run build
 ```
 
-## Setup Cloud Gallery
+## Setup Home Gallery
 
 See `node index.js -h` for details
 
@@ -61,7 +64,7 @@ export STORAGE_DIR=$GALLERY_HOME/storage
 export DATABASE=$GALLERY_HOME/catalog.db
 ```
 
-Now index, extract, build and serve the Cloud Gallery
+Now index, extract, build and serve the Home Gallery
 
 ```
 # Index filesystem and generate SHA1 sums of files
