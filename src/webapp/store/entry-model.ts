@@ -9,23 +9,31 @@ export interface Entry {
   year: number;
 }
 
+export interface Search {
+  type: 'none' | 'year' | 'query';
+  revert: boolean;
+  value: any;
+}
+
 export interface EntryModel {
   allEntries: Entry[];
   entries: Entry[];
-  query: String;
+  query: Search;
   addEntries: Thunk<EntryModel, Entry[]>;
   setEntries: Action<EntryModel, Entry[]>;
-  showAll: Action<EntryModel>;
-  setYear: Action<EntryModel, number>;
-  search: Thunk<EntryModel, String>;
+  search: Thunk<EntryModel, Search>;
 }
 
 const execQuery = async (entries: Entry[], query: String) => {
   const promise = new Promise<Entry[]>((resolve, reject) => {
+    if (!query) {
+      resolve(entries);
+    }
+
     console.log(`search for ${query}`);
     parse(query, (err, ast) => {
-      console.log(`parse result ${err}, ${ast}`);
       if (err) {
+        console.log(`Parse error result ${err}, ${ast}`);
         return resolve(entries);
       }
       const options = {
@@ -44,30 +52,39 @@ const execQuery = async (entries: Entry[], query: String) => {
   return promise;
 }
 
+const doSearch = async (entries, query) => {
+  if (query.type == 'query') {
+    entries = await execQuery(entries, query.value);
+  } else if (query.type == 'year') {
+    entries = entries.filter(entry => entry.year == query.value)
+  } else {
+    entries = entries;
+  }
+  if (query.revert) {
+    entries.sort((a, b) => -1);
+  }
+  return entries;
+}
+
 export const entryModel : EntryModel = {
   allEntries: [],
   entries: [],
-  query: '',
+  query: { type: 'none', value: null, revert: false },
   addEntries: thunk((actions, payload, {getState}) => {
     const state = getState();
     state.allEntries = state.allEntries.concat(payload);
     state.allEntries.sort((a, b) => a.date < b.date ? 1 : -1);
     actions.search(state.query);
   }),
-  search: thunk(async (actions, payload, {getState}) => {
-    const allEntries = getState().allEntries;
-    const entries = await execQuery(allEntries, payload);
+  search: thunk(async (actions, query, {getState}) => {
+    const state = getState();
+    const entries = await doSearch([...state.allEntries], query);
     console.log('exec Query', entries);
-    actions.setEntries(entries);
+    state.query = query;
+    state.entries = entries;
   }),
   setEntries: action((state, payload) => {
     console.log('set entries', payload);
     state.entries = payload;
   }),
-  showAll: action((state) => {
-    state.entries = [...state.allEntries];
-  }),
-  setYear: action((state, year) => {
-    state.entries = state.allEntries.filter(entry => entry.year == year);
-  })
 };

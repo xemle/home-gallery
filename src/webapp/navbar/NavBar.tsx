@@ -9,11 +9,10 @@ import { useStoreActions } from '../store/hooks';
 export const NavBar = (props) => {
   const input = useRef<HTMLInputElement>();
   const search = useStoreActions(actions => actions.entries.search);
-  const showAll = useStoreActions(actions => actions.entries.showAll);
   const history = useHistory();
 
   const searchButtonClickHandler = (e) => {
-    search(input.current.value);
+    search({type: 'query', value: input.current.value, revert: false});
     history.push('/');
   }
 
@@ -25,7 +24,7 @@ export const NavBar = (props) => {
 
   const allClickHandler = () => {
     history.push('/');
-    showAll();
+    search({type: 'none', value: false, revert: false});
   }
 
   return ( 
