@@ -6,9 +6,21 @@
 }
 
 .media-view__media {
+  position: relative;
   height: 100%;
   width: auto;
   max-width: 100%;
   margin: 0 auto;
   object-fit: contain;
+}
+
+.media-view--image {
+  position: relative;
+
+  img {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    left: 50%;
+  }
 }

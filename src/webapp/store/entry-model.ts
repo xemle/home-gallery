@@ -4,6 +4,9 @@ import { createFilter } from '../query/ast';
 
 export interface Entry {
   id: string;
+  type: string;
+  date: string;
+  year: number;
 }
 
 export interface EntryModel {
@@ -12,6 +15,8 @@ export interface EntryModel {
   query: String;
   load: Thunk<EntryModel, Entry[]>;
   setEntries: Action<EntryModel, Entry[]>;
+  showAll: Action<EntryModel>;
+  setYear: Action<EntryModel, number>;
   search: Thunk<EntryModel, String>;
 }
 
@@ -24,7 +29,7 @@ const execQuery = async (entries: Entry[], query: String) => {
         return resolve(entries);
       }
       const options = {
-        textFn: (v) => `${v.id.substring(0, 10)} ${v.type} ${v.date} ${v.make} ${v.model} ${v.files[0].filename}`.toLowerCase();
+        textFn: (v) => `${v.id.substring(0, 10)} ${v.type} ${v.date} ${v.make} ${v.model} ${v.files[0].filename}`.toLowerCase()
       }
       createFilter(ast, options, (err, queryFn) => {
         console.log(`filter result ${err}, ${queryFn}`);
@@ -46,7 +51,7 @@ export const entryModel : EntryModel = {
   load: thunk((actions, payload, {getState}) => {
     const state = getState();
     state.allEntries = state.allEntries.concat(payload);
-    state.allEntries.sort((a: {date: string}, b: {date:string}) => a.date < b.date ? 1 : -1);
+    state.allEntries.sort((a, b) => a.date < b.date ? 1 : -1);
     actions.search(state.query);
   }),
   search: thunk(async (actions, payload, {getState}) => {
@@ -58,5 +63,11 @@ export const entryModel : EntryModel = {
   setEntries: action((state, payload) => {
     console.log('set entries', payload);
     state.entries = payload;
+  }),
+  showAll: action((state) => {
+    state.entries = [...state.allEntries];
+  }),
+  setYear: action((state, year) => {
+    state.entries = state.allEntries.filter(entry => entry.year == year);
   })
 };

@@ -13,9 +13,9 @@ import { StoreProvider } from 'easy-peasy';
 import { useStoreActions, useStoreState } from './store/hooks';
 import { store } from './store/store';
 
-import { Grid } from "./components/Grid";
-import { MediaView } from './components/MediaView';
-import { Years, YearView } from './components/Years';
+import { List } from "./list/List";
+import { MediaView } from './single/MediaView';
+import { Years, YearView } from './year/Years';
 
 export const Root = () => {
   return (
@@ -26,8 +26,6 @@ export const Root = () => {
 }
 
 export const Main = () => {
-    const entries = useStoreState(state => state.entries.entries);
-    const allEntries = useStoreState(state => state.entries.allEntries);
     const load = useStoreActions(actions => actions.entries.load);
     const basename = location.pathname.replace(/\/$/, '');
     console.log(`Set route basename to ${basename}`);
@@ -63,13 +61,12 @@ export const Main = () => {
     
     return (
         <Router basename={basename}>
-          {entries.length}
           <LastLocationProvider>
             <Switch>
-                <Route exact path="/" children={<Grid media={entries}/>} />
-                <Route exact path="/years" children={<Years media={allEntries}/>} />
-                <Route exact path="/years/:year" children={<YearView media={allEntries}/>} />
-                <Route path="/view/:id" children={<MediaView media={entries}/>} />
+                <Route exact path="/" children={<List />} />
+                <Route exact path="/years" children={<Years />} />
+                <Route exact path="/years/:year" children={<YearView />} />
+                <Route path="/view/:id" children={<MediaView />} />
             </Switch>
           </LastLocationProvider>
         </Router>
