@@ -13,7 +13,7 @@ export interface EntryModel {
   allEntries: Entry[];
   entries: Entry[];
   query: String;
-  load: Thunk<EntryModel, Entry[]>;
+  addEntries: Thunk<EntryModel, Entry[]>;
   setEntries: Action<EntryModel, Entry[]>;
   showAll: Action<EntryModel>;
   setYear: Action<EntryModel, number>;
@@ -48,7 +48,7 @@ export const entryModel : EntryModel = {
   allEntries: [],
   entries: [],
   query: '',
-  load: thunk((actions, payload, {getState}) => {
+  addEntries: thunk((actions, payload, {getState}) => {
     const state = getState();
     state.allEntries = state.allEntries.concat(payload);
     state.allEntries.sort((a, b) => a.date < b.date ? 1 : -1);
