@@ -1,0 +1,53 @@
+/*
+Link
+
+Markup:
+<div class="text">
+  <p>This is text with a <a class="link">link text</a></p>
+</div>
+
+Styleguide 2.3
+*/
+/*
+Link primary
+
+Markup:
+<div class="text">
+  <p>This is a <a class="link -primary">primary link</a></p>
+</div>
+
+Styleguide 2.3.1
+*/
+/*
+Link with icon
+
+Markup:
+<div class="text">
+  <p>This is a <a class="link"><i class="fas fa-camera"></i> primary link</a></p>
+</div>
+
+Styleguide 2.3.2
+*/
+.link {
+  color: $link-color;
+  cursor: pointer;
+
+  &:hover {
+    color: lighten($link-color, 15%);
+  }
+  &:active {
+    color: darken($link-color, 5%);
+  }
+
+  &.-primary {
+    color: $primary-color;
+
+    &:hover {
+      color: lighten($primary-color, 15%);
+    }
+    &:active {
+      color: darken($primary-color, 5%);
+    }
+  }
+
+}

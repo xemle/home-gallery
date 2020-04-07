@@ -1,0 +1,56 @@
+/*
+Text
+
+Markup:
+<div class="text">
+  <p>This is a text</p>
+</div>
+
+Styleguide 2.1
+*/
+/*
+Headline
+
+Markup:
+<div class="text">
+  <h1>Headline 1</h1>
+  <h2>Headline 2</h2>
+  <h3>Headline 3</h3>
+  <h4>Headline 4</h4>
+</div>
+
+Styleguide 2.1.1
+*/
+.text {
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  span,
+  li,
+  strong {
+    color: $text-color;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: lighten($text-color, 20%);
+    font-weight: bold;
+    line-height: 2em;
+  }
+  h1 {
+    font-size: 2em;
+  }
+  h2 {
+    font-size: 1.6em;
+  }
+  h3 {
+    font-size: 1.3em;
+  }
+  h4 {
+    font-size: 1.15em;
+  }
+}

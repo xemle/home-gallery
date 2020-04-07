@@ -1,40 +1,58 @@
+/*
+  Navbar
+
+  Use `.nav--top` for pinning the navbar to the top
+
+  Markup:
+  <div class="nav -space">
+    <div>
+      <a class="nav__link link"><i class="fas fa-fw fa-folder"></i> <span class="hide-sm">Folders</span></a>
+      <a class="nav__link link"><i class="fas fa-fw fa-clock"></i> <span class="hide-sm">Timeline</span></a>
+      <a class="nav__link link"><i class="fas fa-fw fa-map"></i> <span class="hide-sm">Map</span></a>
+      <a class="nav__link link"><i class="fas fa-fw fa-heart"></i> <span class="hide-sm">Favorites</span></a>
+      <a class="nav__link link"><i class="fas fa-fw fa-object-group"></i> <span class="hide-sm">Select</span></a>
+      <a class="nav__link link"><i class="fas fa-fw fa-pen"></i> <span class="hide-sm">Edit</span></a>
+    </div>
+    <div>
+      <div class="button-group -input">
+        <input class="input">
+        <button class="button -default"><i class="fas fa-search"></i></button>
+      </div>
+    </div>
+  </div>
+
+  Styleguide 4
+*/
+$nav-height: 40px !default;
+$nav-background-color: lighten($background-color, 10%);
+
 .nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   height: $nav-height;
 
   display: flex;
   align-items: center;
+  padding: 0 $unit;
+
   background-color: #333;
   z-index: 10;
+
+  &.-space {
+    justify-content: space-between;
+  }
+}
+
+.nav--top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
 }
 
 .nav__link {
-  padding: 8px 10px;
+  padding: 13px 2*$unit;
   text-decoration: none;
 
   &:hover {
     background-color: #444;
-  }
-}
-
-.nav__search {
-  border: 1px solid $black;
-  border-radius: 2px;
-  background-color: $nav-background-color;
-
-  input {
-    background-color: transparent;
-    border: none;
-    padding: 0 10px;
-  }
-
-  button {
-    height: 100%;
-    background-color: lighten($nav-background-color, 10%);
-    border: none;
-    padding: 5px 10px;
   }
 }

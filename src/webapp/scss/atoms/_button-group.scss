@@ -1,0 +1,48 @@
+/*
+Button Group
+
+Markup:
+<div class="button-group -right">
+  <button class="button -primary">Submit</button>
+  <a class="link button -link">Cancel</a>
+</div>
+
+Styleguide 2.6
+*/
+/*
+Input with button
+
+Markup:
+<div class="button-group -input">
+  <input class="input"><button class="button -default">OK</button>
+</div>
+
+Styleguide 2.6.1
+*/
+.button-group {
+  display: flex;
+  align-items: center;
+
+  &.-right {
+    flex-direction: row-reverse;
+
+    > * {
+      margin-right: 0;
+      margin-left: $unit;
+    }
+  }
+
+  &.-input {
+    > .input {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  
+    > .button {
+      border-left: none;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+  }
+
+}

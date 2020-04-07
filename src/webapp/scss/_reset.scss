@@ -3,9 +3,8 @@
   padding: 0;
   box-sizing: border-box;
   font-family: Verdana, Arial;
-  font-size: 12px;
+  font-size: $font-size;
   line-height: 1.5rem;
-  color: #eee;
 }
 
 html,
@@ -15,7 +14,6 @@ body,
   height: 100%;
 }
 
-body {
-  background-color: $body-background-color;
+.bg {
+  background-color: $background-color;
 }
-

@@ -1,9 +1,20 @@
-$body-background-color: #222;
+/*
+Settings
+
+Styleguide 1
+*/
+$background-color: #222;
+
+$font-size: 12px;
+$text-color: #aaa;
+$link-color: lighten($text-color, 30%);
 
 $black: #000;
 $white: #fff;
 
-$nav-height: 40px;
-$nav-background-color: lighten($body-background-color, 10%);
+$unit: 8px;
+$border-radius: 3px;
 
+$primary-color: rgb(38, 153, 38);
 
+$small-screen-width: 920px;
