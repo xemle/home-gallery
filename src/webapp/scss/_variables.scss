@@ -17,4 +17,5 @@ $border-radius: 3px;
 
 $primary-color: rgb(38, 153, 38);
 
-$small-screen-width: 920px;
+$sm-screen-width-max: 920px;
+$md-screen-width-min: $sm-screen-width-max + 1px;
