@@ -1,7 +1,7 @@
 /*
   Navbar
 
-  Use `.nav--top` for pinning the navbar to the top
+  Use `.-top` for pinning the navbar to the top
 
   Markup:
   <div class="nav -space">
@@ -36,17 +36,18 @@ $nav-background-color: lighten($background-color, 10%);
   background-color: #333;
   z-index: 10;
 
+  &.-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
   &.-space {
     justify-content: space-between;
   }
 }
 
-.nav--top {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-}
 
 .nav__link {
   padding: 13px 2*$unit;

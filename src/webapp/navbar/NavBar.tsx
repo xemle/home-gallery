@@ -29,15 +29,15 @@ export const NavBar = (props) => {
 
   return ( 
     <>
-      <div className="nav">
-        Gallery
+      <div className="nav -top -space">
+        <div>
+          <a className="nav__link link" onClick={allClickHandler}><i className="fas fa-globe"></i> <span className="hide-sm">Show all</span></a>
+          <Link className="nav__link link" to={`/years`}><i className="fas fa-clock"></i> <span className="hide-sm">Years</span></Link>
+        </div>
 
-        <a className="nav__link" onClick={allClickHandler}>All</a>
-        <Link className="nav__link" to={`/years`}>Years</Link>
-
-        <div className="nav__search">
-          <input ref={input} onKeyUp={searchInputKeyUpHandler} placeholder="Search..."/>
-          <button onClick={searchButtonClickHandler}>OK</button>
+        <div className="button-group -input">
+          <input className="input" ref={input} onKeyUp={searchInputKeyUpHandler} placeholder="Search..."/>
+          <button className="button -default" onClick={searchButtonClickHandler}><i className="fas fa-search"></i></button>
         </div>
       </div>
     </>
