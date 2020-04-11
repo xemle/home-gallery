@@ -1,3 +1,21 @@
+/*
+  Utils
+
+  Styleguide 1.1
+*/
+/*
+  Hide on small screens
+
+  `.hide-sm` to hide elements on small screens
+
+  Markup:
+  <ul>
+    <li>All screens</li>
+    <li class="hide-sm">Only in large screens</li>
+  </ul>
+
+  Styleguide 1.1.1
+*/
 @media (max-width: $sm-screen-width-max) {
   .hide-sm {
     display: none;

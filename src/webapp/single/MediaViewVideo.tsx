@@ -5,8 +5,8 @@ export const MediaViewVideo = (props) => {
   
   return (
     <>
-      <div className="media-view media-view--video">
-        <video className="media-view__media" controls poster={`/files/${previews.filter(p => p.match(/image-preview-800/)).shift()}`}>
+      <div className="-video">
+        <video className="mediaView__media" controls poster={`/files/${previews.filter(p => p.match(/image-preview-800/)).shift()}`}>
           <source src={`/files/${previews.filter(p => p.match(/video-preview/)).shift()}`}  type="video/mp4" />
           No native video element support. Watch video file from <a href={`/files/${previews.filter(p => p.match(/video-preview/)).shift()}`}>here</a>
         </video>

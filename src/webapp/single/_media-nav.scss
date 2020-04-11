@@ -3,16 +3,14 @@
 
   Markup:
   <div style="position: relative; height:200px;">
-    <div class="mediaNav">
-      <div class="-left">
-        <a class="mediaNav__button"><i class="fas fa-chevron-left fa-2x"></i></a>
-      </div>
-      <div class="-center">
-        <a class="mediaNav__button"><i class="fas fa-chevron-up fa-2x"></i></a>
-      </div>
-      <div class="-right">
-        <a class="mediaNav__button"><i class="fas fa-chevron-right fa-2x"></i></a>
-      </div>
+    <div class="mediaNav -left">
+      <a class="mediaNav__button"><i class="fas fa-chevron-left fa-2x"></i></a>
+    </div>
+    <div class="mediaNav -center">
+      <a class="mediaNav__button"><i class="fas fa-chevron-up fa-2x"></i></a>
+    </div>
+    <div class="mediaNav -right">
+      <a class="mediaNav__button"><i class="fas fa-chevron-right fa-2x"></i></a>
     </div>
   </div>
 
@@ -21,17 +19,24 @@
 .mediaNav {
   position: absolute;
   z-index: 5;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: space-between;
 
-  > .-left,
-  > .-right {
-    display: flex;
-    align-items: center;
+  &.-left,
+  &.-right {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  &.-left {
+    left: 0;
+  }
+
+  &.-right {
+    right: 0;
+  }
+
+  &.-center {
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 

@@ -19,12 +19,12 @@ export const MediaViewImage = (props) => {
     });
     img.src = largeUrl;
   }, []);
-  
+
   return (
     <>
-      <div className="media-view media-view--image">
-        <img className="media-view__media" src={smallUrl} />
-        <img className="media-view__media" src={src} />
+      <div className="-image">
+        <img className="mediaView__media" src={smallUrl} />
+        <img className="mediaView__media" src={src} />
       </div>
     </>
   )

@@ -41,8 +41,10 @@ export const MediaView = () => {
 
   return (
     <>
-      <MediaNav />
-      {mediaTypeView}
+      <div className="mediaView">
+        <MediaNav />
+        {mediaTypeView}
+      </div>
     </>
   )
 }

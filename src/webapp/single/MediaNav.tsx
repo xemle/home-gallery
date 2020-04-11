@@ -78,29 +78,27 @@ export const MediaNav = () => {
 
   return (
     <>
-      <div className="mediaNav">
-        { prev &&
-          <div className="-left">
-            <Link className="mediaNav__button" to={{pathname:`/view/${prev.id}`, state: {...linkState, index: index - 1} }}>
-              <i className="fas fa-chevron-left fa-2x"></i>
-            </Link>
-          </div>
-        }
-        { linkState && linkState.uppathname &&
-          <div className="-center">
-            <Link className="mediaNav__button" to={{pathname: linkState.uppathname}}>
-              <i className="fas fa-chevron-up fa-2x"></i>
-            </Link>
-          </div>
-        }
-        { next &&
-          <div className="-right">
-            <Link className="mediaNav__button" to={{pathname:`/view/${next.id}`, state: {...linkState, index: index + 1} }}>              
-              <i className="fas fa-chevron-right fa-2x"></i>
-            </Link>
-          </div>
-        }
-      </div>
+      { prev &&
+        <div className="mediaNav -left">
+          <Link className="mediaNav__button" to={{pathname:`/view/${prev.id}`, state: {...linkState, index: index - 1} }}>
+            <i className="fas fa-chevron-left fa-2x"></i>
+          </Link>
+        </div>
+      }
+      { linkState && linkState.uppathname &&
+        <div className="mediaNav -center">
+          <Link className="mediaNav__button" to={{pathname: linkState.uppathname}}>
+            <i className="fas fa-chevron-up fa-2x"></i>
+          </Link>
+        </div>
+      }
+      { next &&
+        <div className="mediaNav -right">
+          <Link className="mediaNav__button" to={{pathname:`/view/${next.id}`, state: {...linkState, index: index + 1} }}>
+            <i className="fas fa-chevron-right fa-2x"></i>
+          </Link>
+        </div>
+      }
     </>
   )
 }
