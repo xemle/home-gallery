@@ -12,7 +12,25 @@ steps:
   - apk add --no-cache python make g++ vips-dev
   - npm set registry http://npm.home.local
   - npm install --unsafe-perm
+
 - name: build
   image: node:12-alpine
   commands:
   - npm run build
+
+- name: notify
+  image: sfelis/drone-email
+  settings:
+    from:
+      from_secret: mail_from
+    host:
+      from_secret: mail_host
+    port:
+      from_secret: mail_port
+    username:
+      from_secret: mail_username
+    password:
+      from_secret: mail_password
+  when:
+    status:
+    - failure
