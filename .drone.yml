@@ -1,0 +1,18 @@
+kind: pipeline
+type: docker
+name: default
+
+platform:
+  arch: arm
+
+steps:
+- name: install
+  image: node:12-alpine
+  commands:
+  - apk add --no-cache python make g++ vips-dev
+  - npm set registry http://npm.home.local
+  - npm install --unsafe-perm
+- name: build
+  image: node:12-alpine
+  commands:
+  - npm run build
