@@ -13,6 +13,8 @@
       $modal.find('.modal__backdrop').click(() => {
         $modal.removeClass('-visible');
       })
-    })
+    });
+
+    $('.kss-modifier__example').addClass('galleryRoot').addClass('bg');
   });
 })(j);

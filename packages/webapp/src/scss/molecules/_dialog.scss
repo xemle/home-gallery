@@ -19,14 +19,14 @@ Markup:
       <div class="dialog__footer -grey">
         <div class="button-group -right">
           <button class="button -primary">Submit</button>
-          <a class="link button -link">Cancel</a>
+          <a class="link button -default -link">Cancel</a>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-Styleguide 3.2
+Styleguide 3.3
 */
 .modal {
   display: none;
@@ -96,6 +96,6 @@ Styleguide 3.2
 
 .dialog__footer {
   &.-grey {
-    background-color: darken($background-color, 10%);
+    background-color: $background-color-02dp;
   }
 }

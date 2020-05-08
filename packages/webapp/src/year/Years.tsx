@@ -14,7 +14,7 @@ import { Entry } from '../store/entry-model';
 
 export const Years = () => {
   const allEntries = useStoreState(state => state.entries.allEntries);
-  
+
   const years = useMemo(() => {
     const entries: Entry[] = Array.from(allEntries.values());
     const years = entries.reduce((result, {year}) => {
@@ -27,7 +27,7 @@ export const Years = () => {
     return years;
   }, [allEntries]);
 
-  return ( 
+  return (
     <>
       <NavBar />
       <h2 style={{marginTop: '40px'}}>Years</h2>
@@ -48,7 +48,7 @@ export const YearView = () => {
   const search = useStoreActions(actions => actions.search.search);
   search({type: 'year', value: year});
 
-  return ( 
+  return (
     <>
       <List />
     </>

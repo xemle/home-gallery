@@ -4,20 +4,21 @@ Button Group
 Markup:
 <div class="button-group -right">
   <button class="button -primary">Submit</button>
-  <a class="link button -link">Cancel</a>
+  <a class="link button -default -link">Cancel</a>
 </div>
 
-Styleguide 2.6
+Styleguide 3.1
 */
 /*
 Input with button
 
 Markup:
 <div class="button-group -input">
-  <input class="input"><button class="button -default">OK</button>
+  <input class="input">
+  <button class="button -default">OK</button>
 </div>
 
-Styleguide 2.6.1
+Styleguide 3.1.1
 */
 .button-group {
   display: flex;
@@ -36,6 +37,10 @@ Styleguide 2.6.1
     > .input {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
+
+      &:focus ~ .button {
+        border-color: $text-color;
+      }
     }
   
     > .button {
@@ -43,6 +48,17 @@ Styleguide 2.6.1
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
+
+    &:hover {
+      > .input {
+        border-color: $text-color;
+      }
+
+      > .button {
+        border-color: $text-color;
+      }
+    }
+
   }
 
 }

@@ -2,9 +2,15 @@
 Text
 
 Markup:
-<div class="text">
-  <p>This is a text</p>
-</div>
+<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
+  eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam
+  voluptua. At vero eos et accusam et justo duo dolores et ea rebum.</p>
+<p class="-high-text">Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor
+  sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr.</p>
+<p class="-low-text">Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse
+  molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero
+  eros et accumsan et iusto odio dignissim qui blandit praesent luptatum
+  zzril delenit augue duis dolore te feugait nulla facilisi.</p>
 
 Styleguide 2.1
 */
@@ -21,23 +27,12 @@ Markup:
 
 Styleguide 2.1.1
 */
-.text {
-  h1,
-  h2,
-  h3,
-  h4,
-  p,
-  span,
-  li,
-  strong {
-    color: $text-color;
-  }
-
+.galleryRoot {
   h1,
   h2,
   h3,
   h4 {
-    color: lighten($text-color, 20%);
+    color: $text-high-color;
     font-weight: bold;
     line-height: 2em;
   }
@@ -53,4 +48,12 @@ Styleguide 2.1.1
   h4 {
     font-size: 1.15em;
   }
+}
+
+.-high-text {
+  color: $text-high-color;
+}
+
+.-low-text {
+  color: $text-low-color;
 }

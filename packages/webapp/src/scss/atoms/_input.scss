@@ -6,15 +6,17 @@ Markup:
 
 Styleguide 2.5
 */
-$input-color: #aaa;
+$input-color: $background-color-06dp;
 
 .input {
   padding: 0.5*$unit $unit;
   background-color: $input-color;
-  border: 1px solid darken($input-color, 20%);
+  border: 1px solid $text-low-color;
   border-radius: $border-radius;
 
   &:focus {
-    background-color: lighten($input-color, 20%);
+    color: $text-high-color;
+    border-color: $text-color;
+    background-color: $background-color-12dp;
   }
 }

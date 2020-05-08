@@ -1,0 +1,11 @@
+@mixin only-sm {
+  @media (max-width: $sm-screen-width-max) {
+    @content;
+  }
+}
+
+@mixin only-md {
+  @media (min-width: $md-screen-width-min) {
+    @content;
+  }
+}

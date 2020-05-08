@@ -24,7 +24,7 @@
   Styleguide 4
 */
 $nav-height: 40px !default;
-$nav-background-color: lighten($background-color, 10%);
+$nav-background-color: $background-color-08dp;
 
 .nav {
   height: $nav-height;
@@ -47,7 +47,6 @@ $nav-background-color: lighten($background-color, 10%);
     justify-content: space-between;
   }
 }
-
 
 .nav__link {
   padding: 13px 2*$unit;
