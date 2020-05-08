@@ -18,6 +18,11 @@ steps:
   commands:
   - npm run build
 
+- name: styleguide
+  image: node:12-alpine
+  commands:
+  - npm run styleguide:build
+
 - name: notify
   image: sfelis/drone-email
   settings:
