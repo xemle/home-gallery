@@ -1,8 +1,7 @@
 .cache
-.syncthing.*.tmp
 .vscode
-node_modules
-package-lock.json.cache
 dist
-src/webapp/fonts
-styleguide
+node_modules
+*.tmp
+package-lock.json
+package-lock.json.cache

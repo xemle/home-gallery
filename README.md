@@ -46,7 +46,8 @@ The general workflow is to index your directories -> extract meta data and calcu
 ```
 # Install required packages
 npm install
-# Build web app to ./dist directory
+npx lerna bootstrap
+# Build required filed
 npm run build
 ```
 

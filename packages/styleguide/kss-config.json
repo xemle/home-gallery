@@ -1,0 +1,15 @@
+{
+  "source": [
+    "node_modules/@home-gallery/webapp/src"
+  ],
+  "homepage": "src/homepage.md",
+  "destination": "dist/",
+  "css": [
+    "kss-custom.css",
+    "app.css"
+  ],
+  "js": [
+    "j.js",
+    "kss-custom.js"
+  ]
+}

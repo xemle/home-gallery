@@ -1,13 +1,13 @@
 const yargs = require('yargs');
-const indexCli = require('./lib/index/cli');
-const extractCli = require('./lib/extract/cli');
-const buildCli = require('./lib/build/cli');
-const serverCli = require('./lib/server/cli');
+const indexCli = require('./packages/index/src/cli');
+const extractCli = require('./packages/extractor/src/cli');
+const databaseCli = require('./packages/database/src/cli');
+const serverCli = require('./packages/server/src/cli');
 
 yargs.usage('Usage: $0 [global options] <command> [options]')
   .command(indexCli)
   .command(extractCli)
-  .command(buildCli)
+  .command(databaseCli)
   .command(serverCli)
   .demandCommand()
   .help()

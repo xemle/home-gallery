@@ -1,0 +1,26 @@
+{
+  "name": "@home-gallery/common",
+  "version": "1.0.0",
+  "description": "Common library of HomeGallery",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "cpx 'src/**' dist"
+  },
+  "keywords": [
+    "HomeGallery",
+    "utils",
+    "common",
+    "lib"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "devDependencies": {
+    "cpx": "^1.5.0",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "debug": "^4.1.1",
+    "ignore": "^5.1.4"
+  }
+}

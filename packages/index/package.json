@@ -1,0 +1,29 @@
+{
+  "name": "@home-gallery/index",
+  "version": "1.0.0",
+  "description": "File indexer for HomeGallery",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "cpx 'src/**' dist"
+  },
+  "keywords": [
+    "HomeGallery",
+    "file",
+    "index",
+    "indexer"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "devDependencies": {
+    "cpx": "^1.5.0",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "@home-gallery/common": "^1.0.0",
+    "async": "^3.1.0",
+    "debug": "^4.1.1",
+    "merge-stream": "^2.0.0",
+    "yargs": "^15.0.2"
+  }
+}

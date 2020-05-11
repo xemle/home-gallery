@@ -1,0 +1,24 @@
+{
+  "name": "@home-gallery/storage",
+  "version": "1.0.0",
+  "description": "Preview and metadata storage of HomeGallery",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "cpx 'src/**' dist"
+  },
+  "keywords": [
+    "HomeGallery",
+    "storage"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "devDependencies": {
+    "cpx": "^1.5.0",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "@home-gallery/common": "^1.0.0",
+    "debug": "^4.1.1"
+  }
+}

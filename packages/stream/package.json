@@ -1,0 +1,25 @@
+{
+  "name": "@home-gallery/stream",
+  "version": "1.0.0",
+  "description": "Stream utilities for HomeGallery",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "cpx 'src/**' dist"
+  },
+  "keywords": [
+    "HomeGallery",
+    "utils",
+    "stream"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "devDependencies": {
+    "cpx": "^1.5.0",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "debug": "^4.1.1",
+    "through2": "^3.0.1"
+  }
+}

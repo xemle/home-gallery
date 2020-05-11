@@ -11,17 +11,14 @@ steps:
   commands:
   - apk add --no-cache python make g++ vips-dev
   - npm set registry http://npm.home.local
-  - npm install --unsafe-perm
+  - npm config set unsafe-perm true
+  - npm install
+  - npx lerna bootstrap --concurrency 2 --no-ci
 
 - name: build
   image: node:12-alpine
   commands:
   - npm run build
-
-- name: styleguide
-  image: node:12-alpine
-  commands:
-  - npm run styleguide:build
 
 - name: notify
   image: sfelis/drone-email
