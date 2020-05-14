@@ -26,6 +26,7 @@
     "debug": "^4.1.1",
     "exiftool-vendored": "^9.3.0",
     "ffmpeg-static": "^4.0.0",
+    "ffprobe": "^1.1.0",
     "ffprobe-static": "^3.0.0",
     "fluent-ffmpeg": "^2.1.2",
     "node-vibrant": "^3.1.5",
