@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "clean": "lerna run clean",
+    "bootstrap": "lerna bootstrap",
     "build": "lerna run build"
   },
   "keywords": [],

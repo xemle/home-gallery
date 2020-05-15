@@ -33,7 +33,7 @@ const command = {
     .demandOption(['storage', 'database'])
   },
   handler: (argv) => {
-    const webappDir = path.resolve(__dirname || '.', '..', 'public');
+    const webappDir = path.resolve(__dirname || '.', 'public');
     startServer(argv.host, argv.port, argv.storage, argv.database, webappDir, (err) => {
       if (err) {
         debug(`Could not start server: ${err}`);

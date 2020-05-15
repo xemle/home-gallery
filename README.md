@@ -46,8 +46,9 @@ The general workflow is to index your directories -> extract meta data and calcu
 ```
 # Install required packages
 npm install
-npx lerna bootstrap
-# Build required filed
+# Bootstrap packages of mono repository
+npm run bootstrap
+# Build required files
 npm run build
 ```
 

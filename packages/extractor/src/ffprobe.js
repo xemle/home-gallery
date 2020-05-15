@@ -4,7 +4,7 @@ const ffprobe = require('ffprobe');
 const ffprobeStatic = require('ffprobe-static');
 const debug = require('debug')('extract:ffprobe');
 
-const { getStoragePaths, writeEntryFile } = require('@home-gallery/storage');
+const { getStoragePaths, writeStorageFile } = require('@home-gallery/storage');
 
 function execFfprobe(storageDir, entry, cb) {
   const src = entry.src;
@@ -22,7 +22,7 @@ function execFfprobe(storageDir, entry, cb) {
       return cb(err);
     }
 
-    writeEntryFile(entry, storageDir, filename, JSON.stringify(info), (err) => {
+    writeStorageFile(entry, storageDir, filename, JSON.stringify(info), (err) => {
       if (err) {
         return cb(err);
       }

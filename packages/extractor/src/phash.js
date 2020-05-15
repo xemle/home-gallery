@@ -3,7 +3,7 @@ const through2 = require('through2');
 const phash = require('sharp-phash');
 const debug = require('debug')('extract:phash');
 
-const { getStoragePaths, writeEntryFile } = require('@home-gallery/storage');
+const { getStoragePaths, writeStorageFile } = require('@home-gallery/storage');
 
 const phashSuffix = 'phash.json';
 
@@ -21,7 +21,7 @@ function calculatePHash(storageDir, entry, previewImageSuffix, cb) {
       } catch(e) {
         return cb(`Could not convert result ${result}: ${e}`);
       }
-      writeEntryFile(entry, storageDir, phashFilename, JSON.stringify({high, low, raw: result}), cb);
+      writeStorageFile(entry, storageDir, phashFilename, JSON.stringify({high, low, raw: result}), cb);
     }, (err) => {
       return cb(err);
     })

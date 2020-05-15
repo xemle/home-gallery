@@ -3,7 +3,7 @@ const through2 = require('through2');
 const sharp = require('sharp');
 const debug = require('debug')('extract:preview');
 
-const { getStoragePaths, writeEntryFile } = require('@home-gallery/storage');
+const { getStoragePaths, writeStorageFile } = require('@home-gallery/storage');
 
 function resize(entry, src, storageDir, filename, size, cb) {
   sharp(src)
@@ -14,7 +14,7 @@ function resize(entry, src, storageDir, filename, size, cb) {
       if (err) {
         return cb(`Could not create JPEG buffer from ${src}: ${err}`);
       }
-      writeEntryFile(entry, storageDir, filename, buf, (err) => {
+      writeStorageFile(entry, storageDir, filename, buf, (err) => {
         if (err) {
           return cb(err);
         }

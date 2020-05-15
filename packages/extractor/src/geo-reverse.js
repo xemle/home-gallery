@@ -3,7 +3,7 @@ const request = require('request');
 const debug = require('debug')('extract:geo-lookup');
 
 const { throttleAsync } = require('@home-gallery/stream');
-const { getStoragePaths, writeEntryFile } = require('@home-gallery/storage');
+const { getStoragePaths, writeStorageFile } = require('@home-gallery/storage');
 
 function geoReverse(storageDir) {
   
@@ -61,7 +61,7 @@ function geoReverse(storageDir) {
         }
         return cb();
       }
-      writeEntryFile(entry, storageDir, geoReverseFilename, body, (err) => {
+      writeStorageFile(entry, storageDir, geoReverseFilename, body, (err) => {
         if (err) {
           debug(`Could write geo reverse of ${entry} for ${geo}: ${err}`);
         } else {

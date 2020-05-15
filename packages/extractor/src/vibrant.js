@@ -3,7 +3,7 @@ const through2 = require('through2');
 const Vibrant = require('node-vibrant');
 const debug = require('debug')('extract:vibrant');
 
-const { getStoragePaths, writeEntryFile } = require('@home-gallery/storage');
+const { getStoragePaths, writeStorageFile } = require('@home-gallery/storage');
 
 function extractVibrantColors(storageDir, entry, cb) {
   const {dir, prefix} = getStoragePaths(entry.sha1sum);
@@ -23,7 +23,7 @@ function extractVibrantColors(storageDir, entry, cb) {
       if (err) {
         return cb(err);
       }
-      writeEntryFile(entry, storageDir, vibrantFilename, JSON.stringify(palette), (err) => {
+      writeStorageFile(entry, storageDir, vibrantFilename, JSON.stringify(palette), (err) => {
         if (err) {
           return cb(err);
         }
