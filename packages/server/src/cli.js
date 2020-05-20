@@ -41,8 +41,16 @@ const command = {
     .demandOption(['storage', 'database'])
   },
   handler: (argv) => {
-    const webappDir = path.resolve(__dirname || '.', 'public');
-    startServer(argv.host, argv.port, argv.storage, argv.database, webappDir, argv.key, argv.cert, (err) => {
+    const config = {
+      host: argv.host,
+      port: argv.port,
+      storageDir: argv.storage,
+      databaseFilename: argv.database,
+      webappDir: path.resolve(__dirname || '.', 'public'),
+      key: argv.key,
+      cert: argv.cert
+    }
+    startServer(config, (err) => {
       if (err) {
         debug(`Could not start server: ${err}`);
       } else {

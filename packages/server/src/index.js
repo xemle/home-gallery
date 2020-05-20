@@ -30,7 +30,7 @@ function createServer(key, cert, app) {
   }
 }
 
-function startServer(host, port, storageDir, databaseFilename, webappDir, cb) {
+function startServer({host, port, storageDir, databaseFilename, webappDir, key, cert}, cb) {
   const app = express();
   app.disable('x-powered-by');
 
