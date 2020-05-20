@@ -14,8 +14,14 @@ const command = {
         describe: 'Storage directory'
       },
       database: {
+        require: true,
         alias: 'd',
         describe: 'Database filename'
+      },
+      event: {
+        require: true,
+        alias: 'e',
+        describe: 'Event filename'
       },
       host: {
         alias: 'H',
@@ -46,6 +52,7 @@ const command = {
       port: argv.port,
       storageDir: argv.storage,
       databaseFilename: argv.database,
+      eventFilename: argv.event,
       webappDir: path.resolve(__dirname || '.', 'public'),
       key: argv.key,
       cert: argv.cert

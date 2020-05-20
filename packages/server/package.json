@@ -7,7 +7,8 @@
     "clean": "rimraf dist",
     "build": "cpx 'src/**' dist",
     "postbuild": "cpx 'node_modules/@home-gallery/webapp/dist/**' dist/public",
-    "run": "node index.js"
+    "run": "node index.js",
+    "watch": "onchange -d 200 'src/**' -- npm run build"
   },
   "keywords": [
     "HomeGallery",
@@ -19,16 +20,19 @@
   "devDependencies": {
     "cpx": "^1.5.0",
     "debug": "^4.1.1",
+    "onchange": "^7.0.2",
     "rimraf": "^3.0.2"
   },
   "dependencies": {
     "@home-gallery/common": "^1.0.0",
     "@home-gallery/webapp": "^1.0.0",
+    "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "memory-cache": "^0.2.0",
     "morgan": "^1.9.1",
+    "uuid": "^8.0.0",
     "yargs": "^15.0.2"
   }
 }

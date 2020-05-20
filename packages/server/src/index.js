@@ -1,10 +1,13 @@
 const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 const morgan = require('morgan');
+
 const debug = require('debug')('server');
 
 const databaseApi = require('./api/database');
+const eventApi = require('./api/events');
 
 function shouldCompress (req, res) {
   if (req.headers['x-no-compression']) {
@@ -30,7 +33,7 @@ function createServer(key, cert, app) {
   }
 }
 
-function startServer({host, port, storageDir, databaseFilename, webappDir, key, cert}, cb) {
+function startServer({host, port, storageDir, databaseFilename, eventFilename, webappDir, key, cert}, cb) {
   const app = express();
   app.disable('x-powered-by');
 
@@ -39,8 +42,14 @@ function startServer({host, port, storageDir, databaseFilename, webappDir, key, 
   app.use('/files', express.static(storageDir, {index: false, maxAge: '2d', immutable: true}));
 
   app.use(morgan('tiny'));
-  app.get('/api', databaseApi(databaseFilename));
-  
+  app.use(bodyParser.json())
+
+  app.get('/api/database', databaseApi(databaseFilename));
+  const { read, push, stream } = eventApi(eventFilename);
+  app.get('/api/events', read);
+  app.get('/api/events/stream', stream);
+  app.post('/api/events', push);
+
   app.use('/', express.static(webappDir));
 
   const server = createServer(key, cert, app);
@@ -55,7 +64,7 @@ function startServer({host, port, storageDir, databaseFilename, webappDir, key, 
       console.log(`Open Home Gallery on ${key && cert ? 'https' : 'http'}://localhost:${port}`);
       cb(null, app);
     })
-  
+
 }
 
 module.exports = startServer;
