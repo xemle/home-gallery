@@ -11,12 +11,14 @@ import { NavBar } from '../navbar/NavBar';
 import { List } from '../list/List';
 import { useStoreActions } from '../store/hooks';
 import { useStoreState } from "easy-peasy";
+import { Entry } from '../store/entry-model';
 
 export const Years = () => {
   const allEntries = useStoreState(state => state.entries.allEntries);
   
   const years = useMemo(() => {
-    const years = allEntries.reduce((result, {year}) => {
+    const entries: Entry[] = Array.from(allEntries.values());
+    const years = entries.reduce((result, {year}) => {
       if (result.indexOf(year) < 0) {
         result.push(year);
       }
@@ -44,7 +46,7 @@ export const Years = () => {
 export const YearView = () => {
   const params = useParams();
   const year = +params.year;
-  const search = useStoreActions(actions => actions.entries.search);
+  const search = useStoreActions(actions => actions.search.search);
   search({type: 'year', value: year, revert: false});
 
   return ( 

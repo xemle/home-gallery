@@ -7,13 +7,12 @@ import {
     Link
   } from "react-router-dom";
 import { LastLocationProvider } from 'react-router-last-location';
-import axios from 'axios';
 
 import { StoreProvider } from 'easy-peasy';
 import { useStoreActions, useStoreState } from './store/hooks';
 import { store } from './store/store';
 
-import { fetchAll } from './api';
+import { fetchAll, getEvents, eventStream } from './api';
 
 import { List } from "./list/List";
 import { MediaView } from './single/MediaView';
@@ -29,13 +28,22 @@ export const Root = () => {
 
 export const Main = () => {
     const addEntries = useStoreActions(actions => actions.entries.addEntries);
-    const basename = location.pathname.replace(/\/$/, '');
-    console.log(`Set route basename to ${basename}`);
+    const initEvents = useStoreActions(actions => actions.events.initEvents);
+    const addEvent = useStoreActions(actions => actions.events.addEvent);
+    const basename = '/';
+
     useEffect(() => {
       const chunkLimits = [5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000];
-      fetchAll(chunkLimits, addEntries);
+      fetchAll(chunkLimits, addEntries)
+        .then(() => getEvents())
+        .then((events) => {
+          initEvents(events.data);
+          eventStream((event) => {
+            addEvent(event);
+          });
+        });
     }, []);
-    
+
     return (
         <Router basename={basename}>
           <LastLocationProvider>

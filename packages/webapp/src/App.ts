@@ -2,8 +2,6 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Root } from "./Main";
 
-import { StoreProvider, createStore } from "easy-peasy";
-
 export class App {
     private _appName: string = "Home Gallery";
 

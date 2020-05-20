@@ -33,9 +33,9 @@ export const MediaView = () => {
   const next = entries[index + 1];
 
   let mediaTypeView = <MediaViewUnknownType media={media}/>;
-  if (media.type === 'image' || media.type === 'rawImage') {
+  if (media && (media.type === 'image' || media.type === 'rawImage')) {
     mediaTypeView = <MediaViewImage key={media.id} media={media} next={next} prev={prev}/>
-  } else if (media.type === 'video') {
+  } else if (media && media.type === 'video') {
     mediaTypeView = <MediaViewVideo key={media.id} media={media} next={next} prev={prev}/>
   }
 

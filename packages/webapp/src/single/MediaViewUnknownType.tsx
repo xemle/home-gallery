@@ -1,7 +1,7 @@
 import * as React from "react";
 
 export const MediaViewUnknownType = (props) => {
-  const { id, type } = props.media;
+  const { id, type } = props.media || {};
   
   return (
     <>
