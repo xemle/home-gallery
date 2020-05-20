@@ -1,0 +1,1 @@
+export const baseResolver = () => window['__base'] || '';

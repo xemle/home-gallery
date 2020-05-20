@@ -11,10 +11,15 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="stylesheet" href="/app.scss">
     <title>Home Gallery</title>
+    <script>window.__base = '';</script>
 </head>
 
 <body class="bg">
-    <div id="app"></div>
+    <div id="app">
+        <h1>Your Home Gallery is loading...</h1>
+
+        <noscript>Please enable Javascript to run the application</noscript>
+    </div>
     <script src="App.ts" type="text/javascript"></script>
     <script>
       if ('serviceWorker' in navigator) {

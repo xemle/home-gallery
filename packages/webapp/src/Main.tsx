@@ -12,6 +12,7 @@ import { StoreProvider } from 'easy-peasy';
 import { useStoreActions, useStoreState } from './store/hooks';
 import { store } from './store/store';
 
+import { baseResolver } from './base-resolver';
 import { fetchAll, getEvents, eventStream } from './api';
 
 import { List } from "./list/List";
@@ -45,7 +46,7 @@ export const Main = () => {
     }, []);
 
     return (
-        <Router basename={basename}>
+        <Router basename={`${baseResolver()}/`}>
           <LastLocationProvider>
             <Switch>
                 <Route exact path="/" children={<List />} />
