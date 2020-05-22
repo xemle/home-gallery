@@ -38,7 +38,6 @@ export const getEvents = async () => {
 }
 
 export const eventStream = (onActionEvent) => {
-  console.log(`Open EventSource`);
   const events = new EventSource(`${baseResolver()}/api/events/stream`);
 
   events.onmessage = (event) => {
@@ -50,7 +49,7 @@ export const eventStream = (onActionEvent) => {
     }
   };
 
-  events.addEventListener('actionEvent', (event: MessageEvent) => {
+  events.addEventListener('userAction', (event: MessageEvent) => {
     console.log(`Received action event: ${event}`);
     try {
       const data = JSON.parse(event.data);

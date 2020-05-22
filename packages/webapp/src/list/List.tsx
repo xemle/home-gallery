@@ -5,10 +5,10 @@ import { useStoreState } from '../store/hooks';
 import { FluentList } from "./FluentList";
 import { NavBar } from "../navbar/NavBar";
 
-export const List = (props) => {
+export const List = () => {
   const entries = useStoreState(state => state.entries.entries);
 
-  return ( 
+  return (
     <>
       <NavBar />
       <div style={{paddingTop: 44}}>

@@ -25,7 +25,7 @@ const events = (filename) => {
   const isValidEvent = (data) => {
     if (!data.type) {
       return false;
-    } else if (data.type === 'actionType' && (!data.targetIds || !data.targetIds.length || !data.actions || !data.actions.length)) {
+    } else if (data.type === 'userAction' && (!data.targetIds || !data.targetIds.length || !data.actions || !data.actions.length)) {
       return false;
     }
 

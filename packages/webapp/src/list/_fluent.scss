@@ -10,4 +10,10 @@
     object-fit: cover;
     background-color: #333;
   }
+
+  &.-selected {
+    outline: 4px solid mix($white, $primary-color, 40%);
+    outline-offset: -1px;
+    filter: brightness(110%) saturate(110%);
+  }
 }

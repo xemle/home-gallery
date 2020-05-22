@@ -1,22 +1,27 @@
 import * as React from "react";
 import { useLayoutEffect, useMemo, useRef } from "react";
-import { Link, useLocation, useHistory } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
 import { useLastLocation } from 'react-router-last-location';
+import { useStoreActions, useStoreState } from '../store/hooks';
 
 import useBodyDimensions from '../utils/useBodyDimensions';
-import { useTouch } from '../utils/useTouch';
 import { fluent } from "./fluent";
 import { VirtualScroll } from "./VirtualScroll";
+import { ViewMode } from "../store/edit-mode-model";
+import { useDeviceType, DeviceType } from "../utils/useDeviceType";
 
 const Cell = (props) => {
   const location = useLocation();
+  const viewMode = useStoreState(state => state.editMode.viewMode);
+
+  const selectedIdMap = useStoreState(state => state.editMode.selectedIdMap);
+  const toggleIds = useStoreActions(store => store.editMode.toggleIds);
   const {height, width, index, item} = props;
-  const ref = useRef();
   const {id, previews} = item;
   const linkState = {
     uppathname: location.pathname,
     index
-  }  
+  }
   const style = { height, width }
   const history = useHistory();
 
@@ -29,20 +34,21 @@ const Cell = (props) => {
     history.push(`/view/${id}`, linkState);
   }
 
-  const tapHandler = ({touchType}) => {
-    if (touchType === 'tap') {
+  const onClick = () => {
+    if (viewMode === ViewMode.EDIT) {
+      toggleIds([id]);
+    } else {
       showImage();
     }
   }
 
-  useTouch(ref, tapHandler);
+  const isSelected = () => {
+    return viewMode === ViewMode.EDIT && selectedIdMap[id];
+  }
 
   const previewUrl = `/files/${preview}`;
   return (
-    <div key={id} className='fluent__cell' style={style} ref={ref} onClick={showImage}>
-      {/* <Link to={{pathname:`/view/${id}`, state: linkState}}>
-          <img style={style} src={previewUrl} />
-      </Link> */}
+    <div key={id} className={`fluent__cell ${isSelected() ? '-selected' : ''}`} style={style} onClick={onClick}>
       <img style={style} src={previewUrl} />
     </div>
   )
@@ -62,13 +68,14 @@ const Row = (props) => {
 
 export const FluentList = (props) => {
   const { width } = useBodyDimensions();
-  
+  const [ deviceType ] = useDeviceType();
+
   const rows = useMemo(() => {
-    const rowHeights = width < 1280 ? {minHeight: 61, maxHeight: 110} : {minHeight: 120, maxHeight: 200 }
+    const rowHeights = deviceType === DeviceType.MOBILE ? {minHeight: 61, maxHeight: 110} : {minHeight: 120, maxHeight: 200 }
     return fluent(props.entries, Object.assign({padding: 8, width}, rowHeights));
   }, [width, props.entries])
 
-  const virtualScrollRef = useRef(null); 
+  const virtualScrollRef = useRef(null);
   const lastLocation = useLastLocation();
   const idMatch = lastLocation ? lastLocation.pathname.match(/\/([a-z0-9]{40})\b/) : false;
 

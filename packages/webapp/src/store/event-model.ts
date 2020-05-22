@@ -59,7 +59,7 @@ const applyEvents = (entries: Map<String, Entry>, events: Event[]) => {
   let actionCount = 0;
   events.forEach(event => {
     const eventId = event.id;
-    if (event.type != 'actionEvent' || !event.targetIds || !event.targetIds.length || !event.actions || !event.actions.length) {
+    if (event.type != 'userAction' || !event.targetIds || !event.targetIds.length || !event.actions || !event.actions.length) {
       return;
     }
     const targetEntries = event.targetIds
