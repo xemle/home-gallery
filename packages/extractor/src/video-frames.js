@@ -13,7 +13,7 @@ function extractVideoFames(entry, src, storageDir, frameCount, filenamePattern, 
 
   let files = [];
   const command = ffmpeg(src);
-  command.setFfmpegPath(ffmpegStatic.path);
+  command.setFfmpegPath(ffmpegStatic);
   command.setFfprobePath(ffprobeStatic.path);  
   command
     .on('error', cb)

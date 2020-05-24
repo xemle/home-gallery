@@ -24,7 +24,7 @@ function convertVideo(storageDir, entry, cb) {
   const tmpFile = path.join(storageDir, `${filename}.tmp`);
   const file = path.join(storageDir, filename);
   const command = ffmpeg(input);
-  command.setFfmpegPath(ffmpegStatic.path);
+  command.setFfmpegPath(ffmpegStatic);
   command.setFfprobePath(ffprobeStatic.path);  
   command
     .on('error', cb)
