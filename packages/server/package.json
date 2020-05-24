@@ -4,8 +4,10 @@
   "description": "Web server of HomeGallery",
   "main": "index.js",
   "scripts": {
-    "run": "node index.js",
-    "postinstall": "cpx 'node_modules/@home-gallery/webapp/dist/**' ./public"
+    "clean": "rimraf dist",
+    "build": "cpx 'src/**' dist",
+    "postbuild": "cpx 'node_modules/@home-gallery/webapp/dist/**' dist/public",
+    "run": "node index.js"
   },
   "keywords": [
     "HomeGallery",
@@ -16,7 +18,8 @@
   "license": "MIT",
   "devDependencies": {
     "cpx": "^1.5.0",
-    "debug": "^4.1.1"
+    "debug": "^4.1.1",
+    "rimraf": "^3.0.2"
   },
   "dependencies": {
     "@home-gallery/common": "^1.0.0",

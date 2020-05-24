@@ -5,13 +5,15 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpx 'src/**' dist"
+    "build": "cpx 'src/**' dist",
+    "watch": "onchange 'src/**' -- npm run build"
   },
   "keywords": [],
   "author": "Sebastian Felis <sebastian@silef.de>",
   "license": "MIT",
   "devDependencies": {
     "cpx": "^1.5.0",
+    "onchange": "^7.0.2",
     "rimraf": "^3.0.2"
   },
   "dependencies": {

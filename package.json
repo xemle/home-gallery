@@ -6,7 +6,8 @@
   "scripts": {
     "clean": "lerna run clean",
     "bootstrap": "lerna bootstrap",
-    "build": "lerna run build"
+    "build": "lerna run build",
+    "watch": "lerna run watch"
   },
   "keywords": [],
   "author": "",
