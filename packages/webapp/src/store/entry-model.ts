@@ -37,7 +37,7 @@ const execQuery = async (entries: Entry[], query: String) => {
         return resolve(entries);
       }
       const options = {
-        textFn: (v) => `${v.id.substring(0, 10)} ${v.type} ${v.date} ${v.make} ${v.model} ${v.files[0].filename}`.toLowerCase()
+        textFn: (v) => `${v.id.substring(0, 10)} ${v.type} ${v.date} ${v.make} ${v.model} ${v.files[0].filename} ${v.country} ${v.state} ${v.city} ${v.road}`.toLowerCase()
       }
       createFilter(ast, options, (err, queryFn) => {
         console.log(`filter result ${err}, ${queryFn}`);

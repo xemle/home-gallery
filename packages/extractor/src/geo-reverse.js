@@ -5,13 +5,41 @@ const debug = require('debug')('extract:geo-lookup');
 const { throttleAsync } = require('@home-gallery/stream');
 const { getStoragePaths, writeStorageFile } = require('@home-gallery/storage');
 
-function geoReverse(storageDir) {
-  
+const getAcceptLanguageValue = (languages) => {
+  const anyLang = '*;q=0.5';
+  const priorities = languages.map((lang, index, array) => {
+    const isFirst = index === 0;
+    if (isFirst) {
+      return lang;
+    } else {
+      const percent = index * (1 / array.length);
+      const q = (1 - 0.5 * percent).toFixed(1);
+      return `${lang};q=${q}`;
+    }
+  }).concat(anyLang);
+  return priorities.join(',');
+}
+
+const getEntryFile = (entry, suffix) => {
+  const {dir, prefix} = getStoragePaths(entry.sha1sum);
+  return path.join(dir, `${prefix}-${suffix}`);
+}
+
+const hasEntryFile = (entry, suffix) => {
+  const entryFile = getEntryFile(entry, suffix);
+  return entry.files.indexOf(entryFile) >= 0;
+}
+
+function geoReverse(storageDir, languages) {
   let isLimitExceeded = false;
 
+  const acceptLanguageValue = getAcceptLanguageValue([].concat(languages || []));
+
   function passThrough(entry) {
-    if (isLimitExceeded || entry.meta['geoReverse']) {
+    if (isLimitExceeded) {
       return true;
+    } else if (hasEntryFile(entry, 'geo-reverse.json')) {
+      return true
     } else if (entry.meta['exif'] && entry.meta['exif'].GPSPosition) {
       return false;
     } else {
@@ -20,8 +48,7 @@ function geoReverse(storageDir) {
   }
 
   function task(entry, cb) {
-    const {dir, prefix} = getStoragePaths(entry.sha1sum);
-    const geoReverseFilename = path.join(dir, `${prefix}-geo-reverse.json`);
+    const geoReverseFilename = getEntryFile(entry, 'geo-reverse.json');
 
     if (!entry.meta['exif'] || !entry.meta['exif'].GPSPosition) {
       return cb();
@@ -44,7 +71,8 @@ function geoReverse(storageDir) {
     const options = {
       url,
       headers: {
-        'User-Agent': 'home-gallery/1.0.0'
+        'User-Agent': 'home-gallery/1.0.0',
+        'Accept-Language': `${acceptLanguageValue}`
       }
     }
     const t0 = Date.now();

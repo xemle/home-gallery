@@ -48,7 +48,7 @@ function extractData(indexFilenames, storageDir, fileFilterFn, minChecksumDate, 
       videoPoster(storageDir, imagePreviewSizes),
       vibrant(storageDir),
       phash(storageDir, `image-preview-${imagePreviewSizes[1]}`),
-      geoReverse(storageDir),
+      geoReverse(storageDir, ['de', 'en']),
       video(storageDir),
       //.pipe(videoFrames(storageDir, videoFrameCount))
 

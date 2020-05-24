@@ -148,13 +148,24 @@ const mapMedia = through2.obj(function (entry, enc, cb) {
     debug(`Could not extract exif data from ${entry.filename}:${entry.sha1sum}: ${e} ${JSON.stringify(entry)}`);
   }
 
+  let geoInfo = {};
+  const geoReverse = getEntryMetaByKey(entry, 'geoReverse');
+  if (geoReverse) {
+    ['lat', 'lon', 'addresstype'].forEach(key => geoInfo[key] = geoReverse[key]);
+    ['country', 'state', 'city', 'road', 'house_number' ].forEach(key => {
+      if (geoReverse.address[key]) {
+        geoInfo[key] = geoReverse.address[key];
+      }
+    });
+  }
+
   const media = Object.assign({
     id: entry.sha1sum,
     type: entry.type,
     date: entry.date,
     files: [mapFile(entry)].concat(entry.sidecars.map(mapFile)),
     previews: allStorageFiles.filter(file => file.match(/-preview/))
-  }, exifData)
+  }, exifData, geoInfo)
 
   this.push(media);
   cb();
