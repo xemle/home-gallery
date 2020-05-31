@@ -25,7 +25,7 @@ const lexer = moo.compile({
     {match: /'(?:\\['\\rn]|[^'\\])*?'/, lineBreaks: true, value: x => x.slice(1, -1)},
   ],
   number: {match: /(?:[-])?0|[1-9][0-9]*(?:\.[0-9]+)?/, value: x => +x},
-  value: /[-_.A-Za-z0-9]+/,
+  value: /[^\s'"]+/,
 });
 
 %}

@@ -17,7 +17,7 @@ const lexer = moo.compile({
     {match: /"(?:\\["\\rn]|[^"\\])*?"/, lineBreaks: true, value: x => x.slice(1, -1)},
     {match: /'(?:\\['\\rn]|[^'\\])*?'/, lineBreaks: true, value: x => x.slice(1, -1)},
   ],
-  value: /[-_.A-Za-z0-9]+/,
+  value: /[^\s'"]+/,
 });
 
 var grammar = {
