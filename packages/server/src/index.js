@@ -42,7 +42,7 @@ function startServer({host, port, storageDir, databaseFilename, eventFilename, w
   app.use('/files', express.static(storageDir, {index: false, maxAge: '2d', immutable: true}));
 
   app.use(morgan('tiny'));
-  app.use(bodyParser.json())
+  app.use(bodyParser.json({limit: '1mb'}))
 
   app.get('/api/database', databaseApi(databaseFilename));
   const { read, push, stream } = eventApi(eventFilename);
