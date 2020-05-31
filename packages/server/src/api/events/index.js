@@ -55,6 +55,11 @@ const events = (filename) => {
     debug(`Add new client ${newClient}`);
 
     req.on('end', () => {
+      debug(`Client connection ended. Remove client ${newClient}`);
+      removeClient(newClient);
+    });
+
+    req.on('close', () => {
       debug(`Client connection closed. Remove client ${newClient}`);
       removeClient(newClient);
     });
