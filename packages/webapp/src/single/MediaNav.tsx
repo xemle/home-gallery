@@ -10,7 +10,7 @@ export const MediaNav = ({index, prev, next, listPathname}) => {
   const { width } = useBodyDimensions();
 
   const loadImage = async url => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (!url) {
         return
       }
@@ -20,7 +20,7 @@ export const MediaNav = ({index, prev, next, listPathname}) => {
     });
   }
 
-  const getPreviewUrl = (media, size) => '/files/' + media.previews.filter(p => p.indexOf(`image-preview-${size}.`) >= 0).shift();
+  const getPreviewUrl = (entry, size) => '/files/' + entry.previews.filter(p => p.indexOf(`image-preview-${size}.`) >= 0).shift();
 
   useEffect(() => {
     let abort = false;
@@ -64,3 +64,4 @@ export const MediaNav = ({index, prev, next, listPathname}) => {
     </>
   )
 }
+

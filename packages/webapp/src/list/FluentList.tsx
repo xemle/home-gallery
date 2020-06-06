@@ -10,13 +10,12 @@ import { VirtualScroll } from "./VirtualScroll";
 import { ViewMode } from "../store/edit-mode-model";
 import { useDeviceType, DeviceType } from "../utils/useDeviceType";
 
-const Cell = (props) => {
+const Cell = ({height, width, index, item, items}) => {
   const location = useLocation();
   const viewMode = useStoreState(state => state.editMode.viewMode);
 
   const selectedIdMap = useStoreState(state => state.editMode.selectedIdMap);
   const toggleIds = useStoreActions(store => store.editMode.toggleIds);
-  const {height, width, index, item} = props;
   const {id, previews} = item;
   const style = { height, width }
   const history = useHistory();

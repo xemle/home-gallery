@@ -7,7 +7,7 @@ export const SearchInput = ({focus, onSearch}) => {
   return (
     <>
       <div className="button-group -input">
-        <input className="input" value={query} onChange={e => setQuery(e.target.value)} onKeyUp={(e) => e.keyCode === 13 && onSearch(query)} ref={input => input && input.focus()} placeholder="Search..."/>
+        <input className="input" value={query} onChange={e => setQuery(e.target.value)} onKeyUp={(e) => e.keyCode === 13 && onSearch(query)} ref={input => input && focus && input.focus()} placeholder="Search..."/>
         <button className="button -default" onClick={() => onSearch(query)}><i className="fas fa-search"></i></button>
       </div>
     </>

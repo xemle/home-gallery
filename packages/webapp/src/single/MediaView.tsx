@@ -13,9 +13,12 @@ import { MediaViewUnknownType } from './MediaViewUnknownType';
 import { MediaViewImage } from './MediaViewImage';
 import { MediaViewVideo } from './MediaViewVideo';
 
-function getMediaIndex(media, id) {
-  for (let i = 0; i < media.length; i++) {
-    if (media[i].id === id) {
+const findEntryIndex = (location, entries, id) => {
+  if (location.state && location.state.index) {
+    return location.state.index;
+  }
+  for (let i = 0; i < entries.length; i++) {
+    if (entries[i].id === id) {
       return i;
     }
   }
@@ -28,7 +31,7 @@ export const MediaView = () => {
   const listPathname = useListPathname();
 
   const entries = useStoreState(state => state.entries.entries);
-  let index = location.state && location.state.index ? location.state.index : getMediaIndex(entries, id);
+  let index = findEntryIndex(location, entries, id);
 
   const media = entries[index];
   const prev = entries[index - 1];
@@ -55,3 +58,4 @@ export const MediaView = () => {
     </>
   )
 }
+

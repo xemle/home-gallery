@@ -6,7 +6,8 @@
   align-content: center;
   justify-content: center;
 
-  > .-image img {
+  > .-image img,
+  > .-video img {
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
