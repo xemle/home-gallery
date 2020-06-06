@@ -32,7 +32,20 @@ const execQuery = async (entries: Entry[], query: String) => {
       const options = {
         textFn: (v) => {
           if (!v.textCache) {
-            v.textCache = `${v.id.substring(0, 10)} ${v.type} ${v.date} ${v.make} ${v.model} ${v.files[0].filename} ${v.tags ? v.tags.join(' ') : ''}`.toLowerCase();
+            v.textCache = [
+              v.id.substring(0, 10),
+              v.type,
+              v.date,
+              v.make || '',
+              v.model || '',
+              v.files[0].filename,
+              v.country || '',
+              v.state || '',
+              v.city || ''
+            ]
+            .concat(v.tags || [])
+            .join(' ')
+            .toLowerCase();
           }
           return v.textCache;
         }
