@@ -12,11 +12,13 @@ export const EditNavBar = () => {
   const viewMode = useStoreState(state => state.editMode.viewMode);
 
   const selectedIdMap = useStoreState(state => state.editMode.selectedIdMap);
+  const allEntries = useStoreState(state => state.entries.allEntries)
 
   const setViewMode = useStoreActions(actions => actions.editMode.setViewMode);
   const reset = useStoreActions(actions => actions.editMode.reset);
   const selectAll = useStoreActions(actions => actions.editMode.selectAll);
   const invert = useStoreActions(actions => actions.editMode.invert);
+  const setEntries = useStoreActions(actions => actions.entries.setEntries);
 
   const toggleViewMode = () => {
     setViewMode(viewMode === ViewMode.VIEW ? ViewMode.EDIT : ViewMode.VIEW);
@@ -31,6 +33,12 @@ export const EditNavBar = () => {
     return false;
   }
 
+  const showSelected = () => {
+    const entryIds = Object.keys(selectedIdMap);
+    const entries = entryIds.map(id => allEntries.get(id)).filter(e => !!e);
+    setEntries(entries);
+  }
+
   return (
     <>
       <SearchNavBar>
@@ -39,6 +47,7 @@ export const EditNavBar = () => {
           <a className="nav__link link" onClick={() => reset()}><i className="fas fa-undo"></i> <span className="hide-sm">Reset all</span></a>
           <a className="nav__link link" onClick={() => selectAll()}><i className="fas fa-folder"></i> <span className="hide-sm">All</span></a>
           <a className="nav__link link" onClick={() => invert()}><i className="fas fa-exchange-alt"></i> <span className="hide-sm">Invert</span></a>
+          <a className="nav__link link" onClick={showSelected}><i className="fas fa-eye"></i> <span className="hide-sm">View selected</span></a>
           <a className="nav__link link" onClick={() => setDialogVisible(true)}><i className="fas fa-check"></i> <span className="hide-sm">{`Edit ${Object.keys(selectedIdMap).length} media`}</span></a>
         </div>
       </SearchNavBar>
