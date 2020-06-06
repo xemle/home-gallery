@@ -1,5 +1,6 @@
 import { Action, action, Thunk, thunk } from 'easy-peasy';
 import { StoreModel } from './store';
+import { entryModel } from './entry-model';
 
 export enum ViewMode {
   VIEW,
@@ -13,20 +14,54 @@ export interface IdMap {
 export interface EditModeModel {
   viewMode: ViewMode;
   selectedIdMap: IdMap;
+  lastSelectedId: string;
 
   setViewMode: Action<EditModeModel, ViewMode>;
   selectAll: Thunk<EditModeModel, any, any, StoreModel>;
   invert: Thunk<EditModeModel, any, any, StoreModel>;
   setIds: Thunk<EditModeModel, string[], any, StoreModel>;
   addIds: Action<EditModeModel, string[]>;
-  toggleIds: Action<EditModeModel, string[]>;
+  toggleId: Action<EditModeModel, string>;
+  toggleRange: Thunk<EditModeModel, string, any, StoreModel>;
   removeIds: Action<EditModeModel, string[]>;
   reset: Action<EditModeModel>;
+}
+
+const getSelectionRange = (entries, firstId, lastId) => {
+  let startIndex = -1;
+  let endIndex = -1;
+
+  for (var i = 0; i < entries.length; i++) {
+    const entryId = entries[i].id;
+    if (entryId == firstId && startIndex < 0) {
+      startIndex = i;
+    } else if (entryId === lastId && startIndex < 0) {
+      startIndex = i;
+    } else if (entryId === firstId && startIndex >= 0) {
+      endIndex = i + 1;
+      break;
+    } else if (entryId === lastId && startIndex >= 0) {
+      endIndex = i + 1;
+      break;
+    }
+  }
+
+  return [startIndex, endIndex];
+}
+
+const getSelectionRangeIds = (entries, firstId, lastId) => {
+  const [start, end] = getSelectionRange(entries, firstId, lastId);
+  const ids = [];
+  for (var i = start; i < end; i++) {
+    ids.push(entries[i].id);
+  }
+  return ids;
 }
 
 export const editModeModel : EditModeModel = {
   viewMode: ViewMode.VIEW,
   selectedIdMap: {},
+  lastSelectedId: '',
 
   setViewMode: action((state, mode) => {
     state.viewMode = mode;
@@ -55,23 +90,40 @@ export const editModeModel : EditModeModel = {
         state.selectedIdMap[id] = true;
       }
     })
-    console.log('Add', ids, state.selectedIdMap);
   }),
   removeIds: action((state, ids) => {
     const selectedIds = state.selectedIdMap;
     ids.forEach(id => delete selectedIds[id]);
-    console.log('remove', ids, state.selectedIdMap);
   }),
-  toggleIds: action((state, ids) => {
-    ids.forEach(id => {
-      const selectedIdMap = state.selectedIdMap;
-      const exists = selectedIdMap[id];
-      if (exists) {
-        delete selectedIdMap[id];
-      } else {
-        selectedIdMap[id] = true;
-      }
-    })
+  toggleId: action((state, id) => {
+    const selectedIdMap = state.selectedIdMap;
+    const isSelected = selectedIdMap[id];
+    if (isSelected) {
+      delete selectedIdMap[id];
+    } else {
+      selectedIdMap[id] = true;
+    }
+    state.lastSelectedId = id;
+  }),
+  toggleRange: thunk(async (actions, id, {getState, getStoreState}) => {
+    const state = getState();
+    const lastSelectedId = state.lastSelectedId;
+    if (!lastSelectedId) {
+      actions.toggleId(id);
+      return;
+    }
+    const selectedIdMap = state.selectedIdMap;
+    const isLastSelected = selectedIdMap[lastSelectedId];
+    const entries = getStoreState().entries.entries;
+
+    const entryIds = getSelectionRangeIds(entries, lastSelectedId, id);
+    state.lastSelectedId = id;
+
+    if (isLastSelected) {
+      actions.addIds(entryIds);
+    } else {
+      actions.removeIds(entryIds);
+    }
   }),
   reset: action((state) => {
     state.selectedIdMap = {};

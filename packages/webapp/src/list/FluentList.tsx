@@ -17,7 +17,8 @@ const Cell = ({height, width, index, item, items}) => {
   const viewMode = useStoreState(state => state.editMode.viewMode);
 
   const selectedIdMap = useStoreState(state => state.editMode.selectedIdMap);
-  const toggleIds = useStoreActions(store => store.editMode.toggleIds);
+  const toggleId = useStoreActions(store => store.editMode.toggleId);
+  const toggleRange = useStoreActions(store => store.editMode.toggleRange);
   const {id, previews} = item;
   const style = { height, width }
   const history = useHistory();
@@ -31,9 +32,13 @@ const Cell = ({height, width, index, item, items}) => {
     history.push(`/view/${id}`, {listPathname: location.pathname, index});
   }
 
-  const onClick = () => {
+  const onClick = (selectRange) => {
     if (viewMode === ViewMode.EDIT) {
-      toggleIds([id]);
+      if (selectRange) {
+        toggleRange(id);
+      } else {
+        toggleId(id);
+      }
     } else {
       showImage();
     }
@@ -56,10 +61,11 @@ const Cell = ({height, width, index, item, items}) => {
         scrollYStart = window.scrollY;
       }
     })
-    hammer.on('tap', () => {
+    hammer.on('tap press', (e) => {
       const scrollYDiff = Math.abs(scrollYStart - window.scrollY);
       if (scrollYDiff < 10) {
-        onClick();
+        const selectRange = (e.pointerType === "mouse" && e.srcEvent.shiftKey) || e.type === 'press';
+        onClick(selectRange);
       }
     });
 
