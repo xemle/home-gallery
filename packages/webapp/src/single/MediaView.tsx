@@ -32,18 +32,23 @@ export const MediaView = () => {
   const prev = entries[index - 1];
   const next = entries[index + 1];
 
-  let mediaTypeView = <MediaViewUnknownType media={media}/>;
-  if (media && (media.type === 'image' || media.type === 'rawImage')) {
-    mediaTypeView = <MediaViewImage key={media.id} media={media} next={next} prev={prev}/>
-  } else if (media && media.type === 'video') {
-    mediaTypeView = <MediaViewVideo key={media.id} media={media} next={next} prev={prev}/>
-  }
+  const isImage = media.type === 'image' || media.type === 'rawImage'
+  const isVideo = media.type === 'video'
+  const isUnknown = !media || (['image', 'rawImage', 'video'].indexOf(media.type) < 0)
 
   return (
     <>
-      <div className="mediaView">
-        <MediaNav />
-        {mediaTypeView}
+      <MediaNav index={index} prev={prev} next={next} listPathname={listPathname} />
+      <div className="mediaView" ref={ref}>
+        {isImage &&
+          <MediaViewImage key={media.id} media={media} next={next} prev={prev}/>
+        }
+        {isVideo &&
+          <MediaViewVideo key={media.id} media={media} next={next} prev={prev}/>
+        }
+        {isUnknown &&
+          <MediaViewUnknownType key={media.id} media={media} next={next} prev={prev}/>
+        }
       </div>
     </>
   )
