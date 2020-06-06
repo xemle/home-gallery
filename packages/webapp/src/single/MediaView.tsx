@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 
 import { useStoreState } from '../store/hooks';
+import useListPathname from './useListPathname';
 
 import { MediaNav } from './MediaNav';
 import { MediaViewUnknownType } from './MediaViewUnknownType';
@@ -24,6 +25,7 @@ function getMediaIndex(media, id) {
 export const MediaView = () => {
   let { id } = useParams();
   let location = useLocation();
+  const listPathname = useListPathname();
 
   const entries = useStoreState(state => state.entries.entries);
   let index = location.state && location.state.index ? location.state.index : getMediaIndex(entries, id);

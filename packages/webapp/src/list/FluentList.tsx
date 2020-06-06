@@ -18,10 +18,6 @@ const Cell = (props) => {
   const toggleIds = useStoreActions(store => store.editMode.toggleIds);
   const {height, width, index, item} = props;
   const {id, previews} = item;
-  const linkState = {
-    uppathname: location.pathname,
-    index
-  }
   const style = { height, width }
   const history = useHistory();
 
@@ -31,7 +27,7 @@ const Cell = (props) => {
   const preview = previews.filter(preview => preview && preview.indexOf(previewName) >= 0).shift();
 
   const showImage = () => {
-    history.push(`/view/${id}`, linkState);
+    history.push(`/view/${id}`, {listPathname: location.pathname, index});
   }
 
   const onClick = () => {
