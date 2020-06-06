@@ -3,6 +3,7 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 import { useLocation, useHistory } from "react-router-dom";
 import { useLastLocation } from 'react-router-last-location';
 import { useStoreActions, useStoreState } from '../store/hooks';
+import Hammer from 'hammerjs';
 
 import useBodyDimensions from '../utils/useBodyDimensions';
 import { fluent } from "./fluent";
@@ -11,6 +12,7 @@ import { ViewMode } from "../store/edit-mode-model";
 import { useDeviceType, DeviceType } from "../utils/useDeviceType";
 
 const Cell = ({height, width, index, item, items}) => {
+  const ref = useRef();
   const location = useLocation();
   const viewMode = useStoreState(state => state.editMode.viewMode);
 
@@ -41,9 +43,38 @@ const Cell = ({height, width, index, item, items}) => {
     return viewMode === ViewMode.EDIT && selectedIdMap[id];
   }
 
+  useLayoutEffect(() => {
+    if (!ref.current) {
+      return;
+    }
+    const element = ref.current;
+    const hammer = new Hammer(element);
+    let scrollYStart = 0;
+
+    hammer.on('hammer.input', (e) => {
+      if (e.isFirst) {
+        scrollYStart = window.scrollY;
+      }
+    })
+    hammer.on('tap', () => {
+      const scrollYDiff = Math.abs(scrollYStart - window.scrollY);
+      if (scrollYDiff < 10) {
+        onClick();
+      }
+    });
+
+    return () => {
+      if (!hammer) {
+        return;
+      }
+      hammer.stop(false);
+      hammer.destroy();
+    }
+  });
+
   const previewUrl = `/files/${preview}`;
   return (
-    <div key={id} className={`fluent__cell ${isSelected() ? '-selected' : ''}`} style={style} onClick={onClick}>
+    <div ref={ref} key={id} className={`fluent__cell ${isSelected() ? '-selected' : ''}`} style={style}>
       <img style={style} src={previewUrl} />
     </div>
   )

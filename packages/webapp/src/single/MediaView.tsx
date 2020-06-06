@@ -1,9 +1,12 @@
 import * as React from "react";
+import { useRef, useLayoutEffect } from "react";
 import {
   BrowserRouter as Router,
   useParams,
   useLocation,
+  useHistory
 } from "react-router-dom";
+import Hammer from 'hammerjs';
 
 import { useStoreState } from '../store/hooks';
 import useListPathname from './useListPathname';
@@ -28,6 +31,7 @@ const findEntryIndex = (location, entries, id) => {
 export const MediaView = () => {
   let { id } = useParams();
   let location = useLocation();
+  const history = useHistory();
   const listPathname = useListPathname();
 
   const entries = useStoreState(state => state.entries.entries);
@@ -36,6 +40,31 @@ export const MediaView = () => {
   const media = entries[index];
   const prev = entries[index - 1];
   const next = entries[index + 1];
+
+  const ref = useRef();
+  useLayoutEffect(() => {
+    if (!ref.current) {
+      return;
+    }
+    const element = ref.current;
+    const mc = new Hammer.Manager(element, {
+      recognizers: [
+        [Hammer.Pan,{ direction: Hammer.DIRECTION_ALL }]
+      ]
+    });
+
+    mc.on('panright', () => prev && history.push(`/view/${prev.id}`, { listPathname, index: index - 1 }));
+    mc.on('panleft', () => next && history.push(`/view/${next.id}`, { listPathname, index: index + 1 }));
+    mc.on('panup', () => history.push(listPathname));
+
+    return () => {
+      if (!mc) {
+        return;
+      }
+      mc.stop(false);
+      mc.destroy();
+    }
+  });
 
   const isImage = media.type === 'image' || media.type === 'rawImage'
   const isVideo = media.type === 'video'
