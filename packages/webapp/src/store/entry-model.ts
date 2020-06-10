@@ -6,6 +6,8 @@ export interface Entry {
   type: string;
   date: string;
   year: number;
+  width: number;
+  height: number;
   tags: string[];
   appliedEventIds?: string[],
   textCache?: string | false;

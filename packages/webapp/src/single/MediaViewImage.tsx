@@ -22,7 +22,7 @@ export const MediaViewImage = (props) => {
 
   return (
     <>
-      <div className="-image">
+      <div className="mediaView -image">
         <img className="mediaView__media" src={smallUrl} />
         <img className="mediaView__media" src={src} />
       </div>

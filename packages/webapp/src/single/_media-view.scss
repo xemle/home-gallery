@@ -6,15 +6,15 @@
   align-content: center;
   justify-content: center;
 
-  > .-image img,
-  > .-video img {
+  &.-image img,
+  &.-video img {
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
     left: 50%;
   }
 
-  .-video {
+  &.-video {
     position: relative;
     height: 100%;
     width: 100%;
@@ -31,4 +31,14 @@
   max-width: 100%;
   margin: 0 auto;
   object-fit: contain;
+}
+
+.zoomable {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  overflow: hidden;
 }
