@@ -68,7 +68,23 @@ function cache(duration) {
   return { middleware, clear };
 }
 
-function startServer(host, port, storageDir, catalogFilename, webappDir, cb) {
+function createServer(key, cert, app) {
+  if (key && cert) {
+    const fs = require('fs');
+    const https = require('https');
+    var privateKey  = fs.readFileSync(key, 'utf8');
+    var certificate = fs.readFileSync(cert, 'utf8');
+
+    var credentials = {key: privateKey, cert: certificate};
+
+    return https.createServer(credentials, app);
+  } else {
+    const http = require('http');
+    return http.createServer({spdy: { plain: true, ssl: false} }, app);
+  }
+}
+
+function startServer(host, port, storageDir, catalogFilename, webappDir, key, cert, cb) {
   const app = express();
 
   let catalog = { media: [] };
@@ -92,6 +108,8 @@ function startServer(host, port, storageDir, catalogFilename, webappDir, cb) {
     }    
   })
 
+  app.disable('x-powered-by');
+
   app.use(cors());
   app.use(compression({ filter: shouldCompress }))
   app.use('/files', express.static(storageDir, {index: false, maxAge: '2d', immutable: true}));
@@ -111,7 +129,8 @@ function startServer(host, port, storageDir, catalogFilename, webappDir, cb) {
   
   app.use('/', express.static(webappDir));
 
-  app.listen(port, host)
+  const server = createServer(key, cert, app);
+  server.listen(port, host)
     .on('error', (e) => {
       if (e.code === 'EADDRINUSE') {
         console.log(`Address is already in use!`);
@@ -119,7 +138,7 @@ function startServer(host, port, storageDir, catalogFilename, webappDir, cb) {
       cb(e);
     })
     .on('listening', () => {
-      console.log(`Open Home Gallery on http://localhost:${port}`);
+      console.log(`Open Home Gallery on ${key && cert ? 'https' : 'http'}://localhost:${port}`);
       cb(null, app);
     })
   

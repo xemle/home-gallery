@@ -28,13 +28,21 @@ const command = {
         number: true,
         default: 3000,
         describe: 'Listening TCP port'
+      },
+      key: {
+        alias: 'K',
+        describe: 'SSL key file'
+      },
+      cert: {
+        alias: 'C',
+        describe: 'SSL certificate file'
       }
     })
     .demandOption(['storage', 'database'])
   },
   handler: (argv) => {
     const webappDir = path.resolve(__dirname || '.', 'public');
-    startServer(argv.host, argv.port, argv.storage, argv.database, webappDir, (err) => {
+    startServer(argv.host, argv.port, argv.storage, argv.database, webappDir, argv.key, argv.cert, (err) => {
       if (err) {
         debug(`Could not start server: ${err}`);
       } else {
