@@ -7,7 +7,8 @@
     "clean": "rimraf dist",
     "postinstall": "cpx 'node_modules/@fortawesome/fontawesome-free/webfonts/*.*' src/fonts",
     "dev": "node dev-server.js",
-    "build": "parcel build src/index.html --out-dir dist --public-url ./"
+    "build": "parcel build src/index.html --out-dir dist --public-url ./",
+    "postbuild": "workbox generateSW"
   },
   "keywords": [
     "HomeGallery",
@@ -27,7 +28,8 @@
     "react-dom": "^16.12.0",
     "rimraf": "^3.0.2",
     "sass": "^1.26.5",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.2",
+    "workbox-cli": "^5.1.3"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.13.0",

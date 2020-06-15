@@ -5,13 +5,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="./app.scss">
+    <link rel="shortcut icon" href="/public/favicon.ico" />
+    <link rel="apple-touch-icon" href="/public/logo192.png" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="/app.scss">
     <title>Home Gallery</title>
 </head>
 
 <body class="bg">
     <div id="app"></div>
     <script src="App.ts" type="text/javascript"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        const worker = './service-worker.js';
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register(worker).then(registration => {
+            registration.onupdatefound = () => {
+              const installingWorker = registration.installing;
+              if (installingWorker == null) {
+                return;
+              }
+              installingWorker.onstatechange = () => {
+                if (installingWorker.state === "installed") {
+                  if (navigator.serviceWorker.controller) {
+                    console.log(
+                      "New content is available and will be used when all " +
+                      "tabs for this page are closed."
+                    );
+                  } else {
+                    console.log("Content is cached for offline use.");
+                  }
+                }
+              };
+            };
+          })
+          .catch(error => {
+            console.error("Error during service worker registration:", error);
+          });
+        });
+      }
+    </script>
 </body>
 
 </html>
