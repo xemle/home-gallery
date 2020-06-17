@@ -9,7 +9,7 @@ steps:
 - name: install
   image: node:12-alpine
   commands:
-  - apk add --no-cache python make g++ vips-dev
+  - apk add --no-cache python make g++ git openssh-client vips-dev
   - npm set registry http://npm.home.local
   - npm config set unsafe-perm true
   - npm install
