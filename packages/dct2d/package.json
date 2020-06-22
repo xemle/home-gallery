@@ -1,0 +1,28 @@
+{
+  "name": "@home-gallery/dct2d",
+  "version": "1.0.0",
+  "description": "dct2d library with idct2d function",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "watch": "onchange '*.js' -- npm run test"
+  },
+  "keywords": [
+    "dct2d",
+    "dct",
+    "idct2d",
+    "idct"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^8.0.1",
+    "onchange": "^7.0.2"
+  },
+  "mocha": {
+    "spec": [
+      "test.js"
+    ]
+  }
+}

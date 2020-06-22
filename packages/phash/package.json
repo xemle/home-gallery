@@ -1,0 +1,31 @@
+{
+  "name": "@home-gallery/phash",
+  "version": "1.0.0",
+  "description": "phash library",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "watch": "onchange '*.js' -- npm run test"
+  },
+  "keywords": [
+    "phash",
+    "perceptual",
+    "perceptual hash"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "jimp": "^0.13.0",
+    "mocha": "^8.0.1",
+    "onchange": "^7.0.2"
+  },
+  "dependencies": {
+    "@home-gallery/dct2d": "^1.0.0"
+  },
+  "mocha": {
+    "spec": [
+      "test.js"
+    ]
+  }
+}

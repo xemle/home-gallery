@@ -20,6 +20,11 @@ steps:
   commands:
   - npm run build
 
+- name: test
+  image: node:12-alpine
+  commands:
+  - npm run test
+
 - name: notify
   image: sfelis/drone-email
   settings:

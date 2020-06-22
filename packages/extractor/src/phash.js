@@ -1,27 +1,40 @@
 const path = require('path');
 const through2 = require('through2');
-const phash = require('sharp-phash');
+const sharp = require('sharp');
 const debug = require('debug')('extract:phash');
+
+const phash = require('@home-gallery/phash');
 
 const { getStoragePaths, writeStorageFile } = require('@home-gallery/storage');
 
 const phashSuffix = 'phash.json';
 
-function calculatePHash(storageDir, entry, previewImageSuffix, cb) {
+function calculatePhash(image) {
+  let sharpImage;
+  try {
+    sharpImage = sharp(image);
+  } catch (e) {
+    return Promise.reject(`Initiation of sharp failed. Error: ${e}`);
+  }
+
+  return sharpImage
+    .greyscale()
+    .resize(32, 32, { fit: "fill" })
+    .rotate()
+    .raw()
+    .toBuffer()
+    .then(buf => phash([...buf]))
+    .then(hash => hash.toHex());
+}
+
+function createPhashFile(storageDir, entry, previewImageSuffix, cb) {
   const {dir, prefix} = getStoragePaths(entry.sha1sum);
   const imageFilename = path.join(storageDir, getEntryFile(entry, previewImageSuffix));
   const phashFilename = path.join(dir, `${prefix}-${phashSuffix}`);
 
-  phash(imageFilename)
-    .then((result) => {
-      let high, low;
-      try {
-        high = parseInt(result.substr(0, 32), 2);
-        low = parseInt(result.substr(32), 2);
-      } catch(e) {
-        return cb(`Could not convert result ${result}: ${e}`);
-      }
-      writeStorageFile(entry, storageDir, phashFilename, JSON.stringify({high, low, raw: result}), cb);
+  calculatePhash(imageFilename)
+    .then(hash => {
+      writeStorageFile(entry, storageDir, phashFilename, JSON.stringify(hash), cb);
     }, (err) => {
       return cb(err);
     })
@@ -44,7 +57,7 @@ function phashExtractor(storageDir, previewImageSuffix) {
     const that = this;
     if (entryHasFile(entry, previewImageSuffix) && !entryHasFile(entry, phashSuffix)) {
       const t0 = Date.now();
-      calculatePHash(storageDir, entry, previewImageSuffix, (err) => {
+      createPhashFile(storageDir, entry, previewImageSuffix, (err) => {
         if (err) {
           debug(`Could not calculate phash of ${entry}: ${err}`);
         } else {
