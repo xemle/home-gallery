@@ -44,7 +44,8 @@ function startServer({host, port, storageDir, databaseFilename, eventFilename, w
   app.use(morgan('tiny'));
   app.use(bodyParser.json({limit: '1mb'}))
 
-  app.get('/api/database', databaseApi(databaseFilename));
+  const { read: dbRead, init: dbInit } = databaseApi();
+  app.get('/api/database', dbRead);
   const { read, push, stream } = eventApi(eventFilename);
   app.get('/api/events', read);
   app.get('/api/events/stream', stream);
@@ -62,7 +63,14 @@ function startServer({host, port, storageDir, databaseFilename, eventFilename, w
     })
     .on('listening', () => {
       console.log(`Open Home Gallery on ${key && cert ? 'https' : 'http'}://localhost:${port}`);
-      cb(null, app);
+      dbInit(databaseFilename, (err) => {
+        if (err) {
+          cb(err);
+          server.close();
+        } else {
+          cb(null, app);
+        }
+      })
     })
 
 }

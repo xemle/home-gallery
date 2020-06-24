@@ -17,21 +17,12 @@ function prepareData(data) {
   return {...data, ...{media: entries}};
 }
 
-function databaseApi(databaseFilename) {
+function databaseApi() {
   let catalog = { media: [] };
   const databaseCache = cache(3600);
 
-  readWatchDatabase(databaseFilename, (err, data) => {
-    if (err) {
-      debug(`Could not read catalog file ${databaseFilename}: ${err}`);
-    } else {
-      catalog.media = prepareData(data).media;
-      databaseCache.clear();
-    }    
-  })
-
   function send(req, res) {
-    if (req.query.offset || req.query.limit) {
+    if (req.query && (req.query.offset || req.query.limit)) {
       const length = catalog.media.length;
       const offset = sanitizeInt(req.query.offset, 0, length, 0);
       const limit = sanitizeInt(req.query.limit, Math.min(10, length), length, length);
@@ -41,11 +32,32 @@ function databaseApi(databaseFilename) {
       res.send(catalog);
     }
   }
-  
-  return function (req, res) {
-    databaseCache.middleware(req, res, function () {
-      send(req, res);
-    });
+
+  const once = (fn) => {
+    let called = false;
+    return (err, data) => {
+      if (!called) {
+        called = true;
+        fn(err, data);
+      }
+    }
+  }
+
+  return {
+    init: (databaseFilename, cb) => {
+      const onceCb = once(cb);
+      readWatchDatabase(databaseFilename, (err, data) => {
+        if (err) {
+          debug(`Could not read catalog file ${databaseFilename}: ${err}`);
+          onceCb(err);
+        } else {
+          catalog.media = prepareData(data).media;
+          databaseCache.clear();
+          onceCb();
+        }    
+      })
+    },
+    read: (req, res) => databaseCache.middleware(req, res, () => send(req, res))
   }
 }
 
