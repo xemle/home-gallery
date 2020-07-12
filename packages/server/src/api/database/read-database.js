@@ -23,10 +23,11 @@ function watchDatabase(databaseFilename, cb) {
 }
 
 function readWatchDatabase(databaseFilename, cb) {
-  readDatabase(databaseFilename, (err) => {
+  readDatabase(databaseFilename, (err, data) => {
     if (err) {
       return cb(err);
     }
+    cb(null, data);
     watchDatabase(databaseFilename, cb);
   });
 }
