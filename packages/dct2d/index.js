@@ -26,12 +26,12 @@ const forEach2d = (size, cb) => {
  * @return {Array} Precalculated cos terms
  */
 const initCosTerms = (size) => {
-  const result = [];
+  const terms = [];
   forEach2d(size, (m, p) => {
-    const cos = Math.cos((Math.PI * (2 * m + 1) * p) / (2 * size));
-    result.push(cos);
+    const term = Math.cos((Math.PI * (2 * m + 1) * p) / (2 * size));
+    terms.push(term);
   })
-  return result;
+  return terms;
 }
 
 /**
