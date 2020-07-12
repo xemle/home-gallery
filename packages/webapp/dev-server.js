@@ -15,12 +15,14 @@ app.use(
   '/api/',
   proxy({
     target: API_PROXY,
+    secure: false
   })
 );
 app.use(
   '/files/',
   proxy({
     target: API_PROXY,
+    secure: false
   })
 );
 
