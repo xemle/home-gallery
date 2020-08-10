@@ -8,23 +8,35 @@ const { parallel } = require('@home-gallery/stream');
 
 const similaritySuffix = 'similarity-embeddings.json';
 
-const buildEntryFile = (entry, suffix) => {
-  const {dir, prefix} = getStoragePaths(entry.sha1sum);
-  return path.join(dir, `${prefix}-${suffix}`);
-}
+const getStorage = (storageDir) => {
 
-const hasEntryFile = (entry, suffix) => {
-  const entryFile = buildEntryFile(entry, suffix);
-  return entry.files.indexOf(entryFile) >= 0;
+  const buildEntryFile = (entry, suffix) => {
+    const {dir, prefix} = getStoragePaths(entry.sha1sum);
+    return path.join(dir, `${prefix}-${suffix}`);
+  }
+
+  const hasEntryFile = (entry, suffix) => {
+    const entryFile = buildEntryFile(entry, suffix);
+    return entry.files.indexOf(entryFile) >= 0;
+  }
+
+  return {
+    buildEntryFile,
+    hasEntryFile,
+    readStorageFile: (filename, cb) => readStorageFile(storageDir, filename, cb),
+    writeStorageFile: (entry, filename, data, cb) => writeStorageFile(entry, storageDir, filename, data, cb)
+  }
 }
 
 function similiarity(storageDir, imageSuffix, concurrent) {
   let hasError = false;
 
+  const storage = getStorage(storageDir);
+
   function testAsync(entry, cb) {
     if (hasError) {
       cb(false);
-    } else if (!hasEntryFile(entry, imageSuffix) || hasEntryFile(entry, similaritySuffix)) {
+    } else if (!storage.hasEntryFile(entry, imageSuffix) || storage.hasEntryFile(entry, similaritySuffix)) {
       cb(false);
     } else if (entry.type === 'image') {
       cb(true);
@@ -35,8 +47,8 @@ function similiarity(storageDir, imageSuffix, concurrent) {
 
   function taskAsync(entry, cb) {
     const t0 = Date.now();
-    const imageEntryFile = buildEntryFile(entry, imageSuffix);
-    readStorageFile(storageDir, imageEntryFile, (err, buffer) => {
+    const imageEntryFile = storage.buildEntryFile(entry, imageSuffix);
+    storage.readStorageFile(imageEntryFile, (err, buffer) => {
       if (err) {
         debug(`Could not read image entry file ${imageEntryFile} from ${entry}: ${err}. Skip similarity embeddings for this entry`);
         return cb();
@@ -59,8 +71,8 @@ function similiarity(storageDir, imageSuffix, concurrent) {
           debug(`Could not get similarity embeddings of ${entry} from URL ${url}: HTTP response code is ${res.statusCode}. Skip all further similarity embeddings`);
           return cb();
         }
-        const similarityEntryFile = buildEntryFile(entry, similaritySuffix);
-        writeStorageFile(entry, storageDir, similarityEntryFile, body, (err) => {
+        const similarityEntryFile = storage.buildEntryFile(entry, similaritySuffix);
+        storage.writeStorageFile(entry, similarityEntryFile, body, (err) => {
           if (err) {
             debug(`Could write similarity embeddings of ${entry}: ${err}`);
           } else {
