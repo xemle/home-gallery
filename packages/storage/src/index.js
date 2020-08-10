@@ -4,6 +4,7 @@ const writeStorageFile = require('./write-storage-file');
 const { getMetaCacheKey, getMetaCacheFilename } = require('./meta-cache-key');
 const { updateMeta }= require('./meta-file');
 const readMetaCached = require('./read-meta-cached');
+const readStorageFile = require('./read-storage-file');
 
 module.exports = {
   readMeta,
@@ -12,5 +13,6 @@ module.exports = {
   getMetaCacheKey, 
   getMetaCacheFilename,
   updateMeta,
-  readMetaCached
+  readMetaCached,
+  readStorageFile
 }

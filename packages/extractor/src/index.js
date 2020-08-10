@@ -52,7 +52,7 @@ function extractData(indexFilenames, storageDir, fileFilterFn, minChecksumDate, 
       vibrant(storageDir),
       phash(storageDir, `image-preview-${phashPreviewSize}`),
       geoReverse(storageDir, ['de', 'en']),
-      similarityEmbeddings(storageDir, `image-preview-${similarityEmbeddingsPreviewSize}.jpg`),
+      similarityEmbeddings(storageDir, `image-preview-${similarityEmbeddingsPreviewSize}.jpg`, 5),
       video(storageDir),
       //.pipe(videoFrames(storageDir, videoFrameCount))
 
