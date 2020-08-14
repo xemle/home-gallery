@@ -134,6 +134,33 @@ function useExif(entry) {
   }, getExposerTime(), getShutterSpeed())
 }
 
+const atob = bytes => Buffer.from(bytes).toString('base64');
+
+const browserEncoder = values => {
+  const normalized = values
+    .filter((_, i) => i % 3 === 0)
+    .map(value => +(3 * Math.sqrt(Math.min(1, Math.max(0, value / 2.875)))).toFixed())
+  const len = Math.ceil(normalized.length / 4);
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = ((normalized[i * 4] & 3) << 6) ^
+      (((normalized[i * 4 + 1] || 0) & 3) << 4) ^
+      (((normalized[i * 4 + 2] || 0) & 3) << 2) ^
+      ((normalized[i * 4 + 3] || 0) & 3);
+  }
+  return atob(bytes);
+}
+
+const getSimilarityHash = entry => {
+  const embeddings = getEntryMetaByKey(entry, 'similarityEmbeddings');
+  if (!embeddings || !embeddings.data || !embeddings.data.length) {
+    return {};
+  }
+  return {
+    similarityHash: browserEncoder(embeddings.data)
+  }
+}
+
 const mapMedia = through2.obj(function (entry, enc, cb) {
   const allStorageFiles = [entry.files]
     .concat(entry.sidecars.map(sidecar => sidecar.files))
@@ -159,13 +186,15 @@ const mapMedia = through2.obj(function (entry, enc, cb) {
     });
   }
 
+  const similarityHash = getSimilarityHash(entry);
+
   const media = Object.assign({
     id: entry.sha1sum,
     type: entry.type,
     date: entry.date,
     files: [mapFile(entry)].concat(entry.sidecars.map(mapFile)),
     previews: allStorageFiles.filter(file => file.match(/-preview/))
-  }, exifData, geoInfo)
+  }, exifData, geoInfo, similarityHash)
 
   this.push(media);
   cb();
