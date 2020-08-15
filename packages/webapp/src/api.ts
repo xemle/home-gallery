@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { baseResolver } from './base-resolver';
 
+const decodeBase64 = base64 => atob(base64);
+
 export const fetchAll = async (chunkLimits, onChunk) => {
   let chunkIndex = 0;
 
@@ -22,7 +24,13 @@ export const fetchAll = async (chunkLimits, onChunk) => {
         if (!data.media || !data.media.length) {
           return;
         }
-        onChunk(data.media);
+        onChunk(data.media.map(entry => {
+          if (entry.similarityHash) {
+            const ascii = decodeBase64(entry.similarityHash);
+            entry.similarityHash = ascii;
+          }
+          return entry;
+        }));
         if (limit && data.media.length == limit) {
           return next();
         }

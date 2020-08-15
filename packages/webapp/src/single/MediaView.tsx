@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import Hammer from 'hammerjs';
 
-import { useStoreState } from '../store/hooks';
+import { useStoreState, useStoreActions } from '../store/hooks';
 import useListPathname from './useListPathname';
 
 import { MediaNav } from './MediaNav';
@@ -51,6 +51,9 @@ export const MediaView = () => {
   const dimensions = useBodyDimensions();
 
   const entries = useStoreState(state => state.entries.entries);
+  const allEntries = useStoreState(state => state.entries.allEntries);
+  const setEntries = useStoreActions(store => store.entries.setEntries);
+
   let index = findEntryIndex(location, entries, id);
 
   const media = entries[index];
@@ -91,9 +94,97 @@ export const MediaView = () => {
   const key = media ? media.id : (Math.random() * 100000).toFixed(0);
   const scaleSize = scaleDimensions(media, dimensions);
   console.log(scaleSize, dimensions, media);
+
+  const getSimilarRef = (hash) => {
+    const result = [];
+    for (let i = 0; i < hash.length; i++) {
+      let value = hash[i];
+      let shift = 0;
+      while (shift < 24) {
+        const v = value & 3;
+        result.push(v);
+        shift++;
+        value = value >> 2;
+      }
+    }
+    return result;
+  }
+
+  const getSqrtDenA = values => {
+    return values.map(v => v * v / 9).reduce((r, v) => r + v)
+  }
+
+  const cosineSimilarity2 = (ref, sqrtDenA, b) => {
+    let denB = 0;
+    let num = 0;
+    let iRef = 0;
+    for (let i = 0; i < b.length; i++) {
+      let bi = b[i];
+      let shift = 0;
+      while (shift < 24) {
+        const av = ref[iRef++];
+        const bv = bi & 3;
+        num += av * bv / 9;
+        denB += bv * bv / 9;
+
+        shift++;
+        bi = bi >> 2;
+      }
+    }
+
+    return num / (sqrtDenA * Math.sqrt(denB));
+  }
+
+  const cosineSimilarity = (a, b) => {
+    let denA = 0;
+    let denB = 0;
+    let num = 0;
+    for (let i = 0; i < a.length; i++) {
+      let ai = a.charCodeAt(i) & 255;
+      let bi = b.charCodeAt(i) & 255;
+      for (let j = 0; j < 4; j++) {
+        let av = (ai & 3);
+        let bv = (bi & 3);
+        av = av * av / 9;
+        bv = bv * bv / 9;
+        num += av * bv;
+        denA += av * av;
+        denB += bv * bv;
+
+        ai = (ai >> 2);
+        bi = (bi >> 2);
+      }
+    }
+
+    return num / (Math.sqrt(denA) * Math.sqrt(denB));
+  }
+
+  const searchHandler = () => {
+    if (!media.similarityHash) {
+      return
+    }
+    const t0 = Date.now();
+    const comparableEntries = Array.from(allEntries.values()).filter(entry => !!entry.similarityHash);
+    const t1 = Date.now()
+    const similar = comparableEntries.map(entry => {
+      return {
+        entry,
+        similarity: cosineSimilarity(media.similarityHash, entry.similarityHash)
+      }
+    })
+    .filter(item => item.similarity > 0.5)
+    const t2 = Date.now();
+    similar.sort((a, b) => (a.similarity - b.similarity) < 0 ? 1 : -1);
+    const entries = similar.map(s => s.entry);
+    const t3 = Date.now();
+    console.log(`Took ${t1 - t0}ms to select, ${t2 - t1}ms to calculate, to sort ${t3 - t2}ms, to map ${Date.now() - t3}ms similar pictures`);
+    history.push('/');
+    setEntries(entries);
+  }
+
   return (
     <>
-      <MediaNav index={index} prev={prev} next={next} listPathname={listPathname} />
+      <MediaNav index={index} prev={prev} next={next} listPathname={listPathname} onSearch={searchHandler} />
       {isImage &&
         <Zoomable key={key} width={scaleSize.width} height={scaleSize.height}>
           <MediaViewImage key={key} media={media} next={next} prev={prev}/>

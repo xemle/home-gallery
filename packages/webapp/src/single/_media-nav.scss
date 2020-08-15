@@ -38,6 +38,13 @@
     left: 50%;
     transform: translateX(-50%);
   }
+
+  &.-bottom {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+  }
+
 }
 
 .mediaNav__button {

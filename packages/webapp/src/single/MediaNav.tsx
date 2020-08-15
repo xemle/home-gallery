@@ -6,7 +6,7 @@ import {
 
 import useBodyDimensions from "../utils/useBodyDimensions";
 
-export const MediaNav = ({index, prev, next, listPathname}) => {
+export const MediaNav = ({index, prev, next, listPathname, onSearch}) => {
   const { width } = useBodyDimensions();
 
   const loadImage = async url => {
@@ -59,6 +59,12 @@ export const MediaNav = ({index, prev, next, listPathname}) => {
           <Link className="mediaNav__button" to={{pathname:`/view/${next.id}`, state: {listPathname, index: index + 1} }}>
             <i className="fas fa-chevron-right fa-2x"></i>
           </Link>
+        </div>
+      }
+      { <div className="mediaNav -bottom">
+          <a onClick={onSearch} className="mediaNav__button">
+            <i className="fas fa-seedling fa-2x"></i>
+          </a>
         </div>
       }
     </>
