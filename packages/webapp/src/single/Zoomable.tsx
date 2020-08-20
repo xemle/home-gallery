@@ -1,16 +1,18 @@
 import React from 'react';
 import { useState, useRef, useLayoutEffect, FunctionComponent } from 'react';
 import Hammer from 'hammerjs';
+import useBodyDimensions from "../utils/useBodyDimensions";
 
 type ZoomableProps = {
-  width: number;
-  height: number;
+  childWidth: number;
+  childHeight: number;
   onSwipe?: (ev: HammerInput) => void
 }
 
-export const Zoomable: FunctionComponent<ZoomableProps> = ({width, height, onSwipe, children}) => {
+export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHeight, onSwipe, children}) => {
   const ref = useRef<HTMLDivElement>();
   const [style, setStyle] = useState({});
+  const dimensions = useBodyDimensions();
 
   useLayoutEffect(() => {
     const el = ref.current;
@@ -41,8 +43,8 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({width, height, onSwi
     const updateElementTransform = () => {
       const scale = Math.min(5, Math.max(1, transform.scale));
 
-      const maxX = (scale * width - width) / 2;
-      const maxY = (scale * height - height) / 2;
+      const maxX = (scale * childWidth - childWidth) / 2;
+      const maxY = (scale * childHeight - childHeight) / 2;
       const x = Math.min(maxX, Math.max(-maxX, transform.translate.x));
       const y = Math.min(maxY, Math.max(-maxY, transform.translate.y));
 
@@ -94,7 +96,25 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({width, height, onSwi
     }
 
     const onDoubleTapHandler = (ev) => {
-      resetElement();
+      if (transform.scale > 1.5) {
+        resetElement();
+      } else {
+        transform.scale = 4;
+        const deviceCenter = {
+          x: childWidth / 2 - ev.center.x,
+          y: childHeight / 2 - ev.center.y
+        };
+        const childOffset = {
+          x: (dimensions.width - childWidth) / 2,
+          y: (dimensions.height - childHeight) / 2
+        };
+        const scaleUxOffset = 0.5;
+        const scale = transform.scale - scaleUxOffset;
+        transform.translate = {
+          x: scale * (deviceCenter.x + childOffset.x),
+          y: scale * (deviceCenter.y + childOffset.y),
+        }
+      }
       logEvent(ev);
       requestElementUpdate();
     }

@@ -113,7 +113,7 @@ export const MediaView = () => {
     <>
       <MediaNav index={index} current={current} prev={prev} next={next} listPathname={listPathname} onClick={onNavClick} />
       {isImage &&
-        <Zoomable key={key} width={scaleSize.width} height={scaleSize.height} onSwipe={onSwipe}>
+        <Zoomable key={key} childWidth={scaleSize.width} childHeight={scaleSize.height} onSwipe={onSwipe}>
           <MediaViewImage key={key} media={current} next={next} prev={prev}/>
         </Zoomable>
       }
