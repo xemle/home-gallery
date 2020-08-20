@@ -13,7 +13,7 @@ export const SearchNavBar = ({children}) => {
   const history = useHistory();
 
   const onSearch = (query) => {
-    search({type: 'query', value: query, revert: false});
+    search({type: 'query', value: query});
     history.push('/');
   }
 

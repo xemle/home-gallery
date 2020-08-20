@@ -16,7 +16,7 @@ export const ViewNavBar = () => {
 
   const allClickHandler = () => {
     history.push('/');
-    search({type: 'none', value: false, revert: false});
+    search({type: 'none'});
   }
 
   const editClickHandler = () => {

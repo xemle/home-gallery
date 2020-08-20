@@ -47,7 +47,7 @@ export const YearView = () => {
   const params = useParams();
   const year = +params.year;
   const search = useStoreActions(actions => actions.search.search);
-  search({type: 'year', value: year, revert: false});
+  search({type: 'year', value: year});
 
   return ( 
     <>
