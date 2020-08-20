@@ -2,7 +2,6 @@ import * as React from "react";
 import { useMemo } from "react";
 
 import {
-  BrowserRouter as Router,
   useParams,
   Link
 } from "react-router-dom";

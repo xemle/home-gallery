@@ -1,23 +1,24 @@
 import * as React from "react";
-import {useState, useEffect} from 'react';
+import {useEffect} from 'react';
 import {
     BrowserRouter as Router,
     Switch,
     Route,
-    Link
   } from "react-router-dom";
 import { LastLocationProvider } from 'react-router-last-location';
 
 import { StoreProvider } from 'easy-peasy';
-import { useStoreActions, useStoreState } from './store/hooks';
+import { useStoreActions } from './store/hooks';
 import { store } from './store/store';
 
 import { baseResolver } from './base-resolver';
 import { fetchAll, getEvents, eventStream } from './api';
 
-import { List } from "./list/List";
-import { MediaView } from './single/MediaView';
+import { AllView } from "./list/All";
+import { SearchView } from './list/Search';
+import { SimilarView } from './list/Similar';
 import { Years, YearView } from './year/Years';
+import { MediaView } from './single/MediaView';
 
 export const Root = () => {
   return (
@@ -49,10 +50,12 @@ export const Main = () => {
         <Router basename={`${baseResolver()}/`}>
           <LastLocationProvider>
             <Switch>
-                <Route exact path="/" children={<List />} />
+                <Route exact path="/" children={<AllView />} />
                 <Route exact path="/years" children={<Years />} />
                 <Route exact path="/years/:year" children={<YearView />} />
                 <Route path="/view/:id" children={<MediaView />} />
+                <Route path="/similar/:id" children={<SimilarView />} />
+                <Route path="/search/:term" children={<SearchView />} />
             </Switch>
           </LastLocationProvider>
         </Router>

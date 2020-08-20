@@ -61,7 +61,7 @@ export const MediaNav = ({current, index, prev, next, listPathname, onClick}) =>
             <i className="fas fa-th fa-2x"></i>
           </Link>
         }
-        { current.similarityHash &&
+        { current?.similarityHash &&
           <a onClick={event => onClick({event, type: 'similar'})} className="mediaNav__button" title="Show similar images">
             <i className="fas fa-seedling fa-2x"></i>
           </a>

@@ -116,8 +116,6 @@ const doSearch = async (entries, query) => {
   } else if (query.type == 'similar') {
     entries = execSimilar(entries, query.value);
     defaultSortOrder = false;
-  } else {
-    entries = entries;
   }
 
   if (defaultSortOrder) {

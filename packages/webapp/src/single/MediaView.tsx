@@ -19,7 +19,7 @@ import { Zoomable } from "./Zoomable";
 import useBodyDimensions from "../utils/useBodyDimensions";
 
 const findEntryIndex = (location, entries, id) => {
-  if (location.state && location.state.index) {
+  if (location.state?.index && entries[location.state.index]?.id === id) {
     return location.state.index;
   }
   for (let i = 0; i < entries.length; i++) {
@@ -55,7 +55,7 @@ export const MediaView = () => {
 
   let index = findEntryIndex(location, entries, id);
 
-  const media = entries[index];
+  const current = entries[index];
   const prev = entries[index - 1];
   const next = entries[index + 1];
 
@@ -86,36 +86,36 @@ export const MediaView = () => {
   });
   */
 
-  const isImage = media && (media.type === 'image' || media.type === 'rawImage');
-  const isVideo = media && (media.type === 'video')
-  const isUnknown = !media || (['image', 'rawImage', 'video'].indexOf(media.type) < 0)
+  const isImage = current && (current.type === 'image' || current.type === 'rawImage');
+  const isVideo = current && (current.type === 'video')
+  const isUnknown = !current || (['image', 'rawImage', 'video'].indexOf(current.type) < 0)
 
-  const key = media ? media.id : (Math.random() * 100000).toFixed(0);
-  const scaleSize = scaleDimensions(media, dimensions);
-  console.log(scaleSize, dimensions, media);
+  const key = current ? current.id : (Math.random() * 100000).toFixed(0);
+  const scaleSize = scaleDimensions(current, dimensions);
+  console.log(scaleSize, dimensions, current);
 
   const onNavClick = ({type}) => {
-    if (type === 'similar' && media.similarityHash) {
-      search({type: 'similar', value: media.similarityHash});
+    if (type === 'similar' && current.similarityHash) {
+      history.push(`/similar/${current.id}`);
     } else {
       search({type: 'none'});
+      history.push('/');
     }
-    history.push('/');
   }
 
   return (
     <>
-      <MediaNav index={index} current={media} prev={prev} next={next} listPathname={listPathname} onClick={onNavClick} />
+      <MediaNav index={index} current={current} prev={prev} next={next} listPathname={listPathname} onClick={onNavClick} />
       {isImage &&
         <Zoomable key={key} width={scaleSize.width} height={scaleSize.height}>
-          <MediaViewImage key={key} media={media} next={next} prev={prev}/>
+          <MediaViewImage key={key} media={current} next={next} prev={prev}/>
         </Zoomable>
       }
       {isVideo &&
-        <MediaViewVideo key={key} media={media} next={next} prev={prev}/>
+        <MediaViewVideo key={key} media={current} next={next} prev={prev}/>
       }
       {isUnknown &&
-        <MediaViewUnknownType key={key} media={media} next={next} prev={prev}/>
+        <MediaViewUnknownType key={key} media={current} next={next} prev={prev}/>
       }
     </>
   )

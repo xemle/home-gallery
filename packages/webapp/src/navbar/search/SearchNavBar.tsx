@@ -13,8 +13,7 @@ export const SearchNavBar = ({children}) => {
   const history = useHistory();
 
   const onSearch = (query) => {
-    search({type: 'query', value: query});
-    history.push('/');
+    history.push(`/search/${query}`);
   }
 
   return (
