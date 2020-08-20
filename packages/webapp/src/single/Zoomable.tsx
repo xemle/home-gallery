@@ -1,8 +1,14 @@
 import React from 'react';
-import { useState, useRef, useLayoutEffect } from 'react';
+import { useState, useRef, useLayoutEffect, FunctionComponent } from 'react';
 import Hammer from 'hammerjs';
 
-export const Zoomable = ({width, height, children}) => {
+type ZoomableProps = {
+  width: number;
+  height: number;
+  onSwipe?: (ev: HammerInput) => void
+}
+
+export const Zoomable: FunctionComponent<ZoomableProps> = ({width, height, onSwipe, children}) => {
   const ref = useRef<HTMLDivElement>();
   const [style, setStyle] = useState({});
 
@@ -20,7 +26,7 @@ export const Zoomable = ({width, height, children}) => {
     let initScale = 1;
 
     const logEvent = (ev) => {
-      console.log(ev);
+      //console.log(ev);
       //el.innerText = ev.type;
     }
 
@@ -54,7 +60,7 @@ export const Zoomable = ({width, height, children}) => {
       }
     }
 
-    const onPan = (ev) => {
+    const onPanHandler = (ev) => {
       if (ev.type == 'panstart') {
         START_X = transform.translate.x;
         START_Y = transform.translate.y;
@@ -69,28 +75,25 @@ export const Zoomable = ({width, height, children}) => {
       requestElementUpdate();
     }
 
-    let onPinch = (ev) => {
+    let onPinchHandler = (ev) => {
       if(ev.type == 'pinchstart') {
         initScale = transform.scale || 1;
       }
 
-      transform.scale = Math.min(5, Math.max(1, initScale * ev.scale);
+      transform.scale = Math.min(5, Math.max(1, initScale * ev.scale));
 
       logEvent(ev);
       requestElementUpdate();
     }
 
-    const onSwipe = (ev) => {
+    const onSwipeHandler = (ev) => {
       logEvent(ev);
-      requestElementUpdate();
+      if (transform.scale === 1 && onSwipe) {
+        onSwipe(ev);
+      }
     }
 
-    const onTap = (ev) => {
-      logEvent(ev);
-      requestElementUpdate();
-    }
-
-    const onDoubleTap = (ev) => {
+    const onDoubleTapHandler = (ev) => {
       resetElement();
       logEvent(ev);
       requestElementUpdate();
@@ -108,14 +111,15 @@ export const Zoomable = ({width, height, children}) => {
     mc.add(new Hammer.Tap({ event: 'doubletap', taps: 2 }));
     mc.add(new Hammer.Tap());
 
-    mc.on("panstart panmove", onPan);
-    mc.on("pinchstart pinchmove", onPinch);
-    mc.on("swipe", onSwipe);
-    mc.on("tap", onTap);
-    mc.on("doubletap", onDoubleTap);
+    mc.on("panstart panmove", onPanHandler);
+    mc.on("pinchstart pinchmove", onPinchHandler);
+    mc.on("swipe", onSwipeHandler);
+    //mc.on("tap", onTap);
+    mc.on("doubletap", onDoubleTapHandler);
 
     mc.on("hammer.input", (ev) => {
       if(ev.isFinal) {
+        logEvent(ev);
         //resetElement();
       }
     });

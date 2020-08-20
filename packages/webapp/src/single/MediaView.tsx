@@ -1,7 +1,5 @@
 import * as React from "react";
-import { useRef, useLayoutEffect } from "react";
 import {
-  BrowserRouter as Router,
   useParams,
   useLocation,
   useHistory
@@ -103,11 +101,19 @@ export const MediaView = () => {
     }
   }
 
+  const onSwipe = (ev) => {
+    if (ev.direction === Hammer.DIRECTION_LEFT && next) {
+      history.push(`/view/${next.id}`, {listPathname: location.pathname, index: index + 1});
+    } else if (ev.direction === Hammer.DIRECTION_RIGHT && prev) {
+      history.push(`/view/${prev.id}`, {listPathname: location.pathname, index: index - 1});
+    }
+  }
+
   return (
     <>
       <MediaNav index={index} current={current} prev={prev} next={next} listPathname={listPathname} onClick={onNavClick} />
       {isImage &&
-        <Zoomable key={key} width={scaleSize.width} height={scaleSize.height}>
+        <Zoomable key={key} width={scaleSize.width} height={scaleSize.height} onSwipe={onSwipe}>
           <MediaViewImage key={key} media={current} next={next} prev={prev}/>
         </Zoomable>
       }
