@@ -15,3 +15,17 @@
 .kss-modifier__wrapper {
   background-color: #222;
 }
+
+#kss-node .kss-section.is-fullscreen {
+  margin: 0;
+  padding: 0;
+}
+
+#kss-node .is-fullscreen .kss-style {
+  display: none;
+}
+
+#kss-node .is-fullscreen .kss-modifier__wrapper {
+  margin: 0;
+  padding: 0;
+}

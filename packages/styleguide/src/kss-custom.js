@@ -16,5 +16,13 @@
     });
 
     $('.kss-modifier__example').addClass('galleryRoot').addClass('bg');
+
+    $(document).on('keyup', e => {
+      const ESC_KEY = 27;
+      if (e.which == ESC_KEY) {
+        $('#kss-node').removeClass('kss-fullscreen-mode');
+        $('.is-fullscreen').removeClass('is-fullscreen');
+      }
+    });
   });
 })(j);

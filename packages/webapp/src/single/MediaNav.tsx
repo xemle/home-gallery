@@ -71,6 +71,9 @@ export const MediaNav = ({current, index, prev, next, listPathname, onClick}) =>
             <i className="fas fa-calendar-day fa-2x"></i>
           </a>
         }
+        <a onClick={event => onClick({event, type: 'info'})} className="mediaNav__button" title="Show info">
+          <i className="fas fa-info fa-2x"></i>
+        </a>
         </div>
       }
     </>

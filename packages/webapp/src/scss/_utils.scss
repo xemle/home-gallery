@@ -15,13 +15,39 @@
 
   Styleguide 1.1.1
 */
+/*
+  Position
+
+  Elements can have a fixed or absolute position, use following util classes
+
+  * `.position-absolute` Allways absolute position
+  * `.position-absolute-sm` Absolute position on small screens
+  * `.position-absolute-md` Absolute position on mid screens
+  * `.position-fixed` Allways fixed position
+  * `.position-fixed-sm` Fixed position on small screens
+  * `.position-fixed-md` Fixed position on mid screens
+
+  Styleguide 1.1.2
+*/
+.position-fixed {
+  position: fixed;
+}
+
 @include only-sm {
+  .position-fixed-sm {
+    position: fixed;
+  }
+
   .hide-sm {
     display: none;
   }
 }
 
 @include only-md {
+  .position-fixed-md {
+    position: fixed;
+  }
+
   .hide-md {
     display: none;
   }

@@ -1,3 +1,34 @@
+@mixin reset-box {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+@mixin reset-font {
+  font-family: Verdana, Arial;
+  font-size: $font-size;
+  line-height: 1.5rem;
+  text-decoration: none;
+}
+
+@mixin reset-color {
+  color: $text-color;
+}
+
+@mixin reset-link {
+  color: $text-high-color;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+@mixin height-screen {
+  height: 100%;
+  height: 100vh; /* Fallback for browsers that do not support Custom Properties */
+  height: calc(var(--vh, 1vh) * 100);
+}
+
 @mixin only-sm {
   @media (max-width: $sm-screen-width-max) {
     @content;

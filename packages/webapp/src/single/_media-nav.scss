@@ -21,10 +21,13 @@
 
   Styleguide 5
 */
+$nav-icon-size: 30px;
+$nav-icon-size-md: 40px;
+$nav-font-size-md: 200%;
+
 .mediaNav {
   position: absolute;
   z-index: 5;
-  display: flex;
 
   &.-left,
   &.-right {
@@ -49,14 +52,15 @@
     left: 50%;
     transform: translateX(-50%);
     bottom: 0;
+    display: flex;
   }
 
 }
 
 .mediaNav__button {
   display: block;
-  width: 40px;
-  height: 40px;
+  width: $nav-icon-size;
+  height: $nav-icon-size;
   margin: $unit;
   display: flex;
   justify-content: center;
@@ -81,11 +85,11 @@
 
 @media (min-width: $md-screen-width-min) {
   .mediaNav__button {
-    width: 60px;
-    height: 60px;
+    width: $nav-icon-size-md;
+    height: $nav-icon-size-md;
 
     .fas {
-      font-size: 400%;
+      font-size: $nav-font-size-md;
     }
   }
 }

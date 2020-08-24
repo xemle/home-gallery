@@ -128,7 +128,7 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHei
     mc.add(new Hammer.Swipe()).recognizeWith(mc.get('pan'));
     mc.add(new Hammer.Pinch({ threshold: 0 })).recognizeWith([mc.get('pan')]);
 
-    mc.add(new Hammer.Tap({ event: 'doubletap', taps: 2 }));
+    mc.add(new Hammer.Tap({ event: 'doubletap', taps: 2, interval: 400 }));
     mc.add(new Hammer.Tap());
 
     mc.on("panstart panmove", onPanHandler);
