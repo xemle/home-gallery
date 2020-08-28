@@ -1,0 +1,22 @@
+{
+  "name": "@home-gallery/api-server",
+  "version": "1.0.0",
+  "description": "Public api server for HomeGallery",
+  "main": "index.js",
+  "scripts": {
+    "serve": "node index.js"
+  },
+  "keywords": [
+    "HomeGallery",
+    "api",
+    "server"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "dependencies": {
+    "@tensorflow-models/mobilenet": "^2.0.4",
+    "@tensorflow/tfjs-node": "^2.1.0",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0"
+  }
+}
