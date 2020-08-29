@@ -1,9 +1,7 @@
-const path = require('path');
 const request = require('request');
 const debug = require('debug')('extract:geo-lookup');
 
 const { throttleAsync } = require('@home-gallery/stream');
-const { getStoragePaths, writeStorageFile } = require('@home-gallery/storage');
 
 const getAcceptLanguageValue = (languages) => {
   const anyLang = '*;q=0.5';
@@ -20,17 +18,9 @@ const getAcceptLanguageValue = (languages) => {
   return priorities.join(',');
 }
 
-const getEntryFile = (entry, suffix) => {
-  const {dir, prefix} = getStoragePaths(entry.sha1sum);
-  return path.join(dir, `${prefix}-${suffix}`);
-}
+const geoReverseSuffix = 'geo-reverse.json';
 
-const hasEntryFile = (entry, suffix) => {
-  const entryFile = getEntryFile(entry, suffix);
-  return entry.files.indexOf(entryFile) >= 0;
-}
-
-function geoReverse(storageDir, languages) {
+function geoReverse(storage, languages) {
   let isLimitExceeded = false;
 
   const acceptLanguageValue = getAcceptLanguageValue([].concat(languages || []));
@@ -38,7 +28,7 @@ function geoReverse(storageDir, languages) {
   function passThrough(entry) {
     if (isLimitExceeded) {
       return true;
-    } else if (hasEntryFile(entry, 'geo-reverse.json')) {
+    } else if (storage.hasEntryFile(entry, geoReverseSuffix)) {
       return true
     } else if (entry.meta['exif'] && entry.meta['exif'].GPSPosition) {
       return false;
@@ -48,8 +38,6 @@ function geoReverse(storageDir, languages) {
   }
 
   function task(entry, cb) {
-    const geoReverseFilename = getEntryFile(entry, 'geo-reverse.json');
-
     if (!entry.meta['exif'] || !entry.meta['exif'].GPSPosition) {
       return cb();
     }
@@ -89,7 +77,7 @@ function geoReverse(storageDir, languages) {
         }
         return cb();
       }
-      writeStorageFile(entry, storageDir, geoReverseFilename, body, (err) => {
+      storage.writeEntryFile(entry, geoReverseSuffix, body, (err) => {
         if (err) {
           debug(`Could write geo reverse of ${entry} for ${geo}: ${err}`);
         } else {

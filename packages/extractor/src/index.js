@@ -4,6 +4,7 @@ const { readStreams } = require('@home-gallery/index');
 const { filter, toList, sort, each, flatten, map, processIndicator } = require('@home-gallery/stream');
 const mapToStorageEntry = require('./map-storage-entry');
 const { readMeta } = require('@home-gallery/storage');
+const { createStorage } = require('./storage');
 
 const exiftool = require('./exiftool');
 const ffprobe = require('./ffprobe');
@@ -23,6 +24,8 @@ function extractData(indexFilenames, storageDir, fileFilterFn, minChecksumDate, 
     if (err) {
       return cb(err);
     }
+
+    const storage = createStorage(storageDir);
 
     const imagePreviewSizes = [1920, 1280, 800, 320, 128];
     const videoFrameCount = 10;
@@ -45,15 +48,15 @@ function extractData(indexFilenames, storageDir, fileFilterFn, minChecksumDate, 
       // read existing files and meta data (json files)
       readMeta(storageDir),
 
-      exiftool(storageDir),
-      ffprobe(storageDir),
-      imagePreview(storageDir, imagePreviewSizes),
-      videoPoster(storageDir, imagePreviewSizes),
-      vibrant(storageDir),
+      exiftool(storage),
+      ffprobe(storage),
+      imagePreview(storage, imagePreviewSizes),
+      videoPoster(storage, imagePreviewSizes),
+      vibrant(storage),
       phash(storageDir, `image-preview-${phashPreviewSize}`),
-      geoReverse(storageDir, ['de', 'en']),
-      similarityEmbeddings(storageDir, `image-preview-${similarityEmbeddingsPreviewSize}.jpg`, 5),
-      video(storageDir),
+      geoReverse(storage, ['de', 'en']),
+      similarityEmbeddings(storage, `image-preview-${similarityEmbeddingsPreviewSize}.jpg`, 5),
+      video(storage),
       //.pipe(videoFrames(storageDir, videoFrameCount))
 
       processIndicator({totalFn: () => total}),

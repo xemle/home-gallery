@@ -1,29 +1,20 @@
 const fs = require('fs');
-const path = require('path');
-const through2 = require('through2');
 const ffmpegStatic = require('ffmpeg-static');
 const ffprobeStatic = require('ffprobe-static');
 const ffmpeg = require('fluent-ffmpeg');
-
 const debug = require('debug')('extract:video');
 
-const { getStoragePaths } = require('@home-gallery/storage');
 const { toPipe, conditionalTask } = require('./task');
 
-function convertVideo(storageDir, entry, cb) {
-  const {dir, prefix} = getStoragePaths(entry.sha1sum);
-  const filename = path.join(dir, `${prefix}-video-preview-720.mp4`);
+const videoSuffix = 'video-preview-720.mp4';
 
-  if (entry.files.indexOf(filename) >= 0) {
-    return cb();
-  }
-
+function convertVideo(storage, entry, cb) {
   debug(`Start video conversion of ${entry}`);
 
   const t0 = Date.now();
   const input = entry.src;
-  const tmpFile = path.join(storageDir, `${filename}.tmp`);
-  const file = path.join(storageDir, filename);
+  const file = storage.getEntryFilename(entry, videoSuffix);
+  const tmpFile = `${file}.tmp`;
   const command = ffmpeg(input);
   command.setFfmpegPath(ffmpegStatic);
   command.setFfprobePath(ffprobeStatic.path);  
@@ -34,7 +25,7 @@ function convertVideo(storageDir, entry, cb) {
         if (err) {
           return cb(`Failed to rename file to ${filename} for ${entry}`);
         }
-        entry.files.push(filename);
+        storage.addEntryFilename(entry, videoSuffix);
         debug(`Video conversion of ${entry} done in ${Date.now() - t0}ms`);
         cb();
       })
@@ -43,6 +34,7 @@ function convertVideo(storageDir, entry, cb) {
     .videoCodec('libx264')
     .audioCodec('aac')
     .outputOptions([
+      '-y',
       '-r 30', // frame rate
       '-vf scale=-2:\'min(720,ih)\',format=yuv420p', // Scale to 720p without upscaling
       '-preset slow',
@@ -58,11 +50,11 @@ function convertVideo(storageDir, entry, cb) {
     .run();
 }
 
-function video(storageDir) {
-  const test = entry => entry.type === 'video';
+function video(storage) {
+  const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, videoSuffix);
 
   const task = (entry, cb) => {
-    convertVideo(storageDir, entry, (err) => {
+    convertVideo(storage, entry, (err) => {
       if (err) {
         debug(`Video preview conversion of ${entry} failed: ${err}`);
       }

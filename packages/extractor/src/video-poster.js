@@ -1,48 +1,32 @@
-const path = require('path');
-const through2 = require('through2');
 const debug = require('debug')('extract:video:poster');
 
-const { getStoragePaths } = require('@home-gallery/storage');
 const { resizeImage } = require('./image-preview');
 const { extractVideoFames } = require('./video-frames');
 const { toPipe, conditionalTask } = require('./task');
 
-function videoPoster(storageDir, previewImageSizes) {
+const videoPosterSuffix = 'video-poster.jpg';
 
-  function extractPoster(entry, cb) {
-    const src = entry.src;
-  
-    const {dir, prefix} = getStoragePaths(entry.sha1sum);
-    const filename = path.join(dir, `${prefix}-video-poster.jpg`);
-  
-    if (entry.files.indexOf(filename) >= 0) {
-      return cb();
-    }
+function videoPoster(storage, previewImageSizes) {
 
+  const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, videoPosterSuffix);
+
+  const task = (entry, cb) => {
     const t0 = Date.now();
-    extractVideoFames(entry, src, storageDir, 1, `${prefix}-video-poster.jpg`, (err) => {
+    const dir = storage.getEntryDirname(entry);
+    const basename = storage.getEntryBasename(entry, videoPosterSuffix);
+    extractVideoFames(entry.src, dir, basename, 1, (err) => {
       if (err) {
         return cb(err);
       }
 
-      resizeImage(storageDir, entry, path.join(storageDir, filename), previewImageSizes, (err, calculatedSizes) => {
+      const posterSrc = storage.getEntryFilename(entry, videoPosterSuffix);
+      resizeImage(storage, entry, posterSrc, previewImageSizes, (err, calculatedSizes) => {
         if (!err && calculatedSizes.length) {
           debug(`Created ${calculatedSizes.length} video preview images from ${entry} with sizes of ${calculatedSizes.join(',')} in ${Date.now() - t0}ms`);
         }
         cb(err);
       });
 
-    })
-  }
-
-  const test = entry => entry.type === 'video'
-
-  const task = (entry, cb) => {
-    extractPoster(entry, (err) => {
-      if (err) {
-        debug(`Could not extract video poster from ${entry}: ${err}`);
-      }
-      cb();
     })
   }
 
