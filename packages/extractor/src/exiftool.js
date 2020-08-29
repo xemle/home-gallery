@@ -4,6 +4,7 @@ const ExifTool = require('exiftool-vendored').ExifTool;
 const debug = require('debug')('extract:exif');
 
 const { getStoragePaths, writeStorageFile } = require('@home-gallery/storage');
+const { toPipe, conditionalTask } = require('./task');
 
 function exif(storageDir) {
   const exiftool = new ExifTool({ taskTimeoutMillis: 5000 });
@@ -34,28 +35,26 @@ function exif(storageDir) {
     }
   }
 
-  return through2.obj(function (entry, enc, cb) {
-    const that = this;
-    if (entry.type === 'image' || entry.type === 'rawImage' || entry.type === 'video') {
-      extractExif(storageDir, entry, (err) => {
-        if (err) {
-          debug(`Could not extract exif of ${entry}: ${err}`);
-        }
-        that.push(entry);
-        cb();
-      })
-    } else {
-      this.push(entry);
-      cb();
-    }
+  const test = entry => entry.type === 'image' || entry.type === 'rawImage' || entry.type === 'video'
 
-  }, function (cb) {
+  const task = (entry, cb) => {
+    extractExif(storageDir, entry, err => {
+      if (err) {
+        debug(`Could not extract exif of ${entry}: ${err}`);
+      }
+      cb();
+    })
+  }
+
+  return toPipe(conditionalTask(test, task), cb => {
     exiftool.end()
-      .then(cb, (err) => {
+      .then(cb)
+      .catch(err => {
         debug(`Could not close exiftool: ${err}`);
         cb();
       })
-  });
+  })
+
 }
 
 module.exports = exif;

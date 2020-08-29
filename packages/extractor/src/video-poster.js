@@ -5,6 +5,7 @@ const debug = require('debug')('extract:video:poster');
 const { getStoragePaths } = require('@home-gallery/storage');
 const { resizeImage } = require('./image-preview');
 const { extractVideoFames } = require('./video-frames');
+const { toPipe, conditionalTask } = require('./task');
 
 function videoPoster(storageDir, previewImageSizes) {
 
@@ -34,22 +35,18 @@ function videoPoster(storageDir, previewImageSizes) {
     })
   }
 
-  return through2.obj(function (entry, enc, cb) {
-    const that = this;
-    if (entry.type === 'video') {
-      extractPoster(entry, (err) => {
-        if (err) {
-          debug(`Could not extract video poster from ${entry}: ${err}`);
-        }
-        that.push(entry);
-        cb();
-      })
-    } else {
-      this.push(entry);
-      cb();
-    }
+  const test = entry => entry.type === 'video'
 
-  });
+  const task = (entry, cb) => {
+    extractPoster(entry, (err) => {
+      if (err) {
+        debug(`Could not extract video poster from ${entry}: ${err}`);
+      }
+      cb();
+    })
+  }
+
+  return toPipe(conditionalTask(test, task));
 }
 
 module.exports = videoPoster;

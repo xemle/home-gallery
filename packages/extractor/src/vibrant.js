@@ -4,6 +4,7 @@ const Vibrant = require('node-vibrant');
 const debug = require('debug')('extract:vibrant');
 
 const { getStoragePaths, writeStorageFile } = require('@home-gallery/storage');
+const { toPipe, conditionalTask } = require('./task');
 
 function extractVibrantColors(storageDir, entry, cb) {
   const {dir, prefix} = getStoragePaths(entry.sha1sum);
@@ -34,22 +35,18 @@ function extractVibrantColors(storageDir, entry, cb) {
 }
 
 function vibrantColors(storageDir) {
+  const test = entry => entry.type === 'image' || entry.type === 'video';
 
-  return through2.obj(function (entry, enc, cb) {
-    const that = this;
-    if (entry.type === 'image' || entry.type === 'video') {
-      extractVibrantColors(storageDir, entry, (err) => {
-        if (err) {
-          debug(`Could not extract vibrant colors of ${entry}: ${err}`);
-        }
-        that.push(entry);
-        cb();
-      })
-    } else {
-      that.push(entry);
+  const task = (entry, cb) => {
+    extractVibrantColors(storageDir, entry, (err) => {
+      if (err) {
+        debug(`Could not extract vibrant colors of ${entry}: ${err}`);
+      }
       cb();
-    }
-  });
+    })
+  }
+
+  return toPipe(conditionalTask(test, task));
 }
 
 module.exports = vibrantColors;

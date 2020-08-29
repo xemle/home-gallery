@@ -1,10 +1,10 @@
-const fs = require('fs');
 const path = require('path');
 const request = require('request');
 const debug = require('debug')('extract:similarity');
 
 const { getStoragePaths, readStorageFile, writeStorageFile } = require('@home-gallery/storage');
 const { parallel } = require('@home-gallery/stream');
+const { conditionalTask } = require('./task');
 
 const similaritySuffix = 'similarity-embeddings.json';
 
@@ -33,19 +33,19 @@ function similiarity(storageDir, imageSuffix, concurrent) {
 
   const storage = getStorage(storageDir);
 
-  function testAsync(entry, cb) {
+  const test = entry => {
     if (hasError) {
-      cb(false);
+      return false;
     } else if (!storage.hasEntryFile(entry, imageSuffix) || storage.hasEntryFile(entry, similaritySuffix)) {
-      cb(false);
+      return false;
     } else if (entry.type === 'image') {
-      cb(true);
+      return true;
     } else {
-      cb(false);
+      return false;
     }
   }
 
-  function taskAsync(entry, cb) {
+  const task = (entry, cb) =>{
     const t0 = Date.now();
     const imageEntryFile = storage.buildEntryFile(entry, imageSuffix);
     storage.readStorageFile(imageEntryFile, (err, buffer) => {
@@ -85,7 +85,7 @@ function similiarity(storageDir, imageSuffix, concurrent) {
     });
   }
 
-  return parallel({testAsync, taskAsync, concurrent});
+  return parallel({task: conditionalTask(test, task), concurrent});
 }
 
 module.exports = similiarity;

@@ -5,6 +5,7 @@ const ffprobeStatic = require('ffprobe-static');
 const debug = require('debug')('extract:ffprobe');
 
 const { getStoragePaths, writeStorageFile } = require('@home-gallery/storage');
+const { toPipe, conditionalTask } = require('./task');
 
 function execFfprobe(storageDir, entry, cb) {
   const src = entry.src;
@@ -33,22 +34,19 @@ function execFfprobe(storageDir, entry, cb) {
 }
 
 function videoMeta(storageDir) {
-  return through2.obj(function (entry, enc, cb) {
-    const that = this;
-    if (entry.type === 'video') {
-      execFfprobe(storageDir, entry, (err) => {
-        if (err) {
-          debug(`Could not extract video metadata of ${entry}: ${err}`);
-        }
-        that.push(entry);
-        cb();
-      })
-    } else {
-      this.push(entry);
-      cb();
-    }
 
-  });
+  const test = entry => entry.type === 'video';
+
+  const task = (entry, cb) => {
+    execFfprobe(storageDir, entry, err => {
+      if (err) {
+        debug(`Could not extract video metadata of ${entry}: ${err}`);
+      }
+      cb();
+    });
+  }
+
+  return toPipe(conditionalTask(test, task));
 }
 
 module.exports = videoMeta;

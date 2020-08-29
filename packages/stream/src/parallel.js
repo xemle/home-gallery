@@ -1,13 +1,11 @@
 const through2 = require('through2');
 
-const MAGIC_LAST_ENTRY = '__PARALELL_QUEUE_END__';
-
-function parallel({test, testAsync, taskAsync, concurrent}) {
+function parallel({testSync, test, task, concurrent}) {
   let runningTasks = 0;
   const queue = [];
 
-  if (test && !testAsync) {
-    testAsync = (entry, cb) => test(entry) ? cb(true) : cb(false);
+  if (testSync && !test) {
+    test = (entry, cb) => testSync(entry) ? cb(true) : cb(false);
   }
 
   const consumeHead = () => {
@@ -32,38 +30,30 @@ function parallel({test, testAsync, taskAsync, concurrent}) {
     }
 
     const nextTask = queue[nextTaskIndex];
-    if (nextTask.entry === MAGIC_LAST_ENTRY) {
+    if (nextTask.flush) {
       nextTask.completed = true;
       return consumeHead();
     }
 
     nextTask.running = true;
     runningTasks++;
-    testAsync(nextTask.entry, runTask => {
-      if (runTask) {
-        taskAsync(nextTask.entry, () => {
-          runningTasks--;
-          nextTask.completed = true;
-          consumeHead();
-        });
-      } else {
-        runningTasks--;
-        nextTask.completed = true;
-        consumeHead();
-      }
+    task(nextTask.entry, () => {
+      runningTasks--;
+      nextTask.completed = true;
+      consumeHead();
     });
   }
 
-  return through2.obj(function (entry, enc, cb) {
+  return through2.obj(function (entry, _, cb) {
     const that = this;
     const done = () => {
       that.push(entry);
     }
-    queue.push({entry, done, running: false, completed: false});
+    queue.push({entry, done, running: false, completed: false, flush: false});
     next();
     cb();
   }, function(cb) {
-    queue.push({entry: MAGIC_LAST_ENTRY, done: cb, running: false, completed: false});
+    queue.push({entry: null, done: cb, running: false, completed: false, flush: true});
     next();
   });
 

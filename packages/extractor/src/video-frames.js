@@ -6,6 +6,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const debug = require('debug')('extract:video:frame');
 
 const { getStoragePaths } = require('@home-gallery/storage');
+const { toPipe, conditionalTask } = require('./task');
 
 function extractVideoFames(entry, src, storageDir, frameCount, filenamePattern, cb) {
   const t0 = Date.now();
@@ -49,22 +50,18 @@ function videoFrames(storageDir, frameCount) {
     extractVideoFames(entry, path.join(storageDir, src), storageDir, frameCount, `${prefix}-video-frame-%00i.jpg`, cb);
   }
 
-  return through2.obj(function (entry, enc, cb) {
-    const that = this;
-    if (entry.type === 'video') {
-      extractFrames(entry, (err) => {
-        if (err) {
-          debug(`Could not extract video frames from ${entry}: ${err}`);
-        }
-        that.push(entry);
-        cb();
-      })
-    } else {
-      this.push(entry);
-      cb();
-    }
+  const test = entry => entry.type === 'video';
 
-  });
+  const task = (entry, cb) => {
+    extractFrames(entry, (err) => {
+      if (err) {
+        debug(`Could not extract video frames from ${entry}: ${err}`);
+      }
+      cb()
+    })
+  }
+
+  return toPipe(conditionalTask(test, task));
 }
 
 module.exports = {videoFrames, extractVideoFames};

@@ -8,6 +8,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const debug = require('debug')('extract:video');
 
 const { getStoragePaths } = require('@home-gallery/storage');
+const { toPipe, conditionalTask } = require('./task');
 
 function convertVideo(storageDir, entry, cb) {
   const {dir, prefix} = getStoragePaths(entry.sha1sum);
@@ -58,23 +59,18 @@ function convertVideo(storageDir, entry, cb) {
 }
 
 function video(storageDir) {
+  const test = entry => entry.type === 'video';
 
-  return through2.obj(function (entry, enc, cb) {
-    const that = this;
-    if (entry.type === 'video') {
-      convertVideo(storageDir, entry, (err) => {
-        if (err) {
-          debug(`Video preview conversion of ${entry} failed: ${err}`);
-        }
-        that.push(entry);
-        cb();
-      })
-    } else {
-      this.push(entry);
+  const task = (entry, cb) => {
+    convertVideo(storageDir, entry, (err) => {
+      if (err) {
+        debug(`Video preview conversion of ${entry} failed: ${err}`);
+      }
       cb();
-    }
+    })
+  }
 
-  });
+  return toPipe(conditionalTask(test, task));
 }
 
 module.exports = video;

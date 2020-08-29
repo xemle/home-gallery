@@ -4,6 +4,7 @@ const sharp = require('sharp');
 const debug = require('debug')('extract:preview');
 
 const { getStoragePaths, writeStorageFile } = require('@home-gallery/storage');
+const { toPipe, conditionalTask } = require('./task');
 
 function resize(entry, src, storageDir, filename, size, cb) {
   sharp(src)
@@ -57,25 +58,21 @@ function resizeImage(storageDir, entry, src, sizes, cb) {
 }
 
 function imagePreview(storageDir, sizes) {
-  return through2.obj(function (entry, enc, cb) {
-    const that = this;
-    if (entry.type === 'image') {
-      const t0 = Date.now();
-      resizeImage(storageDir, entry, entry.src, sizes, (err, calculatedSizes) => {
-        if (err) {
-          debug(`Could not calculate image preview of ${entry}: ${err}`);
-        } else if (calculatedSizes.length) {
-          debug(`Created ${calculatedSizes.length} image previews from ${entry} with sizes of ${calculatedSizes.join(',')} in ${Date.now() - t0}ms`)
-        }
-        that.push(entry);
-        cb();
-      })
-    } else {
-      this.push(entry);
-      cb();
-    }
+  const test = entry => entry.type === 'image';
 
-  });
+  const task = (entry, cb) => {
+    const t0 = Date.now();
+    resizeImage(storageDir, entry, entry.src, sizes, (err, calculatedSizes) => {
+      if (err) {
+        debug(`Could not calculate image preview of ${entry}: ${err}`);
+      } else if (calculatedSizes.length) {
+        debug(`Created ${calculatedSizes.length} image previews from ${entry} with sizes of ${calculatedSizes.join(',')} in ${Date.now() - t0}ms`)
+      }
+      cb();
+    })
+  }
+
+  return toPipe(conditionalTask(test, task));
 }
 
 module.exports = { imagePreview, resizeImage };
