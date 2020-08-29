@@ -10,7 +10,6 @@ const exiftool = require('./exiftool');
 const ffprobe = require('./ffprobe');
 const { imagePreview } = require('./image-preview');
 const vibrant = require('./vibrant');
-const phash = require('./phash');
 const geoReverse = require('./geo-reverse');
 const similarityEmbeddings = require('./similarity-embeddings');
 const video = require('./video');
@@ -29,7 +28,6 @@ function extractData(indexFilenames, storageDir, fileFilterFn, minChecksumDate, 
 
     const imagePreviewSizes = [1920, 1280, 800, 320, 128];
     const videoFrameCount = 10;
-    const phashPreviewSize = imagePreviewSizes[2];
     const similarityEmbeddingsPreviewSize = imagePreviewSizes[2];
 
     let total = 0;
@@ -53,7 +51,6 @@ function extractData(indexFilenames, storageDir, fileFilterFn, minChecksumDate, 
       imagePreview(storage, imagePreviewSizes),
       videoPoster(storage, imagePreviewSizes),
       vibrant(storage),
-      phash(storageDir, `image-preview-${phashPreviewSize}`),
       geoReverse(storage, ['de', 'en']),
       similarityEmbeddings(storage, `image-preview-${similarityEmbeddingsPreviewSize}.jpg`, 5),
       video(storage),
