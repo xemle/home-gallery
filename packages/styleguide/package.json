@@ -1,0 +1,40 @@
+{
+  "name": "@home-gallery/styleguide",
+  "version": "1.0.0",
+  "description": "Styleguide of HomeGallery",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm-run-all -p build:css -s build:styleguide copy",
+    "build:css": "npx node-sass --include-path node_modules --source-map true --output-style compressed node_modules/@home-gallery/webapp/src/app.scss -o dist",
+    "build:styleguide": "kss -c kss-config.json",
+    "copy": "npm-run-all -p copy:kss copy:fonts",
+    "copy:kss": "cpx 'src/*.{css,js}' dist",
+    "copy:fonts": "cpx 'src/fonts/*' dist/fonts",
+    "dev": "npm-run-all -s clean build -p serve watch",
+    "postinstall": "cpx 'node_modules/@fortawesome/fontawesome-free/webfonts/*.*' src/fonts",
+    "serve": "live-server --host=0.0.0.0 --port=3001 --wait=250 dist",
+    "watch": "npm-run-all -p watch:webapp watch:styleguide",
+    "watch:webapp": "onchange '../webapp/src/**/*.scss' -- npm run build",
+    "watch:styleguide": "onchange 'src/**/*' -- npm run build"
+  },
+  "keywords": [
+    "HomeGallery",
+    "styleguide",
+    "kss"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.13.1",
+    "cpx": "^1.5.0",
+    "kss": "^3.0.1",
+    "live-server": "^1.2.1",
+    "node-sass": "^4.14.1",
+    "npm-run-all": "^4.1.5",
+    "onchange": "^7.0.2",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "@home-gallery/webapp": "^1.0.0"
+  }
+}

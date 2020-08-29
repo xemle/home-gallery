@@ -73,14 +73,13 @@ Styleguide 3.3
   border: 1px solid darken($background-color, 10%);
   border-radius: $border-radius;
 
-  > * {
-    padding: $unit 2*$unit;
-  }
 }
 
 .dialog__header,
-.dialog__footer {
+.dialog__footer,
+.dialog__scroll-container {
   flex-shrink: 0;
+  padding: $unit 2*$unit;
 }
 
 .dialog__header {
@@ -91,6 +90,7 @@ Styleguide 3.3
 }
 
 .dialog__scroll-container {
+  flex-shrink: 0;
   overflow: auto;
 }
 

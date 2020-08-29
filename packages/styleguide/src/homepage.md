@@ -1,1 +1,1 @@
-# Styleguide
+# HomeGallery Styleguide

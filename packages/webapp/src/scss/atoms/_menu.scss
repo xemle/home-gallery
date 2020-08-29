@@ -1,0 +1,55 @@
+/*
+  Menu
+
+  Markup:
+  <ul class="menu">
+    <li><a>Item 1</a></li>
+    <li class="-active"><a>Item 2</a>
+      <ul class="menu">
+        <li><a>Item 2.1</a></li>
+        <li class="-active"><a>Item 2.2</a>
+          <ul class="menu">
+            <li><a>Item 2.2.1</a></li>
+            <li><a>Item 2.2.2</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a>Item 3</a></li>
+  </ul>
+
+  Styleguide 2.6
+*/
+
+.menu {
+  list-style: none;
+  background-color: $background-color;
+
+  > li {
+    border: 1px solid $background-color-02dp;
+    border-bottom: none;
+
+    &.-active {
+      background-color: $background-color-02dp;
+    }
+
+    > a {
+      display: inline-block;
+      padding: $unit 2*$unit;
+    }
+
+    &:last-child {
+      border-bottom: 1px solid $background-color-02dp;
+    }
+
+    > .menu > li {
+      border-left: none;
+      border-right: none;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+  }
+}

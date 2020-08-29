@@ -31,7 +31,7 @@ export const Years = () => {
     <>
       <NavBar />
       <h2 style={{marginTop: '40px'}}>Years</h2>
-      <ul>
+      <ul className="menu">
         {years.map(year => {
           return <li key={year}>
             <Link to={`/years/${year}`}>{year}</Link>
