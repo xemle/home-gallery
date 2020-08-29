@@ -54,10 +54,11 @@ function similiarity(storageDir, imageSuffix, concurrent) {
         return cb();
       }
 
-      const url = 'http://localhost:9012/embeddings';
+      const url = 'https://api.home-gallery.org/embeddings';
       const options = {
         url,
         method: 'POST',
+        headers: { 'Content-Type': 'image/jpeg' },
         body: buffer,
         encoding: null
       }
