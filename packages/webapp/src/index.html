@@ -22,7 +22,8 @@
     </div>
     <script src="App.ts" type="text/javascript"></script>
     <script>
-      if ('serviceWorker' in navigator) {
+      const isLocal = location.hostname === 'localhost';
+      if ('serviceWorker' in navigator && !isLocal) {
         const worker = './service-worker.js';
         window.addEventListener('load', () => {
           navigator.serviceWorker.register(worker).then(registration => {
