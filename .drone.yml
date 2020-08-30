@@ -13,17 +13,17 @@ steps:
   - npm set registry http://npm.home.local
   - npm config set unsafe-perm true
   - npm install
-  - npx lerna bootstrap --concurrency 2 --no-ci
+  - npm run bootstrap -- --concurrency 2 --no-ci --ignore @home-gallery/api-server
 
 - name: build
   image: node:12-alpine
   commands:
-  - npm run build
+  - npm run build -- --ignore @home-gallery/api-server
 
 - name: test
   image: node:12-alpine
   commands:
-  - npm run test
+  - npm run test -- --ignore @home-gallery/api-server
 
 - name: notify
   image: sfelis/drone-email
