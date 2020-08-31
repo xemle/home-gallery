@@ -4,7 +4,7 @@ const mobilenet = require('@tensorflow-models/mobilenet');
 const embeddings = async () => {
   const t0 = Date.now();
   const config = {
-    version: 2,
+    version: 1,
     alpha: 1.0
   }
   const model = await mobilenet.load(config);
