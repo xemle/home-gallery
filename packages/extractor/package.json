@@ -1,5 +1,5 @@
 {
-  "name": "@home-gallery/exractor",
+  "name": "@home-gallery/extractor",
   "version": "1.0.0",
   "description": "Preview and metadata extractor of HomeGallery",
   "main": "index.js",
