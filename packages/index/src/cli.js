@@ -9,6 +9,7 @@ const createIndex = require('./create');
 const updateIndex = require('./update');
 const writeIndex = require('./write');
 const checksum = require('./checksum');
+const { matcherFns } = require('./merge');
 const { statIndex, prettyPrint } = require('./stat');
 
 const command = {
@@ -48,7 +49,12 @@ const command = {
       'exclude-if-present': {
         alias: 'X',
         describe: 'Exclude files and directories if file is present'
-      }
+      },
+      'matcher': {
+        alias: 'm',
+        default: 'size-ctime-inode',
+        describe: `File matcher for index merge by: size, size-ctime, size-ctime-inode`
+      },
     })
     .demandOption(['index', 'directory'])
     .command(
@@ -68,7 +74,8 @@ const command = {
           checksum: argv.checksum,
           filter: fileFilterFn,
           excludeIfPresent: argv['exclude-if-present'],
-          dryRun: argv['dry-run']
+          dryRun: argv['dry-run'],
+          matcherFn: matcherFns[argv.m] || matcherFns['size-ctime-inode']
         }
         update(argv.directory, argv.index, options, () => true)
       }
@@ -85,7 +92,7 @@ const createOrUpdate = (base, indexFilename, options, cb) => {
         if (err) {
           return callback(err);
         }
-        updateIndex(fileIndex.entries, fsEntries, (err, entries, changed) => {
+        updateIndex(fileIndex.entries, fsEntries, options.matcherFn, (err, entries, changed) => {
           if (err) {
             return callback(err);
           }

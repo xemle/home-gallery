@@ -1,7 +1,7 @@
 const path = require('path');
 const debug = require('debug')('index:update');
 
-const mergeIndex = require('./merge');
+const { mergeIndex }  = require('./merge');
 
 const createEntryMap = (entries) => {
   return entries.reduce((map, entry) => {
@@ -37,7 +37,7 @@ const byDirName = (a, b) => {
   return 0;
 }
 
-const updateIndex = (fileEntries, fsEntries, cb) => {
+const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
   const t0 = Date.now();
   if (!fileEntries.length) {
     debug(`Initiate index with ${fsEntries.length} entries`);
@@ -53,7 +53,7 @@ const updateIndex = (fileEntries, fsEntries, cb) => {
   const onlyFsKeys = fsKeys.filter(key => !fileEntryMap[key]);
   const commonKeys = fileKeys.filter(key => fsEntryMap[key]);
 
-  const { commonEntryMap, changedKeys } = mergeIndex(fileEntryMap, fsEntryMap, commonKeys);
+  const { commonEntryMap, changedKeys } = mergeIndex(fileEntryMap, fsEntryMap, commonKeys, matcherFn);
 
   if (!onlyFileKeys.length && !onlyFsKeys.length && !changedKeys.length) {
     debug(`No changes found in ${Date.now() - t0}ms`);

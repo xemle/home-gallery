@@ -1,17 +1,33 @@
 const debug = require('debug')('index:merge');
 
-const matchEntry = (fileEntry, fsEntry) => {
-  if (fileEntry.size === fsEntry.size &&
-    fileEntry.ino === fsEntry.ino &&
-    fileEntry.dev === fsEntry.dev &&
-    fileEntry.ctimeMs === fsEntry.ctimeMs &&
-    fileEntry.fileType === fsEntry.fileType) {
-    return true;
+const matcherFns = {
+  size: (fileEntry, fsEntry) => {
+    if (fileEntry.size === fsEntry.size &&
+      fileEntry.fileType === fsEntry.fileType) {
+      return true;
+    }
+    return false;
+  },
+  'size-ctime': (fileEntry, fsEntry) => {
+    if (fileEntry.size === fsEntry.size &&
+      fileEntry.fileType === fsEntry.fileType &&
+      fileEntry.ctimeMs === fsEntry.ctimeMs) {
+      return true;
+    }
+    return false;
+  },
+  'size-ctime-inode': (fileEntry, fsEntry) => {
+    if (fileEntry.size === fsEntry.size &&
+      fileEntry.fileType === fsEntry.fileType &&
+      fileEntry.ctimeMs === fsEntry.ctimeMs &&
+      fileEntry.ino === fsEntry.ino) {
+      return true;
+    }
+    return false;
   }
-  return false;
 }
 
-const mergeIndex = (fileEntryMap, fsEntryMap, commonKeys) => {
+const mergeIndex = (fileEntryMap, fsEntryMap, commonKeys, matcherFn) => {
   const t0 = Date.now();
   let changedKeys = [];
   
@@ -19,7 +35,7 @@ const mergeIndex = (fileEntryMap, fsEntryMap, commonKeys) => {
     const fileEntry = fileEntryMap[key];
     const fsEntry = fsEntryMap[key];
 
-    if (matchEntry(fileEntry, fsEntry)) {
+    if (matcherFn(fileEntry, fsEntry)) {
       return fileEntry;
     } else {
       changedKeys.push(key);
@@ -36,4 +52,7 @@ const mergeIndex = (fileEntryMap, fsEntryMap, commonKeys) => {
   return {commonEntryMap, changedKeys};
 }
 
-module.exports = mergeIndex;
+module.exports = {
+  mergeIndex,
+  matcherFns
+};
