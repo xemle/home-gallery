@@ -30,12 +30,14 @@ readStreams = (indexFilenames, cb) => {
       return cb(null, merged);
     }
     const indexFilename = indexFilenames[i++];
+    const t0 = Date.now();
     readStream(indexFilename, (err, entryStream) => {
       if (err) {
         debug(`Could not read file index stream of ${indexFilename}. Skip it`);
         return next();
       }
       merged.add(entryStream);
+      debug(`Read file index from ${indexFilename} in ${Date.now() - t0}ms`);
       next();
     });
   }

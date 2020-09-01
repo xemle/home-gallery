@@ -1,15 +1,6 @@
-const async = require('async');
-const path = require('path');
 const debug = require('debug')('cli:index');
 
-const { fileFilter } = require('@home-gallery/common');
-
-const readIndex = require('./read');
-const createIndex = require('./create');
-const updateIndex = require('./update');
-const writeIndex = require('./write');
-const checksum = require('./checksum');
-const { matcherFns } = require('./merge');
+const { update, matcherFns } = require('./index');
 const { statIndex, prettyPrint } = require('./stat');
 
 const command = {
@@ -66,91 +57,16 @@ const command = {
       })
   },
   handler: (argv) => {
-    fileFilter(argv.exclude, argv['exclude-from-file'], (err, fileFilterFn) => {
-      if (err) {
-        debug(`${err}`);
-      } else {
-        const options = {
-          checksum: argv.checksum,
-          filter: fileFilterFn,
-          excludeIfPresent: argv['exclude-if-present'],
-          dryRun: argv['dry-run'],
-          matcherFn: matcherFns[argv.m] || matcherFns['size-ctime-inode']
-        }
-        update(argv.directory, argv.index, options, () => true)
-      }
-    })
+    const options = {
+      checksum: argv.checksum,
+      exclude: argv.exclude,
+      excludeFromFile: argv['exclude-from-file'],
+      excludeIfPresent: argv['exclude-if-present'],
+      dryRun: argv['dry-run'],
+      matcherFn: matcherFns[argv.m] || matcherFns['size-ctime-inode']
+    }
+    update(argv.directory, argv.index, options, () => true)
   }
-}
-
-const createOrUpdate = (base, indexFilename, options, cb) => {
-  const now = new Date();
-  async.waterfall([
-    (callback) => readIndex(indexFilename, callback),
-    (fileIndex, callback) => {
-      createIndex(base, options, (err, fsEntries) => {
-        if (err) {
-          return callback(err);
-        }
-        updateIndex(fileIndex.entries, fsEntries, options.matcherFn, (err, entries, changed) => {
-          if (err) {
-            return callback(err);
-          }
-          callback(null, fileIndex, entries, changed);
-        })
-      })
-    },
-    (fileIndex, entries, changed, callback) => {
-      if (changed) {
-        const newIndex = {
-          type: 'fileindex',
-          version: 1,
-          created: now.toISOString(),
-          base: path.resolve(base),
-          entries
-        }
-        if (options.dryRun) {
-          callback(null, newIndex);
-        } else {
-          writeIndex(indexFilename, newIndex, callback);
-        }
-      } else {
-        callback(null, fileIndex);
-      }
-    }
-  ], cb);
-}
-
-const update = (base, indexFilename, options, cb) => {
-  const t0 = Date.now();
-  debug(`Updating file index for path ${base}`);
-  async.waterfall([
-    (callback) => createOrUpdate(base, indexFilename, options, callback),
-    (index, callback) => {
-      if (options.checksum) {
-        const sha1sumDate = new Date().toISOString();
-        return checksum(index, sha1sumDate, (err, index, changed) => {
-          if (err) {
-            return callback(err);
-          } else if (changed && !options.dryRun) {
-            return writeIndex(indexFilename, index, callback);
-          } else {
-            return callback(null, index);
-          }
-        })
-      } else {
-        return callback(null, index);
-      }
-    }
-  ], (err, index) => {
-    if (err) {
-      debug(`Could not update file index ${indexFilename}: ${err}`);
-      cb(err);
-    } else {
-      debug(`Successfully updated file index in ${Date.now() - t0}ms`);
-      cb(null, index);
-    }
-  });
 }
 
 const stats = (indexFilename, cb) => {

@@ -9,8 +9,8 @@ const createFilesMapper = (excludeIfPresent) => {
   }
 
   return (files) => {
-    const index = files.indexOf(excludeIfPresent);
-    return index < 0 ? files : [];
+    const hasExcludeFile = files.indexOf(excludeIfPresent) < 0;
+    return hasExcludeFile ? files : [];
   }
 }
 
