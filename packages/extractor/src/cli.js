@@ -1,9 +1,5 @@
 const debug = require('debug')('cli:extract');
 
-const { fileFilter } = require('@home-gallery/common');
-
-const extract = require('./index');
-
 const command = {
   command: 'extract',
   describe: 'Extract meta data and calculate preview files',
@@ -35,6 +31,9 @@ const command = {
     .demandOption(['index', 'storage'])
   },
   handler: (argv) => {
+    const extract = require('./index');
+    const { fileFilter } = require('@home-gallery/common');
+
     const t0 = Date.now();
     fileFilter(argv.exclude, argv['exclude-from-file'], (err, fileFilterFn) => {
       if (err) {

@@ -1,9 +1,5 @@
 const debug = require('debug')('cli:build');
 
-const { fileFilter } = require('@home-gallery/common');
-
-const build = require('./index');
-
 const command = {
   command: 'build',
   describe: 'Create catalog database from file index, extracted meta data and preview files',
@@ -35,6 +31,9 @@ const command = {
     .demandOption(['index', 'storage', 'database'])
   },
   handler: (argv) => {
+    const { fileFilter } = require('@home-gallery/common');
+    const build = require('./index');
+
     const t0 = Date.now();
     fileFilter(argv.exclude, argv['exclude-from-file'], (err, fileFilterFn) => {
       if (err) {

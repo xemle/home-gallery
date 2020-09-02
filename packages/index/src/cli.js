@@ -1,8 +1,5 @@
 const debug = require('debug')('cli:index');
 
-const { update, matcherFns } = require('./index');
-const { statIndex, prettyPrint } = require('./stat');
-
 const command = {
   command: 'index',
   describe: 'Create or update file index',
@@ -50,13 +47,15 @@ const command = {
     .demandOption(['index', 'directory'])
     .command(
       'stats',
-      'Print index statistics', 
-      (yargs) => yargs, 
+      'Print index statistics',
+      (yargs) => yargs,
       (argv) => {
         stats(argv.index, () => true)
       })
   },
   handler: (argv) => {
+    const { update, matcherFns } = require('./index');
+
     const options = {
       checksum: argv.checksum,
       exclude: argv.exclude,
@@ -70,6 +69,8 @@ const command = {
 }
 
 const stats = (indexFilename, cb) => {
+  const { statIndex, prettyPrint } = require('./stat');
+
   statIndex(indexFilename, (err, stats) => {
     if (err) {
       debug(`Could not read file index ${indexFilename}: ${err}`);

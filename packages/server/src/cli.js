@@ -1,7 +1,4 @@
-const path = require('path');
 const debug = require('debug')('cli:server');
-
-const startServer = require('./index');
 
 const command = {
   command: 'server',
@@ -47,6 +44,9 @@ const command = {
     .demandOption(['storage', 'database'])
   },
   handler: (argv) => {
+    const startServer = require('./index');
+    const path = require('path');
+
     const config = {
       host: argv.host,
       port: argv.port,
