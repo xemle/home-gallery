@@ -61,7 +61,8 @@ function geoReverse(storage, languages) {
       headers: {
         'User-Agent': 'home-gallery/1.0.0',
         'Accept-Language': `${acceptLanguageValue}`
-      }
+      },
+      timeout: 4000,
     }
     const t0 = Date.now();
     request(options, (err, res, body) => {

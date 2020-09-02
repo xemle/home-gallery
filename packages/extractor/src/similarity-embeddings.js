@@ -35,7 +35,8 @@ function similiarity(storage, imageSuffix, concurrent) {
         method: 'POST',
         headers: { 'Content-Type': 'image/jpeg' },
         body: buffer,
-        encoding: null
+        encoding: null,
+        timeout: 4000,
       }
       request(options, (err, res, body) => {
         if (err) {
