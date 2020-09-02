@@ -46,7 +46,7 @@ function readJsonFiles(storageDir, filenames, cb) {
   })
 }
 
-function readStorageFiles(entry, storageDir, cb) {
+function readEntryFiles(entry, storageDir, cb) {
   const {dir, prefix} = getStoragePaths(entry.sha1sum);
 
   readDir(path.join(storageDir, dir), (err, files) => {
@@ -71,4 +71,4 @@ function readStorageFiles(entry, storageDir, cb) {
   });
 }
 
-module.exports = readStorageFiles;
+module.exports = readEntryFiles;

@@ -5,7 +5,7 @@ const { readStreams } = require('@home-gallery/index');
 
 const { processIndicator, filter, flatten, sort, each, toList } = require('@home-gallery/stream');
 const mapToCatalogEntry = require('./map-catalog-entry');
-const { readMetaCached } = require('@home-gallery/storage');
+const readEntryFilesGrouped = require('./read-entry-files-grouped');
 const groupByDir = require('./group-by-dir');
 const groupSidecarFiles = require('./group-sidecar-files');
 const mapToMedia = require('./map-media');
@@ -16,6 +16,8 @@ function build(indexFilenames, storageDir, catalogFilename, fileFilterFn, cb) {
     if (err) {
       return cb(err);
     }
+
+    const supportedTypes = ['image', 'rawImage', 'video'];
 
     let totalFiles = 0;
     pipeline(
@@ -28,19 +30,14 @@ function build(indexFilenames, storageDir, catalogFilename, fileFilterFn, cb) {
       each(entry => { totalFiles = entry.length }),
       flatten(),
       mapToCatalogEntry,
-      // Read all meta data
-      readMetaCached(storageDir),
-      processIndicator({name: 'read meta', totalFn: () => totalFiles}),
       // Stream entry list
-      toList(),
-      sort(entry => path.dirname(entry.filename)),
-      flatten(),
       groupByDir(),
+      readEntryFilesGrouped(storageDir),
       processIndicator({name: 'read directories'}),
       groupSidecarFiles,
       // Stream single entry
       flatten(),
-      filter(entry => ['image', 'rawImage', 'video', 'sound'].indexOf(entry.type) >= 0),
+      filter(entry => supportedTypes.indexOf(entry.type) >= 0),
       mapToMedia,
       processIndicator({name: 'map to media'}),
       toList(),

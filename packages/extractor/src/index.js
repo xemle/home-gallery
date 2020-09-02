@@ -3,9 +3,9 @@ const { pipeline } = require('stream');
 const { readStreams } = require('@home-gallery/index');
 const { filter, toList, sort, each, flatten, map, processIndicator } = require('@home-gallery/stream');
 const mapToStorageEntry = require('./map-storage-entry');
-const { readMeta } = require('@home-gallery/storage');
 const { createStorage } = require('./storage');
 
+const readAllEntryFiles = require('./read-all-entry-files');
 const exiftool = require('./exiftool');
 const ffprobe = require('./ffprobe');
 const { imagePreview } = require('./image-preview');
@@ -15,8 +15,8 @@ const similarityEmbeddings = require('./similarity-embeddings');
 const video = require('./video');
 const videoPoster = require('./video-poster');
 const {videoFrames} = require('./video-frames');
-const groupByMetaCache = require('./group-meta-cache');
-const { writeMetaCache } = require('./write-meta-cache');
+const groupByEntryFilesCacheKey = require('./group-entry-files-cache');
+const { updateEntryFilesCache } = require('./update-entry-files-cache');
 
 function extractData(indexFilenames, storageDir, fileFilterFn, minChecksumDate, cb) {
   readStreams(indexFilenames, (err, entryStream) => {
@@ -44,7 +44,7 @@ function extractData(indexFilenames, storageDir, fileFilterFn, minChecksumDate, 
       flatten(),
       mapToStorageEntry,
       // read existing files and meta data (json files)
-      readMeta(storageDir),
+      readAllEntryFiles(storage),
 
       exiftool(storage),
       ffprobe(storage),
@@ -58,8 +58,8 @@ function extractData(indexFilenames, storageDir, fileFilterFn, minChecksumDate, 
 
       processIndicator({totalFn: () => total}),
 
-      groupByMetaCache(),
-      writeMetaCache(storageDir).on('finish', () => cb(null, total)),
+      groupByEntryFilesCacheKey(),
+      updateEntryFilesCache(storage).on('finish', () => cb(null, total)),
       (err) => {
         if (err) {
           return cb(`Could not process entries: ${err}`)

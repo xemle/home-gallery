@@ -1,6 +1,7 @@
 const path = require('path');
 const Stream = require('stream');
 const mergeStream = require('merge-stream');
+const debug = require('debug')('index:readStream');
 
 const readIndex = require('./read');
 

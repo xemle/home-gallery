@@ -1,5 +1,5 @@
 const path = require('path');
-const { getStoragePaths, readStorageFile, writeStorageFile } = require('@home-gallery/storage');
+const { getStoragePaths, readStorageFile, writeStorageFile, readEntryFiles, updateEntryFilesCache, getEntryFilesCacheFilename } = require('@home-gallery/storage');
 
 const createStorage = (storageDir) => {
 
@@ -42,6 +42,11 @@ const createStorage = (storageDir) => {
       const filename = buildEntryFile(entry, suffix);
       writeStorageFile(entry, storageDir, filename, data, cb);
     },
+    readAllEntryFiles: (entry, cb) => readEntryFiles(entry, storageDir, cb),
+    updateEntryFilesCache: (entries, cb) => {
+      const cacheFilename = getEntryFilesCacheFilename(entries[0]);
+      updateEntryFilesCache(path.join(storageDir, cacheFilename), entries, cb)
+    }
   }
 }
 

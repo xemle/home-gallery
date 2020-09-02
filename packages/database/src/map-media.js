@@ -166,7 +166,7 @@ const mapMedia = through2.obj(function (entry, enc, cb) {
     .concat(entry.sidecars.map(sidecar => sidecar.files))
     .reduce((r, a) => { a.forEach(v => r.push(v)); return r}, []);
 
-  const mapFile = ({sha1sum, type, size, filename}) => { return { id: sha1sum, type, size, filename }; }
+  const mapFile = ({sha1sum, indexName, type, size, filename}) => { return { id: sha1sum, index: indexName, type, size, filename }; }
 
   let exifData = {};
   try {
