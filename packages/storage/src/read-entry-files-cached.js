@@ -8,9 +8,8 @@ const { lruCache } = require('@home-gallery/common');
 
 function createCache(storageDir) {
   const loadCache = (entry, cb) => {
-    const filename = getEntryFilesCacheFilename(entry);
-    const metaFilename = path.join(storageDir, filename);
-    readEntryFilesCache(metaFilename, cb);
+    const cacheFilename = getEntryFilesCacheFilename(entry);
+    readEntryFilesCache(path.join(storageDir, cacheFilename), cb);
   }
 
   return lruCache(getEntryFilesCacheKey, loadCache, 20);
@@ -28,9 +27,9 @@ function readEntryFilesCached(storageDir) {
       }
 
       if (err && err.code === 'ENOENT') {
-        debug(`Meta cache for ${entry} is missing. Read files and meta from entry`);
+        debug(`Entry files cache for ${entry} is missing. Read files and meta from storage`);
       } else if (err) {
-        debug(`Could not read meta cache for ${entry}: ${err}. Read files and meta from entry`);
+        debug(`Could not read entry files cache for ${entry}: ${err}. Read files and meta from storage`);
       }
 
       readEntryFilesSingle(entry, storageDir, (err, filesAndMeta) => {
