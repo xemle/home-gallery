@@ -3,7 +3,8 @@ import { useMemo } from "react";
 
 import {
   useParams,
-  Link
+  Link,
+  useLocation
 } from "react-router-dom";
 
 import { NavBar } from '../navbar/NavBar';
@@ -44,9 +45,11 @@ export const Years = () => {
 
 export const YearView = () => {
   const params = useParams();
+  const location = useLocation();
   const year = +params.year;
   const search = useStoreActions(actions => actions.search.search);
-  search({type: 'year', value: year});
+  let locationQuery = new URLSearchParams(location.search && location.search.substring(1) || '');
+  search({type: 'year', value: year, query: locationQuery.get('q')});
 
   return (
     <>

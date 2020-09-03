@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useHistory } from "react-router-dom";
-import { useStoreActions } from '../../store/hooks';
+import { useStoreActions, useStoreState } from '../../store/hooks';
 import { useDeviceType, DeviceType } from "../../utils/useDeviceType";
 import { MobileSearch } from "./MobileSearch";
 import { DesktopSearch } from "./DesktopSearch";
@@ -9,11 +9,17 @@ import { DesktopSearch } from "./DesktopSearch";
 export const SearchNavBar = ({children}) => {
   const [ deviceType ] = useDeviceType();
 
-  const search = useStoreActions(actions => actions.search.search);
+  const query = useStoreState(state => state.search.query);
   const history = useHistory();
 
-  const onSearch = (query) => {
-    history.push(`/search/${query}`);
+  const onSearch = (queryInput) => {
+    if (query.type == 'none' || query.type == 'query') {
+      history.push(`/search/${queryInput}`);
+    } else if (query.type == 'year') {
+      history.push(`/years/${query.value}?q=${queryInput}`);
+    } else if (query.type == 'similar') {
+      history.push(`/similar/${query.value}?q=${queryInput}`);
+    }
   }
 
   return (

@@ -2,6 +2,7 @@ import * as React from "react";
 
 import {
   useParams,
+  useLocation
 } from "react-router-dom";
 
 import { List } from './List';
@@ -9,11 +10,10 @@ import { useStoreState, useStoreActions } from '../store/hooks';
 
 export const SimilarView = () => {
   const params = useParams();
-  const id = params.id;
-  const allEntries = useStoreState(store => store.entries.allEntries);
-  const current = allEntries.get(id);
+  const location = useLocation();
   const search = useStoreActions(actions => actions.search.search);
-  search({type: 'similar', value: current.similarityHash});
+  let locationQuery = new URLSearchParams(location.search && location.search.substring(1) || '');
+  search({type: 'similar', value: params.id, query: locationQuery.get('q')});
 
   return ( 
     <>

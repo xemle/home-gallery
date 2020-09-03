@@ -7,6 +7,7 @@ import { filterEntriesByQuery } from '@home-gallery/query';
 export interface Search {
   type: 'none' | 'year' | 'query' | 'similar';
   value?: any;
+  query?: string;
 }
 
 export interface SearchModel {
@@ -76,15 +77,22 @@ const execSimilar = (entries: Entry[], similarityHash) => {
 
 const byDate = (a, b) => a.date < b.date ? 1 : -1;
 
-const doSearch = async (entries, query) => {
+const doSearch = async (allEntries: Map<String, Entry>, query) => {
+  let entries = Array.from(allEntries.values())
   let defaultSortOrder = true;
+
   if (query.type == 'query') {
     entries = await execQuery(entries, query.value);
   } else if (query.type == 'year') {
     entries = entries.filter(entry => entry.year == query.value)
   } else if (query.type == 'similar') {
-    entries = execSimilar(entries, query.value);
+    const id = query.value;
+    const seedEntry = allEntries.get(id);
+    entries = execSimilar(entries, seedEntry.similarityHash);
     defaultSortOrder = false;
+  }
+  if (query.query) {
+    entries = await execQuery(entries, query.query);
   }
 
   if (defaultSortOrder) {
@@ -103,8 +111,8 @@ export const searchModel : SearchModel = {
   }),
   refresh: thunk(async (action, _, { getState, getStoreState }) => {
     const state = getState();
-    const allEntries = Array.from(getStoreState().entries.allEntries.values());
-    const entries = await doSearch(allEntries, state.query);
+    const allEntries = getStoreState().entries.allEntries;
+    const entries = await doSearch(allEntries as Map<String, Entry>, state.query);
     const storeState = getStoreState();
     storeState.entries.entries = entries;
   })
