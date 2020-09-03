@@ -44,7 +44,7 @@ SortBy ->
 
 Terms ->
   OrExpression __ Terms {% data => { return {type: 'terms', value: [data[0]].concat(data[2].value)} } %}
-  | OrExpression {% data => {% data => { return {type: 'terms', value: [data[0]]} } %} %}
+  | OrExpression {% data => data[0] %}
 
 OrExpression -> 
   AndExpression __ %or __ OrExpression {% data => { return {type: 'or', left: data[0], right: data[4]} } %}

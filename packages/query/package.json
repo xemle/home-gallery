@@ -1,0 +1,25 @@
+{
+  "name": "@home-gallery/query",
+  "version": "1.0.0",
+  "description": "User events",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "compile": "nearleyc -o src/query.js src/query-simple.ne",
+    "build": "cpx 'src/**' dist",
+    "watch": "onchange 'src/**' -- npm run build"
+  },
+  "keywords": [
+    "HomeGallery",
+    "Search query"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "devDependencies": {
+    "cpx": "^1.5.0",
+    "onchange": "^7.0.2",
+    "rimraf": "^3.0.2",
+    "moo": "^0.5.1",
+    "nearley": "^2.19.3"
+  }
+}

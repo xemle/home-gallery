@@ -10,26 +10,26 @@ const createFilter = (ast, options, cb) => {
     return cb(new Error('Invalid AST type. Expect type query'));
   }
   
-  const filterFn = queryExpression(ast.value, mergedOptions);
-  const queryFn = (list) => {
-    const result = Array.isArray(list) ? list.filter(filterFn) : [list].filter(filterFn);
-    return result;
+  try {
+    const filterFn = queryExpression(ast.value, mergedOptions);
+    cb(null, filterFn);
+  } catch (err) {
+    cb(err);
   }
-  cb(null, queryFn);
 }
 
 const queryExpression = (exp, options) => {
   if (exp.type === 'terms') {
     return termsExpression(exp.value, options);
   } else {
-    return cb(new Error('Invalid AST type. Expect type terms'));
+    throw new Error('Invalid AST type. Expect type terms');
   }
 }
 
 const termsExpression = (exps, options) => {
   const filterFns = exps.map(exp => orExpression(exp, options))
   
-  let filter = v => true;
+  let filter = () => true;
   while (filterFns.length) {
     const headFns = filterFns.splice(0, Math.min(filterFns.length, 4));
     

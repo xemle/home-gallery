@@ -1,8 +1,8 @@
 import { Thunk, thunk } from 'easy-peasy';
-import { parse } from '../query/parse';
-import { createFilter } from '../query/ast';
 import { StoreModel } from './store';
 import { Entry } from './entry-model';
+
+import { filterEntriesByQuery } from '@home-gallery/query';
 
 export interface Search {
   type: 'none' | 'year' | 'query' | 'similar';
@@ -17,47 +17,16 @@ export interface SearchModel {
 }
 
 const execQuery = async (entries: Entry[], query: String) => {
-  const promise = new Promise<Entry[]>((resolve, reject) => {
-    if (!query) {
-      resolve(entries);
-    }
-
-    console.log(`search for ${query}`);
-    parse(query, (err, ast) => {
+  const promise = new Promise<Entry[]>((resolve) => {
+    const t0 = Date.now();
+    filterEntriesByQuery(entries, query, (err, filtered) => {
       if (err) {
-        console.log(`Parse error result ${err}, ${ast}`);
+        console.log(`Could not build query of ${query}: ${err}`);
         return resolve(entries);
       }
-      const options = {
-        textFn: (v) => {
-          if (!v.textCache) {
-            v.textCache = [
-              v.id.substring(0, 10),
-              v.type,
-              v.date,
-              v.make || '',
-              v.model || '',
-              v.files[0].filename,
-              v.country || '',
-              v.state || '',
-              v.city || ''
-            ]
-            .concat(v.tags || [])
-            .join(' ')
-            .toLowerCase();
-          }
-          return v.textCache;
-        }
-      }
-      createFilter(ast, options, (err, queryFn) => {
-        console.log(`filter result ${err}, ${queryFn}`);
-        if (err) {
-          return resolve(entries);
-        }
-        const result : Entry[] = queryFn(entries);
-        resolve(result);
-      })
-    });
+      console.log(`Found ${filtered.length} of ${entries.length} entries by query '${query}' in ${Date.now() - t0}ms`);
+      resolve(filtered);
+    })
   })
   return promise;
 }
