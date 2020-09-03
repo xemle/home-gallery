@@ -1,0 +1,23 @@
+{
+  "name": "@home-gallery/events",
+  "version": "1.0.0",
+  "description": "User events",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "keywords": [
+    "HomeGallery",
+    "events"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^14.6.3",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.0.2"
+  }
+}
