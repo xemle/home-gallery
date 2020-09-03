@@ -18,10 +18,14 @@ const read = (storageDir) => {
         }
         entry.files = filesAndMeta.files;
         entry.meta = filesAndMeta.meta;
-        next();
+        if (i % 500 === 0) {
+          process.nextTick(next);
+        } else {
+          next();
+        }
       })
     }
-    next();
+    process.nextTick(next);
   };
 
   const flush = (cb) => {
