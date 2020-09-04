@@ -1,5 +1,5 @@
 const buildDatabase = require('./build');
-const writeDatabase = require('./write-database');
+const { writeDatabase, writeDatabasePlain } = require('./write-database');
 const readDatabase = require('./read-database');
 
-module.exports = { buildDatabase, writeDatabase, readDatabase };
+module.exports = { buildDatabase, writeDatabase, writeDatabasePlain, readDatabase };

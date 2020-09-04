@@ -8,7 +8,7 @@ const readEntryFilesGrouped = require('./read-entry-files-grouped');
 const groupByDir = require('./group-by-dir');
 const groupSidecarFiles = require('./group-sidecar-files');
 const mapToMedia = require('./map-media');
-const writeDatabase = require('./write-database');
+const { writeDatabase } = require('./write-database');
 
 function build(indexFilenames, storageDir, databaseFilename, fileFilterFn, cb) {
   readStreams(indexFilenames, (err, entryStream) => {
