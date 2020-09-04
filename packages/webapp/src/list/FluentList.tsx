@@ -10,11 +10,13 @@ import { fluent } from "./fluent";
 import { VirtualScroll } from "./VirtualScroll";
 import { ViewMode } from "../store/edit-mode-model";
 import { useDeviceType, DeviceType } from "../utils/useDeviceType";
+import { baseResolver } from '../base-resolver';
 
 const Cell = ({height, width, index, item, items}) => {
   const ref = useRef();
   const location = useLocation();
   const viewMode = useStoreState(state => state.editMode.viewMode);
+  const base = baseResolver();
 
   const selectedIdMap = useStoreState(state => state.editMode.selectedIdMap);
   const toggleId = useStoreActions(store => store.editMode.toggleId);
@@ -78,7 +80,7 @@ const Cell = ({height, width, index, item, items}) => {
     }
   });
 
-  const previewUrl = `/files/${preview}`;
+  const previewUrl = `${base}/files/${preview}`;
   return (
     <div ref={ref} key={id} className={`fluent__cell ${isSelected() ? '-selected' : ''}`} style={style}>
       <img style={style} src={previewUrl} />

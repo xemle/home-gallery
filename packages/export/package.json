@@ -1,0 +1,37 @@
+{
+  "name": "@home-gallery/export",
+  "version": "1.0.0",
+  "description": "Create static export of HomeGallery",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "cpx 'src/**' dist",
+    "postbuild": "cpx 'node_modules/@home-gallery/webapp/dist/**' dist/public",
+    "watch": "onchange 'src/**' -- npm run build"
+  },
+  "keywords": [
+    "HomeGallery",
+    "export",
+    "static"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "devDependencies": {
+    "cpx": "^1.5.0",
+    "onchange": "^7.0.2",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "@home-gallery/common": "^1.0.0",
+    "@home-gallery/database": "^1.0.0",
+    "@home-gallery/events": "^1.0.0",
+    "@home-gallery/query": "^1.0.0",
+    "@home-gallery/storage": "^1.0.0",
+    "@home-gallery/webapp": "^1.0.0",
+    "archiver": "^5.0.0",
+    "async": "^3.2.0",
+    "debug": "^4.1.1",
+    "through2": "^3.0.1",
+    "yargs": "^15.0.2"
+  }
+}
