@@ -1,13 +1,13 @@
-# Home Gallery
+# HomeGallery
 
-Home Gallery is a web gallery to serve private photos and videos from your local NAS
+HomeGallery is a web gallery to serve private photos and videos from your local NAS
 
 Note: This software is a private pet/spare time project without any warranty or any
 support. Love it or leave it! If you have any problem, fork the project and fix
 it by your own. Maybe valuable pull requests are merged if spare time and mood
 is available.
 
-MIT License
+[MIT License](https://en.wikipedia.org/wiki/MIT_License)
 
 ## Motivation
 
@@ -22,7 +22,7 @@ MIT License
 * Serve your local data without usage of cloud services
 * One user only - all files are served
 * Watch your photos and videos from mobile phone
-* Serve all your images from multiple SOURCE (hard drive, camara files, mobile phone files, etc)
+* Serve all your images from multiple source directories (hard drive, camara files, mobile phone files, etc)
 
 ## General Architecture
 
@@ -30,7 +30,7 @@ The gallery has several components:
 
 * File indexer (short term 'index'): Index of your files and directories state including SHA1 content hashes
 * Extractor: Calculates preview files and videos and extracts meta data like exif data, geo reverse lookups, dominant colors, etc.
-* Storage: All generated files from the extractor are stored here
+* Storage: All generated files from the extractor are stored here. These files are also servced by the server
 * Database builder (short term 'builder'): Based on the index and the storage the gallery database is created
 * Web Server (short term 'server'): Serve the database and the previews of the storage
 * Web App: Application which runs on the browser
@@ -45,11 +45,32 @@ Further features:
 - Media are identified by their content. Duplicated media (identical files byte-by-byte) are only processed once and renaming is supported without recalulating previews etc.
 - With secured https setup the webapp can be used as PWA app on mobile devices
 - Tags are supported and such edits are propagated and updated on concurrent sessions
-- Similarity detection of images is supported. So if you have one sunset image, you can easily find other sunset photos in your archive
+- Reverse image lookup (similar image search) is supported. So if you have one sunset image, you can easily find other sunset photos in your archive without manual tagging
 
 ## Requirements
 
 * [node](https://nodejs.org)
+
+# External Services and Privacy
+
+The goal of HomeGallery is to use as less public serivces as possible
+due sensitive private image data. It tries to use service which can
+be deployed local. However the setup requires technical knowlege and
+technical maintenance. Following services are called:
+
+For geo reverse lookups (geo coordinates to addess), HomeGallery
+queries the [Nominatim Service](https://nominatim.openstreetmap.org/reverse)
+from [OpenStreetMap](https://openstreetmap.org). Only geo coordinates
+are transmitted.
+
+For reverse image lookups (similar image search), HomeGallery uses the
+its own public API at https://api.home-gallery.org. The similarity
+image feature uses [TensorflowJS](https://www.tensorflow.org/js). The
+tensorflow library requires the AVX CPU instruction which is not
+supported on small devices such Raspberry Pis. The API can be run
+locally as Docker container, if AVX CPU instruction is supported. See
+`api-service` package for details. All preview images are send to this
+api.
 
 ## Limits
 
@@ -66,7 +87,7 @@ npm run bootstrap
 npm run build
 ```
 
-## Setup Home Gallery
+## Setup of HomeGallery
 
 Run CLI help by `node index.js -h` for details
 
@@ -78,10 +99,10 @@ export GALLERY_HOME=$HOME/.config/home-gallery
 export SOURCE_INDEX=$GALLERY_HOME/home-pictures.idx
 export DATABASE=$GALLERY_HOME/catalog.db
 export EVENTS=$GALLERY_HOME/events.db
-export STORAGE_DIR=$HOME/.local/opt/home-gallery-storage
+export STORAGE_DIR=$HOME/.cache/home-gallery-storage
 ```
 
-Now index, extract, build and serve the Home Gallery
+Now index, extract, build and serve your own private HomeGallery
 
 ```
 # Save current date to extract only new files
@@ -102,12 +123,24 @@ While the index, previews and database can be reproduced, the only valuable data
 
 ## Development
 
+HomeGallery uses [lerna](https://github.com/lerna/lerna) with multi
+packages. Common npm scripts are `clean`, `build`, `watch`.
+
+To run only a subset of packages you can use lerna's
+scope feature, e.g build only module `export` and `database`:
+
+```
+npm run build -- --scope '@home-gallery/{export,database}'
+```
+
 ### Web App
+
+The web app can be stared in in development mode with hot reloading.
+By default the api requests are proxied to the default local server
+http://localhost:3000.
+
+Use `API_PROXY` environment variable to change the api proxy url.
 
 ```
 API_PROXY=http://localhost:3000 npm run dev
-```
-
-```
-API_PROXY=http://api.host:3000 npm run dev
 ```
