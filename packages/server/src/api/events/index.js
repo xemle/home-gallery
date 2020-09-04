@@ -1,11 +1,11 @@
 const { v4: uuidv4 } = require('uuid');
 const debug = require('debug')('server:events');
 
-const append = require('./append-file');
-const readFile = require('./read-file');
+const { readEvents, appendEvent } = require('@home-gallery/events/dist/node');
 
-const events = (filename) => {
+const events = (eventsFilename) => {
   let clients = [];
+  let eventsCache = false;
 
   const sendEventsToAll = (data) => {
     clients.forEach(c => {
@@ -71,37 +71,51 @@ const events = (filename) => {
   };
 
   const push = (req, res, next) => {
-    const data = req.body;
-    if (!isValidEvent(data)) {
-      debug(`Received invalid event: ${JSON.stringify(data)}`);
+    const event = req.body;
+    if (!isValidEvent(event)) {
+      debug(`Received invalid event: ${JSON.stringify(event)}`);
       res.status(400).end();
       return;
     }
-    if (!data.id) {
-      data.id = uuidv4();
+    if (!event.id) {
+      event.id = uuidv4();
     }
-    if (!data.date) {
-      data.date = new Date().toISOString();
+    if (!event.date) {
+      event.date = new Date().toISOString();
     }
-    append(filename, data, (err) => {
+    appendEvent(eventsFilename, event, (err) => {
       if (err) {
-        console.log(`Could not save event to ${filename}. Error: ${err}. Event ${JSON.stringify(data).substr(0, 50)}...`);
+        console.log(`Could not save event to ${eventsFilename}. Error: ${err}. Event ${JSON.stringify(event).substr(0, 50)}...`);
         res.status(500).end();
       } else {
-        debug(`New event ${data.id} created`);
-        sendEventsToAll(data);
+        debug(`New event ${event.id} created`);
+        if (eventsCache !== false) {
+          eventsCache.push(event);
+        }
+        sendEventsToAll(event);
         res.status(201).end();
       }
     });
   }
 
   const read = (req, res, next) => {
-    readFile(filename, (err, events) => {
-      if (err) {
-        const status = err.code === 'ENOENT' ? 404 : 500;
-        return res.status(status).end();
+    if (eventsCache !== false) {
+      debug(`Send ${eventsCache.length} cached events`);
+      return res.json({ data: eventsCache });
+    }
+
+    const t0 = Date.now();
+    readEvents(eventsFilename, (err, events) => {
+      if (err && err.code === 'ENOENT') {
+        eventsCache = [];
+        return res.status(404).end();
+      } else if (err) {
+        debug(`Failed to read events file ${eventsFilename}: ${err}`);
+        return res.status(500).end();
       }
-      res.json({ data: events });
+      eventsCache = events;
+      debug(`Read events file ${eventsFilename} in ${Date.now() - t0}ms and send ${eventsCache.length} events`);
+      return res.json({ data: eventsCache });
     });
   }
 

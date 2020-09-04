@@ -16,7 +16,9 @@
   "author": "Sebastian Felis <sebastian@silef.de>",
   "license": "MIT",
   "devDependencies": {
+    "@types/debug": "^4.1.5",
     "@types/node": "^14.6.3",
+    "debug": "^4.1.1",
     "rimraf": "^3.0.2",
     "typescript": "^4.0.2"
   }
