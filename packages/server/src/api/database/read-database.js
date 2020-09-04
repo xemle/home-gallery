@@ -1,35 +1,36 @@
 const fs = require('fs');
 const debug = require('debug')('server:api:database:read');
 
-const { readJsonGzip } = require('@home-gallery/common');
+const { readDatabase } = require('@home-gallery/database');
 
-function readDatabase(databaseFilename, cb) {
-  readJsonGzip(databaseFilename, (err, data) => {
+function read(filename, cb) {
+  const t0 = Date.now();
+  readDatabase(filename, (err, database) => {
     if (err) {
       return cb(err);
     }
-    debug(`Read database file ${databaseFilename} with ${data.media.length} entries`);
-    cb(err, data);
+    debug(`Read database file ${filename} with ${database.data.length} entries in ${Date.now() - t0}ms`);
+    cb(err, database);
   });
 }
 
-function watchDatabase(databaseFilename, cb) {
-  fs.watch(databaseFilename, () => {
+function watch(filename, cb) {
+  fs.watch(filename, () => {
     setTimeout(() => {
-      debug(`Database file ${databaseFilename} changed. Re-import it`);
-      readDatabase(databaseFilename, cb);
+      debug(`Database file ${filename} changed. Re-import it`);
+      read(filename, cb);
     }, 250);
   })
 }
 
-function readWatchDatabase(databaseFilename, cb) {
-  readDatabase(databaseFilename, (err, data) => {
+function readWatch(filename, cb) {
+  read(filename, (err, data) => {
     if (err) {
       return cb(err);
     }
     cb(null, data);
-    watchDatabase(databaseFilename, cb);
+    watch(filename, cb);
   });
 }
 
-module.exports = { readWatchDatabase, readDatabase };
+module.exports = { readWatchDatabase: readWatch, readDatabase: read };

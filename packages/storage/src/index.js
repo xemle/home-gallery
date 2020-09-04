@@ -1,4 +1,3 @@
-const readMeta = require('./read-meta');
 const getStoragePaths = require('./storage-path');
 const writeStorageFile = require('./write-storage-file');
 const { getEntryFilesCacheKey, getEntryFilesCacheFilename }= require('./entry-files-cache-file');

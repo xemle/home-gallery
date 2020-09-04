@@ -20,18 +20,18 @@ export const fetchAll = async (chunkLimits, onChunk) => {
     }
     return await fetch(url)
       .then(res => res.json())
-      .then(data => {
-        if (!data.media || !data.media.length) {
+      .then(database => {
+        if (!database.data || !database.data.length) {
           return;
         }
-        onChunk(data.media.map(entry => {
+        onChunk(database.data.map(entry => {
           if (entry.similarityHash) {
             const ascii = decodeBase64(entry.similarityHash);
             entry.similarityHash = ascii;
           }
           return entry;
         }));
-        if (limit && data.media.length == limit) {
+        if (limit && database.data.length == limit) {
           return next();
         }
       });

@@ -2,7 +2,7 @@
   "name": "@home-gallery/database",
   "version": "1.0.0",
   "description": "HomeGallery database",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist",
     "build": "cpx 'src/**' dist",

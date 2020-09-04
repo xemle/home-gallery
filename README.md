@@ -97,7 +97,7 @@ Example to serve all images and videos from `$HOME/Pictures`
 export SOURCE_DIR=$HOME/Pictures
 export GALLERY_HOME=$HOME/.config/home-gallery
 export SOURCE_INDEX=$GALLERY_HOME/home-pictures.idx
-export DATABASE=$GALLERY_HOME/catalog.db
+export DATABASE=$GALLERY_HOME/database.db
 export EVENTS=$GALLERY_HOME/events.db
 export STORAGE_DIR=$HOME/.cache/home-gallery-storage
 ```

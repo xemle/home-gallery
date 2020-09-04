@@ -2,7 +2,7 @@ const debug = require('debug')('cli:build');
 
 const command = {
   command: 'build',
-  describe: 'Create catalog database from file index, extracted meta data and preview files',
+  describe: 'Build database from file indices, extracted meta data and preview files from the storage',
   builder: (yargs) => {
     return yargs.option({
       index: {
@@ -32,18 +32,18 @@ const command = {
   },
   handler: (argv) => {
     const { fileFilter } = require('@home-gallery/common');
-    const build = require('./index');
+    const { buildDatabase } = require('./index');
 
     const t0 = Date.now();
     fileFilter(argv.exclude, argv['exclude-from-file'], (err, fileFilterFn) => {
       if (err) {
         debug(`${err}`);
       } else {
-        build(argv.index, argv.storage, argv.database, fileFilterFn, (err, database) => {
+        buildDatabase(argv.index, argv.storage, argv.database, fileFilterFn, (err, database) => {
           if (err) {
             debug(`Could not build catalog database: ${err}`);
           } else {
-            debug(`Build catalog database ${argv.database} with ${database.media.length} entries in ${Date.now() - t0}ms`);
+            debug(`Build catalog database ${argv.database} with ${database.data.length} entries in ${Date.now() - t0}ms`);
           }
         })
       }
