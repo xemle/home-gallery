@@ -1,0 +1,111 @@
+# Change of HomeGallery
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### File Index Format Changed
+
+File index format changed on 2020-09-03, after git commit d017e1f.
+
+Before migration `zcat <index> | jq . | head` prints
+
+```
+{
+  "type": "fileindex",
+  "version": 1,
+  "created": "..."
+  "base": "...",
+  "entries": [
+    ...
+```
+
+After migration it should be
+
+```
+{
+  "type": "home-gallery/fileindex@1.0",
+  "version": 1,
+  "created": "..."
+  "base": "...",
+  "data": [
+    ...
+```
+
+Migrate it by
+
+```
+export IDX=<index> zcat "$IDX" | sed -e 's/fileindex/home-gallery\/fileindex@1.0/' -e 's/entries/data/' | gzip -c - > "$IDX.tmp"; mv "$IDX.tmp" "$IDX"
+```
+
+### Database Format Change
+
+Database format change on 2020-09-03, after git commit d017e1f.
+
+Before migration `zcat <database> | jq . | head` prints
+
+```
+{
+  "type": "database",
+  "version": 1,
+  "created": "..."
+  "media": [
+    ...
+```
+
+After migration it should be
+
+```
+{
+  "type": "home-gallery/database@1.0",
+  "version": 1,
+  "created": "...",
+  "data": [
+    ...
+```
+
+Migrate it by
+
+```
+export DB=<database>; zcat "$DB" | sed -e 's/database/home-gallery\/database@1.0/' -e 's/media/data/' | gzip -c - > "$DB.tmp"; mv "$DB.tmp" "$DB"
+```
+
+### Events Format Change
+
+Events database format change on 2020-09-03, after git commit d017e1f.
+
+Before migration `cat <events> | jq . | head` prints
+
+```
+{
+  "type": "userAction",
+  "targetIds": [
+    ...
+  ],
+  "actions": [
+    ...
+```
+
+After migration it should be
+
+```
+{
+  "type": "home-gallery/events@1.0",
+  "created": "...",
+}
+{
+  "type": "userAction",
+  "targetIds": [
+    ...
+  ],
+  ...
+```
+
+Migrate it by
+
+```
+export EVENTS=<events>; sed  -i '1i {"type":"home-gallery/events@1.0","created":"2020-09-06T06:57:17.507Z"}' "$EVENTS"
+```

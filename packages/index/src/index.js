@@ -22,7 +22,7 @@ const createOrUpdate = (directory, filename, options, cb) => {
         if (err) {
           return callback(err);
         }
-        updateIndex(fileIndex.entries, fsEntries, options.matcherFn, (err, entries, changed) => {
+        updateIndex(fileIndex.data, fsEntries, options.matcherFn, (err, entries, changed) => {
           if (err) {
             return callback(err);
           }
@@ -33,11 +33,10 @@ const createOrUpdate = (directory, filename, options, cb) => {
     (fileIndex, entries, changed, callback) => {
       if (changed) {
         const newIndex = {
-          type: 'fileindex',
-          version: 1,
+          type: 'home-gallery/fileindex@1.0',
           created: now.toISOString(),
           base: path.resolve(directory),
-          entries
+          data: entries
         }
         if (options.dryRun) {
           callback(null, newIndex);

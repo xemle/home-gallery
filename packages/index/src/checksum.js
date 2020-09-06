@@ -24,7 +24,7 @@ const createSha1 = (filename, cb) => {
 };
 
 const checksum = (index, sha1sumDate, cb) => {
-  const missingChecksumEntries = index.entries.filter(e => e.isFile && !e.sha1sum);
+  const missingChecksumEntries = index.data.filter(e => e.isFile && !e.sha1sum);
   let interrupted = false;
   const t0 = Date.now();
 
@@ -32,7 +32,7 @@ const checksum = (index, sha1sumDate, cb) => {
     return cb(null, index, false);
   }
 
-  const totalBytes = index.entries.reduce((all, entry) => { all += entry.size; return all}, 0);
+  const totalBytes = index.data.reduce((all, entry) => { all += entry.size; return all}, 0);
   const bytes = missingChecksumEntries.reduce((all, entry) => { all += entry.size; return all}, 0);
   let bytesCalculated = 0;
   debug(`Calculating checksums for ${missingChecksumEntries.length} entries with ${humanize(bytes)} of total size ${humanize(totalBytes)} (${(100 * bytes / totalBytes).toFixed(1)}%)`);

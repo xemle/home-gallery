@@ -74,7 +74,7 @@ function statIndex(indexFilename, cb) {
       debug(`Failed to read index file ${indexFilename}: ${err}`);
       return cb(err);
     } 
-    index.entries.forEach(countEntry)
+    index.data.forEach(countEntry)
     debug(`Read stats of ${indexFilename} in ${Date.now() - t0}ms`);
     stats.extensions.sort();
     stats.unknownExtensions.sort();
