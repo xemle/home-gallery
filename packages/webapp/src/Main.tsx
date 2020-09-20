@@ -12,7 +12,7 @@ import { useStoreActions } from './store/hooks';
 import { store } from './store/store';
 
 import { baseResolver } from './base-resolver';
-import { fetchAll, getEvents, eventStream } from './api';
+import { fetchAll, getEvents, eventStream } from './api/ApiService';
 
 import { AllView } from "./list/All";
 import { SearchView } from './list/Search';
@@ -35,15 +35,18 @@ export const Main = () => {
     const basename = '/';
 
     useEffect(() => {
+      const fetchEvents = () => getEvents()
+        .then(events => initEvents(events.data))
+        .catch(e => {
+          console.log(`Could not fetch intitial events: ${e}`);
+        })
+
+      const subscribeEvents = () => eventStream((event) => addEvent(event));
+
       const chunkLimits = [5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000];
       fetchAll(chunkLimits, addEntries)
-        .then(() => getEvents())
-        .then((events) => {
-          initEvents(events.data);
-          eventStream((event) => {
-            addEvent(event);
-          });
-        });
+        .then(fetchEvents)
+        .then(subscribeEvents);
     }, []);
 
     return (

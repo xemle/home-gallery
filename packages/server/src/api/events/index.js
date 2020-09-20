@@ -107,11 +107,23 @@ const events = (eventsFilename) => {
     const t0 = Date.now();
     readEvents(eventsFilename, (err, events) => {
       if (err && err.code === 'ENOENT') {
-        eventsCache = [];
-        return res.status(404).end();
+        debug(`Events file ${eventsFilename} does not exist yet. Create an event to initialize it`);
+        const err = {
+          error: {
+            code: 404,
+            message: 'Events file does not exist yet. Create an event to initialize it'
+          }
+        }
+        return res.status(404).json(err).send();
       } else if (err) {
         debug(`Failed to read events file ${eventsFilename}: ${err}`);
-        return res.status(500).end();
+        const err = {
+          error: {
+            code: 500,
+            message: 'Loading event file failded. See server logs'
+          }
+        }
+        return res.status(500).json(err).end();
       }
       eventsCache = events;
       debug(`Read events file ${eventsFilename} in ${Date.now() - t0}ms and send ${eventsCache.length} events`);

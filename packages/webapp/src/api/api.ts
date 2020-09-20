@@ -1,6 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
 
-import { baseResolver } from './base-resolver';
+import { baseResolver } from '../base-resolver';
+import { Event, EventListener } from '@home-gallery/events'
 
 const decodeBase64 = base64 => atob(base64);
 
@@ -40,12 +40,30 @@ export const fetchAll = async (chunkLimits, onChunk) => {
   return next();
 }
 
-export const getEvents = async () => {
-  return await fetch(`${baseResolver()}/api/events`)
-      .then(res => res.json())
+const isSuccessfullResponse = res => res.status >= 200 && res.status < 300;
+
+class EventError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+
+  res: any;
 }
 
-export const eventStream = (onActionEvent) => {
+export const getEvents = async () => {
+  return await fetch(`${baseResolver()}/api/events`)
+      .then(res => {
+        if (isSuccessfullResponse(res)) {
+          return res.json()
+        } else {
+          const err = new EventError(`Failed to fetch events. Reponse status code is ${res.status}`);
+          err.res = res;
+          throw err;
+        }
+      })
+}
+
+export const eventStream = (onActionEvent: EventListener) => {
   const events = new EventSource(`${baseResolver()}/api/events/stream`);
 
   events.onmessage = (event) => {
@@ -60,7 +78,7 @@ export const eventStream = (onActionEvent) => {
   events.addEventListener('userAction', (event: MessageEvent) => {
     console.log(`Received action event: ${event}`);
     try {
-      const data = JSON.parse(event.data);
+      const data: Event = JSON.parse(event.data);
       onActionEvent(data);
     } catch (e) {
       console.log(`Could not read Event: ${e}`);
@@ -76,8 +94,9 @@ export const eventStream = (onActionEvent) => {
   };
 }
 
-export const pushEvent = async (event) => {
-  const id = uuidv4();
+export const pushEvent = async (event: Event) => {
+  console.log(`push event `, event);
+
   const response = await fetch(`${baseResolver()}/api/events`, {
     method: 'POST',
     mode: 'cors',
@@ -85,7 +104,7 @@ export const pushEvent = async (event) => {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({...event, ...{ id } })
+    body: JSON.stringify(event)
   });
   return response.text();
 }

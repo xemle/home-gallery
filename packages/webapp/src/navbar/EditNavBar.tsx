@@ -5,7 +5,7 @@ import { useStoreActions, useStoreState } from '../store/hooks';
 import { ViewMode } from "../store/edit-mode-model";
 import { SearchNavBar } from './search/SearchNavBar';
 import { TagDialog } from '../dialog/tag-dialog';
-import { addTags } from '../ApiService';
+import { addTags } from '../api/ApiService';
 
 export const EditNavBar = () => {
   const [dialogVisible, setDialogVisible] = useState(false);
