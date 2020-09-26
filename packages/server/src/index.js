@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
@@ -52,6 +53,9 @@ function startServer({host, port, storageDir, databaseFilename, eventFilename, w
   app.post('/api/events', push);
 
   app.use('/', express.static(webappDir));
+
+  const spa = (req, res) => res.sendFile(path.resolve(webappDir, 'index.html'))
+  app.use(spa)
 
   const server = createServer(key, cert, app);
   server.listen(port, host)
