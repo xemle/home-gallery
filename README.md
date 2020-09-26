@@ -114,7 +114,7 @@ DEBUG=* node index.js extract -i $SOURCE_INDEX -s $STORAGE_DIR -C "$CHECKSUM_FRO
 # Build database for web app
 DEBUG=* node index.js build -i $SOURCE_INDEX -s $STORAGE_DIR -d $DATABASE
 # Serve gallery
-DEBUG=server* node index.js serve -s $STORAGE -d $DATABASE -e $EVENTS
+DEBUG=server* node index.js server -s $STORAGE -d $DATABASE -e $EVENTS
 ```
 
 Note: `extract` and `build` can consume multiple indices (multiple media source directories). Use exclude patterns if required.
