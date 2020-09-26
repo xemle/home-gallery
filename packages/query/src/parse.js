@@ -7,7 +7,7 @@ const parse = (text, cb) => {
   try {
     parser.feed(text);
   } catch (err) {
-    cb(err)
+    return cb(err)
   }
   if (parser.results.length) {
     const ast = parser.results[parser.results.length - 1];

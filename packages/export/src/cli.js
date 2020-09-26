@@ -36,7 +36,8 @@ const command = {
         type: 'string',
         describe: 'Search query for matching entries'
       },
-      base: {
+      'base-path': {
+        alias: 'b',
         type: 'string',
         default: '/',
         describe: 'Base path of static page. e.g. "/gallery"'
@@ -49,12 +50,10 @@ const command = {
     const options = {
       eventsFilename: argv.events,
       outputDirectory: argv.output,
+      basePath: argv['base-path'],
       archiveFilename: argv.file,
       keep: argv.keep,
-      query: argv.query,
-      webappConfig: {
-        base: argv.base
-      }
+      query: argv.query
     }
     const t0 = Date.now();
     exportBuilder(argv.database, argv.storage, options, (err, outputDirectory, archiveFilename) => {

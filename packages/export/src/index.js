@@ -8,7 +8,7 @@ const cleanupDatabase = require('./cleanup-database');
 const exportStorage = require('./export-storage');
 const writeDatabase = require('./write-database');
 const copyWebapp = require('./copy-webapp');
-const injectWebappConfig = require('./inject-webapp-config')
+const setBasePath = require('./set-base-path')
 const createArchive = require('./create-archive');
 const deleteDirectory = require('./delete-directory');
 
@@ -22,13 +22,12 @@ const buildDatabase = (databaseFilename, eventsFilename, query, cb) => {
 }
 
 const exportBuilder = (databaseFilename, storageDir, options, cb) => {
-  const t0 = Date.now();
   waterfall([
     (callback) => buildDatabase(databaseFilename, options.eventsFilename, options.query, callback),
-    (database, callback) => exportStorage(database, storageDir, options.outputDirectory, callback),
-    (database, outputDirectory, callback) => writeDatabase(database, outputDirectory, callback),
-    (outputDirectory, callback) => copyWebapp(outputDirectory, callback),
-    (outputDirectory, callback) => injectWebappConfig(outputDirectory, options.webappConfig, callback),
+    (database, callback) => exportStorage(database, storageDir, options.outputDirectory, options.basePath, callback),
+    (database, outputDirectory, basePath, callback) => writeDatabase(database, outputDirectory, basePath, callback),
+    (outputDirectory, basePath, callback) => copyWebapp(outputDirectory, basePath, callback),
+    (outputDirectory, basePath, callback) => setBasePath(outputDirectory, basePath, callback),
     (outputDirectory, callback) => createArchive(outputDirectory, options.archiveFilename, callback),
     (outputDirectory, archiveFilename, callback) => deleteDirectory(outputDirectory, options.keep, archiveFilename, callback)
   ], (err, outputDirectory, archiveFilename) => {

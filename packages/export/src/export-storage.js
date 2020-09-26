@@ -7,7 +7,7 @@ const { mkdir } = require('@home-gallery/common')
 const copyFile = (src, dst, size, cb) => {
   fs.copyFile(src, dst, (err) => {
     if (err) {
-      debug(`Copy of ${filename} to ${outputDirectory} failed: ${err}`);
+      debug(`Copy of ${src} to ${dst} failed: ${err}`);
       return cb(err);
     }
     cb();
@@ -54,7 +54,7 @@ const exportStorageFile = (filename, storageDir, outputDirectory, cb) => {
   })
 }
 
-const exportEntry = (entry, storageDir, outputDirectory, cb) => {
+const exportEntry = (entry, storageDir, directory, cb) => {
   let i = 0;
   const previews = entry.previews || [];
   const next = () => {
@@ -62,7 +62,7 @@ const exportEntry = (entry, storageDir, outputDirectory, cb) => {
       return cb();
     }
     const filename = previews[i++];
-    exportStorageFile(filename, storageDir, outputDirectory, (err) => {
+    exportStorageFile(filename, storageDir, directory, (err) => {
       if (err) {
         debug(`Could not export preview file ${filename} of entry ${entryToString(entry)}. Continue`);
       }
@@ -101,23 +101,24 @@ const entryToString = entry => {
   return `${entry.id.substr(7)}:${firstFile.indexName}:${firstFile.filename}`
 }
 
-const exportStorage = (database, storageDir, outputDirectory, cb) => {
+const exportStorage = (database, storageDir, outputDirectory, basePath, cb) => {
   if (!outputDirectory) {
     const date = formatDate();
     outputDirectory = `home-gallery-export-${date}`
   }
 
+  const directory = path.join(outputDirectory, basePath);
   const t0 = Date.now();
   const entries = database.data;
   let i = 0;
   const next = () => {
     if (i === entries.length) {
       debug(`Exported ${entries.length} entries in ${Date.now() - t0}ms`);
-      return cb(null, database, outputDirectory);
+      return cb(null, database, outputDirectory, basePath);
     }
 
     const entry = entries[i++];
-    exportEntry(entry, storageDir, outputDirectory, () => {
+    exportEntry(entry, storageDir, directory, () => {
       if (i % 200 === 0) {
         process.nextTick(next);
       } else {
