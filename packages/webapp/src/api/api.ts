@@ -61,8 +61,15 @@ export const getEvents = async () => {
       })
 }
 
+let eventSourceReconnectTimeout = 1000;
+const eventSourceReconnectTimeoutMax = 2 * 60 * 1000;
+
 export const eventStream = (onActionEvent: EventListener) => {
   const events = new EventSource(`api/events/stream`);
+
+  events.onopen = () => {
+    eventSourceReconnectTimeout = 1000;
+  }
 
   events.onmessage = (event) => {
     try {
@@ -88,7 +95,8 @@ export const eventStream = (onActionEvent: EventListener) => {
     events.close();
     setTimeout(() => {
       eventStream(onActionEvent);
-    }, 2000);
+    }, eventSourceReconnectTimeout);
+    eventSourceReconnectTimeout = Math.min(eventSourceReconnectTimeoutMax, eventSourceReconnectTimeout * 2);
   };
 }
 
