@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const yargs = require('yargs');
 const indexCli = require('./packages/index/dist/cli');
 const extractCli = require('./packages/extractor/dist/cli');
@@ -14,5 +16,5 @@ yargs.usage('Usage: $0 [global options] <command> [options]')
   .demandCommand()
   .help()
   .alias('h', 'help')
-  .epilog('(c) 2019 Clould Gallery')
+  .epilog('(c) 2020 HomeGallery')
   .argv;

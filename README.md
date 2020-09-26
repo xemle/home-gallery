@@ -24,24 +24,29 @@ is available.
 * Watch your photos and videos from mobile phone
 * Serve all your images from multiple source directories (hard drive, camara files, mobile phone files, etc)
 
+## Documentation
+
+See [docs.home-gallery.org](https://docs.home-gallery.org) for general documentation
+
 ## General Architecture
 
 The gallery has several components:
 
 * File indexer (short term 'index'): Index of your files and directories state including SHA1 content hashes
 * Extractor: Calculates preview files and videos and extracts meta data like exif data, geo reverse lookups, dominant colors, etc.
-* Storage: All generated files from the extractor are stored here. These files are also servced by the server
+* Storage: All generated files from the extractor are stored here. These files are also served by the server
 * Database builder (short term 'builder'): Based on the index and the storage the gallery database is created
 * Web Server (short term 'server'): Serve the database and the previews of the storage
 * Web App: Application which runs on the browser
 * Events: Manual user actions such as manual tagging
+* Exporter: Export a subset as static website to share the subset on a web space
 
 The general workflow is to index your directories -> extract meta data and calculate previews -> build the database -> serve the Web App.
 
 Further features:
 
 - Due the file index the detection of changed media becomes quite fast after the first run
-- Once the preview files are generated and mete data are extraced, the original sources are not touchted and required any more. So media from offline disk need to be extracted only once and the disk can stay offline on next runs
+- Once the preview files are generated and mete data are extraced, the original sources are not touched and required any more. So media from offline disk need to be extracted only once and the disk can stay offline on next runs
 - Media are identified by their content. Duplicated media (identical files byte-by-byte) are only processed once and renaming is supported without recalulating previews etc.
 - With secured https setup the webapp can be used as PWA app on mobile devices
 - Tags are supported and such edits are propagated and updated on concurrent sessions
@@ -85,39 +90,43 @@ npm install
 npm run bootstrap
 # Build required modules
 npm run build
+# Link CLI to npm global binaries
+npm link
 ```
 
 ## Setup of HomeGallery
 
-Run CLI help by `node index.js -h` for details
+Run CLI help by `npx gallery -h` for details
 
-Example to serve all images and videos from `$HOME/Pictures`
+Following basic example is to serve all images and videos from `$HOME/Pictures`. Check [examples folder](examples/README.md) for futher examples.
 
 ```
+# Media folder to import to the HomeGallery. Change it properly
 export SOURCE_DIR=$HOME/Pictures
-export GALLERY_HOME=$HOME/.config/home-gallery
-export SOURCE_INDEX=$GALLERY_HOME/home-pictures.idx
-export DATABASE=$GALLERY_HOME/database.db
-export EVENTS=$GALLERY_HOME/events.db
-export STORAGE_DIR=$HOME/.cache/home-gallery-storage
+# Directory for configuration and database files
+export CONFIG_DIR=$HOME/.config/home-gallery
+# Storage directory of preview files and meta data
+export STORAGE_DIR=$HOME/.cache/home-gallery/storage
 ```
 
-Now index, extract, build and serve your own private HomeGallery
+Now index the filesystem, extract preview and meta data and finally build the database
 
 ```
-# Save current date to extract only new files
-CHECKSUM_FROM=$(date -uIseconds)
-# Index filesystem and generate SHA1 sums of files
-DEBUG=* node index.js index -i $SOURCE_INDEX -d $SOURCE_DIR -c
-# Generate preview images/videos and extract meta data like EXIF or GEO names
-DEBUG=* node index.js extract -i $SOURCE_INDEX -s $STORAGE_DIR -C "$CHECKSUM_FROM"
+# Index filesystem from $SOURCE_DIR and generate SHA1 checksums of files
+DEBUG=* npx gallery index -i "$CONFIG_DIR/index.idx" -d "$SOURCE_DIR"
+# Generate preview images/videos and extract meta data like EXIF or GEO names. This might take a while
+DEBUG=* npx gallery extract -i "$CONFIG_DIR/index.idx" -s "$STORAGE_DIR"
 # Build database for web app
-DEBUG=* node index.js build -i $SOURCE_INDEX -s $STORAGE_DIR -d $DATABASE
-# Serve gallery
-DEBUG=server* node index.js server -s $STORAGE -d $DATABASE -e $EVENTS
+DEBUG=* npx gallery build -i "$CONFIG_DIR/index.idx" -s "$STORAGE_DIR" -d "$CONFIG_DIR/database.db"
 ```
 
 Note: `extract` and `build` can consume multiple indices (multiple media source directories). Use exclude patterns if required.
+
+Than start the HomeGallery web server and visit [localhost:3000](http://localhost:3000)
+
+```
+DEBUG=server* npx gallery server -s "$STORAGE_DIR" -d "$CONFIG_DIR/database.db" -e "$CONFIG_DIR/events.db"
+```
 
 While the index, previews and database can be reproduced, the only valuable data is the event database which stores manual user actions.
 
