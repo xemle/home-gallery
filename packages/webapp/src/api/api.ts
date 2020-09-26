@@ -1,5 +1,3 @@
-
-import { baseResolver } from '../base-resolver';
 import { Event, EventListener } from '@home-gallery/events'
 
 const decodeBase64 = base64 => atob(base64);
@@ -8,7 +6,7 @@ export const fetchAll = async (chunkLimits, onChunk) => {
   let chunkIndex = 0;
 
   const next = async () => {
-    let url = `${baseResolver()}/api/database`;
+    let url = `api/database`;
     let limit = 0;
     if (chunkIndex < chunkLimits.length) {
       const offset = chunkIndex > 0 ? chunkLimits[chunkIndex - 1] : 0;
@@ -51,7 +49,7 @@ class EventError extends Error {
 }
 
 export const getEvents = async () => {
-  return await fetch(`${baseResolver()}/api/events`)
+  return await fetch(`api/events`)
       .then(res => {
         if (isSuccessfullResponse(res)) {
           return res.json()
@@ -64,7 +62,7 @@ export const getEvents = async () => {
 }
 
 export const eventStream = (onActionEvent: EventListener) => {
-  const events = new EventSource(`${baseResolver()}/api/events/stream`);
+  const events = new EventSource(`api/events/stream`);
 
   events.onmessage = (event) => {
     try {
@@ -97,7 +95,7 @@ export const eventStream = (onActionEvent: EventListener) => {
 export const pushEvent = async (event: Event) => {
   console.log(`push event `, event);
 
-  const response = await fetch(`${baseResolver()}/api/events`, {
+  const response = await fetch(`api/events`, {
     method: 'POST',
     mode: 'cors',
     credentials: 'same-origin',

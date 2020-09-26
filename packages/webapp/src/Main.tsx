@@ -11,7 +11,6 @@ import { StoreProvider } from 'easy-peasy';
 import { useStoreActions } from './store/hooks';
 import { store } from './store/store';
 
-import { baseResolver } from './base-resolver';
 import { fetchAll, getEvents, eventStream } from './api/ApiService';
 
 import { AllView } from "./list/All";
@@ -32,7 +31,6 @@ export const Main = () => {
     const addEntries = useStoreActions(actions => actions.entries.addEntries);
     const initEvents = useStoreActions(actions => actions.events.initEvents);
     const addEvent = useStoreActions(actions => actions.events.addEvent);
-    const basename = '/';
 
     useEffect(() => {
       const fetchEvents = () => getEvents()
@@ -49,8 +47,10 @@ export const Main = () => {
         .then(subscribeEvents);
     }, []);
 
+    const base = document.querySelector('base')?.getAttribute('href') || '/';
+
     return (
-        <Router basename={`${baseResolver()}/`}>
+        <Router basename={base}>
           <LastLocationProvider>
             <Switch>
                 <Route exact path="/" children={<AllView />} />
