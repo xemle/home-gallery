@@ -54,6 +54,8 @@ Further features:
 
 ## Requirements
 
+* essential build tools like make or g++
+* libvips
 * [node](https://nodejs.org)
 
 # External Services and Privacy
