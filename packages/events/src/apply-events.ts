@@ -49,7 +49,7 @@ export const applyEvents = (entries: Map<String, Taggable>, events: Event[]): Ta
     targetEntries.forEach(entry => {
       let changed = false;
       event.actions.forEach(action => {
-        changed = changed || applyEventAction(entry, action);
+        changed = applyEventAction(entry, action) || changed;
       });
 
       if (!entry.appliedEventIds) {
