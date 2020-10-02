@@ -1,6 +1,6 @@
 const through2 = require('through2');
 
-function parallel({testSync, test, task, concurrent}) {
+const parallel = ({testSync, test, task, concurrent}) => {
   let runningTasks = 0;
   const queue = [];
 
@@ -19,8 +19,8 @@ function parallel({testSync, test, task, concurrent}) {
   const next = () => {
     if (!queue.length || runningTasks >= concurrent) {
       return;
-    } 
-    
+    }
+
     let nextTaskIndex = 0;
     while (nextTaskIndex < queue.length && (queue[nextTaskIndex].running || queue[nextTaskIndex].completed)) {
       nextTaskIndex++;
@@ -30,7 +30,7 @@ function parallel({testSync, test, task, concurrent}) {
     }
 
     const nextTask = queue[nextTaskIndex];
-    if (nextTask.flush) {
+    if (nextTask.isFlush) {
       nextTask.completed = true;
       return consumeHead();
     }
@@ -44,16 +44,12 @@ function parallel({testSync, test, task, concurrent}) {
     });
   }
 
-  return through2.obj(function (entry, _, cb) {
-    const that = this;
-    const done = () => {
-      that.push(entry);
-    }
-    queue.push({entry, done, running: false, completed: false, flush: false});
+  return through2.obj((entry, _, cb) => {
+    const done = () => cb(null, entry);
+    queue.push({entry, done, running: false, completed: false, isFlush: false});
     next();
-    cb();
-  }, function(cb) {
-    queue.push({entry: null, done: cb, running: false, completed: false, flush: true});
+  }, (cb) => {
+    queue.push({entry: null, done: cb, running: false, completed: false, isFlush: true});
     next();
   });
 
