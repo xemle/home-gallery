@@ -1,7 +1,7 @@
 const { pipeline } = require('stream');
 
 const { readStreams } = require('@home-gallery/index');
-const { filter, toList, sort, each, flatten, map, processIndicator } = require('@home-gallery/stream');
+const { filter, toList, sort, each, flatten, purge, processIndicator } = require('@home-gallery/stream');
 const mapToStorageEntry = require('./map-storage-entry');
 const { createStorage } = require('./storage');
 
@@ -59,11 +59,13 @@ function extractData(indexFilenames, storageDir, fileFilterFn, minChecksumDate, 
       processIndicator({totalFn: () => total}),
 
       groupByEntryFilesCacheKey(),
-      updateEntryFilesCache(storage).on('finish', () => cb(null, total)),
+      updateEntryFilesCache(storage),
+      purge(),
       (err) => {
         if (err) {
           return cb(`Could not process entries: ${err}`)
         }
+        cb(null, total)
       }
     );
   });

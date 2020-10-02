@@ -5,6 +5,7 @@ const group = require('./group');
 const log = require('./log');
 const map = require('./map');
 const parallel = require('./parallel');
+const purge = require('./purge');
 const processIndicator = require('./process-indicator');
 const sort = require('./sort');
 const { throttle, throttleAsync } = require('./throttle');
@@ -18,6 +19,7 @@ module.exports = {
   log,
   map,
   parallel,
+  purge,
   processIndicator,
   sort,
   throttle,
