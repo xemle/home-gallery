@@ -3,7 +3,7 @@ const debug = require('debug')('storage:map:media');
 
 function getEntryMetaByKey(entry, key) {
   if (!entry.meta) {
-    debug(`Meta data is missing for ${entry.filename}`);
+    debug(`Meta data is missing for entry ${entry}`);
     return false;
   } else if (entry.meta[key]) {
     return entry.meta[key];
@@ -33,10 +33,10 @@ function useExif(entry) {
     if (typeof value !== 'string' || value.length < 10 || value.startsWith('0000')) {
       return false;
     }
-    
+
     const match = value.match(/(\d{4}).(\d{2}).(\d{2}).(\d{2}).(\d{2}).(\d{2})(\.\d+)?(([-+](\d{2}:\d{2}|\d{4}))|Z)?\s*$/);
     if (!match) {
-      debug(`Unknown time format ${value} of ${JSON.stringify(date)}`);
+      debug(`Unknown time format ${value} of ${JSON.stringify(date)} of entry ${entry}`);
       return false;
     }
 
@@ -51,11 +51,11 @@ function useExif(entry) {
     } else if (match[8]) {
       iso8601 += match[8];
     }
-    
+
     try {
       return new Date(iso8601).toISOString();
     } catch(e) {
-      debug(`Could not create valid ISO8601 date '${iso8601}' from '${JSON.stringify(date)}': ${e}`); 
+      debug(`Could not create valid ISO8601 date '${iso8601}' from '${JSON.stringify(date)}' of entry ${entry}: ${e}`);
       return false;
     }
   }
@@ -78,7 +78,7 @@ function useExif(entry) {
     let result = {};
     if (!exifMeta[prop]) {
       return result;
-    } 
+    }
     result[`${prop}Raw`] = exifMeta[prop];
     const match = exifMeta[prop].toString().match(/^(\d+)\/(\d+)$/);
     if (match) {
@@ -87,16 +87,16 @@ function useExif(entry) {
       result[`${prop}Divider`] = +match[2];
     } else if (typeof exifMeta[prop] === 'number') {
       result[`${prop}Value`] = exifMeta[prop];
-    } 
+    }
     result[`${prop}Value`] = +exifMeta[prop];
   }
 
   function getExposerTime() {
-    return getFractionNumber('ExposerTime');  
+    return getFractionNumber('ExposerTime');
   }
 
   function getShutterSpeed() {
-    return getFractionNumber('ShutterSpeed');  
+    return getFractionNumber('ShutterSpeed');
   }
 
   const exifDate = getExifDate(exifMeta);
@@ -172,7 +172,7 @@ const mapMedia = through2.obj(function (entry, enc, cb) {
   try {
     exifData = useExif(entry);
   } catch (e) {
-    debug(`Could not extract exif data from ${entry.filename}:${entry.sha1sum}: ${e} ${JSON.stringify(entry)}`);
+    debug(`Could not extract exif data from entry ${entry}: ${e}`);
   }
 
   let geoInfo = {};
