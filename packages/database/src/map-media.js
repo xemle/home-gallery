@@ -8,12 +8,12 @@ function getEntryMetaByKey(entry, key) {
   } else if (entry.meta[key]) {
     return entry.meta[key];
   } else if (entry.sidecars.length) {
-    for (let i = 0; i < entry.sidecars; i++) {
-      if (!entry.sidecars[i].meta) {
-        debug(`Missing meta data of sidecar ${entry.sidecars[i].filename}`);
-      }
-      if (entry.sidecars[i].meta && entry.sidecars[i].meta[key]) {
-        return entry.sidecars[i].meta[key];
+    for (let i = 0; i < entry.sidecars.length; i++) {
+      const sidecar = entry.sidecars[i];
+      if (!sidecar.meta) {
+        debug(`Missing meta data of sidecar ${sidecar} of entry ${entry}`);
+      } else if (sidecar.meta && sidecar.meta[key]) {
+        return sidecar.meta[key];
       }
     }
   }
