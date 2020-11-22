@@ -2,19 +2,26 @@ import { Event, EventListener } from '@home-gallery/events'
 
 const decodeBase64 = base64 => atob(base64);
 
-export const fetchAll = async (chunkLimits, onChunk) => {
-  let chunkIndex = 0;
+const mapEntriesForBrowser = entry => {
+  if (entry.similarityHash) {
+    const ascii = decodeBase64(entry.similarityHash);
+    entry.similarityHash = ascii;
+  }
+  return entry;
+}
+
+export const fetchAll = async (limits, onChunk) => {
+  let limitIndex = 0;
+  let offset = 0;
 
   const next = async () => {
-    let url = `api/database`;
-    let limit = 0;
-    if (chunkIndex < chunkLimits.length) {
-      const offset = chunkIndex > 0 ? chunkLimits[chunkIndex - 1] : 0;
-      limit = chunkLimits[chunkIndex++] - offset;
-      url += `?offset=${offset}&limit=${limit}`;
-    } else if (chunkLimits.length) {
-      const offset = chunkLimits[chunkLimits.length - 1];
-      url += `?offset=${offset}`;
+    let url = `api/database?offset=${offset}`;
+    let limit = limits[limitIndex];
+    if (limit > 0) {
+      url += `&limit=${limit}`
+    }
+    if (limitIndex < limits.length - 1) {
+      limitIndex++;
     }
     return await fetch(url)
       .then(res => res.json())
@@ -22,14 +29,10 @@ export const fetchAll = async (chunkLimits, onChunk) => {
         if (!database.data || !database.data.length) {
           return;
         }
-        onChunk(database.data.map(entry => {
-          if (entry.similarityHash) {
-            const ascii = decodeBase64(entry.similarityHash);
-            entry.similarityHash = ascii;
-          }
-          return entry;
-        }));
-        if (limit && database.data.length == limit) {
+        let entries = database.data.map(mapEntriesForBrowser);
+        onChunk(entries);
+        if (entries.length == limit) {
+          offset += entries.length;
           return next();
         }
       });

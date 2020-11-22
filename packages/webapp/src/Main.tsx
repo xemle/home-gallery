@@ -41,7 +41,7 @@ export const Main = () => {
 
       const subscribeEvents = () => eventStream((event) => addEvent(event));
 
-      const chunkLimits = [5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000];
+      const chunkLimits = [5000, 5000, 10000, 20000, 40000];
       fetchAll(chunkLimits, addEntries)
         .then(fetchEvents)
         .then(subscribeEvents);
