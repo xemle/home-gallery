@@ -2,14 +2,14 @@
 
 SCRIPT=$0
 DIR=$(dirname "$SCRIPT")
-GALLERY_SRC=${GALLERY_SRC:-$DIR/..}
+GALLERY_HOME=${GALLERY_HOME:-$DIR/..}
 
 if [ ! -x "$(which npm)" -o ! -x "$(which node)" ]; then
   echo "Could not find npm or node binaries. Please install node TLS version from https://nodejs.org"
   exit 1
 fi
-echo "Change directory to sources $GALLERY_SRC"
-cd $GALLERY_SRC
+echo "Change directory to gallery home $GALLERY_HOME"
+cd $GALLERY_HOME
 
 echo "Install package dependencies"
 npm install
@@ -31,12 +31,5 @@ if [ $? -ne 0 ]; then
   echo "Build sources failed. Run 'npm run build' manually to fix it"
   exit 1
 fi
-
-npm link
-if [ $? -ne 0 ]; then
-  echo "Linking failed. Run 'npm link' manually to fix it"
-  exit 1
-fi
-echo "HomeGallery CLI is ready to run via 'npx gallery'"
 
 cd - > /dev/null

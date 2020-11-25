@@ -6,7 +6,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-./update-gallery.sh
+./update-gallery.sh --full
 if [ $? -ne 0 ]; then
   echo "Update gallery failed. Run update-gallery.sh manually to fix it"
   exit 1

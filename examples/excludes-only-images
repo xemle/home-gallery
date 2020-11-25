@@ -1,0 +1,13 @@
+# Include only jpg and png files. Use this exclude file for quick start since
+# video conversion takes time
+
+# Ignore all files
+*.*
+
+# Allow directories with dots
+!*.*/
+# Allow jpg and png files
+!*.jpg
+!*.JPG
+!*.png
+!*.PNG
