@@ -92,13 +92,11 @@ npm install
 npm run bootstrap
 # Build required modules
 npm run build
-# Link CLI to npm global binaries
-npm link
 ```
 
 ## Setup of HomeGallery
 
-Run CLI help by `npx gallery -h` for details
+Run CLI help by `node index.js -h` for details
 
 Following basic example is to serve all images and videos from `$HOME/Pictures`. Check [examples folder](examples/README.md) for futher examples.
 
@@ -115,11 +113,11 @@ Now index the filesystem, extract preview and meta data and finally build the da
 
 ```
 # Index filesystem from $SOURCE_DIR and generate SHA1 checksums of files
-DEBUG=* npx gallery index -i "$CONFIG_DIR/index.idx" -d "$SOURCE_DIR"
+DEBUG=* node index.js index -i "$CONFIG_DIR/index.idx" -d "$SOURCE_DIR" -c
 # Generate preview images/videos and extract meta data like EXIF or GEO names. This might take a while
-DEBUG=* npx gallery extract -i "$CONFIG_DIR/index.idx" -s "$STORAGE_DIR"
+DEBUG=* node index.js extract -i "$CONFIG_DIR/index.idx" -s "$STORAGE_DIR"
 # Build database for web app
-DEBUG=* npx gallery build -i "$CONFIG_DIR/index.idx" -s "$STORAGE_DIR" -d "$CONFIG_DIR/database.db"
+DEBUG=* node index.js build -i "$CONFIG_DIR/index.idx" -s "$STORAGE_DIR" -d "$CONFIG_DIR/database.db"
 ```
 
 Note: `extract` and `build` can consume multiple indices (multiple media source directories). Use exclude patterns if required.
@@ -127,7 +125,7 @@ Note: `extract` and `build` can consume multiple indices (multiple media source 
 Than start the HomeGallery web server and visit [localhost:3000](http://localhost:3000)
 
 ```
-DEBUG=server* npx gallery server -s "$STORAGE_DIR" -d "$CONFIG_DIR/database.db" -e "$CONFIG_DIR/events.db"
+DEBUG=server* node index.js server -s "$STORAGE_DIR" -d "$CONFIG_DIR/database.db" -e "$CONFIG_DIR/events.db"
 ```
 
 While the index, previews and database can be reproduced, the only valuable data is the event database which stores manual user actions.
