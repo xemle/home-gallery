@@ -34,6 +34,7 @@
     "node-vibrant": "^3.1.5",
     "sharp": "^0.23.4",
     "through2": "^3.0.1",
+    "tmp-promise": "^3.0.2",
     "yargs": "^15.0.2"
   }
 }
