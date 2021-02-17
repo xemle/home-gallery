@@ -7,10 +7,10 @@ const embeddingsMiddleware = require('./src/embeddings-middleware');
 
 const run = async () => {
   const port = process.env.PORT || 3000;
-  const TFJS_CPU = process.env.TFJS_CPU || false
+  const useTensorflowCpu = process.env.TFJS_CPU || false
   const maxBytes = 2 * 1024 * 1024; // 2 MB;
 
-  const embeddings = await Embeddings(TFJS_CPU);
+  const embeddings = await Embeddings(useTensorflowCpu);
   const app = await server({port});
 
   app.post('/embeddings', [
