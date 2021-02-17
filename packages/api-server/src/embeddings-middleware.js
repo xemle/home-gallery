@@ -12,6 +12,7 @@ const embeddingsMiddleware = (embeddings) => {
         body = { srcSha1sum, model, version, created, data };
         resolve(body);
       } catch (e) {
+        console.log(`Error: ${e}`)
         reject(e);
       }
     })

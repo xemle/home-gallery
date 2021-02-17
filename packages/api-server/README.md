@@ -28,6 +28,8 @@ was supporting AVX CPU instruction and one solution was to offer a public API - 
 
 If your hardware supports AVX CPU instruction you can use this api server from local.
 
+If you have time, you can use the slow CPU backend by setting the env variable TFJS_CPU=1
+
 ## Using node
 
 ```
@@ -67,4 +69,10 @@ should output something like:
 ```
 docker build -t api-server .
 docker run -p 3000:3000 api-server
+```
+
+Run api-server with CPU backend
+
+```
+docker run -p 3000:3000 -e TFJS_CPU=1 api-server
 ```
