@@ -14,6 +14,7 @@
   "author": "Sebastian Felis <sebastian@silef.de>",
   "license": "MIT",
   "dependencies": {
+    "@tensorflow-models/coco-ssd": "^2.2.1",
     "@tensorflow-models/mobilenet": "^2.0.4",
     "@tensorflow/tfjs": "^3.1.0",
     "@tensorflow/tfjs-backend-cpu": "^3.1.0",

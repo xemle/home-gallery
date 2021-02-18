@@ -1,16 +1,16 @@
-const loadTensorflow = require('./load-tensorflow');
 const mobilenet = require('@tensorflow-models/mobilenet');
 
-const embeddings = async (useCpuBackend) => {
-  const { decodeJpeg } = await loadTensorflow(useCpuBackend)
+const embeddings = async (decodeJpeg) => {
+  const modelName = 'mobilenet'
+  console.log(`Loading model ${modelName}...`);
 
   const t0 = Date.now();
   const config = {
     version: 1,
     alpha: 1.0
   }
+
   const model = await mobilenet.load(config);
-  const modelName = 'mobilenet'
   const version = `v${config.version}_${config.alpha.toFixed(1)}`;
   console.log(`Loaded model ${modelName} ${version} in ${Date.now() - t0}ms`);
 
