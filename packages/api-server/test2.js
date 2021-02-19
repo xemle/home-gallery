@@ -4,11 +4,11 @@ const path = require('path')
 const backend = process.env.BACKEND === 'cpu' ? 'cpu' : 'wasm';
 let tf;
 if (backend === 'wasm') {
-  require('@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.node');
-  tf = require('@tensorflow/tfjs-core/dist/tf-core.node');
+  require('@tensorflow/tfjs-backend-wasm');
+  tf = require('@tensorflow/tfjs-core');
 } else if (backend === 'cpu') {
-  require('@tensorflow/tfjs-backend-cpu/dist/tf-backend-cpu.node');
-  tf = require('@tensorflow/tfjs/dist/tf.node');
+  require('@tensorflow/tfjs-backend-cpu');
+  tf = require('@tensorflow/tfjs');
 }
 
 const mobilenet = require('@tensorflow-models/mobilenet');
@@ -84,7 +84,7 @@ const run = async () => {
   await tf.setBackend(backend)
   await tf.ready()
   const t1 = Date.now();
-  console.log(`Set wasm backend in ${t1 - t0}ms`)
+  console.log(`Set ${backend} backend in ${t1 - t0}ms`)
   const config = {
     version: 1,
     alpha: 1.0,
