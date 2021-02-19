@@ -1,7 +1,16 @@
 const fs = require('fs')
 const path = require('path')
-require('@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.node');
-const tf = require('@tensorflow/tfjs-core/dist/tf-core.node');
+
+const backend = process.env.BACKEND === 'cpu' ? 'cpu' : 'wasm';
+let tf;
+if (backend === 'wasm') {
+  require('@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.node');
+  tf = require('@tensorflow/tfjs-core/dist/tf-core.node');
+} else if (backend === 'cpu') {
+  require('@tensorflow/tfjs-backend-cpu/dist/tf-backend-cpu.node');
+  tf = require('@tensorflow/tfjs/dist/tf.node');
+}
+
 const mobilenet = require('@tensorflow-models/mobilenet');
 const cocoSsd = require('@tensorflow-models/coco-ssd');
 const readJpeg = require('./src/read-jpeg');
@@ -72,7 +81,8 @@ const toArrayBuffer = (buf) => {
 
 const run = async () => {
   const t0 = Date.now();
-  await tf.setBackend('wasm')
+  await tf.setBackend(backend)
+  await tf.ready()
   const t1 = Date.now();
   console.log(`Set wasm backend in ${t1 - t0}ms`)
   const config = {
