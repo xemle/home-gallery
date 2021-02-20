@@ -2,14 +2,12 @@ const fs = require('fs')
 const path = require('path')
 
 const backend = process.env.BACKEND === 'cpu' ? 'cpu' : 'wasm';
-let tf;
 if (backend === 'wasm') {
   require('@tensorflow/tfjs-backend-wasm');
-  tf = require('@tensorflow/tfjs-core');
 } else if (backend === 'cpu') {
   require('@tensorflow/tfjs-backend-cpu');
-  tf = require('@tensorflow/tfjs');
 }
+const tf = require('@tensorflow/tfjs');
 
 const mobilenet = require('@tensorflow-models/mobilenet');
 const cocoSsd = require('@tensorflow-models/coco-ssd');
