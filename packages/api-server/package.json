@@ -18,6 +18,7 @@
     "@tensorflow-models/mobilenet": "^2.0.4",
     "@tensorflow/tfjs": "^3.1.0",
     "@tensorflow/tfjs-backend-cpu": "^3.1.0",
+    "@tensorflow/tfjs-backend-wasm": "^3.1.0",
     "@tensorflow/tfjs-converter": "^3.1.0",
     "@tensorflow/tfjs-node": "^3.1.0",
     "express": "^4.17.1",
