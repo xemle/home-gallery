@@ -1,4 +1,5 @@
 const fs = require('fs').promises
+const path = require('path');
 
 const { loadJSONModel } = require('./src/tensorflow/file-system');
 const readJpeg = require('./src/read-jpeg');
@@ -13,6 +14,7 @@ const cocoSsd = require('@tensorflow-models/coco-ssd');
 
 const decodeJpeg = (tf, data) => {
   const {buffer, width, height} = readJpeg(data)
+  console.log(`decodeJpeg: ${width}x${height}`)
   const channels = 3;
   return tf.tensor3d(buffer, [height, width, channels]);
 }
@@ -30,6 +32,45 @@ const run = async () => {
       load: async () => loadJSONModel('models/mobilenet/model.json')
     }
   }
+
+  const faceapi = require('@vladmandic/face-api');
+  faceapi.tf.setBackend(backend);
+  const modelPath = path.join(__dirname, 'node_modules/@vladmandic/face-api/model');
+  await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
+  await faceapi.nets.ageGenderNet.loadFromDisk(modelPath);
+  await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);
+  await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath);
+  await faceapi.nets.faceExpressionNet.loadFromDisk(modelPath);
+  const minScore = 0.1;
+  const maxResults = 5;
+  const optionsSSDMobileNet = new faceapi.SsdMobilenetv1Options({ minConfidence: minScore, maxResults });
+
+  async function image(buffer) {
+    const decoded = decodeJpeg(tf, buffer);
+    const casted = decoded.toFloat();
+    const result = casted.expandDims(0);
+    decoded.dispose();
+    casted.dispose();
+    return result;
+  }
+  
+  async function detect(tensor) {
+    const result = await faceapi
+      .detectAllFaces(tensor, optionsSSDMobileNet)
+      .withFaceLandmarks()
+      .withFaceExpressions()
+      .withFaceDescriptors()
+      .withAgeAndGender();
+    return result;
+  }  
+
+  const buffer = await fs.readFile('./sample-2.jpg');
+  console.log(`file read`);
+  const tensor = await image(buffer);
+  console.log(`Tensor created`);
+  const faceApiResult = await detect(tensor);
+  console.log(faceApiResult);
+
   const model = await mobilenet.load(config);
   const t2 = Date.now();
   console.log(`Load mobilenet in ${t2 - t1}ms`)
