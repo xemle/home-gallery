@@ -33,8 +33,8 @@ const run = async () => {
     }
   }
 
-  const faceapi = require('@vladmandic/face-api');
-  faceapi.tf.setBackend(backend);
+  const faceapi = require('@vladmandic/face-api/dist/face-api.node-cpu');
+  //faceapi.tf.setBackend(backend);
   const modelPath = path.join(__dirname, 'node_modules/@vladmandic/face-api/model');
   await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
   await faceapi.nets.ageGenderNet.loadFromDisk(modelPath);
