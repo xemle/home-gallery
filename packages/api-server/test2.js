@@ -27,14 +27,12 @@ const run = async () => {
   const config = {
     version: 1,
     alpha: 1.0,
-    //modelUrl: `http://127.0.0.1:8081/mobilenet/model.json`
     modelUrl: {
       load: async () => loadJSONModel('models/mobilenet/model.json')
     }
   }
 
   const faceapi = require('@vladmandic/face-api/dist/face-api.node-cpu');
-  //faceapi.tf.setBackend(backend);
   const modelPath = path.join(__dirname, 'node_modules/@vladmandic/face-api/model');
   await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
   await faceapi.nets.ageGenderNet.loadFromDisk(modelPath);
