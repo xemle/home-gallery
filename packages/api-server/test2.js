@@ -2,6 +2,7 @@ const fs = require('fs').promises
 const path = require('path');
 
 const { loadJSONModel } = require('./src/tensorflow/utils/file-system');
+const loadCachedModel = require('./src/tensorflow/utils/load-cached-model');
 const readJpeg = require('./src/read-jpeg');
 
 const backends = ['cpu', 'wasm', 'node']
@@ -28,6 +29,19 @@ const run = async () => {
   const buffer = await fs.readFile('./sample-2.jpg');
   const input = decodeJpeg(tf, buffer);
 
+  const mobileNetConfig = {
+    version: 1,
+    alpha: 1.0,
+    modelUrl: {
+      load: async () => loadCachedModel({
+        url: 'https://tfhub.dev/google/imagenet/mobilenet_v1_100_224/classification/1',
+        cacheDir: path.join(__dirname, 'models/mobilenet'),
+        queryParams: '?tfjs-format=file'
+      })
+    }
+  }
+  const { classify } = await initMobileNet(mobileNetConfig);
+
   const modelPath = path.join(__dirname, 'node_modules/@vladmandic/face-api/model');
   const minScore = 0.1;
   const maxResults = 10;
@@ -37,15 +51,7 @@ const run = async () => {
   console.log(faceApiResult);
 
   const t2 = Date.now();
-  const mobileNetConfig = {
-    version: 1,
-    alpha: 1.0,
-    modelUrl: {
-      load: async () => loadJSONModel(path.join(__dirname, 'models/mobilenet/model.json'))
-    }
-  }
 
-  const { classify } = await initMobileNet(mobileNetConfig);
   console.log(`Load mobilenet in ${t2 - t1}ms`)
 
   const t3 = Date.now();
@@ -58,7 +64,10 @@ const run = async () => {
   const cocoSsdConfig = {
     base: 'mobilenet_v2',
     modelUrl: {
-      load: async () => loadJSONModel(path.join(__dirname, 'models/coco-ssd/model.json'))
+      load: async () => loadCachedModel({
+        url: 'https://storage.googleapis.com/tfjs-models/savedmodel/ssd_mobilenet_v2',
+        cacheDir: path.join(__dirname, 'models/coco-ssd')
+      })
     }
   }
 
