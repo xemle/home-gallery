@@ -1,8 +1,7 @@
 const fs = require('fs').promises
 const path = require('path');
 
-const { loadJSONModel } = require('./src/tensorflow/utils/file-system');
-const loadCachedModel = require('./src/tensorflow/utils/load-cached-model');
+const loadCachedModel = require('./src/tensorflow/load-cached-model');
 const readJpeg = require('./src/read-jpeg');
 
 const backends = ['cpu', 'wasm', 'node']
