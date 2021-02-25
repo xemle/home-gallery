@@ -35,9 +35,8 @@ const run = async () => {
   const maxResults = 10;
   const { detect } = await initFaceApi(modelPath, { minScore, maxResults });
 
-  const faceApiResult = await detect(input);
-  console.log(faceApiResult);
-
+  const faces = await detect(input);
+  console.log(faces);
   const t2 = Date.now();
 
   console.log(`Load mobilenet in ${t2 - t1}ms`)
