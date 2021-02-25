@@ -1,7 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-const { loadJSONModel } = require('./utils/file-system');
+const { loadJSONModel } = require('./file-system');
 const downloadModel = require('./download-model');
 
 const loadCachedModel = async ({ url, cacheDir, queryParams }) => {

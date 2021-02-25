@@ -1,9 +1,9 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-const exists = require('../utils/exists');
-const { dirLock, MIN_MS } = require('../utils/dir-lock');
-const downloadFile = require('../utils/download-file');
+const exists = require('../../utils/exists');
+const { dirLock, MIN_MS } = require('../../utils/dir-lock');
+const downloadFile = require('../../utils/download-file');
 
 const getWeightPaths = async modelFile => {
   const json = await fs.readFile(modelFile, 'utf8');
