@@ -1,5 +1,6 @@
 const through2 = require('through2');
 const debug = require('debug')('storage:map:media');
+const colorConvert = require('color-convert');
 
 function getEntryMetaByKey(entry, key) {
   if (!entry.meta) {
@@ -161,6 +162,17 @@ const getSimilarityHash = entry => {
   }
 }
 
+const getVibrantColors = entry => {
+  const vibrant = getEntryMetaByKey(entry, 'vibrant');
+  if (!vibrant) {
+    return [];
+  }
+  return ['Vibrant', 'Muted']
+    .map(k => vibrant[k]?.rgb)
+    .map(rgb => `#${colorConvert.rgb.hex(...rgb)}`)
+    .filter(v => !!v)
+}
+
 const mapMedia = through2.obj(function (entry, enc, cb) {
   const allStorageFiles = [entry.files]
     .concat(entry.sidecars.map(sidecar => sidecar.files))
@@ -193,7 +205,8 @@ const mapMedia = through2.obj(function (entry, enc, cb) {
     type: entry.type,
     date: entry.date,
     files: [mapFile(entry)].concat(entry.sidecars.map(mapFile)),
-    previews: allStorageFiles.filter(file => file.match(/-preview/))
+    previews: allStorageFiles.filter(file => file.match(/-preview/)),
+    vibrantColors: getVibrantColors(entry)
   }, exifData, geoInfo, similarityHash)
 
   this.push(media);

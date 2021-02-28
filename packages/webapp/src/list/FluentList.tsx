@@ -19,8 +19,8 @@ const Cell = ({height, width, index, item, items}) => {
   const selectedIdMap = useStoreState(state => state.editMode.selectedIdMap);
   const toggleId = useStoreActions(store => store.editMode.toggleId);
   const toggleRange = useStoreActions(store => store.editMode.toggleRange);
-  const {id, previews} = item;
-  const style = { height, width }
+  const {id, previews, vibrantColors } = item;
+  const style = { height, width, backgroundColor: vibrantColors[1] || 'inherited' }
   const history = useHistory();
 
   const previewSizes = [1920, 1280, 800, 320, 128];

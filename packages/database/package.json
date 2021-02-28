@@ -21,6 +21,7 @@
     "@home-gallery/index": "^1.0.0",
     "@home-gallery/storage": "^1.0.0",
     "@home-gallery/stream": "^1.0.0",
+    "color-convert": "^2.0.1",
     "debug": "^4.1.1",
     "yargs": "^15.0.2"
   }
