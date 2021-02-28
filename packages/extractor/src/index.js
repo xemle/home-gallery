@@ -11,6 +11,7 @@ const ffprobe = require('./ffprobe');
 const { imagePreview } = require('./image-preview');
 const vibrant = require('./vibrant');
 const geoReverse = require('./geo-reverse');
+const apiServerEntry = require('./api-server-entry');
 const similarityEmbeddings = require('./similarity-embeddings');
 const video = require('./video');
 const videoPoster = require('./video-poster');
@@ -53,11 +54,32 @@ function extractData(config, cb) {
       videoPoster(storage, imagePreviewSizes),
       vibrant(storage),
       geoReverse(storage, ['de', 'en']),
-      similarityEmbeddings(storage, {
+      apiServerEntry(storage, {
+        name: 'similarity embeddings',
+        apiServerUrl,
+        apiPath: '/embeddings',
         imageSuffix: `image-preview-${similarityEmbeddingsPreviewSize}.jpg`,
+        entrySuffix: 'similarity-embeddings.json',
         concurrent: 5,
         timeout: 30000,
+      }),
+      apiServerEntry(storage, {
+        name: 'object detection',
         apiServerUrl,
+        apiPath: '/objects',
+        imageSuffix: `image-preview-${similarityEmbeddingsPreviewSize}.jpg`,
+        entrySuffix: 'objects.json',
+        concurrent: 5,
+        timeout: 30000,
+      }),
+      apiServerEntry(storage, {
+        name: 'face detection',
+        apiServerUrl,
+        apiPath: '/faces',
+        imageSuffix: `image-preview-${similarityEmbeddingsPreviewSize}.jpg`,
+        entrySuffix: 'faces.json',
+        concurrent: 2,
+        timeout: 30000,
       }),
       video(storage),
       //.pipe(videoFrames(storageDir, videoFrameCount))
