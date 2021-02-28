@@ -14,6 +14,7 @@ const stringifyEntry = entry => {
     entry.city
   ]
   .concat(entry.tags || [])
+  .concat(entry.objects?.map(object => object.class).filter((v, i, a) => a.indexOf(v) === i) || [])
   .join(' ')
   .toLowerCase();
 }

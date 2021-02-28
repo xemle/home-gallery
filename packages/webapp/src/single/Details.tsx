@@ -64,6 +64,8 @@ export const Details = ({current}) => {
     { title: 'Geo Position', value: [current.latitude, current.longitude].filter(v => !!v).map(v => +v.toFixed(4)).join(',') },
     { title: 'Address', value: [current.road, current.city, current.country].filter(v => !!v).join(', ') },
     { title: 'Tags', value: (current.tags || []).join(', ') },
+    { title: 'Objects', value: (current.objects || []).map(object => `${object.class} (${object.score})`).join(', ') },
+    { title: 'Faces', value: (current.faces || []).map(face => `${face.gender} (~${face.age.toFixed()}y)`).join(', ') },
   ];
 
   return (

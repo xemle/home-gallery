@@ -173,6 +173,49 @@ const getVibrantColors = entry => {
     .filter(v => !!v)
 }
 
+const getObjects = (entry, minScore) => {
+  const objects = getEntryMetaByKey(entry, 'objects');
+  if (!objects) {
+    return [];
+  }
+  const { width, height, data } = objects;
+  return data
+    .filter(object => object.score > minScore)
+    .map(object => {
+      return {
+        x: +(object.bbox[0] / width).toFixed(3),
+        y: +(object.bbox[1] / height).toFixed(3),
+        width: +(object.bbox[2] / width).toFixed(2),
+        height: +(object.bbox[3] / height).toFixed(2),
+        score: +object.score.toFixed(2),
+        class: object.class
+      }
+    })
+}
+
+const getFaces = (entry, minScore) => {
+  const faces = getEntryMetaByKey(entry, 'faces');
+  if (!faces) {
+    return [];
+  }
+
+  const { width, height, data } = faces;
+  return data
+    .filter(face => face.alignedRect.score >= minScore)
+    .map(face => {
+      const { box } = face.alignedRect;
+      return {
+        age: +face.age.toFixed(1),
+        gender: face.genderProbability > 0.7 ? face.gender : 'unknown',
+        x: +(box.x / width).toFixed(3),
+        y: +(box.y / height).toFixed(3),
+        width: +(box.width / width).toFixed(2),
+        height: +(box.height / height).toFixed(2),
+        descriptor: Object.values(face.descriptor).map(value => +(value * 1000).toFixed())
+      }
+    })
+}
+
 const mapMedia = through2.obj(function (entry, enc, cb) {
   const allStorageFiles = [entry.files]
     .concat(entry.sidecars.map(sidecar => sidecar.files))
@@ -206,7 +249,9 @@ const mapMedia = through2.obj(function (entry, enc, cb) {
     date: entry.date,
     files: [mapFile(entry)].concat(entry.sidecars.map(mapFile)),
     previews: allStorageFiles.filter(file => file.match(/-preview/)),
-    vibrantColors: getVibrantColors(entry)
+    vibrantColors: getVibrantColors(entry),
+    objects: getObjects(entry, 0.6),
+    faces: getFaces(entry, 0.7)
   }, exifData, geoInfo, similarityHash)
 
   this.push(media);

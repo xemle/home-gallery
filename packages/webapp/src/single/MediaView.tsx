@@ -87,6 +87,8 @@ export const MediaView = () => {
     }
   }
 
+  console.log('Media object', current);
+
   return (
     <>
       <div className={`single ${showInfo ? '-withDetail' : ''}`}>
