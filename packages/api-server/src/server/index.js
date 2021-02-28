@@ -6,7 +6,7 @@ const server = async ({port}) => {
 
   app.set('x-powered-by', false);
   app.use(morgan('dev'));
-  
+
   return new Promise(resolve => {
     app.listen(port, () => {
       console.log(`Listen on port http://localhost:${port}`);

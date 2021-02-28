@@ -43,7 +43,7 @@ const mapFaceToObject = face => {
   }
 }
 
-const initFaceApi = async (modelPath, { minScore, maxResults } = {}) => {
+const initFaceApi = async ({ modelPath, minScore, maxResults } = {}) => {
   await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
   await faceapi.nets.ageGenderNet.loadFromDisk(modelPath);
   await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);

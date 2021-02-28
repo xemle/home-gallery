@@ -8,11 +8,16 @@ const toCachedConfig = (config, cacheDir) => {
   const modelUrl = {
     load: async () => loadCachedModel({
       url: `https://storage.googleapis.com/tfjs-models/savedmodel/ssd_${base}`,
-      cacheDir: path.join(cacheDir, `models/coco-ssd-${base}`)
+      cacheDir: path.resolve(cacheDir, `coco-ssd-${base}`)
     })
   }
 
   return {...config, ...{modelUrl} };
+}
+
+const downloadModel = async(config, cacheDir) => {
+  const cachedConfig = toCachedConfig(config, cacheDir)
+  await cachedConfig.modelUrl.load();
 }
 
 const init = async (config, cacheDir) => {
@@ -28,4 +33,4 @@ const init = async (config, cacheDir) => {
   return { config, model, detect }
 }
 
-module.exports = init;
+module.exports = { init, downloadModel };

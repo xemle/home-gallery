@@ -13,12 +13,17 @@ const toCachedConfig = (config, cacheDir) => {
   const modelUrl = {
     load: async () => loadCachedModel({
       url: `https://tfhub.dev/google/imagenet/mobilenet_v${version}_${alpha}_224/classification/${version}`,
-      cacheDir: path.join(cacheDir, `models/mobilenet-${version}-${alpha}`),
+      cacheDir: path.resolve(cacheDir, `mobilenet-${version}-${alpha}`),
       queryParams: '?tfjs-format=file'
     })
   }
 
   return {...config, ...{modelUrl}};
+}
+
+const downloadModel = async(config, cacheDir) => {
+  const cachedConfig = toCachedConfig(config, cacheDir)
+  await cachedConfig.modelUrl.load();
 }
 
 const init = async (config, cacheDir) => {
@@ -37,4 +42,4 @@ const init = async (config, cacheDir) => {
   return { config, model, classify, infer };
 }
 
-module.exports = init;
+module.exports = { init, downloadModel };
