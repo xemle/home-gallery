@@ -1,12 +1,13 @@
-FROM node:12
+FROM node:14
 
-WORKDIR /opt/app
+WORKDIR /app
 
 COPY package*.json ./
 RUN npm install
 
 COPY src ./src
-COPY index.js .
+COPY *.js .
+RUN node download-models.js
 
 EXPOSE 3000
 

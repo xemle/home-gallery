@@ -1,3 +1,3 @@
 const run = require('./src');
 
-run().then(() => console.log(`Server is ready and running`), e => console.log(`Error: ${e}`));
+run().then(() => console.log(`Server is up and running`), e => console.log(`Error: ${e}`));
