@@ -3,9 +3,10 @@ import { StoreModel } from './store';
 import { Entry } from './entry-model';
 
 import { filterEntriesByQuery } from '@home-gallery/query';
+import { ENGINE_METHOD_RAND } from 'constants';
 
 export interface Search {
-  type: 'none' | 'year' | 'query' | 'similar';
+  type: 'none' | 'year' | 'query' | 'similar' | 'faces';
   value?: any;
   query?: string;
 }
@@ -71,7 +72,48 @@ const execSimilar = (entries: Entry[], similarityHash) => {
   similar.sort((a, b) => (a.similarity - b.similarity) < 0 ? 1 : -1);
   const result = similar.map(s => s.entry);
   const t3 = Date.now();
-  console.log(`Took ${t1 - t0}ms to select, ${t2 - t1}ms to calculate, to sort ${t3 - t2}ms, to map ${Date.now() - t3}ms similar pictures`);
+  console.log(`Similarity search: Took ${t1 - t0}ms to select, ${t2 - t1}ms to calculate, to sort ${t3 - t2}ms, to map ${Date.now() - t3}ms`);
+  return result;
+}
+
+function euclideanDistance(a, b) {
+  return Math.sqrt(
+    a.slice(0, Math.min(a.length, b.length))
+      .map((v, i) => v - b[i])
+      .reduce((r, v) => r + (v ** 2), 0)
+  );
+}
+
+const uniqBy = (keyFn) => {
+  const seen = [];
+  return v => {
+    const key = `${keyFn(v)}`;
+    if (seen.indexOf(key) < 0) {
+      seen.push(key);
+      return true;
+    }
+    return false;
+  }
+}
+
+const execFaces = (entries: Entry[], descriptor) => {
+  const t0 = Date.now();
+  const comparableEntries = entries.filter(entry => entry.faces.length > 0);
+  const t1 = Date.now()
+  const similar = comparableEntries.map(entry => {
+    return entry.faces.map(face => {
+      return {
+        entry,
+        similarity: euclideanDistance(descriptor, face.descriptor)
+      }
+    })
+  })
+  .reduce((r, v) => r.concat(v), [])
+  const t2 = Date.now();
+  similar.sort((a, b) => (b.similarity - a.similarity) < 0 ? 1 : -1);
+  const result = similar.map(s => s.entry).filter(uniqBy(v => v.id));
+  const t3 = Date.now();
+  console.log(`Face search: Took ${t1 - t0}ms to select, ${t2 - t1}ms to calculate, to sort ${t3 - t2}ms, to map ${Date.now() - t3}ms`);
   return result;
 }
 
@@ -89,6 +131,12 @@ const doSearch = async (allEntries: Map<String, Entry>, query) => {
     const id = query.value;
     const seedEntry = allEntries.get(id);
     entries = execSimilar(entries, seedEntry.similarityHash);
+    defaultSortOrder = false;
+  } else if (query.type == 'faces') {
+    const { id, faceIndex } = query.value;
+    const seedEntry = allEntries.get(id);
+    const descriptor = seedEntry?.faces[faceIndex]?.descriptor;
+    entries = execFaces(entries, descriptor);
     defaultSortOrder = false;
   }
   if (query.query) {

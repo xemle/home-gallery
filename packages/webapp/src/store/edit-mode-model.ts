@@ -1,6 +1,5 @@
 import { Action, action, Thunk, thunk } from 'easy-peasy';
 import { StoreModel } from './store';
-import { entryModel } from './entry-model';
 
 export enum ViewMode {
   VIEW,

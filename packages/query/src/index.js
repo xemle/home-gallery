@@ -1,6 +1,9 @@
 const { parse } = require('./parse');
 const { createFilter } = require('./ast');
 
+const uniq = (v, i, a) => a.indexOf(v) === i;
+const flatten = (r, v) => r.concat(v);
+
 const stringifyEntry = entry => {
   return [
     entry.id.substring(0, 10),
@@ -14,7 +17,9 @@ const stringifyEntry = entry => {
     entry.city
   ]
   .concat(entry.tags || [])
-  .concat(entry.objects?.map(object => object.class).filter((v, i, a) => a.indexOf(v) === i) || [])
+  .concat((entry.objects || []).map(object => object.class).filter(uniq))
+  .concat((entry.faces || []).map(face => face.expressions).reduce(flatten, []).filter(uniq))
+  .concat((entry.faces || []).map(face => `${Math.trunc(face.age / 10) * 10}s`).reduce(flatten, []).filter(uniq))
   .join(' ')
   .toLowerCase();
 }

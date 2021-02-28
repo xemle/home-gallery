@@ -51,6 +51,9 @@ const humanizeDuration = duration => {
 }
 
 export const Details = ({current}) => {
+  if (!current) {
+    return (<></>)
+  }
   const rows = [
     { title: 'Short ID', value: current.id.substring(0, 7) },
     { title: 'Type', value: current.type },

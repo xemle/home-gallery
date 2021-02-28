@@ -12,6 +12,7 @@ export interface Entry {
   appliedEventIds?: string[],
   textCache?: string | false;
   similarityHash: string;
+  faces?: any[],
 }
 
 export interface EntryModel {

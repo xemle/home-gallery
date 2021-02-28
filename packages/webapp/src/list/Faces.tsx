@@ -8,14 +8,17 @@ import {
 import { List } from './List';
 import { useStoreState, useStoreActions } from '../store/hooks';
 
-export const SimilarView = () => {
+export const FacesView = () => {
   const params = useParams();
   const location = useLocation();
   const search = useStoreActions(actions => actions.search.search);
   let locationQuery = new URLSearchParams(location.search && location.search.substring(1) || '');
-  search({type: 'similar', value: params.id, query: locationQuery.get('q')});
+  const value = {id: params.id, faceIndex: params.faceIndex};
+  search({type: 'faces', value, query: locationQuery.get('q')});
 
-  return ( 
-    <List />
+  return (
+    <>
+      <List />
+    </>
   )
 }

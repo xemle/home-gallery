@@ -19,6 +19,8 @@ export const SearchNavBar = ({children}) => {
       history.push(`/years/${query.value}?q=${queryInput}`);
     } else if (query.type == 'similar') {
       history.push(`/similar/${query.value}?q=${queryInput}`);
+    } else if (query.type == 'faces') {
+      history.push(`/faces/${query.value.id}/${query.value.faceIndex}?q=${queryInput}`);
     }
   }
 

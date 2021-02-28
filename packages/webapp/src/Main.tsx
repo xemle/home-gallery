@@ -16,6 +16,7 @@ import { fetchAll, getEvents, eventStream } from './api/ApiService';
 import { AllView } from "./list/All";
 import { SearchView } from './list/Search';
 import { SimilarView } from './list/Similar';
+import { FacesView } from './list/Faces';
 import { Years, YearView } from './year/Years';
 import { MediaView } from './single/MediaView';
 
@@ -59,6 +60,7 @@ export const Main = () => {
                 <Route path="/view/:id" children={<MediaView />} />
                 <Route path="/similar/:id" children={<SimilarView />} />
                 <Route path="/search/:term" children={<SearchView />} />
+                <Route path="/faces/:id/:faceIndex" children={<FacesView />} />
             </Switch>
           </LastLocationProvider>
         </Router>
