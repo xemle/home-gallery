@@ -26,6 +26,10 @@ const command = {
       'checksum-from': {
         alias: 'C',
         describe: 'Only entries with newer sha1 checksum date in ISO 8601 format'
+      },
+      'api-server': {
+        describe: 'API server url',
+        default: 'https://api.home-gallery.org'
       }
     })
     .demandOption(['index', 'storage'])
@@ -39,7 +43,14 @@ const command = {
       if (err) {
         debug(err);
       } else {
-        extract(argv.index, argv.storage, fileFilterFn, argv['checksum-from'], (err, count) => {
+        const config = {
+          indexFilenames: argv.index,
+          storageDir: argv.storage,
+          fileFilterFn,
+          minChecksumDate: argv['checksum-from'],
+          apiServerUrl: argv['api-server']
+        }
+        extract(config, (err, count) => {
           if (err) {
             debug(`Could not extract all meta data and preview files: ${err}`);
           } else {

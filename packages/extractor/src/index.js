@@ -18,12 +18,13 @@ const {videoFrames} = require('./video-frames');
 const groupByEntryFilesCacheKey = require('./group-entry-files-cache');
 const { updateEntryFilesCache } = require('./update-entry-files-cache');
 
-function extractData(indexFilenames, storageDir, fileFilterFn, minChecksumDate, cb) {
+function extractData(config, cb) {
+  const {indexFilenames} = config;
   readStreams(indexFilenames, (err, entryStream) => {
     if (err) {
       return cb(err);
     }
-
+    const {storageDir, fileFilterFn, minChecksumDate, apiServerUrl} = config;
     const storage = createStorage(storageDir);
 
     const imagePreviewSizes = [1920, 1280, 800, 320, 128];
@@ -52,7 +53,12 @@ function extractData(indexFilenames, storageDir, fileFilterFn, minChecksumDate, 
       videoPoster(storage, imagePreviewSizes),
       vibrant(storage),
       geoReverse(storage, ['de', 'en']),
-      similarityEmbeddings(storage, `image-preview-${similarityEmbeddingsPreviewSize}.jpg`, 5),
+      similarityEmbeddings(storage, {
+        imageSuffix: `image-preview-${similarityEmbeddingsPreviewSize}.jpg`,
+        concurrent: 5,
+        timeout: 30000,
+        apiServerUrl,
+      }),
       video(storage),
       //.pipe(videoFrames(storageDir, videoFrameCount))
 

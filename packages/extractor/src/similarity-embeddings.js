@@ -6,7 +6,7 @@ const { conditionalTask } = require('./task');
 
 const similaritySuffix = 'similarity-embeddings.json';
 
-function similiarity(storage, imageSuffix, concurrent) {
+function similiarity(storage, {imageSuffix, concurrent, timeout, apiServerUrl}) {
   let hasError = false;
 
   const test = entry => {
@@ -29,14 +29,14 @@ function similiarity(storage, imageSuffix, concurrent) {
         return cb();
       }
 
-      const url = 'https://api.home-gallery.org/embeddings';
+      const url = `${apiServerUrl}/embeddings`;
       const options = {
         url,
         method: 'POST',
         headers: { 'Content-Type': 'image/jpeg' },
         body: buffer,
         encoding: null,
-        timeout: 4000,
+        timeout,
       }
       request(options, (err, res, body) => {
         if (err) {
