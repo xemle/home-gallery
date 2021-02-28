@@ -16,7 +16,7 @@ const formatDate = (format, date) => {
   }
   const d = new Date(date);
   return format.replace(/%([dmYHMS])/g, (_, code) => {
-    if (code === 'd') return pad2(d.getDay());
+    if (code === 'd') return pad2(d.getDate());
     if (code === 'm') return pad2(d.getMonth());
     if (code === 'Y') return pad(d.getFullYear(), 4);
     if (code === 'H') return pad2(d.getHours());
