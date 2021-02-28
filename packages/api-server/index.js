@@ -1,22 +1,3 @@
-const server = require('./src/server');
-const Embeddings = require('./src/embeddings');
+const run = require('./src');
 
-const isMimeMiddleware = require('./src/is-mime-middleware');
-const binaryBodyMiddleware = require('./src/binary-body-middleware');
-const embeddingsMiddleware = require('./src/embeddings-middleware');
-
-const run = async () => {
-  const port = process.env.PORT || 3000;
-  const maxBytes = 2 * 1024 * 1024; // 2 MB;
-
-  const embeddings = await Embeddings();
-  const app = await server({port});
-
-  app.post('/embeddings', [
-    isMimeMiddleware('image/jpeg'),
-    binaryBodyMiddleware(maxBytes),
-    embeddingsMiddleware(embeddings)
-  ]);
-}
-
-run();
+run().then(() => console.log(`Server is up and running`), e => console.log(`Error: ${e}`));

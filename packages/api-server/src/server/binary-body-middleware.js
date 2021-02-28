@@ -1,3 +1,5 @@
+const ERROR_PAYLOAD_TO_LARGE = 413;
+
 const binaryBodyMiddleware = (maxBytes) => {
   return (req, res, next) => {
     const chunks = [];
@@ -9,7 +11,7 @@ const binaryBodyMiddleware = (maxBytes) => {
         if (totalChunkBytes > maxBytes) {
           const err = new Error(`Content limit of max ${maxBytes} bytes exceeded`);
           console.log(err.message);
-          res.status(400).json({error: err.message});
+          res.status(ERROR_PAYLOAD_TO_LARGE).json({error: err.message});
           req.destroy();
         }
       })
