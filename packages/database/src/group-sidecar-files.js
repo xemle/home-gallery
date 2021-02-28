@@ -1,7 +1,9 @@
 const through2 = require('through2');
 
+const bySize = (a, b) => a.size < b.size ? 1 : -1
+
 function toPrimaryEntry(entries) {
-  entries.sort((a, b) => a.size < b.size ? 1 : -1);
+  entries.sort(bySize);
 
   const primary = entries.shift();
   primary.sidecars = entries;
@@ -9,7 +11,8 @@ function toPrimaryEntry(entries) {
 }
 
 /**
- * Strip up to two extensions to group files with their sidecars
+ * Strip one or two extensions to group files with their sidecars, sorted by their size
+ * The main file will be the largest one
  *
  * Example: IMG_2635.AVI, IMG_2635.THM, IMG_2635.AVI.xmp -> group(IMG_2635)
  */
@@ -18,21 +21,20 @@ const sidecarFiles = through2.obj(function (entries, enc, cb) {
 
   const sidecars = {}
 
-  function addSidecar(entry, name) {
-    if (sidecars[name]) {
-      sidecars[name].push(entry);
+  function addSidecar(entry, basename) {
+    if (sidecars[basename]) {
+      sidecars[basename].push(entry);
     } else {
-      sidecars[name] = [entry];
+      sidecars[basename] = [entry];
     }
   }
 
   entries.forEach(entry => {
-    const extMatch1 = entry.filename.match(/(.*)(\.\w{2,4})$/);
-    const extMatch2 = extMatch1 && extMatch1[1].match(/(.*)(\.\w{2,4})$/);
-    if (extMatch2) {
-      addSidecar(entry, extMatch2[1]);
-    } else if (extMatch1) {
-      addSidecar(entry, extMatch1[1]);
+    const filename = entry.filename;
+    const extension = filename.match(/(\.\w{2,4}){1,2}$/);
+    if (extension) {
+      const basename = filename.substr(0, filename.length - extension.length)
+      addSidecar(entry, basename);
     } else {
       result.push(entry);
     }
