@@ -8,7 +8,7 @@ const imageSuffix = 'image-preview-128.jpg';
 
 function vibrantColors(storage) {
   const test = entry => {
-    if (['image', 'video'].indexOf(entry) < 0 || storage.hasEntryFile(entry, vibrantSuffix)) {
+    if (['image', 'video'].indexOf(entry.type) < 0 || storage.hasEntryFile(entry, vibrantSuffix)) {
       return false;
     } else if (!storage.hasEntryFile(entry, imageSuffix)) {
       debug(`Image preview ${imageSuffix} is missing from ${entry}`);
