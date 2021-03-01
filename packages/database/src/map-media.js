@@ -168,9 +168,9 @@ const getVibrantColors = entry => {
     return [];
   }
   return ['Vibrant', 'Muted']
-    .map(k => vibrant[k]?.rgb)
-    .map(rgb => `#${colorConvert.rgb.hex(...rgb)}`)
+    .map(k => (vibrant[k] || {}).rgb)
     .filter(v => !!v)
+    .map(rgb => `#${colorConvert.rgb.hex(...rgb)}`)
 }
 
 const getObjects = (entry, minScore) => {
