@@ -33,15 +33,15 @@ const sidecarFiles = through2.obj(function (entries, enc, cb) {
     const filename = entry.filename;
     const extension = filename.match(/(\.\w{2,4}){1,2}$/);
     if (extension) {
-      const basename = filename.substr(0, filename.length - extension.length)
+      const basename = filename.substr(0, filename.length - extension[0].length)
       addSidecar(entry, basename);
     } else {
       result.push(entry);
     }
   })
 
-  result = result.concat(Object.values(sidecars).map(toPrimaryEntry));
-  this.push(result);
+  const sidecarEntries = Object.values(sidecars).map(toPrimaryEntry);
+  this.push(result.concat(sidecarEntries));
 
   cb()
 });
