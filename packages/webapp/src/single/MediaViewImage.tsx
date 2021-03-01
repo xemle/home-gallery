@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import useBodyDimensions from "../utils/useBodyDimensions";
 
 export const MediaViewImage = (props) => {
-  const largeRef = useRef<HTMLElement>();
+  const imgRef = useRef<HTMLElement>();
   const [faceRects, setFaceRects] = useState([]);
   const [objectRects, setObjectRects] = useState([]);
   const { showDetails } = props;
@@ -32,8 +32,8 @@ export const MediaViewImage = (props) => {
   }
 
   useEffect(() => {
-    const e = largeRef.current;
-    if (!e) {
+    const e = imgRef.current;
+    if (!e || !showDetails) {
       return;
     }
     const { x, y, width, height } = e.getBoundingClientRect();
@@ -66,13 +66,13 @@ export const MediaViewImage = (props) => {
         </div>
       );
     }))
-  }, [largeRef, src, showDetails])
+  }, [imgRef, src, showDetails])
 
   return (
     <>
       <div className="mediaView -image">
-        <img className="mediaView__media" src={smallUrl} />
-        <img ref={largeRef} className="mediaView__media" src={src} />
+        <img ref={imgRef} className="mediaView__media" src={smallUrl} />
+        <img className="mediaView__media" src={src} />
         {showDetails && objectRects}
         {showDetails && faceRects}
       </div>
