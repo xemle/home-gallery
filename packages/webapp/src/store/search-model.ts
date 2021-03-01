@@ -77,19 +77,21 @@ const execSimilar = (entries: Entry[], similarityHash) => {
 }
 
 function euclideanDistance(a, b) {
-  return Math.sqrt(
-    a.slice(0, Math.min(a.length, b.length))
-      .map((v, i) => v - b[i])
-      .reduce((r, v) => r + (v ** 2), 0)
-  );
+  const max = Math.min(a.length, b.length);
+  let result = 0;
+  for (let i = 0; i < max; i++) {
+    const diff = a[i] - b[i];
+    result += diff * diff;
+  }
+  return Math.sqrt(result);
 }
 
 const uniqBy = (keyFn) => {
-  const seen = [];
+  const seen = {};
   return v => {
-    const key = `${keyFn(v)}`;
-    if (seen.indexOf(key) < 0) {
-      seen.push(key);
+    const key = keyFn(v);
+    if (!seen[key]) {
+      seen[key] = true;
       return true;
     }
     return false;
@@ -100,15 +102,15 @@ const execFaces = (entries: Entry[], descriptor) => {
   const t0 = Date.now();
   const comparableEntries = entries.filter(entry => entry.faces.length > 0);
   const t1 = Date.now()
-  const similar = comparableEntries.map(entry => {
-    return entry.faces.map(face => {
-      return {
+  const similar = []
+  comparableEntries.forEach(entry => {
+    entry.faces.forEach(face => {
+      similar.push({
         entry,
         similarity: euclideanDistance(descriptor, face.descriptor)
-      }
+      })
     })
   })
-  .reduce((r, v) => r.concat(v), [])
   const t2 = Date.now();
   similar.sort((a, b) => (b.similarity - a.similarity) < 0 ? 1 : -1);
   const result = similar.map(s => s.entry).filter(uniqBy(v => v.id));
