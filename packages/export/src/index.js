@@ -8,7 +8,8 @@ const cleanupDatabase = require('./cleanup-database');
 const exportStorage = require('./export-storage');
 const writeDatabase = require('./write-database');
 const copyWebapp = require('./copy-webapp');
-const setBasePath = require('./set-base-path')
+const injectState = require('./inject-state');
+const setBasePath = require('./set-base-path');
 const createArchive = require('./create-archive');
 const deleteDirectory = require('./delete-directory');
 
@@ -26,7 +27,8 @@ const exportBuilder = (databaseFilename, storageDir, options, cb) => {
     (callback) => buildDatabase(databaseFilename, options.eventsFilename, options.query, callback),
     (database, callback) => exportStorage(database, storageDir, options.outputDirectory, options.basePath, callback),
     (database, outputDirectory, basePath, callback) => writeDatabase(database, outputDirectory, basePath, callback),
-    (outputDirectory, basePath, callback) => copyWebapp(outputDirectory, basePath, callback),
+    (database, outputDirectory, basePath, callback) => copyWebapp(database, outputDirectory, basePath, callback),
+    (database, outputDirectory, basePath, callback) => injectState(database, outputDirectory, basePath, callback),
     (outputDirectory, basePath, callback) => setBasePath(outputDirectory, basePath, callback),
     (outputDirectory, callback) => createArchive(outputDirectory, options.archiveFilename, callback),
     (outputDirectory, archiveFilename, callback) => deleteDirectory(outputDirectory, options.keep, archiveFilename, callback)

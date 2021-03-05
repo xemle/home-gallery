@@ -12,7 +12,7 @@ const write = (database, outputDirectory, basePath, cb) => {
       return cb(err);
     }
     debug(`Wrote database with ${database.data.length} entries to ${filename} in ${Date.now() - t0}ms`)
-    cb(null, outputDirectory, basePath);
+    cb(null, database, outputDirectory, basePath);
   })
 }
 

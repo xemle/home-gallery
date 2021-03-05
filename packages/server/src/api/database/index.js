@@ -20,6 +20,7 @@ function uniqEntries(entries) {
 function databaseApi() {
   let database = { data: [] };
   const databaseCache = cache(3600);
+  let entryCache = {};
 
   function send(req, res) {
     if (req.query && (req.query.offset || req.query.limit)) {
@@ -54,9 +55,17 @@ function databaseApi() {
           newDatabase.data = uniqEntries(newDatabase.data)
           database = newDatabase;
           databaseCache.clear();
+          entryCache = {};
           onceCb();
         }
       })
+    },
+    getEntries: (count) => {
+      const key = `${count}`;
+      if (typeof entryCache[key] === 'undefined') {
+        entryCache[key] = database.data.slice(0, count);
+      }
+      return entryCache[key]
     },
     read: (req, res) => databaseCache.middleware(req, res, () => send(req, res))
   }

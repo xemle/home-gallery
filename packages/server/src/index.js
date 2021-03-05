@@ -7,8 +7,10 @@ const morgan = require('morgan');
 
 const debug = require('debug')('server');
 
+const injectState = require('./webapp');
 const databaseApi = require('./api/database');
 const eventApi = require('./api/events');
+const webapp = require('./webapp');
 
 function shouldCompress (req, res) {
   if (req.headers['x-no-compression']) {
@@ -45,17 +47,14 @@ function startServer({host, port, storageDir, databaseFilename, eventFilename, w
   app.use(morgan('tiny'));
   app.use(bodyParser.json({limit: '1mb'}))
 
-  const { read: dbRead, init: dbInit } = databaseApi();
+  const { read: dbRead, init: dbInit, getEntries } = databaseApi();
   app.get('/api/database', dbRead);
   const { read, push, stream } = eventApi(eventFilename);
   app.get('/api/events', read);
   app.get('/api/events/stream', stream);
   app.post('/api/events', push);
 
-  app.use('/', express.static(webappDir));
-
-  const spa = (req, res) => res.sendFile(path.resolve(webappDir, 'index.html'))
-  app.use(spa)
+  app.use(webapp(webappDir, getEntries, 50));
 
   const server = createServer(key, cert, app);
   server.listen(port, host)

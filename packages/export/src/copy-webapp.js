@@ -23,7 +23,7 @@ const copyFiles = (files, srcDir, dstDir, cb) => {
   next();
 }
 
-const copyWebapp = (outputDirectory, basePath, cb) => {
+const copyWebapp = (database, outputDirectory, basePath, cb) => {
   const t0 = Date.now();
   const srcDir = path.resolve(__dirname, 'public');
   const dstDir = path.join(outputDirectory, basePath)
@@ -41,7 +41,7 @@ const copyWebapp = (outputDirectory, basePath, cb) => {
         return cb(err);
       }
       debug(`Copied webapp sources to ${dstDir} in ${Date.now() - t0}ms`);
-      cb(null, outputDirectory, basePath);
+      cb(null, database, outputDirectory, basePath);
     })
   })
 }

@@ -33,6 +33,9 @@ export const Main = () => {
     const initEvents = useStoreActions(actions => actions.events.initEvents);
     const addEvent = useStoreActions(actions => actions.events.addEvent);
 
+    const stateEntries = window['__homeGallery']?.entries || [];
+    addEntries(stateEntries);
+
     useEffect(() => {
       const fetchEvents = () => getEvents()
         .then(events => initEvents(events.data))
