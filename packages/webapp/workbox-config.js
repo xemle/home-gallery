@@ -1,9 +1,20 @@
 module.exports = {
   globDirectory: "dist",
   globPatterns: [
-    "**/*.{html,png,woff,woff2,eot,ico,webmanifest,map}"
+    "**/*.{html,js,css,svg,png,woff,woff2,eot,ico}"
   ],
   swDest: "dist/service-worker.js",
   clientsClaim: true,
-  skipWaiting: true
+  skipWaiting: true,
+  runtimeCaching: [{
+    urlPattern: /-preview-320\.jpg$/,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'images',
+      expiration: {
+        maxEntries: 50,
+      },
+    },
+  }],
+
 };
