@@ -32,7 +32,7 @@ function readJsonFiles(storageDir, filenames, cb) {
   filenames.forEach(filename => {
     readJsonFile(path.join(storageDir, filename), (err, json) => {
       if (err) {
-        debug(`Could not parse ${filename}: Error: ${e}. Continue`);
+        debug(`Could not parse ${filename}: Error: ${err}. Continue`);
       } else {
         const name = getMetaKeyName(filename);
         meta[name] = json;
