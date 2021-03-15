@@ -1,0 +1,79 @@
+#
+# HomeGallery configuration file
+#
+#
+# Default configuration file is gallery.config.yml. JSON format is
+# also supported (gallery.config.json)
+#
+# This is a comment, starting with hash tag and space ('# ')
+# A default value starting with hash tag and variable ('#baseDir...')
+#
+# Directory value examples:
+# - /absolute/directory
+# - relative/directory/to/current/working/dir
+# - ~/directory/in/your/home
+# - ./relative/directory/to/configuration/file
+#
+# Variable replacements
+#   baseDir: '~'
+#   confDir: '{baseDir}/.config/home-gallery'
+# configDir is replaced to '~/.config/home-gallery' and than to '$HOME/.config/home-gallery'
+#
+# Variables are baseDir, confDir, confPrefix and dir in sources
+#
+# Variables baseDir, confDir and confPrefix are overwritten by environment
+# variables GALLERY_BASE_DIR, GALLERY_CONF_DIR, GALLERY_CONF_PREFIX
+
+#
+# General
+#
+#baseDir: '~'
+#confDir: '{baseDir}/.config/home-gallery'
+# file prefix for index, database and events
+#confPrefix: ''
+
+#
+# Sources
+#
+# List of media source directories
+sources:
+  - dir: '{baseDir}/Pictures'
+    #index: '{confDir}/{basename(dir)}.idx'
+    # excludes are using gitignore patterns
+    #excludes:
+      #- .DS_Store
+      #- ._*
+      #- '*.tmp'
+      #- '*cache*'
+    #excludeIfPresent: .galleryignore
+    # excludeFromFile: '{confDir}/excludes'
+    # Set offline to true if source directory/disk is offline
+    #offline: true
+
+#
+# Extractor settings
+#
+#extractor:
+  #apiServerUrl: https://api.home-gallery.org
+  # excludes are using gitignore patterns
+  #excludes: []
+
+#
+# Storage and files configuration
+#
+#storage:
+  #dir: '{baseDir}/.cache/home-gallery/storage'
+#database:
+  #file: '{confDir}/database.db'
+#events:
+  #file: '{confDir}/events.db'
+
+#
+# Server configuration
+#
+#server:
+  #port: 3000
+  #host: localhost
+  # security configuration for https
+  # key: '{confDir}/key.key'
+  # cert: '{confDir}/server.crt'

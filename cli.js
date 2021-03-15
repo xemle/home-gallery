@@ -16,5 +16,5 @@ yargs.usage('Usage: $0 [global options] <command> [options]')
   .demandCommand()
   .help()
   .alias('h', 'help')
-  .epilog('(c) 2020 HomeGallery')
+  .epilog('(c) 2021 HomeGallery')
   .argv;

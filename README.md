@@ -1,6 +1,11 @@
+![HomeGallery hero image](https://home-gallery.org/hero.png "self-hosted open-source web gallery")
+
 # HomeGallery
 
-HomeGallery is a web gallery to serve private photos and videos from your local NAS
+[Home-Gallery.org](https://home-gallery.org) is a self-hosted open-source web gallery
+to browse personal photos and videos featuring tagging, mobile-friendly, and AI
+powered image and face discovery. Try the [demo gallery](https://demo.home-gallery.org)
+or enjoy the [food images](https://demo.home-gallery.org/similar/c7f8a3bf0142fc9694f517c23e42d988c97233c3)!
 
 Note: This software is a private pet/spare time project without any warranty or any
 support. Love it or leave it! If you have any problem, fork the project and fix
@@ -26,24 +31,10 @@ is available.
 
 ## Documentation
 
-See [docs.home-gallery.org](https://docs.home-gallery.org) for general documentation
+See [docs.home-gallery.org](https://docs.home-gallery.org) for general documentation. The general
+architecture is described [here](https://docs.home-gallery.org/internals/index.html).
 
-## General Architecture
-
-The gallery has several components:
-
-* File indexer (short term 'index'): Index of your files and directories state including SHA1 content hashes
-* Extractor: Calculates preview files and videos and extracts meta data like exif data, geo reverse lookups, dominant colors, etc.
-* Storage: All generated files from the extractor are stored here. These files are also served by the server
-* Database builder (short term 'builder'): Based on the index and the storage the gallery database is created
-* Web Server (short term 'server'): Serve the database and the previews of the storage
-* Web App: Application which runs on the browser
-* Events: Manual user actions such as manual tagging
-* Exporter: Export a subset as static website to share the subset on a web space
-
-The general workflow is to index your directories -> extract meta data and calculate previews -> build the database -> serve the Web App.
-
-Further features:
+## Features
 
 - Due the file index the detection of changed media becomes quite fast after the first run
 - Once the preview files are generated and mete data are extraced, the original sources are not touched and required any more. So media from offline disk need to be extracted only once and the disk can stay offline on next runs
@@ -52,11 +43,73 @@ Further features:
 - Tags are supported and such edits are propagated and updated on concurrent sessions
 - Reverse image lookup (similar image search) is supported. So if you have one sunset image, you can easily find other sunset photos in your archive without manual tagging
 
+## Limits
+
+The complete "database" is loaded into the browser. My 100.000 media are about
+100 MB plain JSON and 12 MB compressed JSON. The performance is quite good on
+current mobile device. A user reported a successful setup with over 400.000
+media files. Further feedback is welcome.
+
 ## Requirements
 
 * essential build tools like make or g++
 * libvips
 * [node](https://nodejs.org)
+
+## Installation
+
+```
+# Install required packages
+npm install
+# Bootstrap packages of mono repository
+npm run bootstrap
+# Build required modules
+npm run build
+```
+
+## Configure HomeGallery
+
+Configure `gallery.config.yml` with source media directories and other settings.
+
+A bare minimal configuration is
+
+```
+sources:
+  - dir: ~/Pictures
+```
+
+to include all images and videos from your `$HOME/Pictures` directory. The previews
+are stored in `~/.cache/home-gallery/storage` and the configuration files like
+file index, database, events are stored in `~/.config/home-gallery` directory.
+
+A more advance configuration would be
+
+```
+baseDir: /mnt/gallery
+confDir: '{baseDir}/config'
+sources:
+  - dir: /mnt/media
+    index: '{confDir}/mnt-media.idx
+    exclude:
+      - *.CR2
+      - *.cr2
+  - dir: ~/Pictures
+    index: '{confDir}/{basename(dir)}.idx'
+storage:
+  dir: '{baseDir}/storage'
+server:
+  port: 8080
+  host: '0.0.0.0'
+  key: '{confDir}/server.key'
+  cert: '{confDir}/server.crt'
+```
+
+to use media files from directories `/mnt/media` and `$HOME/Pictures`. The gallery
+files are stored on a separate partition `/mnt/gallery`. The storage directory is
+`/mnt/gallery/storage` and other gallery configuration files are located at
+`/mnt/gallery/config`. The server uses https on port 8080.
+
+See [gallery.config.yml](gallery.config.yml) for more configuration details.
 
 # External Services and Privacy
 
@@ -71,64 +124,23 @@ from [OpenStreetMap](https://openstreetmap.org). Only geo coordinates
 are transmitted.
 
 For reverse image lookups (similar image search), HomeGallery uses the
-its own public API at https://api.home-gallery.org. The similarity
-image feature uses [TensorflowJS](https://www.tensorflow.org/js). The
-tensorflow library requires the AVX CPU instruction which is not
-supported on small devices such Raspberry Pis. The API can be run
-locally as Docker container, if AVX CPU instruction is supported. See
-`api-service` package for details. All preview images are send to this
-api.
+its own public API at https://api.home-gallery.org. This public API supports
+low powered devices such as the SoC Raspberry PI and all preview images are
+send to this public API by default. No images or privacy data are kept.
 
-## Limits
+The API can be configured and ran also locally or as Docker container. See
+`api-service` package for further information.
 
-The complete "database" is loaded into the browser. My 100.000 media are about 100 MB plain JSON and 12 MB compressed JSON. The performance is quite good on current mobile device. Futher experiences with larger datasets do not exists. Feedback is welcome.
+## Run HomeGallery
 
-## Installation
+Run `./gallery.js` (or `node gallery`) to
 
-```
-# Install required packages
-npm install
-# Bootstrap packages of mono repository
-npm run bootstrap
-# Build required modules
-npm run build
-```
+- update and process media files
+- start the web server
+- update the gallery application (requires git)
 
-## Setup of HomeGallery
-
-Run CLI help by `node index.js -h` for details
-
-Following basic example is to serve all images and videos from `$HOME/Pictures`. Check [examples folder](examples/README.md) for futher examples.
-
-```
-# Media folder to import to the HomeGallery. Change it properly
-export SOURCE_DIR=$HOME/Pictures
-# Directory for configuration and database files
-export CONFIG_DIR=$HOME/.config/home-gallery
-# Storage directory of preview files and meta data
-export STORAGE_DIR=$HOME/.cache/home-gallery/storage
-```
-
-Now index the filesystem, extract preview and meta data and finally build the database
-
-```
-# Index filesystem from $SOURCE_DIR and generate SHA1 checksums of files
-DEBUG=* node index.js index -i "$CONFIG_DIR/index.idx" -d "$SOURCE_DIR" -c
-# Generate preview images/videos and extract meta data like EXIF or GEO names. This might take a while
-DEBUG=* node index.js extract -i "$CONFIG_DIR/index.idx" -s "$STORAGE_DIR"
-# Build database for web app
-DEBUG=* node index.js build -i "$CONFIG_DIR/index.idx" -s "$STORAGE_DIR" -d "$CONFIG_DIR/database.db"
-```
-
-Note: `extract` and `build` can consume multiple indices (multiple media source directories). Use exclude patterns if required.
-
-Than start the HomeGallery web server and visit [localhost:3000](http://localhost:3000)
-
-```
-DEBUG=server* node index.js server -s "$STORAGE_DIR" -d "$CONFIG_DIR/database.db" -e "$CONFIG_DIR/events.db"
-```
-
-While the index, previews and database can be reproduced, the only valuable data is the event database which stores manual user actions.
+Note: `./gallery.js` is a wrapper of `./cli.js` which offers more granular functionality
+for file indexer, extractor, database builder or extractor. See `./cli.js -h` for details.
 
 ## Development
 

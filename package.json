@@ -11,7 +11,8 @@
     "watch": "lerna run watch"
   },
   "bin": {
-    "gallery": "./index.js"
+    "cli": "./cli.js",
+    "gallery": "./gallery.js"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +21,8 @@
     "lerna": "^3.20.2"
   },
   "dependencies": {
+    "enquirer": "^2.3.6",
+    "yaml": "^1.10.0",
     "yargs": "^15.3.1"
   }
 }
