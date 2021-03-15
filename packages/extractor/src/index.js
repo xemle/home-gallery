@@ -12,7 +12,6 @@ const { imagePreview } = require('./image-preview');
 const vibrant = require('./vibrant');
 const geoReverse = require('./geo-reverse');
 const apiServerEntry = require('./api-server-entry');
-const similarityEmbeddings = require('./similarity-embeddings');
 const video = require('./video');
 const videoPoster = require('./video-poster');
 const {videoFrames} = require('./video-frames');
