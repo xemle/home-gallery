@@ -7,9 +7,8 @@ const morgan = require('morgan');
 
 const debug = require('debug')('server');
 
-const injectState = require('./webapp');
 const databaseApi = require('./api/database');
-const eventApi = require('./api/events');
+const eventsApi = require('./api/events');
 const webapp = require('./webapp');
 
 function shouldCompress (req, res) {
@@ -36,7 +35,7 @@ function createServer(key, cert, app) {
   }
 }
 
-function startServer({host, port, storageDir, databaseFilename, eventFilename, webappDir, key, cert}, cb) {
+function startServer({host, port, storageDir, databaseFilename, eventsFilename, webappDir, key, cert}, cb) {
   const app = express();
   app.disable('x-powered-by');
 
@@ -49,7 +48,7 @@ function startServer({host, port, storageDir, databaseFilename, eventFilename, w
 
   const { read: dbRead, init: dbInit, getEntries } = databaseApi();
   app.get('/api/database', dbRead);
-  const { read, push, stream } = eventApi(eventFilename);
+  const { read, push, stream } = eventsApi(eventsFilename);
   app.get('/api/events', read);
   app.get('/api/events/stream', stream);
   app.post('/api/events', push);

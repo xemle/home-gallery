@@ -15,16 +15,16 @@ const command = {
         alias: 'd',
         describe: 'Database filename'
       },
-      event: {
+      events: {
         require: true,
         alias: 'e',
-        describe: 'Event filename'
+        describe: 'Events filename'
       },
       host: {
         alias: 'H',
         default: 'localhost',
         string: true,
-        describe: 'Host ip address'
+        describe: 'Listening host IP address'
       },
       port: {
         alias: 'p',
@@ -41,7 +41,7 @@ const command = {
         describe: 'SSL certificate file'
       }
     })
-    .demandOption(['storage', 'database'])
+    .demandOption(['storage', 'database', 'events'])
   },
   handler: (argv) => {
     const startServer = require('./index');
@@ -52,7 +52,7 @@ const command = {
       port: argv.port,
       storageDir: argv.storage,
       databaseFilename: argv.database,
-      eventFilename: argv.event,
+      eventsFilename: argv.events,
       webappDir: path.resolve(__dirname || '.', 'public'),
       key: argv.key,
       cert: argv.cert
