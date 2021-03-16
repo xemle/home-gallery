@@ -294,7 +294,7 @@ const resolveConfig = (config, file) => {
     resolveAll(source, ['dir', 'index', 'excludeIfPresent', 'excludeFromFile'], config, env)
   }
 
-  resolveAll(config, ['storage.dir', 'database.file', 'events.file'], config, env)
+  resolveAll(config, ['storage.dir', 'database.file', 'events.file', 'server.key', 'server.cert'], config, env)
   return config
 }
 

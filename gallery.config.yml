@@ -75,5 +75,5 @@ sources:
   #port: 3000
   #host: localhost
   # security configuration for https
-  # key: '{confDir}/key.key'
+  # key: '{confDir}/server.key'
   # cert: '{confDir}/server.crt'
