@@ -5,3 +5,4 @@ node_modules
 *.tmp
 package-lock.json
 package-lock.json.cache
+gallery.config.yml

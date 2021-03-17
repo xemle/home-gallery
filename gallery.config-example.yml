@@ -38,7 +38,7 @@
 # List of media source directories
 sources:
   - dir: '{baseDir}/Pictures'
-    #index: '{confDir}/{basename(dir)}.idx'
+    #index: '{confDir}/{confPrefix}{basename(dir)}.idx'
     # excludes are using gitignore patterns
     #excludes:
       #- .DS_Store

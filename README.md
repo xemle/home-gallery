@@ -69,7 +69,8 @@ npm run build
 
 ## Configure HomeGallery
 
-Configure `gallery.config.yml` with source media directories and other settings.
+Copy `gallery.config-example.yml` to `gallery.config.yml` and configure
+`gallery.config.yml` with source media directories and other settings.
 
 A bare minimal configuration is
 
@@ -109,7 +110,7 @@ files are stored on a separate partition `/mnt/gallery`. The storage directory i
 `/mnt/gallery/storage` and other gallery configuration files are located at
 `/mnt/gallery/config`. The server uses https on port 8080.
 
-See [gallery.config.yml](gallery.config.yml) for more configuration details.
+See [gallery.config-example.yml](gallery.config-example.yml) for more configuration details.
 
 # External Services and Privacy
 
@@ -138,6 +139,8 @@ Run `./gallery.js` (or `node gallery`) to
 - update and process media files
 - start the web server
 - update the gallery application (requires git)
+
+Use different configurations by `--config <file>` parameter. E.g. `./gallery.js --config gallery.other.json`
 
 Note: `./gallery.js` is a wrapper of `./cli.js` which offers more granular functionality
 for file indexer, extractor, database builder or extractor. See `./cli.js -h` for details.

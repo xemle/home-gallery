@@ -236,7 +236,7 @@ const resolvePath = (obj, path) => {
   const parts = path.split('.');
   let parent = obj;
   let key = false;
-  while (parts.length && obj[parts[0]]) {
+  while (parts.length && typeof obj[parts[0]] != 'undefined') {
     key = parts.shift();
     parent = obj;
     obj = parent[key];
@@ -262,6 +262,7 @@ const resolve = (obj, path, config, env) => {
   if (!key || typeof parent[key] !== 'string') {
     return;
   }
+
   parent[key] = parent[key]
     // resolve ~ to users home
     .replace(/^~/, env.HOME)
