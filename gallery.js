@@ -313,8 +313,17 @@ const validateConfig = async config => {
   (uniqIndexFiles.length == config.sources.length) || assertError(`Source index files are not unique`);
 }
 
+const useExampleFallback = async (file, err) => {
+  const example = 'gallery.config-example.yml'
+  return fs.access(example)
+    .then(() => {
+      console.log(`Use fallback configuration ${example}`)
+      return fs.readFile(example, 'utf8')
+    }, () => Promise.reject(new Error(`Could not read configuration file '${file}': ${err}`)))
+}
+
 const loadConfig = async file => {
-  const data = await fs.readFile(file, 'utf8').catch(e => Promise.reject(new Error(`Could not read configuration file '${file}'. Error: ${e}`)))
+  const data = await fs.readFile(file, 'utf8').catch(e => useExampleFallback(file, e))
   const isYaml = file.match(/\.ya?ml$/i);
   const config = isYaml ? YAML.parse(data) : JSON.parse(file)
   expandConfigDefaults(config)
