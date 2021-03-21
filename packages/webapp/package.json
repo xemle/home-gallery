@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "postinstall": "cpx 'node_modules/@fortawesome/fontawesome-free/webfonts/*.*' src/fonts",
+    "postinstall": "cpx \"node_modules/@fortawesome/fontawesome-free/webfonts/*.*\" src/fonts",
     "dev": "node dev-server.js",
     "build": "parcel build src/index.html --out-dir dist --public-url ./",
     "postbuild": "workbox generateSW"

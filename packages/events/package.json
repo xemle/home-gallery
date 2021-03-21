@@ -8,7 +8,7 @@
     "prebuild": "npm run clean",
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "mocha -r ts-node/register src/**/*.test.ts"
+    "test": "mocha -r ts-node/register \"src/**/*.test.ts\""
   },
   "keywords": [
     "HomeGallery",

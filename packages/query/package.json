@@ -6,8 +6,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "compile": "nearleyc -o src/query.js src/query-simple.ne",
-    "build": "cpx 'src/**' dist",
-    "watch": "onchange 'src/**' -- npm run build"
+    "build": "cpx \"src/**\" dist",
+    "watch": "onchange \"src/**\" -- npm run build"
   },
   "keywords": [
     "HomeGallery",

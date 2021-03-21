@@ -8,14 +8,14 @@
     "build:css": "npx sass -I node_modules --source-map --style=compressed node_modules/@home-gallery/webapp/src/app.scss dist/app.css",
     "build:styleguide": "kss -c kss-config.json",
     "copy": "npm-run-all -p copy:kss copy:fonts",
-    "copy:kss": "cpx 'src/*.{css,js}' dist",
-    "copy:fonts": "cpx 'src/fonts/*' dist/fonts",
+    "copy:kss": "cpx \"src/*.{css,js}\" dist",
+    "copy:fonts": "cpx \"src/fonts/*\" dist/fonts",
     "dev": "npm-run-all -s clean build -p serve watch",
-    "postinstall": "cpx 'node_modules/@fortawesome/fontawesome-free/webfonts/*.*' src/fonts",
+    "postinstall": "cpx \"node_modules/@fortawesome/fontawesome-free/webfonts/*.*\" src/fonts",
     "serve": "live-server --host=0.0.0.0 --port=3001 --wait=250 dist",
     "watch": "npm-run-all -p watch:webapp watch:styleguide",
-    "watch:webapp": "onchange '../webapp/src/**/*.scss' -- npm run build",
-    "watch:styleguide": "onchange 'src/**/*' -- npm run build"
+    "watch:webapp": "onchange \"../webapp/src/**/*.scss\" -- npm run build",
+    "watch:styleguide": "onchange \"src/**/*\" -- npm run build"
   },
   "keywords": [
     "HomeGallery",

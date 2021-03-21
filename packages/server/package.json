@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpx 'src/**' dist",
-    "postbuild": "cpx 'node_modules/@home-gallery/webapp/dist/**' dist/public",
+    "build": "cpx \"src/**\" dist",
+    "postbuild": "cpx \"node_modules/@home-gallery/webapp/dist/**\" dist/public",
     "run": "node index.js",
-    "watch": "onchange -d 200 'src/**' -- npm run build"
+    "watch": "onchange -d 200 \"src/**\" -- npm run build"
   },
   "keywords": [
     "HomeGallery",

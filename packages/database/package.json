@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpx 'src/**' dist",
-    "watch": "onchange 'src/**' -- npm run build"
+    "build": "cpx \"src/**\" dist",
+    "watch": "onchange \"src/**\" -- npm run build"
   },
   "keywords": [],
   "author": "Sebastian Felis <sebastian@silef.de>",

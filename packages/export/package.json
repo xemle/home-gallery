@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpx 'src/**' dist",
-    "postbuild": "cpx 'node_modules/@home-gallery/webapp/dist/**' dist/public",
-    "watch": "onchange 'src/**' -- npm run build"
+    "build": "cpx \"src/**\" dist",
+    "postbuild": "cpx \"node_modules/@home-gallery/webapp/dist/**\" dist/public",
+    "watch": "onchange \"src/**\" -- npm run build"
   },
   "keywords": [
     "HomeGallery",
