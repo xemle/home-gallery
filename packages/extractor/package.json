@@ -21,15 +21,15 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.0.20",
+    "@ffprobe-installer/ffprobe": "^1.1.0",
     "@home-gallery/common": "^1.0.0",
     "@home-gallery/index": "^1.0.0",
     "@home-gallery/storage": "^1.0.0",
     "@home-gallery/stream": "^1.0.0",
     "debug": "^4.1.1",
     "exiftool-vendored": "^9.3.0",
-    "ffmpeg-static": "^4.0.0",
     "ffprobe": "^1.1.0",
-    "ffprobe-static": "^3.0.0",
     "fluent-ffmpeg": "^2.1.2",
     "node-vibrant": "^3.1.5",
     "sharp": "^0.23.4",

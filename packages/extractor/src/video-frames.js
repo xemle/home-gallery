@@ -1,6 +1,5 @@
-const path = require('path');
-const ffmpegStatic = require('ffmpeg-static');
-const ffprobeStatic = require('ffprobe-static');
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffprobePath = require('@ffprobe-installer/ffprobe').path;
 const ffmpeg = require('fluent-ffmpeg');
 const debug = require('debug')('extract:video:frame');
 
@@ -16,8 +15,8 @@ function extractVideoFames(src, dir, filenamePattern, frameCount, cb) {
 
   let files = [];
   const command = ffmpeg(src);
-  command.setFfmpegPath(ffmpegStatic);
-  command.setFfprobePath(ffprobeStatic.path);  
+  command.setFfmpegPath(ffmpegPath);
+  command.setFfprobePath(ffprobePath);
   command
     .on('error', cb)
     .on('filenames', (filenames) => {

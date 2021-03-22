@@ -1,5 +1,5 @@
 const ffprobe = require('ffprobe');
-const ffprobeStatic = require('ffprobe-static');
+const ffprobePath = require('@ffprobe-installer/ffprobe').path;
 const debug = require('debug')('extract:ffprobe');
 
 const { toPipe, conditionalTask } = require('./task');
@@ -11,7 +11,7 @@ function videoMeta(storage) {
 
   const task = (entry, cb) => {
     const t0 = Date.now();
-    ffprobe(entry.src, { path: ffprobeStatic.path }, function (err, info) {
+    ffprobe(entry.src, { path: ffprobePath }, function (err, info) {
       if (err) {
         debug(`Could not extract video meta data from ${entry}: ${err}`);
         return cb();

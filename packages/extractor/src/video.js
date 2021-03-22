@@ -1,6 +1,6 @@
 const fs = require('fs');
-const ffmpegStatic = require('ffmpeg-static');
-const ffprobeStatic = require('ffprobe-static');
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffprobePath = require('@ffprobe-installer/ffprobe').path;
 const ffmpeg = require('fluent-ffmpeg');
 const debug = require('debug')('extract:video');
 
@@ -16,8 +16,8 @@ function convertVideo(storage, entry, cb) {
   const file = storage.getEntryFilename(entry, videoSuffix);
   const tmpFile = `${file}.tmp`;
   const command = ffmpeg(input);
-  command.setFfmpegPath(ffmpegStatic);
-  command.setFfprobePath(ffprobeStatic.path);  
+  command.setFfmpegPath(ffmpegPath);
+  command.setFfprobePath(ffprobePath);
   command
     .on('error', cb)
     .on('end', () => {
