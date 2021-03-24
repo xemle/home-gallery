@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "postinstall": "cpx \"node_modules/@fortawesome/fontawesome-free/webfonts/*.*\" src/fonts",
+    "postinstall": "npx cpx \"../../node_modules/@fortawesome/fontawesome-free/webfonts/*.*\" src/fonts",
     "dev": "node dev-server.js",
     "build": "parcel build src/index.html --out-dir dist --public-url ./",
     "postbuild": "workbox generateSW"
@@ -22,25 +22,10 @@
     "url": "https://github.com/xemle/home-gallery.git",
     "directory": "packages/webapp"
   },
-  "devDependencies": {
-    "@types/hammerjs": "^2.0.36",
-    "@types/react": "^16.9.11",
-    "@types/react-dom": "^16.9.4",
-    "cpx": "^1.5.0",
-    "express": "^4.17.1",
-    "http-proxy-middleware": "^0.20.0",
-    "parcel-bundler": "^1.12.4",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "rimraf": "^3.0.2",
-    "sass": "^1.26.5",
-    "typescript": "^3.7.2",
-    "workbox-cli": "^5.1.3"
-  },
   "dependencies": {
-    "@home-gallery/events": "^1.0.0",
-    "@home-gallery/query": "^1.0.0",
     "@fortawesome/fontawesome-free": "^5.13.0",
+    "@home-gallery/events": "file:../events",
+    "@home-gallery/query": "file:../query",
     "easy-peasy": "^3.2.6",
     "hammerjs": "^2.0.8",
     "moo": "^0.5.1",

@@ -21,11 +21,6 @@
     "url": "https://github.com/xemle/home-gallery.git",
     "directory": "packages/common"
   },
-  "devDependencies": {
-    "cpx": "^1.5.0",
-    "onchange": "^7.0.2",
-    "rimraf": "^3.0.2"
-  },
   "dependencies": {
     "debug": "^4.1.1",
     "ignore": "^5.1.4"

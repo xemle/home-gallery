@@ -19,12 +19,5 @@
     "type": "git",
     "url": "https://github.com/xemle/home-gallery.git",
     "directory": "packages/query"
-  },
-  "devDependencies": {
-    "cpx": "^1.5.0",
-    "onchange": "^7.0.2",
-    "rimraf": "^3.0.2",
-    "moo": "^0.5.1",
-    "nearley": "^2.19.3"
   }
 }

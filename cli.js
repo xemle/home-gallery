@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 const yargs = require('yargs');
-const indexCli = require('./packages/index/dist/cli');
-const extractCli = require('./packages/extractor/dist/cli');
-const databaseCli = require('./packages/database/dist/cli');
-const serverCli = require('./packages/server/dist/cli');
-const exportCli = require('./packages/export/dist/cli');
+const indexCli = require('@home-gallery/index/dist/cli');
+const extractCli = require('@home-gallery/extractor/dist/cli');
+const databaseCli = require('@home-gallery/database/dist/cli');
+const serverCli = require('@home-gallery/server/dist/cli');
+const exportCli = require('@home-gallery/export/dist/cli');
 
 yargs.usage('Usage: $0 [global options] <command> [options]')
   .command(indexCli)

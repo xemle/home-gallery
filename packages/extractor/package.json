@@ -20,23 +20,19 @@
     "url": "https://github.com/xemle/home-gallery.git",
     "directory": "packages/extractor"
   },
-  "devDependencies": {
-    "cpx": "^1.5.0",
-    "onchange": "^7.0.2",
-    "rimraf": "^3.0.2"
-  },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
     "@ffprobe-installer/ffprobe": "^1.1.0",
-    "@home-gallery/common": "^1.0.0",
-    "@home-gallery/index": "^1.0.0",
-    "@home-gallery/storage": "^1.0.0",
-    "@home-gallery/stream": "^1.0.0",
+    "@home-gallery/common": "file:../common",
+    "@home-gallery/index": "file:../index",
+    "@home-gallery/storage": "file:../storage",
+    "@home-gallery/stream": "file:../stream",
     "debug": "^4.1.1",
     "exiftool-vendored": "^9.3.0",
     "ffprobe": "^1.1.0",
     "fluent-ffmpeg": "^2.1.2",
     "node-vibrant": "^3.1.5",
+    "request": "^2.88.2",
     "sharp": "^0.23.4",
     "through2": "^3.0.1",
     "yargs": "^15.0.2"

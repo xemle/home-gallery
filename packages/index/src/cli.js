@@ -8,7 +8,7 @@ const command = {
       index: {
         alias: 'i',
         describe: 'File index filename',
-        default: 'fs.idx'
+        default: 'index.idx'
       },
       directory: {
         alias: ['d', 'dir'],

@@ -1,6 +1,6 @@
 {
   "source": [
-    "node_modules/@home-gallery/webapp/src"
+    "../webapp/src"
   ],
   "homepage": "src/homepage.md",
   "destination": "dist/",

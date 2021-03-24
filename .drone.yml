@@ -13,7 +13,6 @@ steps:
   - npm set registry http://npm.home.local
   - npm config set unsafe-perm true
   - npm install
-  - npm run bootstrap -- --concurrency 2 --no-ci --ignore @home-gallery/api-server
 
 - name: build
   image: node:14-alpine

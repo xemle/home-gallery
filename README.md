@@ -61,8 +61,6 @@ media files. Further feedback is welcome.
 ```
 # Install required packages
 npm install
-# Bootstrap packages of mono repository
-npm run bootstrap
 # Build required modules
 npm run build
 ```
@@ -134,13 +132,13 @@ The API can be configured and ran also locally or as Docker container. See
 
 ## Run HomeGallery
 
-Run `./gallery.js` (or `node gallery`) to
+Run `./gallery.js` (or `node gallery.js`) to
 
 - update and process media files
 - start the web server
 - update the gallery application (requires git)
 
-Use different configurations by `--config <file>` parameter. E.g. `./gallery.js --config gallery.other.json`
+Use different configurations by `--config <file>` parameter. E.g. `./gallery.js --config other-gallery.config.yml`.
 
 Note: `./gallery.js` is a wrapper of `./cli.js` which offers more granular functionality
 for file indexer, extractor, database builder or extractor. See `./cli.js -h` for details.

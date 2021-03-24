@@ -102,9 +102,8 @@ const databaseBuild = async (config) => {
 const systemUpgrade = async () => {
   await runSimple('git pull')
   await runSimple('npm install')
-  await runSimple('npm run bootstrap -- --ignore "@home-gallery/api-server"')
-  await runSimple('npm run clean -- --ignore "@home-gallery/api-server"')
-  await runSimple('npm run build -- --ignore "@home-gallery/api-server"')
+  await runSimple('npm run clean -- --ignore "@home-gallery/{api-server,styleguide}"')
+  await runSimple('npm run build -- --ignore "@home-gallery/{api-server,styleguide}"')
 }
 
 const menu = {

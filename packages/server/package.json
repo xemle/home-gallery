@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "cpx \"src/**\" dist",
-    "postbuild": "cpx \"node_modules/@home-gallery/webapp/dist/**\" dist/public",
+    "postbuild": "cpx \"../webapp/dist/**\" dist/public",
     "run": "node index.js",
     "watch": "onchange -d 200 \"src/**\" -- npm run build"
   },
@@ -22,17 +22,11 @@
     "url": "https://github.com/xemle/home-gallery.git",
     "directory": "packages/server"
   },
-  "devDependencies": {
-    "cpx": "^1.5.0",
-    "debug": "^4.1.1",
-    "onchange": "^7.0.2",
-    "rimraf": "^3.0.2"
-  },
   "dependencies": {
-    "@home-gallery/common": "^1.0.0",
-    "@home-gallery/events": "^1.0.0",
-    "@home-gallery/database": "^1.0.0",
-    "@home-gallery/webapp": "^1.0.0",
+    "@home-gallery/common": "file:../common",
+    "@home-gallery/database": "file:../database",
+    "@home-gallery/events": "file:../events",
+    "@home-gallery/webapp": "file:../webapp",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
