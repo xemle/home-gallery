@@ -7,21 +7,21 @@ platform:
 
 steps:
 - name: install
-  image: node:12-alpine
+  image: node:14-alpine
   commands:
-  - apk add --no-cache python make g++ git openssh-client vips-dev
+  - apk add --no-cache python make g++ git openssh-client perl vips-dev
   - npm set registry http://npm.home.local
   - npm config set unsafe-perm true
   - npm install
   - npm run bootstrap -- --concurrency 2 --no-ci --ignore @home-gallery/api-server
 
 - name: build
-  image: node:12-alpine
+  image: node:14-alpine
   commands:
   - npm run build -- --ignore @home-gallery/api-server
 
 - name: test
-  image: node:12-alpine
+  image: node:14-alpine
   commands:
   - npm run test -- --ignore @home-gallery/api-server
 
