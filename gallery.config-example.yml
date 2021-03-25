@@ -31,6 +31,7 @@
 #confDir: '{baseDir}/.config/home-gallery'
 # file prefix for index, database and events
 #confPrefix: ''
+#cacheDir: '{baseDir}/.cache/home-gallery'
 
 #
 # Sources
@@ -62,11 +63,11 @@ sources:
 # Storage and files configuration
 #
 #storage:
-  #dir: '{baseDir}/.cache/home-gallery/storage'
+  #dir: '{cacheDir}/storage'
 #database:
-  #file: '{confDir}/database.db'
+  #file: '{confDir}/{confPrefix}database.db'
 #events:
-  #file: '{confDir}/events.db'
+  #file: '{confDir}/{confPrefix}events.db'
 
 #
 # Server configuration

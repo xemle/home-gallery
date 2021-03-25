@@ -204,6 +204,7 @@ const expandConfigDefaults = (config) => {
     baseDir: '~',
     confDir: '{baseDir}/.config/home-gallery',
     confPrefix: '',
+    cacheDir: '{baseDir}/.cache/home-gallery'
   }, ...config});
 
   if (config.sources && config.sources.length) {
@@ -218,7 +219,7 @@ const expandConfigDefaults = (config) => {
   }
 
   config.storage = Object.assign({
-    dir: '{baseDir}/.cache/home-gallery/storage'
+    dir: '{cacheDir}/storage'
   }, config.storage);
 
   config.database = Object.assign({
@@ -288,7 +289,7 @@ const resolveConfig = (config, file) => {
     HOME: process.env['HOME'] || process.env['HOMEPATH'],
     CWD: fsPath.resolve(fsPath.dirname(file))
   } }
-  resolveAll(config, ['baseDir', 'confDir', 'confPrefix'], config, env)
+  resolveAll(config, ['baseDir', 'confDir', 'confPrefix', 'cacheDir'], config, env)
 
   const sources = config.sources || [];
   for (const source of sources) {
