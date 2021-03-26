@@ -22,7 +22,7 @@ const command = {
       },
       host: {
         alias: 'H',
-        default: 'localhost',
+        default: '0.0.0.0',
         string: true,
         describe: 'Listening host IP address'
       },
