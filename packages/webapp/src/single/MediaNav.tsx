@@ -68,7 +68,7 @@ export const MediaNav = ({current, index, prev, next, listPathname, onClick}) =>
         }
         { query.type != 'none' &&
           <a onClick={event => onClick({event, type: 'none'})} className="mediaNav__button" title="Show chronology">
-            <i className="fas fa-calendar-day fa-2x"></i>
+            <i className="fas fa-clock fa-2x"></i>
           </a>
         }
         <a onClick={event => onClick({event, type: 'info'})} className="mediaNav__button" title="Show info">
