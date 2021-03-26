@@ -199,13 +199,21 @@ const menu = {
   }
 }
 
-const expandConfigDefaults = (config) => {
-  Object.assign(config, {...{
+const useEnvDefaults = (config, env) => {
+  Object.entries(config).forEach(([key, value]) => {
+    config[key] = envDefault(env, key, value)
+  })
+}
+
+const expandConfigDefaults = (config, env) => {
+  const defaultVars = {
     baseDir: '~',
     configDir: '{baseDir}/.config/home-gallery',
     configPrefix: '',
     cacheDir: '{baseDir}/.cache/home-gallery'
-  }, ...config});
+  }
+  useEnvDefaults(defaultVars, env)
+  Object.assign(config, {...defaultVars, ...config});
 
   if (config.sources && config.sources.length) {
     for (const i in config.sources) {
@@ -248,9 +256,16 @@ const resolvePath = (obj, path) => {
   return [parent, key];
 }
 
+const envName = path => 'GALLERY_' + path.replace(/([A-Z])/g, c => `_${c}`).toUpperCase().replace(/[^_A-Z]/g, '_')
+
 const resolveEnv = (env, path) => {
-  const name = 'GALLERY_' + path.replace(/([A-Z])/g, c => `_${c}`).toUpperCase().replace(/\./g, '_')
+  const name = envName(path)
   return env[name] ? [env, name] : [env, false]
+}
+
+const envDefault = (env, path, defaultValue) => {
+  const name = envName(path)
+  return env[name] ? env[name] : defaultValue
 }
 
 const resolveEnvOrPath = (env, obj, path) => {
@@ -284,11 +299,7 @@ const resolveAll = (obj, paths, config, env) => {
   paths.forEach(path => resolve(obj, path, config, env))
 }
 
-const resolveConfig = (config, file) => {
-  const env = {...process.env, ...{
-    HOME: process.env['HOME'] || process.env['HOMEPATH'],
-    CWD: fsPath.resolve(fsPath.dirname(file))
-  } }
+const resolveConfig = (config, env) => {
   resolveAll(config, ['baseDir', 'configDir', 'configPrefix', 'cacheDir'], config, env)
 
   const sources = config.sources || [];
@@ -324,11 +335,21 @@ const useExampleFallback = async (file, err) => {
 }
 
 const loadConfig = async file => {
-  const data = await fs.readFile(file, 'utf8').catch(e => useExampleFallback(file, e))
   const isYaml = file.match(/\.ya?ml$/i);
+  const isJson = file.match(/\.json$/i);
+  if (!isYaml && !isJson) {
+    throw new Error(`Unknown file extension of '${file}'. Expect a .yaml or .json file`)
+  }
+
+  const data = await fs.readFile(file, 'utf8').catch(e => useExampleFallback(file, e))
   const config = isYaml ? YAML.parse(data) : JSON.parse(file)
-  expandConfigDefaults(config)
-  resolveConfig(config, file)
+  const env = {...process.env, ...{
+    HOME: process.env['HOME'] || process.env['HOMEPATH'],
+    CWD: fsPath.resolve(fsPath.dirname(file))
+  } }
+
+  expandConfigDefaults(config, env)
+  resolveConfig(config, env)
   await validateConfig(config)
     .catch(e => {
       console.log(`Check your expanded configuration file:`)
@@ -341,7 +362,7 @@ const loadConfig = async file => {
 
 const parseArgs = (args, env) => {
   const options = {
-    configFile: env['GALLERY_CONFIG'] || 'gallery.config.yml'
+    configFile: envDefault(env, 'config', 'gallery.config.yml')
   }
 
   while (args.length) {
