@@ -120,15 +120,18 @@ const execFaces = (entries: Entry[], descriptor) => {
 }
 
 const byDate = (a, b) => a.date < b.date ? 1 : -1;
+const byDateRev = (a, b) => a.date < b.date ? -1 : 1;
 
 const doSearch = async (allEntries: Map<String, Entry>, query) => {
   let entries = Array.from(allEntries.values())
   let defaultSortOrder = true;
+  let reverse = false;
 
   if (query.type == 'query') {
     entries = await execQuery(entries, query.value);
   } else if (query.type == 'year') {
     entries = entries.filter(entry => entry.year == query.value)
+    reverse = true
   } else if (query.type == 'similar') {
     const id = query.value;
     const seedEntry = allEntries.get(id);
@@ -146,7 +149,7 @@ const doSearch = async (allEntries: Map<String, Entry>, query) => {
   }
 
   if (defaultSortOrder) {
-    entries.sort(byDate);
+    entries.sort(reverse ? byDateRev : byDate);
   }
   return entries;
 }
