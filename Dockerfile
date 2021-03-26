@@ -15,7 +15,8 @@ WORKDIR /app
 
 RUN cp package.json package.json.orig && \
   grep -v -e api-server -e styleguide package.json.orig > package.json && \
-  npm install
+  npm install && \
+  find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
 
 RUN npm run build -- --loglevel verbose && \
   npm prune --production && \

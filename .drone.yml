@@ -13,6 +13,7 @@ steps:
   - npm set registry http://npm.home.local
   - npm config set unsafe-perm true
   - npm install
+  - find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
 
 - name: build
   image: node:14-alpine
