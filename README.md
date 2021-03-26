@@ -143,6 +143,63 @@ Use different configurations by `--config <file>` parameter. E.g. `./gallery.js 
 Note: `./gallery.js` is a wrapper of `./cli.js` which offers more granular functionality
 for file indexer, extractor, database builder or extractor. See `./cli.js -h` for details.
 
+## Docker
+
+Instead of installing node and other required libraries you can use also docker to run the gallery
+
+### Build
+
+Build the docker image by following command
+
+```
+docker build -t home-gallery .
+```
+
+### Data volume structure
+
+The gallery is located at `/app` whereas the data is stored in `/data` within the container.
+The `/data` folder has following structure:
+
+```
+`-- ./data - Docker data volume
+  +-- sources - Your media file sources or other volumne mounts
+  +-- config - Configuration files
+  | `-- gallery.config.yml - Main configuration file
+  `-- storage - Preview images and meta data
+```
+
+Configure your `./data/config/gallery.config.yml` configuration to use media files from `./data/sources`
+
+```
+sources:
+  - dir: '{baseDir}/sources'
+```
+
+Run the docker container
+
+```
+docker run -ti --rm -v $(pwd)/data:/data -u $(id -u):$(id -g) -p 3000:3000 home-gallery
+```
+
+and follow the CLI to render preview files and start the webserver
+
+### Mount files and folders
+
+Media files might be located at multiple folders and paritions.
+These folders and partitions should be mounted as docker volumes into `/data/sources` directory.
+As example for a media partition `/mnt/media` run
+
+```
+docker run -ti --rm -v $(pwd)/data:/data -v /mnt/media:/data/sources/media -u $(id -u):$(id -g) -p 3000:3000 home-gallery
+```
+
+with source configuration in `gallery.config.yml`:
+
+```
+sources:
+  - dir: '{baseDir/sources/media}'
+```
+
 ## Development
 
 HomeGallery uses [lerna](https://github.com/lerna/lerna) with multi
