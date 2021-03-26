@@ -17,6 +17,11 @@
   ],
   "author": "Sebastian Felis <sebastian@silef.de>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xemle/home-gallery.git",
+    "directory": "packages/server"
+  },
   "devDependencies": {
     "cpx": "^1.5.0",
     "debug": "^4.1.1",

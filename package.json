@@ -17,6 +17,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xemle/home-gallery.git"
+  },
   "devDependencies": {
     "lerna": "^3.20.2"
   },

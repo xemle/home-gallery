@@ -13,6 +13,11 @@
   ],
   "author": "Sebastian Felis <sebastian@silef.de>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xemle/home-gallery.git",
+    "directory": "packages/api-server"
+  },
   "dependencies": {
     "@tensorflow-models/coco-ssd": "^2.2.1",
     "@tensorflow-models/mobilenet": "^2.0.4",

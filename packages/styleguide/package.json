@@ -24,6 +24,11 @@
   ],
   "author": "Sebastian Felis <sebastian@silef.de>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xemle/home-gallery.git",
+    "directory": "packages/styleguide"
+  },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.13.1",
     "cpx": "^1.5.0",
