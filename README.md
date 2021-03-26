@@ -80,37 +80,37 @@ sources:
 ```
 
 to include all images and videos from your `$HOME/Pictures` directory. The previews
-are stored in `~/.cache/home-gallery/storage` and the configuration files like
+are stored in `~/.cache/home-gallery` and the configuration files like
 file index, database, events are stored in `~/.config/home-gallery` directory.
 
-A more advance configuration would be
+A more advance configuration with all gallery files in `/mnt/gallery` would be have
 
 ```
 baseDir: /mnt/gallery
-confDir: '{baseDir}/config'
+configDir: '{baseDir}/config'
+cacheDir: '{baseDir}'
 sources:
   - dir: /mnt/media
-    index: '{confDir}/mnt-media.idx
+    index: '{configDir}/mnt-media.idx
     exclude:
       - *.CR2
       - *.cr2
   - dir: ~/Pictures
-    index: '{confDir}/{basename(dir)}.idx'
-storage:
-  dir: '{baseDir}/storage'
+    index: '{configDir}/{basename(dir)}.idx'
 server:
   port: 8080
-  host: '0.0.0.0'
-  key: '{confDir}/server.key'
-  cert: '{confDir}/server.crt'
+  key: '{configDir}/server.key'
+  cert: '{configDir}/server.crt'
 ```
 
-to use media files from directories `/mnt/media` and `$HOME/Pictures`. The gallery
-files are stored on a separate partition `/mnt/gallery`. The storage directory is
+to use media files from directories `/mnt/media` and `$HOME/Pictures`.
+The storage directory is
 `/mnt/gallery/storage` and other gallery configuration files are located at
 `/mnt/gallery/config`. The server uses https on port 8080.
 
 See [gallery.config-example.yml](gallery.config-example.yml) for more configuration details.
+The gallery configuration can be also written in JSON format and must end with `.json` like
+`gallery.config.json`.
 
 # External Services and Privacy
 

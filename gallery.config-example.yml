@@ -16,21 +16,21 @@
 #
 # Variable replacements
 #   baseDir: '~'
-#   confDir: '{baseDir}/.config/home-gallery'
+#   configDir: '{baseDir}/.config/home-gallery'
 # configDir is replaced to '~/.config/home-gallery' and than to '$HOME/.config/home-gallery'
 #
-# Variables are baseDir, confDir, confPrefix and dir in sources
+# Variables are baseDir, configDir, configPrefix, cacheDir and dir in sources
 #
-# Variables baseDir, confDir and confPrefix are overwritten by environment
-# variables GALLERY_BASE_DIR, GALLERY_CONF_DIR, GALLERY_CONF_PREFIX
+# Variables baseDir, configDir, configPrefix and cacheDir are overwritten by environment
+# variables GALLERY_BASE_DIR, GALLERY_CONFIG_DIR, GALLERY_CONFIG_PREFIX, GALLERY_CACHE_DIR
 
 #
 # General
 #
 #baseDir: '~'
-#confDir: '{baseDir}/.config/home-gallery'
+#configDir: '{baseDir}/.config/home-gallery'
 # file prefix for index, database and events
-#confPrefix: ''
+#configPrefix: ''
 #cacheDir: '{baseDir}/.cache/home-gallery'
 
 #
@@ -39,7 +39,7 @@
 # List of media source directories
 sources:
   - dir: '{baseDir}/Pictures'
-    #index: '{confDir}/{confPrefix}{basename(dir)}.idx'
+    #index: '{configDir}/{configPrefix}{basename(dir)}.idx'
     # excludes are using gitignore patterns
     #excludes:
       #- .DS_Store
@@ -47,7 +47,7 @@ sources:
       #- '*.tmp'
       #- '*cache*'
     #excludeIfPresent: .galleryignore
-    # excludeFromFile: '{confDir}/excludes'
+    # excludeFromFile: '{configDir}/excludes'
     # Set offline to true if source directory/disk is offline
     #offline: true
 
@@ -65,9 +65,9 @@ sources:
 #storage:
   #dir: '{cacheDir}/storage'
 #database:
-  #file: '{confDir}/{confPrefix}database.db'
+  #file: '{configDir}/{configPrefix}database.db'
 #events:
-  #file: '{confDir}/{confPrefix}events.db'
+  #file: '{configDir}/{configPrefix}events.db'
 
 #
 # Server configuration
@@ -76,5 +76,5 @@ sources:
   #port: 3000
   #host: localhost
   # security configuration for https
-  # key: '{confDir}/server.key'
-  # cert: '{confDir}/server.crt'
+  # key: '{configDir}/server.key'
+  # cert: '{configDir}/server.crt'

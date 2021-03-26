@@ -202,8 +202,8 @@ const menu = {
 const expandConfigDefaults = (config) => {
   Object.assign(config, {...{
     baseDir: '~',
-    confDir: '{baseDir}/.config/home-gallery',
-    confPrefix: '',
+    configDir: '{baseDir}/.config/home-gallery',
+    configPrefix: '',
     cacheDir: '{baseDir}/.cache/home-gallery'
   }, ...config});
 
@@ -211,7 +211,7 @@ const expandConfigDefaults = (config) => {
     for (const i in config.sources) {
       const source = config.sources[i];
       config.sources[i] = Object.assign({
-        index: '{confDir}/{confPrefix}{basename(dir)}.idx',
+        index: '{configDir}/{configPrefix}{basename(dir)}.idx',
         offline: false,
         excludeIfPresent: '.galleryignore'
       }, source)
@@ -223,11 +223,11 @@ const expandConfigDefaults = (config) => {
   }, config.storage);
 
   config.database = Object.assign({
-    file: '{confDir}/{confPrefix}database.db'
+    file: '{configDir}/{configPrefix}database.db'
   }, config.database);
 
   config.events = Object.assign({
-    file: '{confDir}/{confPrefix}events.db'
+    file: '{configDir}/{configPrefix}events.db'
   }, config.events);
 
   return config;
@@ -289,7 +289,7 @@ const resolveConfig = (config, file) => {
     HOME: process.env['HOME'] || process.env['HOMEPATH'],
     CWD: fsPath.resolve(fsPath.dirname(file))
   } }
-  resolveAll(config, ['baseDir', 'confDir', 'confPrefix', 'cacheDir'], config, env)
+  resolveAll(config, ['baseDir', 'configDir', 'configPrefix', 'cacheDir'], config, env)
 
   const sources = config.sources || [];
   for (const source of sources) {
