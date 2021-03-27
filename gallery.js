@@ -312,16 +312,34 @@ const resolveConfig = (config, env) => {
 
 const assertError = (message, ...args) => { throw new Error(message, ...args) };
 
-const validateConfig = async config => {
-  (config.sources && config.sources.length) || assertError(`Media source directories are missing`);
-
-  for (const i in config.sources) {
-    const source = config.sources[i];
-    const isDir = await fs.access(source.dir).then(() => fs.stat(source.dir)).catch(() => false);
-    isDir || assertError(`Source directory ${source.dir} does not exists`)
+const validateSources = async sources => {
+  if (!sources || !sources.length) {
+    console.log(`Warn: Sources list is empty`)
+    return
   }
-  const uniqIndexFiles = config.sources.map(source => source.index).filter((v, i, a) => a.indexOf(v) === i);
-  (uniqIndexFiles.length == config.sources.length) || assertError(`Source index files are not unique`);
+
+  const onlineSources = sources.filter(source => !source.offline)
+  for (const i in onlineSources) {
+    const source = sources[i];
+    const dirStat = await fs.access(source.dir).then(() => fs.stat(source.dir)).catch(() => false);
+    dirStat || assertError(`Source directory '${source.dir}' does not exists`)
+    dirStat.isDirectory() || assertError(`Source directory '${source.dir}' is not a directory`)
+  }
+
+  const offlineSources = sources.filter(source => source.offline)
+  for (const i in offlineSources) {
+    const source = sources[i];
+    const fileStat = await fs.access(source.index).then(() => fs.stat(source.index)).catch(() => false);
+    fileStat || assertError(`Index file ${source.index} of offline source directory '${source.dir}' does not exists`)
+    fileStat.isFile() || assertError(`Index file ${source.index} of offline source directory '${source.dir}' is not a file`)
+  }
+
+  const uniqIndexFiles = sources.map(source => source.index).filter((v, i, a) => a.indexOf(v) === i);
+  (uniqIndexFiles.length == sources.length) || assertError(`Source index files are not unique`);
+}
+
+const validateConfig = async config => {
+  await validateSources(config.sources)
 }
 
 const useExampleFallback = async (file, err) => {
