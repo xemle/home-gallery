@@ -72,6 +72,10 @@ const updateIndices = async sources => {
 }
 
 const extract = async (config, sources, checksumFrom) => {
+  if (!sources.length) {
+    console.log(`Warn: Sources list is empty. No files to extract`);
+    return;
+  }
   const args = ['extract'];
   const extractor = config.extractor || {};
   sources.forEach(source => args.push('--index', source.index));
