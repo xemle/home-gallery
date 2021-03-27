@@ -145,8 +145,8 @@ const menu = {
       }
       let sources = config.sources.filter(source => !source.offline)
       if (sources.length > 1) {
-        const dirs = await runner(menu.selectSources, config)
-        sources = sources.filter(source => dirs.indexOf(source.dir) >= 0)
+        const indices = await runner(menu.selectSources, config)
+        sources = sources.filter(source => indices.indexOf(source.index) >= 0)
       }
 
       const now = new Date().toISOString().substring(0, 16);
@@ -161,17 +161,17 @@ const menu = {
     prompt: config => new MultiSelect({
       message: 'Select source directories to update',
       footer: '(use space to select, enter to confirm)',
-      initial: config.sources.filter(source => !source.offline).map(source => source.dir),
+      initial: config.sources.filter(source => !source.offline).map(source => source.index),
       choices: config.sources.map((source, i) => {
-        return { value: source.dir, message: `${i + 1}. Source dir: ${source.dir}`, disabled: source.offline, hint: `${source.offline ? '(offline)' : ''}`}
+        return { value: source.index, message: `${i + 1}. Source dir: ${source.dir} (${fsPath.basename(source.index)})`, disabled: source.offline, hint: `${source.offline ? '(offline)' : ''}`}
       })
     }).run(),
-    action: async (dirs, config) => {
-      if (!dirs.length) {
+    action: async (indices, config) => {
+      if (!indices.length) {
         console.log(`No source directories selected. Continue with all ${config.sources.length} sources`);
-        return config.sources.filter(source => !source.offline).map(source => source.dir)
+        return config.sources.filter(source => !source.offline).map(source => source.index)
       }
-      return dirs;
+      return indices;
     }
   },
   system: {
