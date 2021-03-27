@@ -346,27 +346,28 @@ const validateConfig = async config => {
   await validateSources(config.sources)
 }
 
-const useExampleFallback = async (file, err) => {
+const useExampleFallback = async (options, err) => {
   const example = 'gallery.config-example.yml'
   return fs.access(example)
     .then(() => {
       console.log(`Use fallback configuration ${example}`)
+      options.configFile = example
       return fs.readFile(example, 'utf8')
-    }, () => Promise.reject(new Error(`Could not read configuration file '${file}': ${err}`)))
+    }, () => Promise.reject(new Error(`Could not read configuration file '${options.configFile}': ${err}`)))
 }
 
-const loadConfig = async file => {
-  const isYaml = file.match(/\.ya?ml$/i);
-  const isJson = file.match(/\.json$/i);
+const loadConfig = async options => {
+  const isYaml = options.configFile.match(/\.ya?ml$/i);
+  const isJson = options.configFile.match(/\.json$/i);
   if (!isYaml && !isJson) {
-    throw new Error(`Unknown file extension of '${file}'. Expect a .yaml or .json file`)
+    throw new Error(`Unknown file extension of '${options.configFile}'. Expect a .yaml or .json file`)
   }
 
-  const data = await fs.readFile(file, 'utf8').catch(e => useExampleFallback(file, e))
-  const config = isYaml ? YAML.parse(data) : JSON.parse(file)
+  const data = await fs.readFile(options.configFile, 'utf8').catch(e => useExampleFallback(options, e))
+  const config = isYaml ? YAML.parse(data) : JSON.parse(data)
   const env = {...process.env, ...{
     HOME: process.env['HOME'] || process.env['HOMEPATH'],
-    CWD: fsPath.resolve(fsPath.dirname(file))
+    CWD: fsPath.resolve(fsPath.dirname(options.configFile))
   } }
 
   expandConfigDefaults(config, env)
@@ -377,8 +378,9 @@ const loadConfig = async file => {
       console.log(YAML.stringify(config))
       throw e
     })
-  console.log(`Loaded gallery configuration from ${file}`)
-  return config;
+  console.log(`Loaded gallery configuration from ${options.configFile}`)
+  options.config = config;
+  return options;
 }
 
 const parseArgs = (args, env) => {
@@ -396,7 +398,7 @@ const parseArgs = (args, env) => {
 }
 
 const options = parseArgs(process.argv.slice(2), process.env)
-loadConfig(options.configFile)
-  .then(config => runner(menu.main, config))
+loadConfig(options)
+  .then(options => runner(menu.main, options.config))
   .then(result => console.log(result === 'exit' ? 'Have a good day...' : `Result: ${result}`))
   .catch(err => console.log(`Error: ${err}`))
