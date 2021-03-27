@@ -20,7 +20,7 @@ const run = async (command, args, options) => {
   })
 }
 
-const runCli = async(args, options) => run('node', ['cli.js', ...args], options)
+const runCli = async(args, options, nodeArgs) => run('node', [...(nodeArgs || []), 'cli.js', ...args], options)
 
 const runSimple = async (commandLine, options) => {
   const args = commandLine.split(' ');
@@ -96,7 +96,7 @@ const databaseBuild = async (config) => {
   const excludes = storage.excludes || [];
   excludes.forEach(exclude => args.push('--exclude', exclude))
 
-  await runCli(args, {env: {DEBUG: '*'}})
+  await runCli(args, {env: {DEBUG: '*'}}, ['--max-old-space-size=4096'])
 }
 
 const systemUpgrade = async () => {
