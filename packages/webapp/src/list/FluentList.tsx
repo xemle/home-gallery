@@ -20,7 +20,7 @@ const Cell = ({height, width, index, item, items}) => {
   const toggleId = useStoreActions(store => store.editMode.toggleId);
   const toggleRange = useStoreActions(store => store.editMode.toggleRange);
   const {id, previews, vibrantColors } = item;
-  const style = { height, width, backgroundColor: vibrantColors[1] || 'inherited' }
+  const style = { height, width, backgroundColor: (vibrantColors && vibrantColors[1]) || 'inherited' }
   const history = useHistory();
 
   const previewSizes = [1920, 1280, 800, 320, 128];
