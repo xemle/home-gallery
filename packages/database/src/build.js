@@ -31,7 +31,7 @@ function build(indexFilenames, storageDir, databaseFilename, fileFilterFn, cb) {
       mapToDatabaseEntry,
       // Stream entry list
       groupByDir(),
-      readEntryFilesGrouped(storageDir),
+      readEntryFilesGrouped(storageDir, 2),
       processIndicator({name: 'read directories'}),
       groupSidecarFiles,
       // Stream single entry

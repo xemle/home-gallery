@@ -6,17 +6,17 @@ const { getEntryFilesCacheKey, getEntryFilesCacheFilename } = require('./entry-f
 const { readEntryFilesCache } = require('./entry-files-cache');
 const { lruCache } = require('@home-gallery/common');
 
-function createCache(storageDir) {
+function createCache(storageDir, dirCacheSize) {
   const loadCache = (entry, cb) => {
     const cacheFilename = getEntryFilesCacheFilename(entry);
     readEntryFilesCache(path.join(storageDir, cacheFilename), cb);
   }
 
-  return lruCache(getEntryFilesCacheKey, loadCache, 20);
+  return lruCache(getEntryFilesCacheKey, loadCache, dirCacheSize);
 }
 
-function readEntryFilesCached(storageDir) {
-  const cache = createCache(storageDir);
+function readEntryFilesCached(storageDir, dirCacheSize) {
+  const cache = createCache(storageDir, dirCacheSize || 8);
   const clearCache = () => cache.clear();
 
   const readEntryFiles = (entry, cb) => {
