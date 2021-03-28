@@ -2,7 +2,7 @@ const { pipeline } = require('stream');
 
 const { readStreams } = require('@home-gallery/index');
 
-const { processIndicator, filter, flatten, sort, each, toList } = require('@home-gallery/stream');
+const { memoryIndicator, processIndicator, filter, flatten, sort, each, toList } = require('@home-gallery/stream');
 const mapToDatabaseEntry = require('./map-database-entry');
 const readEntryFilesGrouped = require('./read-entry-files-grouped');
 const groupByDir = require('./group-by-dir');
@@ -39,6 +39,7 @@ function build(indexFilenames, storageDir, databaseFilename, fileFilterFn, cb) {
       filter(entry => supportedTypes.indexOf(entry.type) >= 0),
       mapToMedia,
       processIndicator({name: 'map to media'}),
+      memoryIndicator({intervalMs: 30 * 1000}),
       toList(),
       sort(entry => entry.date, true).on('data', entries => {
         writeDatabase(databaseFilename, entries, (err, database) => {

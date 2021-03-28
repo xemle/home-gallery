@@ -4,6 +4,7 @@ const flatten = require('./flatten');
 const group = require('./group');
 const log = require('./log');
 const map = require('./map');
+const memoryIndicator = require('./memory-indicator');
 const parallel = require('./parallel');
 const purge = require('./purge');
 const processIndicator = require('./process-indicator');
@@ -18,6 +19,7 @@ module.exports = {
   group,
   log,
   map,
+  memoryIndicator,
   parallel,
   purge,
   processIndicator,
