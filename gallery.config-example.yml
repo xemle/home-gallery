@@ -36,7 +36,11 @@
 #
 # Sources
 #
-# List of media source directories
+# List of media source directories. These can be read only.
+#
+# All sources are used to build the gallery database. If you need
+# different databases or gallery instances use different gallery
+# configurations
 sources:
   - dir: '{baseDir}/Pictures'
     #index: '{configDir}/{configPrefix}{basename(dir)}.idx'
@@ -48,8 +52,9 @@ sources:
       #- '*cache*'
     #excludeIfPresent: .galleryignore
     # excludeFromFile: '{configDir}/excludes'
-    # Set offline to true if source directory/disk is offline
-    #offline: true
+    # If source directory/disk is offline/unmounted set it to true.
+    # Offline sources require an index file
+    #offline: false
 
 #
 # Extractor settings
@@ -74,7 +79,7 @@ sources:
 #
 #server:
   #port: 3000
-  #host: localhost
+  #host: '0.0.0.0'
   # security configuration for https
   # key: '{configDir}/server.key'
   # cert: '{configDir}/server.crt'
