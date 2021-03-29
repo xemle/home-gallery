@@ -1,7 +1,7 @@
 const { pipeline } = require('stream');
 
 const { readStreams } = require('@home-gallery/index');
-const { filter, toList, sort, each, flatten, purge, processIndicator } = require('@home-gallery/stream');
+const { filter, purge, memoryIndicator, processIndicator } = require('@home-gallery/stream');
 const mapToStorageEntry = require('./map-storage-entry');
 const { createStorage } = require('./storage');
 
@@ -38,11 +38,6 @@ function extractData(config, cb) {
       filter(entry => entry.fileType === 'f' && entry.sha1sum && entry.size > 0),
       filter(entry => !minChecksumDate || entry.sha1sumDate > minChecksumDate),
       filter(entry => fileFilterFn(entry.filename)),
-      // Sort by index and filename
-      toList(),
-      sort(entry => `${entry.indexName}:${entry.filename}`, true),
-      each(entry => { total = entry.length }),
-      flatten(),
       mapToStorageEntry,
       // read existing files and meta data (json files)
       readAllEntryFiles(storage),
@@ -87,6 +82,7 @@ function extractData(config, cb) {
 
       groupByEntryFilesCacheKey(),
       updateEntryFilesCache(storage),
+      memoryIndicator({intervalMs: 30 * 1000}),
       purge(),
       (err) => {
         if (err) {

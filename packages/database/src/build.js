@@ -27,16 +27,10 @@ function build(indexFilenames, storageDir, databaseFilename, fileFilterFn, cb) {
 
     const supportedTypes = ['image', 'rawImage', 'video'];
 
-    let totalFiles = 0;
     pipeline(
       entryStream,
       filter(entry => entry.fileType === 'f' && entry.sha1sum && entry.size > 0),
       filter(entry => fileFilterFn(entry.filename)),
-      // Sort by index and filename
-      toList(),
-      sort(entry => `${entry.indexName}:${entry.filename}`, true),
-      each(entry => { totalFiles = entry.length }),
-      flatten(),
       mapToDatabaseEntry,
       // Stream entry list
       groupByDir(),
