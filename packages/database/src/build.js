@@ -10,6 +10,15 @@ const groupSidecarFiles = require('./group-sidecar-files');
 const mapToMedia = require('./map-media');
 const { writeDatabase } = require('./write-database');
 
+const uniq = (list, keyFn) => list.reduce(([result, keys], entry) => {
+  const key = keyFn(entry)
+  if (!keys[key]) {
+    keys[key] = true
+    result.push(entry)
+  }
+  return [result, keys]
+}, [[], {}])[0]
+
 function build(indexFilenames, storageDir, databaseFilename, fileFilterFn, cb) {
   readStreams(indexFilenames, (err, entryStream) => {
     if (err) {
@@ -42,7 +51,8 @@ function build(indexFilenames, storageDir, databaseFilename, fileFilterFn, cb) {
       memoryIndicator({intervalMs: 30 * 1000}),
       toList(),
       sort(entry => entry.date, true).on('data', entries => {
-        writeDatabase(databaseFilename, entries, (err, database) => {
+        const uniqueEntries = uniq(entries, entry => entry.id);
+        writeDatabase(databaseFilename, uniqueEntries, (err, database) => {
           if (err) {
             return cb(err);
           }
