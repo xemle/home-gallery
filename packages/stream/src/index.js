@@ -6,6 +6,7 @@ const log = require('./log');
 const map = require('./map');
 const memoryIndicator = require('./memory-indicator');
 const parallel = require('./parallel');
+const parseJson = require('./parse-json');
 const purge = require('./purge');
 const processIndicator = require('./process-indicator');
 const sort = require('./sort');
@@ -21,6 +22,7 @@ module.exports = {
   map,
   memoryIndicator,
   parallel,
+  parseJson,
   purge,
   processIndicator,
   sort,
