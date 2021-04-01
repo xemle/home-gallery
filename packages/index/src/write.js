@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const { writeJsonGzip } = require('@home-gallery/common');
 
 const rename = (from, to, index, cb) => {
@@ -11,9 +12,13 @@ const rename = (from, to, index, cb) => {
   });
 }
 
+const by = keyFn => (a, b) => keyFn(a) < keyFn(b) ? -1 : 1
+const byDir = by(e => path.dirname(e.filename))
+
 const writeIndex = (filename, index, cb) => {
   index.created = new Date().toISOString();
   const tmp = `${filename}.tmp`;
+  index.data.sort(byDir)
   writeJsonGzip(tmp, index, (err) => {
     if (err) {
       cb(err);
