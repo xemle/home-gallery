@@ -11,7 +11,7 @@ const writeIndex = require('./write');
 const checksum = require('./checksum');
 
 const { matcherFns } = require('./merge');
-const { readStreams } = require('./read-stream');
+const { readStream, readStreams } = require('./read-stream');
 
 const createOrUpdate = (directory, filename, options, cb) => {
   const now = new Date();
@@ -86,6 +86,7 @@ const update = (directory, filename, options, cb) => {
 }
 
 module.exports = {
+  readStream,
   readStreams,
   update,
   matcherFns

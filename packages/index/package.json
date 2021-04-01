@@ -25,6 +25,7 @@
     "@home-gallery/common": "file:../common",
     "async": "^3.1.0",
     "debug": "^4.1.1",
+    "split2": "^3.2.2",
     "yargs": "^15.0.2"
   }
 }

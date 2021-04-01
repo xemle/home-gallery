@@ -1,30 +1,76 @@
 const path = require('path');
-const { Readable, PassThrough } = require('stream');
+const fs = require('fs');
+const zlib = require('zlib');
+const { PassThrough, Transform } = require('stream')
+const split2 = require('split2');
 const debug = require('debug')('index:readStream');
 
-const readIndex = require('./read');
+const { map } = require('@home-gallery/stream')
 
-const by = keyFn => (a, b) => keyFn(a) < keyFn(b) ? -1 : 1
-const byDir = by(e => path.dirname(e.filename))
+const readHead = (filename, chunk, next) => {
+  const [headData, entry] = chunk.split('data":[{');
+  let head;
+  let headJson;
+  try {
+    headJson = headData + 'data":[]}';
+    head = JSON.parse(headJson);
+    if (!head || !head.type || head.type != 'home-gallery/fileindex@1.0') {
+      next(new Error(`Unknown file index format ${head && head.type || 'unknown'} for index file '${filename}'. Please read CHANGELOG and migrate!`))
+      return [head, false]
+    }
+    return [head, entry];
+  } catch (e) {
+    next(new Error(`Could not parse head JSON of index file '${filename}': ${e}. Data: ${headJson.substr(0, 160)}`));
+    return [head, false]
+  }
+}
+
+const isLastEntry = (data, tail) => data.substring(data.length - tail.length) == tail
+const stripLastEntry = (data, tail) => isLastEntry(data, tail) ? data.substring(0, data.length - tail.length) : data
+
+const parseJsonChunks = (filename) => {
+  let isHead = true
+  let entryIndex = 0;
+  return Transform({
+    objectMode: true,
+    transform: function (chunk, enc, next) {
+      if (isHead) {
+        isHead = false
+        const [head, entry] = readHead(filename, chunk, next)
+        if (entry === false) {
+          return;
+        }
+        this.emit('head', head)
+        chunk = entry;
+      } 
+      let entryJson = '{' + stripLastEntry(chunk, '}]}') + '}'
+      let entry;
+      try {
+        entry = JSON.parse(entryJson)
+      } catch (e) {
+        return next(new Error(`Could not parse entry JSON for file index '${filename}', entry index ${entryIndex}: ${e}. Data: ${entryJson.substr(0, 160)}`));
+      }
+      this.push(entry)
+      entry = null;
+      entryJson = null;
+      chunk = null;
+      entryIndex++;
+      next()
+    }
+  });
+}
 
 const readStream = (indexFilename, cb) => {
-  const t0 = Date.now();
-  readIndex(indexFilename, (err, index) => {
-    if (err) {
-      return cb(err);
-    }
+  debug(`Reading file index from ${filename}`)
+  const indexName = path.basename(indexFilename).replace(/\.[^.]+$/, '');
+  let index;
+  const stream = fs.createReadStream(indexFilename)
+    .pipe(zlib.createGunzip())
+    .pipe(split2('},{'))
+    .pipe(parseJsonChunks(indexFilename)).on('head', head => index = head)
+    .pipe(map(e => Object.assign(e, { indexName, url: `file://${path.join(index.base, e.filename)}` })))
 
-    const indexName = path.basename(indexFilename).replace(/\.[^.]+$/, '');
-    let entries = index.data
-      .sort(byDir)
-      .map(e => Object.assign(e, { indexName, url: `file://${path.join(index.base, e.filename)}` }))
-
-    const entryStream = Readable.from(entries)
-    debug(`Read file index from ${indexFilename} with ${entries.length} entries in ${Date.now() - t0}ms`);
-    entries = null;
-    index = null;
-    process.nextTick(() => cb(null, entryStream));
-  })
+  cb(null, stream)
 }
 
 const appendStream = (nextStream) => {
@@ -56,7 +102,7 @@ const readStreams = (indexFilenames, cb) => {
       if (!err) {
         return cb(stream);
       } else if (i < indexFilenames.length) {
-        debug(`Could not read index ${filename}: ${err}. Continue`)
+        debug(`Could not read file index '${filename}': ${err}. Continue`)
         return nextStream(cb)
       } else {
         return cb();
