@@ -197,7 +197,7 @@ with source configuration in `gallery.config.yml`:
 
 ```
 sources:
-  - dir: '{baseDir/sources/media}'
+  - dir: '{baseDir}/sources/media'
 ```
 
 ## Development
