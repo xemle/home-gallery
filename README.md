@@ -212,14 +212,3 @@ scope feature, e.g build only module `export` and `database`:
 npm run build -- --scope '@home-gallery/{export,database}'
 ```
 
-### Web App
-
-The web app can be stared in in development mode with hot reloading.
-By default the api requests are proxied to the default local server
-http://localhost:3000.
-
-Use `API_PROXY` environment variable to change the api proxy url.
-
-```
-API_PROXY=http://localhost:3000 npm run dev
-```
