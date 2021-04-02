@@ -8,7 +8,7 @@
     "clean": "lerna run clean",
     "build": "lerna run build",
     "test": "lerna run test",
-    "watch": "lerna run watch"
+    "watch": "lerna run watch --concurrency 20 --stream"
   },
   "bin": {
     "cli": "./cli.js",
