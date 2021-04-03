@@ -19,7 +19,7 @@ const Cell = ({height, width, index, item, items}) => {
   const selectedIdMap = useStoreState(state => state.editMode.selectedIdMap);
   const toggleId = useStoreActions(store => store.editMode.toggleId);
   const toggleRange = useStoreActions(store => store.editMode.toggleRange);
-  const {id, previews, vibrantColors } = item;
+  const {id, previews, vibrantColors, type, duration } = item;
   const style = { height, width, backgroundColor: (vibrantColors && vibrantColors[1]) || 'inherited' }
   const history = useHistory();
 
@@ -78,10 +78,33 @@ const Cell = ({height, width, index, item, items}) => {
     }
   });
 
+  const pad = (s, len = 2, char = '0') => {
+    while (s.length < len) {
+      s = char + s
+    }
+    return s
+  }
+
+  const humanizeDuration = duration => {
+    const hours = duration / 3600
+    const min = ((duration % 3600) / 60).toFixed()
+    const sec = (duration % 60).toFixed()
+    if (hours > 1) {
+      return `${hours.toFixed()}:${pad(min)}:${pad(sec)}`
+    }
+    return `${pad(min)}:${pad(sec)}`
+  }
+
   const previewUrl = `files/${preview}`;
   return (
     <div ref={ref} key={id} className={`fluent__cell ${isSelected() ? '-selected' : ''}`} style={style}>
       <img style={style} src={previewUrl} />
+      {type == 'video' &&
+        <span className="_detail">
+          <i className="fas fa-play pr-4"></i>
+          {humanizeDuration(duration)}
+        </span>
+      }
     </div>
   )
 }

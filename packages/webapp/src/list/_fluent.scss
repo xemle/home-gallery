@@ -5,6 +5,7 @@
 
 .fluent__cell {
   margin-left: 8px;
+  position: relative;
 
   img {
     object-fit: cover;
@@ -15,5 +16,20 @@
     outline: 4px solid mix($white, $primary-color, 40%);
     outline-offset: -1px;
     filter: brightness(110%) saturate(110%);
+  }
+
+  ._detail {
+    position: absolute;
+    right: 8px;
+    bottom: 0;
+  }
+
+  &:hover {
+    ._detail {
+      color: #eee;
+      .fas {
+        color: #eee;
+      }
+    }
   }
 }
