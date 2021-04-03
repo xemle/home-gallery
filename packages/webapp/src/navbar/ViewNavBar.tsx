@@ -23,12 +23,17 @@ export const ViewNavBar = () => {
     setViewMode(viewMode === ViewMode.VIEW ? ViewMode.EDIT : ViewMode.VIEW);
   }
 
+  const videoClickHandler = () => {
+    history.push(`/search/video`);
+  }
+
   return (
     <>
       <SearchNavBar >
         <div>
           <a className="nav__link link" onClick={allClickHandler}><i className="fas fa-globe"></i> <span className="hide-sm">Show all</span></a>
           <Link className="nav__link link" to={`/years`}><i className="fas fa-clock"></i> <span className="hide-sm">Years</span></Link>
+          <a className="nav__link link" onClick={videoClickHandler}><i className="fas fa-play"></i> <span className="hide-sm">Videos</span></a>
           <a className="nav__link link" onClick={editClickHandler}><i className="fas fa-pen"></i> <span className="hide-sm">Edit</span></a>
         </div>
       </SearchNavBar>

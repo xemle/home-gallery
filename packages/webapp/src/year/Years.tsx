@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import {
   useParams,
   Link,
+  useHistory,
   useLocation
 } from "react-router-dom";
 
@@ -15,6 +16,7 @@ import { Entry } from '../store/entry-model';
 
 export const Years = () => {
   const allEntries = useStoreState(state => state.entries.allEntries);
+  const history = useHistory();
 
   const years = useMemo(() => {
     const entries: Entry[] = Array.from(allEntries.values());
@@ -36,6 +38,8 @@ export const Years = () => {
         {years.map(year => {
           return <li key={year}>
             <Link to={`/years/${year}`}>{year}</Link>
+            <a onClick={() => history.push(`/years/${year}?q=image`)}><i className="fas fa-image"></i> <span className="hide-sm">Images</span></a>
+            <a onClick={() => history.push(`/years/${year}?q=video`)}><i className="fas fa-play"></i> <span className="hide-sm">Videos</span></a>
           </li>
         })}
       </ul>
