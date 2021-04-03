@@ -7,8 +7,12 @@
     "postinstall": "link-parent-bin",
     "clean": "lerna run clean",
     "build": "lerna run build",
+    "build:database": "lerna run build --scope \"@home-gallery/{common,stream,index,extractor,database}\"",
+    "build:web": "lerna run build --scope \"@home-gallery/{common,server,webapp,query,events}\"",
     "test": "lerna run test",
-    "watch": "lerna run watch --concurrency 20 --stream"
+    "watch": "lerna run watch --concurrency 20 --stream",
+    "watch:database": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{common,stream,index,extractor,database}\"",
+    "watch:web": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{common,server,webapp,query,events}\""
   },
   "bin": {
     "cli": "./cli.js",
