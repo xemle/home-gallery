@@ -9,7 +9,7 @@ import Hammer from 'hammerjs';
 
 import { useStoreState, useStoreActions } from '../store/hooks';
 import { SingleViewMode } from '../store/single-view';
-import useListPathname from './useListPathname';
+import useListLocation from './useListLocation';
 
 import { MediaNav } from './MediaNav';
 import { MediaViewUnknownType } from './MediaViewUnknownType';
@@ -48,7 +48,7 @@ export const MediaView = () => {
   let { id } = useParams();
   let location = useLocation();
   const history = useHistory();
-  const listPathname = useListPathname();
+  const listLocation = useListLocation();
   const dimensions = useBodyDimensions();
 
   const entries = useStoreState(state => state.entries.entries);
@@ -98,7 +98,7 @@ export const MediaView = () => {
       <div className={`single ${showDetails ? '-withDetail' : ''}`}>
         <div className="single__media position-fixed-md">
           <div className="MediaViewContainer">
-            <MediaNav index={index} current={current} prev={prev} next={next} listPathname={listPathname} onClick={onNavClick} />
+            <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} onClick={onNavClick} />
             {isImage &&
               <Zoomable key={key} childWidth={scaleSize.width} childHeight={scaleSize.height} onSwipe={onSwipe}>
                 <MediaViewImage key={key} media={current} next={next} prev={prev} showDetails={showDetails}/>
