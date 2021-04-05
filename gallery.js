@@ -103,11 +103,25 @@ const databaseBuild = async (config) => {
   await runCli(args, {env: {DEBUG: '*'}}, ['--max-old-space-size=4096'])
 }
 
+const getMainScript = async () => {
+  const json = await fs.readFile('package.json', 'utf8')
+  try {
+    const data = JSON.parse(json)
+    return data && data.main || 'gallery.js'
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
 const systemUpgrade = async () => {
   await runSimple('git pull')
   await runSimple('npm install')
   await runSimple('npm run clean -- --ignore "@home-gallery/{api-server,styleguide}"')
   await runSimple('npm run build -- --ignore "@home-gallery/{api-server,styleguide}"')
+  console.log('Gallery application was updated successfully. Start updated CLI...')
+  const main = await getMainScript()
+  await runSimple(`node ${main}`)
+  return 'exitSilent'
 }
 
 const menu = {
@@ -189,8 +203,7 @@ const menu = {
     }).run(),
     action: async (command, config) => {
       if (command === 'appUpgrade') {
-        await systemUpgrade(config);
-        return 'system'
+        return await systemUpgrade(config);
       } else if (command === 'showConfig') {
         console.log('gallery.config.yml:')
         console.log(YAML.stringify(config, null, 2))
@@ -400,5 +413,5 @@ const parseArgs = (args, env) => {
 const options = parseArgs(process.argv.slice(2), process.env)
 loadConfig(options)
   .then(options => runner(menu.main, options.config))
-  .then(result => console.log(result === 'exit' ? 'Have a good day...' : `Result: ${result}`))
+  .then(result => result == 'exit' && console.log('Have a good day...'))
   .catch(err => console.log(`Error: ${err}`))
