@@ -53,7 +53,8 @@ sources:
     #excludeIfPresent: .galleryignore
     # excludeFromFile: '{configDir}/excludes'
     # If source directory/disk is offline/unmounted set it to true.
-    # Offline sources require an index file
+    # Offline sources require an index file. Previews and meta data
+    # should be extracted first before marking a source offline
     #offline: false
 
 #

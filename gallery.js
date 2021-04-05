@@ -338,16 +338,16 @@ const validateSources = async sources => {
   const onlineSources = sources.filter(source => !source.offline)
   for (const i in onlineSources) {
     const source = sources[i];
-    const dirStat = await fs.access(source.dir).then(() => fs.stat(source.dir)).catch(() => false);
-    dirStat || assertError(`Source directory '${source.dir}' does not exists`)
+    const dirStat = await fs.stat(source.dir).catch(() => false);
+    dirStat || assertError(`Source directory '${source.dir}' does not exists and is required for an online source.`)
     dirStat.isDirectory() || assertError(`Source directory '${source.dir}' is not a directory`)
   }
 
   const offlineSources = sources.filter(source => source.offline)
   for (const i in offlineSources) {
     const source = sources[i];
-    const fileStat = await fs.access(source.index).then(() => fs.stat(source.index)).catch(() => false);
-    fileStat || assertError(`Index file ${source.index} of offline source directory '${source.dir}' does not exists`)
+    const fileStat = await fs.stat(source.index).catch(() => false);
+    fileStat || assertError(`Index file ${source.index} of offline source directory '${source.dir}' does not exists. Offline sources require an index file and you should process a source first before it can be marked offline`)
     fileStat.isFile() || assertError(`Index file ${source.index} of offline source directory '${source.dir}' is not a file`)
   }
 
