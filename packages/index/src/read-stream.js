@@ -60,15 +60,15 @@ const parseJsonChunks = (filename) => {
   });
 }
 
-const readStream = (indexFilename, cb) => {
+const readStream = (filename, cb) => {
   debug(`Reading file index from ${filename}`)
-  const indexName = path.basename(indexFilename).replace(/\.[^.]+$/, '');
-  let index;
-  const stream = fs.createReadStream(indexFilename)
+  const indexName = path.basename(filename).replace(/\.[^.]+$/, '');
+  let indexHead;
+  const stream = fs.createReadStream(filename)
     .pipe(zlib.createGunzip())
     .pipe(split2('},{'))
-    .pipe(parseJsonChunks(indexFilename)).on('head', head => index = head)
-    .pipe(map(e => Object.assign(e, { indexName, url: `file://${path.join(index.base, e.filename)}` })))
+    .pipe(parseJsonChunks(filename)).on('head', head => indexHead = head)
+    .pipe(map(e => Object.assign(e, { indexName, url: `file://${path.join(indexHead.base, e.filename)}` })))
 
   cb(null, stream)
 }
