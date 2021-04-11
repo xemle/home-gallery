@@ -10,7 +10,7 @@
     <link rel="apple-touch-icon" href="/public/logo192.png" />
     <meta name="theme-color" content="#909090" />
     <link rel="manifest" href="manifest.webmanifest">
-    <link rel="stylesheet" href="/app.scss">
+    <link rel="stylesheet" href="/app.css">
     <title>Home Gallery</title>
 </head>
 
@@ -21,9 +21,9 @@
         <noscript>Please enable Javascript to run the application</noscript>
     </div>
     <script>window.__homeGallery={}</script>
-    <script src="App.ts" type="text/javascript"></script>
+    <script src="App.js" type="text/javascript"></script>
     <script>
-      const isLocal = location.hostname === 'localhost';
+      const isLocal = ['127.0.0.1', 'localhost'].indexOf(location.hostname) >= 0;
       if ('serviceWorker' in navigator && !isLocal) {
         const worker = './service-worker.js';
         window.addEventListener('load', () => {
