@@ -33,7 +33,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "node-vibrant": "^3.1.5",
     "request": "^2.88.2",
-    "sharp": "^0.23.4",
+    "sharp": "^0.28.1",
     "through2": "^3.0.1",
     "yargs": "^15.0.2"
   }
