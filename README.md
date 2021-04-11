@@ -52,9 +52,12 @@ media files. Further feedback is welcome.
 
 ## Requirements
 
-* essential build tools like make or g++
-* libvips
-* [node](https://nodejs.org)
+HomeGallery runs on Linux (also Raspberry PI), Mac and Windows.
+
+For most cases node environment should be sufficient
+
+* [node](https://nodejs.org) version 14 LTS
+* perl (Linux)
 
 ## Installation
 
@@ -64,6 +67,13 @@ npm install
 # Build required modules
 npm run build
 ```
+
+In some cornor cases you might also need essential build tools to compile library
+bindings.
+
+* make
+* g++
+* python
 
 ## Configure HomeGallery
 

@@ -9,7 +9,7 @@ steps:
 - name: install
   image: node:14-alpine
   commands:
-  - apk add --no-cache python make g++ git openssh-client perl vips-dev
+  - apk add --no-cache perl
   - npm set registry http://npm.home.local
   - npm config set unsafe-perm true
   - npm install

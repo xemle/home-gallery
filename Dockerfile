@@ -1,13 +1,7 @@
 FROM node:14-alpine
 
 RUN apk add --no-cache \
-  python \
-  make \
-  g++ \
-  git \
-  openssh-client \
-  perl \
-  vips-dev
+  perl
 
 COPY package.json *.js lerna.json *.md *.yml LICENSE /app/
 COPY packages /app/packages/
