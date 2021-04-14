@@ -4,7 +4,7 @@
   "description": "",
   "main": "gallery.js",
   "scripts": {
-    "postinstall": "link-parent-bin && node validate-sharp.js",
+    "postinstall": "link-parent-bin && node packages/extractor/validate-sharp.js",
     "clean": "lerna run clean",
     "build": "lerna run build",
     "build:database": "lerna run build --scope \"@home-gallery/{common,stream,index,extractor,database}\"",

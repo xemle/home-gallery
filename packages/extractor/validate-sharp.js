@@ -4,18 +4,30 @@
  * compatible sharp version if required CPU flags are missing. Only linux/x64
  * is supported for a fallback currently
  */
+const os = require('os')
+const fs = require('fs').promises;
+const path = require('path');
 const { spawn } = require('child_process');
 
+const FALLBACK_HOST = 'https://dl.home-gallery.org/npm/libvips'
 const isLinuxX64 = process.platform.match(/linux/i) && process.arch == 'x64'
 const requiredCpuFlags = ['sse4_2']
+
+const log = (...args) => {
+  if (process.env['DEBUG']) {
+    console.log(...args)
+  }
+}
 
 const run = async (command, args, options) => {
   const defaults = { shell: true }
   const optionsEnv = (options || {}).env || {}
+  const env = {...process.env, ...optionsEnv};
+  const swanOptions = {...defaults, ...options, env}
 
   return new Promise((resolve, reject) => {
-    const env = {...process.env, ...optionsEnv};
-    const cmd = spawn(command, args, {...defaults, ...options, env});
+    log(`run ${command} ${args.join(' ')}`)
+    const cmd = spawn(command, args, swanOptions);
 
     const stdout = [];
     const stderr = [];
@@ -47,6 +59,20 @@ const getCpuFlags = async () => {
   return flagLine.replace(/.*: /, '').split(' ')
 }
 
+const exists = file => fs.access(file).then(() => true).catch(() => false)
+
+const findPackage = async (dir, name) => {
+  if (!dir || dir == '/') {
+    return false;
+  }
+  const packageDir = path.join(dir, 'node_modules', name);
+  const found = await exists(path.join(packageDir, 'package.json'))
+  if (found) {
+    return packageDir
+  }
+  return findPackage(path.dirname(dir), name)
+}
+
 const requiresFallback = async () => {
   if (!isLinuxX64) {
     return false;
@@ -60,17 +86,42 @@ const requiresFallback = async () => {
   return true;
 }
 
+const removeVendorDir = async (sharpDir) => {
+  const vendorDir = path.join(sharpDir, 'vendor')
+  log(`Remove old vendor directory ${vendorDir}`)
+  await fs.rmdir(vendorDir, {recursive: true})
+}
+
+const installLibvips = async (sharpDir) => {
+  const cacheDir = path.join(os.homedir(), '.npm', '_libvips-fallback');
+  const env = {
+    'npm_config_cache': cacheDir,
+    'npm_config_sharp_libvips_binary_host': FALLBACK_HOST
+  }
+
+  console.log(`Reinstall compatible libvips version fallback`)
+  log(`Fallback cacheDir is ${cacheDir}`)
+  log(`Fallback binary host is ${FALLBACK_HOST}`)
+  return run('node', [path.join('install', 'libvips.js')], {shell: true, cwd: sharpDir, stdio: 'inherit', env})
+}
+
 const installFallback= async (fallbackRequired) => {
   if (!fallbackRequired) {
     return;
   }
-  console.log(`Reinstall compatible sharp version 0.27.2 as fallback`)
-  return run('npm', ['install', '--no-save', 'sharp@0.27.2'], {stdio: 'inherit'})
+  const sharpDir = await findPackage(process.cwd(), 'sharp');
+  if (!sharpDir) {
+    console.log(`Could not find sharp package. Is it installed?`)
+    return false
+  }
+  log(`Found sharp package in ${sharpDir}`)
+  await removeVendorDir(sharpDir)
+  await installLibvips(sharpDir)
 }
 
 requiresFallback()
   .then(installFallback)
   .catch(err => {
-    console.log(`Failed to reinstall sharp: Exit code is ${err.code}. Are packages make gcc python installed?`)
+    console.log(`Failed to reinstall sharp: Error ${err.code ? err.code : err}. Are packages make gcc python installed?`)
     process.exit(1)
   })

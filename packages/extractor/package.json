@@ -4,6 +4,7 @@
   "description": "Preview and metadata extractor of HomeGallery",
   "main": "index.js",
   "scripts": {
+    "postinstall": "node validate-sharp.js",
     "clean": "rimraf dist",
     "build": "cpx \"src/**\" dist",
     "watch": "onchange \"src/**\" -- npm run build"
