@@ -410,6 +410,10 @@ const parseArgs = (args, env) => {
   return options;
 }
 
+// exit if this file is only required
+if (require.main !== module) {
+  return;
+}
 const options = parseArgs(process.argv.slice(2), process.env)
 loadConfig(options)
   .then(options => runner(menu.main, options.config))

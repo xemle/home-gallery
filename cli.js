@@ -7,6 +7,10 @@ const databaseCli = require('@home-gallery/database/dist/cli');
 const serverCli = require('@home-gallery/server/dist/cli');
 const exportCli = require('@home-gallery/export/dist/cli');
 
+// exit if this file is only required
+if (require.main !== module) {
+  return;
+}
 yargs.usage('Usage: $0 [global options] <command> [options]')
   .command(indexCli)
   .command(extractCli)
