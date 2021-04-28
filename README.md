@@ -2,6 +2,8 @@
 
 # HomeGallery
 
+[![Join the chat at https://gitter.im/home-gallery/community](https://badges.gitter.im/home-gallery/community.svg)](https://gitter.im/home-gallery/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [Home-Gallery.org](https://home-gallery.org) is a self-hosted open-source web gallery
 to browse personal photos and videos featuring tagging, mobile-friendly, and AI
 powered image and face discovery. Try the [demo gallery](https://demo.home-gallery.org)
