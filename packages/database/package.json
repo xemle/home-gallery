@@ -23,6 +23,6 @@
     "@home-gallery/stream": "file:../stream",
     "color-convert": "^2.0.1",
     "debug": "^4.1.1",
-    "yargs": "^15.0.2"
+    "yargs": "^16.2.0"
   }
 }
