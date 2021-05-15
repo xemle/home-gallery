@@ -1,9 +1,19 @@
-const sharp = require('sharp');
 const debug = require('debug')('extract:preview');
+
+let sharp;
+try {
+  sharp = require('sharp');
+} catch (e) {
+  debug(`Could not load sharp: ${e}`)
+}
 
 const { toPipe, conditionalTask } = require('./task');
 
 function resize(src, size, cb) {
+  if (!sharp) {
+    return cb(new Error(`Sharp is not loaded`))
+  }
+
   sharp(src)
     .rotate()
     .resize({width: size})

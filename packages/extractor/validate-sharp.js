@@ -10,7 +10,9 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const FALLBACK_HOST = 'https://dl.home-gallery.org/npm/libvips'
-const isLinuxX64 = process.platform.match(/linux/i) && process.arch == 'x64'
+const platform = process.env.npm_config_platform || process.platform
+const arch = process.env.npm_config_arch || process.arch
+const isLinuxX64 = platform.match(/linux/i) && arch == 'x64'
 const requiredCpuFlags = ['sse4_2']
 
 const log = (...args) => {
@@ -102,11 +104,12 @@ const installLibvips = async (sharpDir) => {
   console.log(`Reinstall compatible libvips version fallback`)
   log(`Fallback cacheDir is ${cacheDir}`)
   log(`Fallback binary host is ${FALLBACK_HOST}`)
-  return run('node', [path.join('install', 'libvips.js')], {shell: true, cwd: sharpDir, stdio: 'inherit', env})
+  return run('npm', [`--prefix=${sharpDir}`, `--platform=${platform}`, `--arch=${arch}`, 'run', 'install'], {shell: true, stdio: 'inherit', env})
 }
 
 const installFallback= async (fallbackRequired) => {
-  if (!fallbackRequired) {
+  const forceFallback = process.env.LIBVIPS_FALLBACK_INSTALL || process.env.npm_config_libvips_fallback_install
+  if (!fallbackRequired && !forceFallback) {
     return;
   }
   const sharpDir = await findPackage(process.cwd(), 'sharp');

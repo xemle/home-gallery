@@ -2,7 +2,7 @@
   "name": "@home-gallery/server",
   "version": "1.0.0",
   "description": "Web server of HomeGallery",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist",
     "build": "cpx \"src/**\" dist",

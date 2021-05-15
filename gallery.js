@@ -6,6 +6,10 @@ const { spawn } = require('child_process');
 const { Select, MultiSelect } = require('enquirer');
 const YAML = require('yaml');
 
+const nodeBin = process.argv[0]
+const galleryDir = __dirname
+const cliScript = fsPath.join(galleryDir, 'cli.js')
+
 const run = async (command, args, options) => {
   const defaults = { shell: true, stdio: 'inherit'}
   const optionsEnv = (options || {}).env || {}
@@ -20,7 +24,7 @@ const run = async (command, args, options) => {
   })
 }
 
-const runCli = async(args, options, nodeArgs) => run('node', [...(nodeArgs || []), 'cli.js', ...args], options)
+const runCli = async(args, options, nodeArgs) => run(nodeBin, [...(nodeArgs || []), cliScript, ...args], options)
 
 const runSimple = async (commandLine, options) => {
   const args = commandLine.split(' ');
@@ -104,23 +108,24 @@ const databaseBuild = async (config) => {
 }
 
 const getMainScript = async () => {
-  const json = await fs.readFile('package.json', 'utf8')
+  const json = await fs.readFile(fsPath.join(galleryDir, 'package.json'), 'utf8')
   try {
     const data = JSON.parse(json)
-    return data && data.main || 'gallery.js'
+    const main = data && data.main || 'gallery.js'
+    return fsPath.join(galleryDir, main)
   } catch (e) {
     return Promise.reject(e)
   }
 }
 
 const systemUpgrade = async () => {
-  await runSimple('git pull')
-  await runSimple('npm install')
-  await runSimple('npm run clean -- --ignore "@home-gallery/{api-server,styleguide}"')
-  await runSimple('npm run build -- --ignore "@home-gallery/{api-server,styleguide}"')
+  await runSimple('git pull', {pwd: galleryDir})
+  await runSimple('npm install', {pwd: galleryDir})
+  await runSimple('npm run clean -- --ignore "@home-gallery/{api-server,styleguide}"', {pwd: galleryDir})
+  await runSimple('npm run build -- --ignore "@home-gallery/{api-server,styleguide}"', {pwd: galleryDir})
   console.log('Gallery application was updated successfully. Start updated CLI...')
   const main = await getMainScript()
-  await runSimple(`node ${main}`)
+  await run(nodeBin, [main])
   return 'exitSilent'
 }
 
@@ -359,13 +364,15 @@ const validateConfig = async config => {
   await validateSources(config.sources)
 }
 
-const useExampleFallback = async (options, err) => {
-  const example = 'gallery.config-example.yml'
+const initExampleConfig = async (options, err) => {
+  const example = fsPath.join(galleryDir, 'gallery.config-example.yml')
   return fs.access(example)
     .then(() => {
-      console.log(`Use fallback configuration ${example}`)
-      options.configFile = example
-      return fs.readFile(example, 'utf8')
+      console.log(`Init configuration from ${example}`)
+      return fs.copyFile(example, 'gallery.config.yml')
+    }).then(() => {
+      options.configFile = 'gallery.config.yml'
+      return fs.readFile(options.configFile, 'utf8')
     }, () => Promise.reject(new Error(`Could not read configuration file '${options.configFile}': ${err}`)))
 }
 
@@ -376,7 +383,7 @@ const loadConfig = async options => {
     throw new Error(`Unknown file extension of '${options.configFile}'. Expect a .yaml or .json file`)
   }
 
-  const data = await fs.readFile(options.configFile, 'utf8').catch(e => useExampleFallback(options, e))
+  const data = await fs.readFile(options.configFile, 'utf8').catch(e => initExampleConfig(options, e))
   const config = isYaml ? YAML.parse(data) : JSON.parse(data)
   const env = {...process.env, ...{
     HOME: process.env['HOME'] || process.env['HOMEPATH'],

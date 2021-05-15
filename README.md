@@ -10,9 +10,7 @@ powered image and face discovery. Try the [demo gallery](https://demo.home-galle
 or enjoy the [food images](https://demo.home-gallery.org/similar/c7f8a3bf0142fc9694f517c23e42d988c97233c3)!
 
 Note: This software is a private pet/spare time project without any warranty or any
-support. Love it or leave it! If you have any problem, fork the project and fix
-it by your own. Maybe valuable pull requests are merged if spare time and mood
-is available.
+support. Ask questions on [gitter.im](https://gitter.im/home-gallery/community).
 
 [MIT License](https://en.wikipedia.org/wiki/MIT_License)
 
@@ -25,10 +23,10 @@ is available.
 
 ## Target Users
 
-* Linux/Unix affine users who solve their own problems, familiar with shell, git and node
+* Computer/Terminal affine users who solve their own problems, familiar with shell
 * Serve your local data without usage of cloud services
 * One user only - all files are served
-* Watch your photos and videos from mobile phone
+* View your own photos and videos from mobile phones
 * Serve all your images from multiple source directories (hard drive, camara files, mobile phone files, etc)
 
 ## Documentation
@@ -38,12 +36,15 @@ architecture is described [here](https://docs.home-gallery.org/internals/index.h
 
 ## Features
 
-- Due the file index the detection of changed media becomes quite fast after the first run
-- Once the preview files are generated and mete data are extraced, the original sources are not touched and required any more. So media from offline disk need to be extracted only once and the disk can stay offline on next runs
-- Media are identified by their content. Duplicated media (identical files byte-by-byte) are only processed once and renaming is supported without recalulating previews etc.
-- With secured https setup the webapp can be used as PWA app on mobile devices
-- Tags are supported and such edits are propagated and updated on concurrent sessions
-- Reverse image lookup (similar image search) is supported. So if you have one sunset image, you can easily find other sunset photos in your archive without manual tagging
+- Reverse image lookup (similar image search). If you have one sunset image, you can easily find other sunset photos in your archive without manual tagging
+- Face detection and search by similar faces
+- GEO location reverse lookups
+- Simple mobile app through [PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps) support
+- Tagging, single and multi selection
+- Support of read only and offline media sources. Once the preview files are generated and their meta data are extraced, the original sources are not touched and required any more. So media from offline disk need to be extracted only once and the disk can stay offline on next runs
+- Media are identified by their content. Duplicated media (identical files byte-by-byte) are only processed once. Renaming is supported without recalulating previews etc.
+- Fast file changes detection such as add, removes, renames or moves
+- Static side export such as the [demo gallery](https://demo.home-gallery.org)
 
 ## Limits
 
@@ -52,30 +53,19 @@ The complete "database" is loaded into the browser. My 100.000 media are about
 current mobile device. A user reported a successful setup with over 400.000
 media files. Further feedback is welcome.
 
-## Requirements
+## Binary Downloads
 
-HomeGallery runs on Linux (also Raspberry PI), Mac and Windows.
+HomeGallery has prebuilt binaries for
+[Linux](https://dl.home-gallery.org/dist/latest/home-gallery-latest-linux-x64),
+[MacOS](https://dl.home-gallery.org/dist/latest/home-gallery-latest-darwin-x64) and
+[Windows](https://dl.home-gallery.org/dist/latest/home-gallery-latest-win-x64.exe).
+Further download options can be found [here](https://dl.home-gallery.org/dist).
 
-For most cases node environment should be sufficient
+The initial start of the binary takes longer due the extraction of app files to
+a temporary directory. Future starts are faster.
 
-* [node](https://nodejs.org) version 14 LTS
-* perl (Linux)
-
-## Installation
-
-```
-# Install required packages
-npm install
-# Build required modules
-npm run build
-```
-
-In some cornor cases you might also need essential build tools to compile library
-bindings.
-
-* make
-* g++
-* python
+If no `gallery.config.yml` file exists it is created by the example configuration.
+See details below.
 
 ## Configure HomeGallery
 
@@ -142,7 +132,36 @@ send to this public API by default. No images or privacy data are kept.
 The API can be configured and ran also locally or as Docker container. See
 `api-service` package for further information.
 
-## Run HomeGallery
+## Customized Environments
+
+HomeGallery runs on the JavaScript runtime [NodeJS](https://nodejs.org) which
+is supported by various platforms such as Linux (also Raspberry PIs), Mac and Windows.
+
+For most cases a customized environment should be sufficient with
+
+* [node](https://nodejs.org) version 14 LTS
+* perl (Linux)
+
+### Setup
+
+```
+# Clone or download the repo from GitHub
+git clone https://github.com/xemle/home-gallery.git
+cd home-gallery
+# Install required packages
+npm install
+# Build required modules
+npm run build
+```
+
+In some cornor cases you might also need essential build tools to compile library
+bindings.
+
+* make
+* g++
+* python
+
+### Run HomeGallery
 
 Run `./gallery.js` (or `node gallery.js`) to
 
@@ -223,4 +242,3 @@ scope feature, e.g build only module `export` and `database`:
 ```
 npm run build -- --scope '@home-gallery/{export,database}'
 ```
-

@@ -1,0 +1,110 @@
+targets:
+  - platform: linux
+    arch: x64
+    command: ['{{caxa}}/home-gallery/node/bin/node', '{{caxa}}/home-gallery/gallery.js']
+  #- platform: linux
+  #  arch: arm64
+  #  command: ['{{caxa}}/home-gallery/node/bin/node', '{{caxa}}/home-gallery/gallery.js']
+  - platform: win
+    arch: x64
+    command: ['{{caxa}}/home-gallery/node/node.exe', '{{caxa}}/home-gallery/gallery.js']
+  - platform: darwin
+    arch: x64
+    command: ['{{caxa}}/home-gallery/node/bin/node', '{{caxa}}/home-gallery/gallery.js']
+before:
+  - npm run clean
+  - npm run build
+  - npm install --force --no-save @ffmpeg-installer/linux-x64 @ffmpeg-installer/linux-arm @ffmpeg-installer/linux-arm64 @ffmpeg-installer/win32-x64 @ffmpeg-installer/darwin-x64 @ffprobe-installer/linux-x64 @ffprobe-installer/linux-arm @ffprobe-installer/linux-arm64 @ffprobe-installer/win32-x64 @ffprobe-installer/darwin-x64 exiftool-vendored.exe exiftool-vendored.pl
+  - node scripts/download-nodejs.js --version=14.16.1 --platforms=linux-x64,darwin-x64,win-x64 --targetDir=node
+run:
+  - npx rimraf node_modules/sharp/{build,vendor,platform.json}
+  - command: npm --prefix=node_modules/sharp --platform=linux --arch=x64 --sharp-install-force run install
+    platformArch: linux-x64
+  - command: npm --prefix=packages/extractor --platform=linux --arch=x64 --libvips-fallback-install run postinstall
+    platformArch: linux-x64
+  #- command: npm --prefix=node_modules/sharp --platform=linux --arch=arm64 --sharp-install-force run install
+  #  platformArch: linux-arm64
+  - command: npm --prefix=node_modules/sharp --platform=darwin --arch=x64 run install
+    platformArch: darwin-x64
+  - command: npm --prefix=node_modules/sharp --platform=win32 --arch=x64 run install
+    platformArch: win-x64
+entries:
+  - ./cli.js
+  - ./gallery.js
+  - ./packages/index
+  - ./packages/extractor
+  - ./packages/database
+  - ./packages/server
+  - ./packages/export
+  - sharp
+  - sharp:dependencies
+includes:
+  - package.json
+  - README.md
+  - LICENSE
+  - cli.js
+  - gallery.js
+  - gallery.config-example.yml
+  - node_modules/sharp
+  - pattern: node_modules/exiftool-vendored.pl
+    platform: '!win'
+  - pattern: node_modules/exiftool-vendored.exe
+    platform: win
+  - node_modules/@ffmpeg-installer
+  - node_modules/@ffprobe-installer
+  - pattern: node/linux-x64
+    platformArch: linux-x64
+  - pattern: node/linux-arm64
+    platformArch: linux-arm64
+  - pattern: node/darwin-x64
+    platformArch: darwin-x64
+  - pattern: node/win-x64
+    platformArch: win-x64
+excludes:
+  - node_modules/.bin/*
+  - '*/node_modules/.bin/*'
+  - packages/*/src
+  - pattern: node_modules/exiftool-vendored.pl
+    platform: win
+  - pattern: node_modules/exiftool-vendored.exe
+    platform: '!win'
+  - pattern: node_modules/@ffmpeg-installer/linux-x64
+    platformArch: '!linux-x64'
+  - pattern: node_modules/@ffmpeg-installer/linux-arm64
+    platformArch: '!linux-arm64'
+  - pattern: node_modules/@ffmpeg-installer/darwin-x64
+    platformArch: '!darwin-x64'
+  - pattern: node_modules/@ffmpeg-installer/win32-x64
+    platformArch: '!win-x64'
+  - node_modules/@ffmpeg-installer/linux-arm
+  - node_modules/@ffmpeg-installer/linux-ia32
+  - node_modules/@ffmpeg-installer/win32-ia32
+  - pattern: node_modules/@ffprobe-installer/linux-x64
+    platformArch: '!linux-x64'
+  - pattern: node_modules/@ffprobe-installer/linux-arm64
+    platformArch: '!linux-arm64'
+  - pattern: node_modules/@ffprobe-installer/darwin-x64
+    platformArch: '!darwin-x64'
+  - pattern: node_modules/@ffprobe-installer/win32-x64
+    platformArch: '!win-x64'
+  - node_modules/@ffprobe-installer/linux-arm
+  - node_modules/@ffprobe-installer/linux-ia32
+  - node_modules/@ffprobe-installer/win32-ia32
+map:
+  - packages/: node_modules/@home-gallery/
+  - from: node/linux-x64/
+    to: node/
+    platformArch: linux-x64
+  - from: node/linux-arm64/
+    to: node/
+    platformArch: linux-arm64
+  - from: node/darwin-x64/
+    to: node/
+    platformArch: darwin-x64
+  - from: node/win-x64/
+    to: node/
+    platformArch: win-x64
+output:
+  dir: dist
+  name: home-gallery
+  prefix: home-gallery/

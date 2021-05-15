@@ -1,0 +1,48 @@
+{
+  "name": "@home-gallery/bundle",
+  "version": "1.0.0",
+  "description": "Bundle HomeGallery to OS specific application",
+  "keywords": [
+    "HomeGallery",
+    "app",
+    "bundle"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "homepage": "https://home-gallery.org",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "directories": {
+    "lib": "dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xemle/home-gallery.git",
+    "directory": "packages/bundle"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm-run-all -p build:js build:types",
+    "build:js": "node build.js",
+    "build:types": "npx tsc -d --emitDeclarationOnly",
+    "watch": "npm-run-all -p watch:js watch:types",
+    "watch:js": "node build.js --watch",
+    "watch:types": "npx tsc -d --emitDeclarationOnly --watch"
+  },
+  "dependencies": {
+    "caxa": "^1.0.0",
+    "glob-to-regexp": "^0.4.1",
+    "pino": "^6.11.3",
+    "pino-pretty": "^4.7.1",
+    "tar-fs": "^2.1.1",
+    "yaml": "^1.10.2"
+  },
+  "devDependencies": {
+    "glob": "^7.1.6",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.2.4"
+  }
+}

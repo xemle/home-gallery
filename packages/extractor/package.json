@@ -2,7 +2,7 @@
   "name": "@home-gallery/extractor",
   "version": "1.0.0",
   "description": "Preview and metadata extractor of HomeGallery",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "postinstall": "node validate-sharp.js",
     "clean": "rimraf dist",
@@ -29,7 +29,7 @@
     "@home-gallery/storage": "file:../storage",
     "@home-gallery/stream": "file:../stream",
     "debug": "^4.1.1",
-    "exiftool-vendored": "^9.3.0",
+    "exiftool-vendored": "^14.4.0",
     "ffprobe": "^1.1.0",
     "fluent-ffmpeg": "^2.1.2",
     "node-vibrant": "^3.1.5",

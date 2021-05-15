@@ -1,0 +1,76 @@
+# Bundle configuration
+#
+# `targets` are list of platform and arch targets. Command is a list of
+# command strings for the caxa stub. `{{caxa}}` will be replaced by the
+# directory of the installation directory.
+#
+# `before` and `run` are lists of commands. A command can be a single string
+# which are splited by white spaces to args. If a arg has white space
+# use a list of arguments.
+# 
+# `before` commands run once before all targets. `run` commands run for every
+# target.
+#
+# `entries` are initial dependency entries. All there dependend transitive 
+# packages are included to the bundle. The transitive dependency tree
+# is build by call of `require()`.
+# If a module can not be loaded due errors on native extension loading
+# the package dependency can be explicit included.
+# E.g. sharp for darwin fails on linux-arm64. To include all required
+# dependency, use `sharp:dependency` as entry and include 
+# `node_modules/sharp` module directory
+#
+# `includes` and `excludes` are glob patterns
+#
+# `map` renames files in the tar.gz archive
+#
+# `before`, `run`, `includes`, `excludes`, `map` can be scoped by `platform`
+# and `arch`. Keys `platform`, `arch` or `platformArch` can be a single string
+# or a list of strings. The prefix '!' excludes this target
+targets:
+  - platform: linux
+    arch: x64
+    command: ['echo', 'App installed in {{caxa}}']
+before:
+  # Simple command
+  - echo starting
+  # Use array if arguments have white spaces
+  - ["echo", "Start packaging"]
+  # Scoped command
+  - command: npm install
+    platform: linux
+run:
+  # same as before commands
+  - npm run install
+entries:
+  # Relative entry file
+  - ./index.js
+  # Relative package
+  - ./packages/bundle
+  # Package entry
+  - sharp
+  # Use `dependency` property from package.json of package `sharp`. Use object keys as dependency entries
+  - sharp:dependency
+  # Use `main` property from package.json of package `sharp` as relative file entry
+  - sharp:main
+includes:
+  # Simple notation
+  - node_modules/.bin
+  # Scoped include pattern
+  - pattern: posixFiles/*
+    platformArch: '!win-x64'
+excludes:
+  # Same as include pattern
+map:
+  # Simple form as 'from: to'
+  - packages: node_module/@scope
+  # Scoped form
+  - from: dir
+    to: target
+    platform: linux
+output:
+  dir: dist
+  # Name of final output `${dist}/${app}-${version}-${platform}-${arch}.tar.gz`
+  name: app
+  # tar.gz archive prefix
+  prefix: app/
