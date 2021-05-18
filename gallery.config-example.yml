@@ -56,6 +56,13 @@ sources:
     # Offline sources require an index file. Previews and meta data
     # should be extracted first before marking a source offline
     #offline: false
+    # Filename matcher for checksum recalculation
+    # size-ctime-inode: this matcher should be used if possible, might
+    #                   not work on windows
+    # size-ctime: this matcher should be used if stable fs inodes are
+    #             not available and might not work for fuse shares
+    # size: this matcher should be used if you know what you are doing
+    #matcher: size-ctime-inode
 
 #
 # Extractor settings

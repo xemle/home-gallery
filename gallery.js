@@ -60,6 +60,7 @@ const startServer = async config => {
 
 const updateIndex = async source => {
   const args = ['index', '--directory', source.dir, '--index', source.index, '--checksum']
+  source.matcher && args.push('--matcher', source.matcher)
   source.excludeFromFile && args.push('--exclude-from-file', source.excludeFromFile)
   source.excludeIfPresent && args.push('--exclude-if-present', source.excludeIfPresent)
 
