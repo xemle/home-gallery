@@ -2,6 +2,7 @@ import * as React from "react";
 import {useEffect} from 'react';
 import {
     BrowserRouter as Router,
+    Redirect,
     Switch,
     Route,
   } from "react-router-dom";
@@ -64,6 +65,7 @@ export const Main = () => {
                 <Route path="/similar/:id" children={<SimilarView />} />
                 <Route path="/search/:term" children={<SearchView />} />
                 <Route path="/faces/:id/:faceIndex" children={<FacesView />} />
+                <Redirect to='/' />
             </Switch>
           </LastLocationProvider>
         </Router>

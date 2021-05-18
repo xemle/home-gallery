@@ -13,7 +13,9 @@ export const SearchNavBar = ({children}) => {
   const history = useHistory();
 
   const onSearch = (queryInput) => {
-    if (query.type == 'none' || query.type == 'query') {
+    if (!queryInput) {
+      history.push(`/`);
+    } else if (query.type == 'none' || query.type == 'query') {
       history.push(`/search/${queryInput}`);
     } else if (query.type == 'year') {
       history.push(`/years/${query.value}?q=${queryInput}`);
