@@ -11,7 +11,7 @@ const galleryDir = __dirname
 const cliScript = fsPath.join(galleryDir, 'cli.js')
 
 const run = async (command, args, options) => {
-  const defaults = { shell: true, stdio: 'inherit'}
+  const defaults = { shell: false, stdio: 'inherit'}
   const optionsEnv = (options || {}).env || {}
   const optionsEnvList = Object.keys(optionsEnv).map(name => `${name}=${optionsEnv[name]}`)
 
