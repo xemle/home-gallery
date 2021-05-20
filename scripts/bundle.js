@@ -1,9 +1,9 @@
-const fs = require('fs')
+const fs = require('fs/promises')
 const path = require('path')
 const bundler = require('@home-gallery/bundle')
 
 const readPackage = async (baseDir) => {
-  const pkg = fs.readFileSync(path.join(baseDir, 'package.json'), 'utf8')
+  const pkg = await fs.readFile(path.join(baseDir, 'package.json'), 'utf8')
   return JSON.parse(pkg);
 }
 
@@ -18,7 +18,7 @@ const parseArgReducer = (options, arg) => {
 }
 
 const parseOptions = async () => {
-  const pkg = readPackage(path.dirname(__dirname))
+  const pkg = await readPackage(path.dirname(__dirname))
   const args = process.argv.slice(2)
   return args.reduce(parseArgReducer, {
     bundleFile: 'bundle.yml',
