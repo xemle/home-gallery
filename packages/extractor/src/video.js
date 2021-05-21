@@ -16,6 +16,8 @@ function convertVideo(storage, entry, cb) {
   const file = storage.getEntryFilename(entry, videoSuffix);
   const tmpFile = `${file}.tmp`;
   const command = ffmpeg(input);
+  const intervalMs = 30*1000;
+  let last = Date.now();
   command.setFfmpegPath(ffmpegPath);
   command.setFfprobePath(ffprobePath);
   command
@@ -47,6 +49,13 @@ function convertVideo(storage, entry, cb) {
       '-b:a 128k',
       '-f mp4'
     ])
+    .on('progress', progress => {
+      const now = Date.now();
+      if (now > last + intervalMs) {
+        debug(`Video conversion of ${entry} at ${progress.timemark} is ${progress.percent.toFixed()}% done`);
+        last = now;
+      }
+    })
     .run();
 }
 
