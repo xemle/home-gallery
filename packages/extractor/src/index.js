@@ -59,7 +59,7 @@ function extractData(config, cb) {
       imagePreview(storage, imagePreviewSizes),
       videoPoster(storage, imagePreviewSizes),
       vibrant(storage),
-      geoReverse(storage, ['de', 'en']),
+      geoReverse(storage, [].concat(config.geoAddressLanguage || ['en', 'de'])),
       apiServerEntry(storage, {
         name: 'similarity embeddings',
         apiServerUrl,

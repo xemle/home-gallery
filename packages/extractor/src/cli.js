@@ -50,6 +50,11 @@ const command = {
         describe: 'Logs every entry for debugging purposes',
         default: false,
         boolean: true
+      },
+      'geo-address-language': {
+        describe: 'Preferred address languages for geo code reverse lookups',
+        array: true,
+        default: ['en', 'de']
       }
     })
     .demandOption(['index', 'storage'])
@@ -73,6 +78,7 @@ const command = {
           skip: argv['skip'],
           limit: argv['limit'],
           printEntry: argv['print-entry'],
+          geoAddressLanguage: argv['geo-address-language']
         }
         extract(config, (err, count) => {
           if (err) {

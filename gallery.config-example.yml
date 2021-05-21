@@ -69,6 +69,9 @@ sources:
 #
 #extractor:
   #apiServerUrl: https://api.home-gallery.org
+  # Preffered address language of geo code reverse lookups
+  # geoAddressLanguage: [de, en-US] # for multiple languages
+  #geoAddressLanguage: en
   # excludes are using gitignore patterns
   #excludes: []
 

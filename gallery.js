@@ -87,6 +87,7 @@ const extract = async (config, sources, options) => {
 
   args.push('--storage', config.storage.dir)
   extractor.apiServer && args.push('--api-server', extractor.apiServer)
+  extractor.geoAddressLanguage && ['--geo-address-language'].concat(extractor.geoAddressLanguage).forEach(v => args.push(v))
 
   const excludes = extractor.excludes || [];
   excludes.forEach(exclude => args.push('--exclude', exclude))
