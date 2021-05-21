@@ -1,7 +1,8 @@
 const { pipeline } = require('stream');
+const debug = require('debug')('extract:main');
 
 const { readStreams } = require('@home-gallery/index');
-const { filter, purge, memoryIndicator, processIndicator } = require('@home-gallery/stream');
+const { concurrent, each, filter, limit, purge, memoryIndicator, processIndicator, skip } = require('@home-gallery/stream');
 const mapToStorageEntry = require('./map-storage-entry');
 const { createStorage } = require('./storage');
 
@@ -25,20 +26,31 @@ function extractData(config, cb) {
       return cb(err);
     }
     const {storageDir, fileFilterFn, minChecksumDate, apiServerUrl} = config;
+    const { queueEntry, releaseEntry } = concurrent(config.concurrent, config.skip)
     const storage = createStorage(storageDir);
 
     const imagePreviewSizes = [1920, 1280, 800, 320, 128];
     const videoFrameCount = 10;
     const similarityEmbeddingsPreviewSize = imagePreviewSizes[2];
 
-    let total = 0;
+    const stats = {
+      queued: 0,
+      processing: 0,
+      processed: 0
+    }
     pipeline(
       entryStream,
       // only files with checksum. Exclude apple files starting with '._'
       filter(entry => entry.fileType === 'f' && entry.sha1sum && entry.size > 0),
       filter(entry => !minChecksumDate || entry.sha1sumDate > minChecksumDate),
       filter(entry => fileFilterFn(entry.filename)),
+      skip(config.skip),
+      limit(config.limit),
       mapToStorageEntry,
+      each(() => stats.queued++),
+      queueEntry,
+      each(() => stats.processing++),
+      each(entry => config.printEntry && debug(`Processing entry #${config.skip + stats.processed} ${entry}`)),
       // read existing files and meta data (json files)
       readAllEntryFiles(storage),
 
@@ -78,17 +90,20 @@ function extractData(config, cb) {
       video(storage),
       //.pipe(videoFrames(storageDir, videoFrameCount))
 
-      processIndicator({totalFn: () => total}),
+      releaseEntry,
+      each(() => stats.processed++),
+      processIndicator({onTick: ({diff}) => debug(`Processed ${stats.processed} entries (#${config.skip + stats.processed}, +${diff}, processing ${stats.processing - stats.processed} and queued ${stats.queued - stats.processing} entries)`)}),
 
       groupByEntryFilesCacheKey(),
       updateEntryFilesCache(storage),
+      processIndicator({name: 'entry dir cache'}),
       memoryIndicator({intervalMs: 30 * 1000}),
       purge(),
       (err) => {
         if (err) {
           return cb(`Could not process entries: ${err}`)
         }
-        cb(null, total)
+        cb(null, stats.processed)
       }
     );
   });

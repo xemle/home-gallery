@@ -16,7 +16,7 @@ const run = async (command, args, options) => {
   const optionsEnvList = Object.keys(optionsEnv).map(name => `${name}=${optionsEnv[name]}`)
 
   return new Promise((resolve, reject) => {
-    console.log(`Execute: ${optionsEnvList.length ? `${optionsEnvList.join(' ')} ` : ''}${[command, ...args].join(' ')}`)
+    console.log(`Execute: ${optionsEnvList.length ? `${optionsEnvList.join(' ')} ` : ''}${[command, ...args].map(v => / /.test(v) ? `"${v}"` : v).join(' ')}`)
     const env = {...process.env, ...optionsEnv};
     const cmd = spawn(command, args, {...defaults, ...options, env});
     cmd.on('exit', (code, signal) => code == 0 ? resolve(code, signal) : reject(code, signal));
@@ -76,7 +76,7 @@ const updateIndices = async sources => {
   }
 }
 
-const extract = async (config, sources, checksumFrom) => {
+const extract = async (config, sources, options) => {
   if (!sources.length) {
     console.log(`Warn: Sources list is empty. No files to extract`);
     return;
@@ -91,7 +91,13 @@ const extract = async (config, sources, checksumFrom) => {
   const excludes = extractor.excludes || [];
   excludes.forEach(exclude => args.push('--exclude', exclude))
 
-  checksumFrom && args.push('--checksum-from', checksumFrom)
+  options.checksumFrom && args.push('--checksum-from', options.checksumFrom)
+
+  if (options.concurrent) {
+    args.push('--concurrent', options.concurrent)
+    args.push('--skip', options.skip || 0)
+    args.push('--limit', options.limit || 0)
+  }
 
   await runCli(args, {env: {DEBUG: '*'}})
 }
@@ -175,7 +181,9 @@ const menu = {
 
       const now = new Date().toISOString().substring(0, 16);
       await updateIndices(sources);
-      await extract(config, sources, command == 'increment' ? now : false);
+      await extract(config, sources, {
+        checksumFrom: command == 'increment' ? now : false
+      });
       await databaseBuild(config);
 
       return 'main'
@@ -204,12 +212,25 @@ const menu = {
       choices: [
         {name: 'appUpgrade', message: 'Upgrade gallery application', hint: '(requires git)'},
         {name: 'showConfig', message: 'Show expanded configuration'},
+        {name: 'debugExtractor', message: 'Debug extractor'},
         {name: 'main', message: 'Back'}
       ]
     }).run(),
     action: async (command, config) => {
       if (command === 'appUpgrade') {
         return await systemUpgrade(config);
+      } else if (command === 'debugExtractor') {
+        let sources = config.sources.filter(source => !source.offline)
+        if (sources.length > 1) {
+          const indices = await runner(menu.selectSources, config)
+          sources = sources.filter(source => indices.indexOf(source.index) >= 0)
+        }
+        console.log('Debugging extractor: Adjust concurrent, skip and limit parameter to your need. Add --print-entry parameter to fine tune')
+        await extract(config, sources, {
+          concurrent: 1,
+          skip: 0,
+          limit: 0
+        });
       } else if (command === 'showConfig') {
         console.log('gallery.config.yml:')
         console.log(YAML.stringify(config, null, 2))

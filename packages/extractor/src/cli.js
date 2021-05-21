@@ -30,6 +30,26 @@ const command = {
       'api-server': {
         describe: 'API server url',
         default: 'https://api.home-gallery.org'
+      },
+      'concurrent': {
+        describe: 'Count of concurrent entry processing. 0 for auto',
+        default: 0,
+        number: true
+      },
+      'skip': {
+        describe: 'Skip given entries before processing',
+        default: 0,
+        number: true
+      },
+      'limit': {
+        describe: 'Limit amount of entry processing. 0 for no limit',
+        default: 0,
+        number: true
+      },
+      'print-entry': {
+        describe: 'Logs every entry for debugging purposes',
+        default: false,
+        boolean: true
       }
     })
     .demandOption(['index', 'storage'])
@@ -48,7 +68,11 @@ const command = {
           storageDir: argv.storage,
           fileFilterFn,
           minChecksumDate: argv['checksum-from'],
-          apiServerUrl: argv['api-server']
+          apiServerUrl: argv['api-server'],
+          concurrent: argv['concurrent'],
+          skip: argv['skip'],
+          limit: argv['limit'],
+          printEntry: argv['print-entry'],
         }
         extract(config, (err, count) => {
           if (err) {
