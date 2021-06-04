@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extractor: Print video progress
 - extractor: Add concurrency, skip and limit parameter for issue identifications
 
+### Fixed
+
+- config: Fix example parameter `apiServer`
+
 ## [1.0.1] - 2020-05-20
 
 Bugfix release

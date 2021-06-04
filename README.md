@@ -124,8 +124,9 @@ queries the [Nominatim Service](https://nominatim.openstreetmap.org/reverse)
 from [OpenStreetMap](https://openstreetmap.org). Only geo coordinates
 are transmitted.
 
-For reverse image lookups (similar image search), HomeGallery uses the
-its own public API at https://api.home-gallery.org. This public API supports
+For reverse image lookups (similar image search), object detection and face
+recogintion, HomeGallery uses the
+its own public API at `api.home-gallery.org`. This public API supports
 low powered devices such as the SoC Raspberry PI and all preview images are
 send to this public API by default. No images or privacy data are kept.
 

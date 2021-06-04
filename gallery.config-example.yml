@@ -68,7 +68,7 @@ sources:
 # Extractor settings
 #
 #extractor:
-  #apiServerUrl: https://api.home-gallery.org
+  #apiServer: https://api.home-gallery.org
   # Preffered address language of geo code reverse lookups
   # geoAddressLanguage: [de, en-US] # for multiple languages
   #geoAddressLanguage: en
