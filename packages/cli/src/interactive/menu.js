@@ -47,8 +47,8 @@ const menu = {
       }
 
       const initialImport = command == 'initial'
-      const incementalUpdate = command == 'increment'
-      await importSources(config, sources, initialImport, incementalUpdate)
+      const incrementalUpdate = command == 'increment'
+      await importSources(config, sources, initialImport, incrementalUpdate)
       return 'main'
     }
   },

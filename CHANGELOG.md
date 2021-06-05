@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add incremental import with database reload support
+- Add run cli command to start the server or source import directly
 - config: Add `matcher` for index file matcher
 - config: Add `geoAddressLanguage` for geo code reverse lookup language
 - extractor: Print video progress
