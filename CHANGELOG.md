@@ -9,10 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add incremental import with database reload support
 - config: Add `matcher` for index file matcher
 - config: Add `geoAddressLanguage` for geo code reverse lookup language
 - extractor: Print video progress
 - extractor: Add `--concurrency`, `--skip` and `--limit` parameter for issue identifications
+- server: Wait for database file if not exist
 - index: Add `--add-limits` parameter
 
 ### Changed

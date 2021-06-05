@@ -65,14 +65,8 @@ function startServer({host, port, storageDir, databaseFilename, eventsFilename, 
     })
     .on('listening', () => {
       console.log(`Open Home Gallery on ${key && cert ? 'https' : 'http'}://localhost:${port}`);
-      dbInit(databaseFilename, (err) => {
-        if (err) {
-          cb(err);
-          server.close();
-        } else {
-          cb(null, app);
-        }
-      })
+      dbInit(databaseFilename);
+      cb(null, app);
     })
 
 }

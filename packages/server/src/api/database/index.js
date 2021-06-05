@@ -1,6 +1,6 @@
 const debug = require('debug')('server:api:database');
 
-const { readWatchDatabase } = require('./read-database');
+const { waitReadWatch } = require('./read-database');
 const { cache } = require('./cache-middleware');
 const { sanitizeInt } = require('./sanitize');
 
@@ -34,23 +34,11 @@ function databaseApi(eventbus) {
     }
   }
 
-  const once = (fn) => {
-    let called = false;
-    return (err, data) => {
-      if (!called) {
-        called = true;
-        fn(err, data);
-      }
-    }
-  }
-
   return {
-    init: (databaseFilename, cb) => {
-      const onceCb = once(cb);
-      readWatchDatabase(databaseFilename, (err, newDatabase) => {
+    init: (databaseFilename) => {
+      waitReadWatch(databaseFilename, (err, newDatabase) => {
         if (err) {
           debug(`Could not read database file ${databaseFilename}: ${err}`);
-          onceCb(err);
         } else {
           newDatabase.data = uniqEntries(newDatabase.data)
           database = newDatabase;
@@ -59,7 +47,6 @@ function databaseApi(eventbus) {
           eventbus.emit(eventbus.create('server', {
             action: 'databaseReloaded'
           }))
-          onceCb();
         }
       })
     },

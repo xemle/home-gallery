@@ -23,14 +23,57 @@ function watch(filename, cb) {
   })
 }
 
-function readWatch(filename, cb) {
-  read(filename, (err, data) => {
-    if (err) {
-      return cb(err);
+const exists = (filename, cb) => {
+  fs.stat(filename, err => {
+    if (err && err.code == 'ENOENT') {
+      cb(null, false);
+    } else if (err) {
+      cb(err);
+    } else {
+      cb(null, true);
     }
-    cb(null, data);
-    watch(filename, cb);
-  });
+  })
 }
 
-module.exports = { readWatchDatabase: readWatch, readDatabase: read };
+const wait = (filename, delay, cb) => {
+  exists(filename, (err, hasFile) => {
+    if (err) {
+      return cb(err);
+    } else if (!hasFile) {
+      return setTimeout(() => wait(filename, delay, cb), delay)
+    } else {
+      return cb(null);
+    }
+  })
+}
+
+function waitReadWatch(filename, cb) {
+  const next = () => {
+    read(filename, (err, data) => {
+      if (err) {
+        return cb(err);
+      }
+      cb(null, data);
+      watch(filename, cb);
+    });
+  }
+
+  exists(filename, (err, hasFile) => {
+    if (err) {
+      return cb(err);
+    } else if (!hasFile) {
+      console.log(`Database file ${filename} does not exists. Waiting for the database file...`)
+      wait(filename, 10 * 1000, err => {
+        if (err) {
+          return cb(err);
+        }
+        console.log(`Database file ${filename} exists now. Continue`);
+        next();
+      });
+    } else {
+      next();
+    }
+  })
+}
+
+module.exports = { waitReadWatch, read };
