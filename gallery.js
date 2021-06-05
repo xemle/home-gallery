@@ -59,7 +59,7 @@ const startServer = async config => {
 }
 
 const updateIndex = async (source, initialImport) => {
-  const args = ['index', '--directory', source.dir, '--index', source.index, '--checksum']
+  const args = ['index', '--directory', source.dir, '--index', source.index]
   source.matcher && args.push('--matcher', source.matcher)
   source.excludeFromFile && args.push('--exclude-from-file', source.excludeFromFile)
   source.excludeIfPresent && args.push('--exclude-if-present', source.excludeIfPresent)

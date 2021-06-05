@@ -15,11 +15,11 @@ const command = {
         describe: 'Directory of file index',
         default: '.'
       },
-      checksum: {
-        alias: 'c',
+      'no-checksum': {
+        alias: 'C',
         boolean: true,
         default: false,
-        describe: 'Calculate file checksums'
+        describe: 'Disable file checksum calculation'
       },
       exclude: {
         alias: 'e',
@@ -60,7 +60,7 @@ const command = {
     const { update, matcherFns } = require('./index');
 
     const options = {
-      checksum: argv.checksum,
+      checksum: !argv.noChecksum,
       exclude: argv.exclude,
       excludeFromFile: argv['exclude-from-file'],
       excludeIfPresent: argv['exclude-if-present'],

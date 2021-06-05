@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extractor: Add `--concurrency`, `--skip` and `--limit` parameter for issue identifications
 - index: Add `--add-limits` parameter
 
+### Changed
+
+- index: Calculate file checksum by default. Use `--no-checksum` to disable it
+
 ### Fixed
 
 - config: Fix example parameter `apiServer`
