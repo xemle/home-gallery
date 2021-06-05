@@ -29,7 +29,6 @@ run:
   - command: npm --prefix=node_modules/sharp --platform=win32 --arch=x64 run install
     platformArch: win-x64
 entries:
-  - ./cli.js
   - ./gallery.js
   - ./packages/index
   - ./packages/extractor

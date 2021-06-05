@@ -66,6 +66,7 @@
   "dependencies": {
     "@home-gallery/api-server": "file:packages/api-server",
     "@home-gallery/bundle": "file:packages/bundle",
+    "@home-gallery/cli": "file:packages/cli",
     "@home-gallery/common": "file:packages/common",
     "@home-gallery/database": "file:packages/database",
     "@home-gallery/events": "file:packages/events",

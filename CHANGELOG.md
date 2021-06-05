@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Extract separate cli package from `cli.js` and `gallery.js`
 - index: Calculate file checksum by default. Use `--no-checksum` to disable it
 
 ### Fixed
