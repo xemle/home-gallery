@@ -17,7 +17,7 @@ function uniqEntries(entries) {
   return uniqEntries;
 }
 
-function databaseApi() {
+function databaseApi(eventbus) {
   let database = { data: [] };
   const databaseCache = cache(3600);
   let entryCache = {};
@@ -56,6 +56,9 @@ function databaseApi() {
           database = newDatabase;
           databaseCache.clear();
           entryCache = {};
+          eventbus.emit(eventbus.create('server', {
+            action: 'databaseReloaded'
+          }))
           onceCb();
         }
       })

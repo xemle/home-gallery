@@ -46,9 +46,9 @@ function startServer({host, port, storageDir, databaseFilename, eventsFilename, 
   app.use(morgan('tiny'));
   app.use(bodyParser.json({limit: '1mb'}))
 
-  const { read: dbRead, init: dbInit, getEntries } = databaseApi();
+  const { read, push, stream, eventbus } = eventsApi(eventsFilename);
+  const { read: dbRead, init: dbInit, getEntries } = databaseApi(eventbus);
   app.get('/api/database', dbRead);
-  const { read, push, stream } = eventsApi(eventsFilename);
   app.get('/api/events', read);
   app.get('/api/events/stream', stream);
   app.post('/api/events', push);

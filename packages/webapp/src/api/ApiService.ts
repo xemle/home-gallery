@@ -1,7 +1,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { Event, EventAction, EventListener } from '@home-gallery/events'
-import { pushEvent as pushEventApi, eventStream as eventStreamApi } from './api';
+import { pushEvent as pushEventApi, eventStream as eventStreamApi, ServerEventListener } from './api';
 import { ActionEventListener } from './ActionEventListner';
 import { UnsavedEventHandler } from './UnsavedEventHanlder';
 export { fetchAll, getEvents } from './api'
@@ -38,10 +38,10 @@ export const pushEvent = async (event: Event) => {
     });
 }
 
-export const eventStream = (onActionEvent: EventListener) => {
+export const eventStream = (onActionEvent: EventListener, onServerEvent: ServerEventListener) => {
   if (!eventStreamSubscribed) {
     eventStreamSubscribed = true;
-    eventStreamApi(unsavedEventHandler.middleware(actionEventListener.publish));
+    eventStreamApi(unsavedEventHandler.middleware(actionEventListener.publish), onServerEvent);
   }
   return actionEventListener.subscribe(onActionEvent);
 }

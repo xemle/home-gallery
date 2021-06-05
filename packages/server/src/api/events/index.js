@@ -7,13 +7,18 @@ const events = (eventsFilename) => {
   let clients = [];
   let eventsCache = false;
 
-  const sendEventsToAll = (data) => {
+  const create = (type, data) => {
+    return Object.assign(data, {
+      type,
+      id: uuidv4(),
+      date: new Date().toISOString(),
+    })
+  }
+
+  const emit = (event) => {
     clients.forEach(c => {
-      console.log(`Sed data to client ${c.id}`);
-      if (data.type) {
-        c.res.write(`event: ${data.type}\n`);
-      }
-      c.res.write(`data: ${JSON.stringify(data)}\n\n`);
+      console.log(`Send data to client ${c.id}`);
+      c.res.write(`data: ${JSON.stringify(event)}\n\n`);
     });
   }
 
@@ -92,7 +97,7 @@ const events = (eventsFilename) => {
         if (eventsCache !== false) {
           eventsCache.push(event);
         }
-        sendEventsToAll(event);
+        emit(event);
         res.status(201).end();
       }
     });
@@ -131,7 +136,8 @@ const events = (eventsFilename) => {
     });
   }
 
-  return { read, stream, push };
+  const eventbus = { create, emit };
+  return { read, stream, push, eventbus };
 }
 
 module.exports = events;

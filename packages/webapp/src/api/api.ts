@@ -67,40 +67,44 @@ export const getEvents = async () => {
 let eventSourceReconnectTimeout = 1000;
 const eventSourceReconnectTimeoutMax = 2 * 60 * 1000;
 
-export const eventStream = (onActionEvent: EventListener) => {
+export interface ServerEvent {
+  type: string;
+  id: string;
+  date: string;
+  action?: string;
+}
+
+export declare type ServerEventListener = (event: ServerEvent) => void;
+
+export const eventStream = (onActionEvent: EventListener, onServerEvent: ServerEventListener) => {
   const events = new EventSource(`api/events/stream`);
 
-  events.onopen = () => {
+  events.addEventListener('open', () => {
     eventSourceReconnectTimeout = 1000;
-  }
+  })
 
-  events.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      console.log(`Unhandled generic event: ${data}`);
-    } catch (e) {
-      console.log(`Could not read Event: ${e}, ${event.data}`);
-    }
-  };
-
-  events.addEventListener('userAction', (event: MessageEvent) => {
+  events.addEventListener('message', (event: MessageEvent) => {
     console.log(`Received action event: ${event}`);
     try {
-      const data: Event = JSON.parse(event.data);
-      onActionEvent(data);
+      const data = JSON.parse(event.data);
+      if (data.type == 'userAction') {
+        onActionEvent(data);
+      } else if (data.type == 'server') {
+        onServerEvent(data);
+      }
     } catch (e) {
       console.log(`Could not read Event: ${e}`);
     }
   })
 
-  events.onerror = (event) => {
+  events.addEventListener('error', event => {
     console.log(`EventSource error. Try to reconnect ${JSON.stringify(event)}`);
     events.close();
     setTimeout(() => {
-      eventStream(onActionEvent);
+      eventStream(onActionEvent, onServerEvent);
     }, eventSourceReconnectTimeout);
     eventSourceReconnectTimeout = Math.min(eventSourceReconnectTimeoutMax, eventSourceReconnectTimeout * 2);
-  };
+  });
 }
 
 export const pushEvent = async (event: Event) => {

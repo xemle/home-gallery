@@ -44,7 +44,15 @@ export const Main = () => {
           console.log(`Could not fetch intitial events: ${e}`);
         })
 
-      const subscribeEvents = () => eventStream((event) => addEvent(event));
+      const subscribeEvents = () => eventStream(
+        (event) => addEvent(event),
+        (serverEvent) => {
+          if (serverEvent.action === 'databaseReloaded') {
+            console.log(`Reload database due server event`)
+            fetchAll(chunkLimits, addEntries)
+          }
+        }
+      );
 
       const chunkLimits = [5000, 5000, 10000, 20000, 40000];
       fetchAll(chunkLimits, addEntries)
