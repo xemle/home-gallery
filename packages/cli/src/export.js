@@ -46,7 +46,7 @@ const command = {
     .demandOption(['storage', 'database'])
   },
   handler: (argv) => {
-    const { exportBuilder } = require('./index');
+    const { exportBuilder } = require('@home-gallery/export');
     const options = {
       eventsFilename: argv.events,
       outputDirectory: argv.output,

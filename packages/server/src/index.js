@@ -71,4 +71,4 @@ function startServer({host, port, storageDir, databaseFilename, eventsFilename, 
 
 }
 
-module.exports = startServer;
+module.exports = { startServer, webappDir: path.join(__dirname, 'public') };

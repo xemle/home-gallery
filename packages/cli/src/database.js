@@ -1,7 +1,7 @@
 const debug = require('debug')('cli:build');
 
 const command = {
-  command: 'build',
+  command: 'database',
   describe: 'Build database from file indices, extracted meta data and preview files from the storage',
   builder: (yargs) => {
     return yargs.option({
@@ -32,7 +32,7 @@ const command = {
   },
   handler: (argv) => {
     const { fileFilter } = require('@home-gallery/common');
-    const { buildDatabase } = require('./index');
+    const { buildDatabase } = require('@home-gallery/database');
 
     const t0 = Date.now();
     fileFilter(argv.exclude, argv['exclude-from-file'], (err, fileFilterFn) => {

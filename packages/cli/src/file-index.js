@@ -57,7 +57,7 @@ const command = {
       })
   },
   handler: (argv) => {
-    const { update, matcherFns } = require('./index');
+    const { update, matcherFns } = require('@home-gallery/index');
 
     const options = {
       checksum: !argv.noChecksum,
@@ -75,7 +75,7 @@ const command = {
 }
 
 const stats = (indexFilename, cb) => {
-  const { statIndex, prettyPrint } = require('./stat');
+  const { statIndex, prettyPrint } = require('@home-gallery/index');
 
   statIndex(indexFilename, (err, stats) => {
     if (err) {

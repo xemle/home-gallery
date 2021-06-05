@@ -47,7 +47,7 @@ const extract = async (config, sources, options) => {
 }
 
 const buildDatabase = async (config) => {
-  const args = ['build'];
+  const args = ['database'];
   const storage = config.storage || {}
   config.sources.forEach(source => args.push('--index', source.index));
   args.push('--storage', storage.dir, '--database', config.database.file);

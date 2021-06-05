@@ -44,7 +44,7 @@ const command = {
     .demandOption(['storage', 'database', 'events'])
   },
   handler: (argv) => {
-    const startServer = require('./index');
+    const { startServer, webappDir } = require('@home-gallery/server');
     const path = require('path');
 
     const config = {
@@ -53,7 +53,7 @@ const command = {
       storageDir: argv.storage,
       databaseFilename: argv.database,
       eventsFilename: argv.events,
-      webappDir: path.resolve(__dirname || '.', 'public'),
+      webappDir,
       key: argv.key,
       cert: argv.cert
     }

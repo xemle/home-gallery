@@ -60,7 +60,7 @@ const command = {
     .demandOption(['index', 'storage'])
   },
   handler: (argv) => {
-    const extract = require('./index');
+    const extract = require('@home-gallery/extractor');
     const { fileFilter } = require('@home-gallery/common');
 
     const t0 = Date.now();

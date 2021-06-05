@@ -9,6 +9,7 @@ const createIndex = require('./create');
 const updateIndex = require('./update');
 const writeIndex = require('./write');
 const checksum = require('./checksum');
+const { statIndex, prettyPrint } = require('./stat')
 
 const { matcherFns } = require('./merge');
 const { readStream, readStreams } = require('./read-stream');
@@ -91,5 +92,7 @@ module.exports = {
   readStream,
   readStreams,
   update,
-  matcherFns
+  matcherFns,
+  prettyPrint,
+  statIndex
 }
