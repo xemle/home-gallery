@@ -43,6 +43,9 @@ const command = {
         default: 'size-ctime-inode',
         describe: `File matcher for index merge by: size, size-ctime, size-ctime-inode`
       },
+      'add-limits': {
+        describe: `Limits of new index files for incremental imports. Format is initial,add?,factor?,max? eg. 200,500,1.25,8000`
+      },
     })
     .demandOption(['index', 'directory'])
     .command(
@@ -62,9 +65,12 @@ const command = {
       excludeFromFile: argv['exclude-from-file'],
       excludeIfPresent: argv['exclude-if-present'],
       dryRun: argv['dry-run'],
-      matcherFn: matcherFns[argv.m] || matcherFns['size-ctime-inode']
+      matcherFn: matcherFns[argv.m] || matcherFns['size-ctime-inode'],
+      addLimits: argv.addLimits
     }
-    update(argv.directory, argv.index, options, () => true)
+    update(argv.directory, argv.index, options, (err, _, limitExceeded) => {
+      process.exit(err ? 2 : (limitExceeded ? 1 : 0))
+    })
   }
 }
 

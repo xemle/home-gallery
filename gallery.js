@@ -58,7 +58,7 @@ const startServer = async config => {
   return 'exit'
 }
 
-const updateIndex = async source => {
+const updateIndex = async (source, initialImport) => {
   const args = ['index', '--directory', source.dir, '--index', source.index, '--checksum']
   source.matcher && args.push('--matcher', source.matcher)
   source.excludeFromFile && args.push('--exclude-from-file', source.excludeFromFile)
@@ -67,12 +67,13 @@ const updateIndex = async source => {
   excludes = source.excludes || [];
   excludes.forEach(exclude => args.push('--exclude', exclude))
 
+  initialImport && args.push('--add-limits', '200,500,1.25,8000')
   await runCli(args, {env: {DEBUG: '*'}})
 }
 
-const updateIndices = async sources => {
+const updateIndices = async (sources, initialImport) => {
   for (const source of sources) {
-    await updateIndex(source);
+    await updateIndex(source, initialImport);
   }
 }
 
@@ -166,7 +167,8 @@ const menu = {
       message: 'Update files',
       choices: [
         {name: 'increment', message: 'Update and process only new files'},
-        {name: 'full', message: 'Process all files'},
+        {name: 'initial', message: 'Initial import (incremental processing)'},
+        {name: 'full', message: 'Process all files (one run)'},
         {name: 'main', message: 'Back'}
       ]
     }).run(),
@@ -180,12 +182,25 @@ const menu = {
         sources = sources.filter(source => indices.indexOf(source.index) >= 0)
       }
 
-      const now = new Date().toISOString().substring(0, 16);
-      await updateIndices(sources);
-      await extract(config, sources, {
-        checksumFrom: command == 'increment' ? now : false
-      });
-      await databaseBuild(config);
+      const catchIndexLimitExceeded = exitCode => {
+        if (exitCode == 1) {
+          return true
+        }
+        throw new Error(`Exit code was ${exitCode}`)
+      }
+
+      let processing = true;
+      while (processing) {
+        const now = new Date().toISOString().substring(0, 16);
+        await updateIndices(sources, command == 'initial').then(() => processing = false).catch(catchIndexLimitExceeded);
+        await extract(config, sources, {
+          checksumFrom: command == 'increment' ? now : false
+        });
+        await databaseBuild(config);
+        if (processing) {
+          console.log(`New chunk of media is processed and is ready to browse. Continue with next chunk to process...`)
+        }
+      }
 
       return 'main'
     }

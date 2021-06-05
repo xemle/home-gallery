@@ -12,13 +12,15 @@ const checksum = require('./checksum');
 
 const { matcherFns } = require('./merge');
 const { readStream, readStreams } = require('./read-stream');
+const createLimitFilter = require('./limit-filter');
 
 const createOrUpdate = (directory, filename, options, cb) => {
   const now = new Date();
   async.waterfall([
     (callback) => readIndex(filename, callback),
-    (fileIndex, callback) => {
-      createIndex(directory, options, (err, fsEntries) => {
+    (fileIndex, callback) => createLimitFilter(fileIndex.data.length, options.addLimits, options.filter, (err, filter) => callback(err, fileIndex, filter)),
+    (fileIndex, limitFilter, callback) => {
+      createIndex(directory, {...options, filter: limitFilter}, (err, fsEntries) => {
         if (err) {
           return callback(err);
         }
@@ -26,11 +28,11 @@ const createOrUpdate = (directory, filename, options, cb) => {
           if (err) {
             return callback(err);
           }
-          callback(null, fileIndex, entries, changed);
+          callback(null, fileIndex, entries, changed, limitFilter.limitExceeded());
         })
       })
     },
-    (fileIndex, entries, changed, callback) => {
+    (fileIndex, entries, changed, limitExceeded, callback) => {
       if (changed) {
         const newIndex = {
           type: 'home-gallery/fileindex@1.0',
@@ -39,31 +41,31 @@ const createOrUpdate = (directory, filename, options, cb) => {
           data: entries
         }
         if (options.dryRun) {
-          callback(null, newIndex);
+          callback(null, newIndex, limitExceeded);
         } else {
-          writeIndex(filename, newIndex, callback);
+          writeIndex(filename, newIndex, (err, index) => callback(err, index, limitExceeded));
         }
       } else {
-        callback(null, fileIndex);
+        callback(null, fileIndex, limitExceeded);
       }
     }
   ], cb);
 }
 
-const updateChecksum = (filename, index, updateChecksums, isDryRun, cb) => {
+const updateChecksum = (filename, index, updateChecksums, isDryRun, limitExeeded, cb) => {
   if (updateChecksums) {
     const sha1sumDate = new Date().toISOString();
     return checksum(index, sha1sumDate, (err, index, changed) => {
       if (err) {
         return cb(err);
       } else if (changed && !isDryRun) {
-        return writeIndex(filename, index, cb);
+        return writeIndex(filename, index, (err, index) => cb(err, index, limitExeeded));
       } else {
-        return cb(null, index);
+        return cb(null, index, limitExeeded);
       }
     })
   } else {
-    return cb(null, index);
+    return cb(null, index, limitExeeded);
   }
 }
 
@@ -73,14 +75,14 @@ const update = (directory, filename, options, cb) => {
   async.waterfall([
     (callback) => fileFilter(options.exclude, options.excludeFromFile, callback),
     (filter, callback) => createOrUpdate(directory, filename, {...options, filter}, callback),
-    (index, callback) => updateChecksum(filename, index, options.checksum, options.dryRun, callback)
-  ], (err, index) => {
+    (index, limitExeeded, callback) => updateChecksum(filename, index, options.checksum, options.dryRun, limitExeeded, callback)
+  ], (err, index, limitExeeded) => {
     if (err) {
       debug(`Could not update file index ${filename}: ${err}`);
       cb(err);
     } else {
       debug(`Updated file index in ${Date.now() - t0}ms`);
-      cb(null, index);
+      cb(null, index, limitExeeded);
     }
   });
 }

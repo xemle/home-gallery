@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - config: Add `matcher` for index file matcher
 - config: Add `geoAddressLanguage` for geo code reverse lookup language
 - extractor: Print video progress
-- extractor: Add concurrency, skip and limit parameter for issue identifications
+- extractor: Add `--concurrency`, `--skip` and `--limit` parameter for issue identifications
+- index: Add `--add-limits` parameter
 
 ### Fixed
 
