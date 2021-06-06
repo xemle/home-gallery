@@ -41,7 +41,6 @@ includes:
   - package.json
   - README.md
   - LICENSE
-  - cli.js
   - gallery.js
   - gallery.config-example.yml
   - node_modules/sharp
