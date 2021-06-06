@@ -1,11 +1,16 @@
 .git
-.cache
+**/.cache
 node_modules
 **/node_modules
 **/dist
 /build
-/examples
 /data
+/dist
+/examples
+/node
+
+# The public folder is build in docker file
+packages/server/public
 
 # Exclude api-server module
 # Build it separately in packages/api-server and run it via docker-compose

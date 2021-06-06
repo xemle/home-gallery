@@ -1,10 +1,8 @@
-FROM node:14-alpine
-
-RUN apk add --no-cache \
-  perl
+FROM node:14-alpine AS builder
 
 COPY package.json *.js lerna.json *.md *.yml LICENSE /app/
 COPY packages /app/packages/
+COPY scripts /app/scripts/
 WORKDIR /app
 
 RUN cp package.json package.json.orig && \
@@ -12,10 +10,22 @@ RUN cp package.json package.json.orig && \
   npm install && \
   find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
 
-RUN npm run build -- --loglevel verbose && \
-  npm prune --production && \
-  npm cache clean --force && \
-  rm -rf packages/webapp/{.cache,dist}
+RUN npm run build --loglevel verbose
+
+RUN node scripts/bundle.js --bundle-file=bundle-docker.yml && \
+  cp dist/latest/home-gallery-*.tar.gz home-gallery.tar.gz
+
+FROM node:14-alpine
+
+RUN apk add --no-cache \
+  perl
+
+WORKDIR /app
+
+COPY --from=builder /app/home-gallery.tar.gz home-gallery.tar.gz
+
+RUN tar xf home-gallery.tar.gz && \
+  rm home-gallery.tar.gz
 
 VOLUME [ "/data" ]
 ENV GALLERY_BASE_DIR=/data
@@ -24,4 +34,4 @@ ENV GALLERY_CACHE_DIR=/data
 ENV GALLERY_CONFIG=/data/config/gallery.config.yml
 EXPOSE 3000
 
-CMD [ "gallery.js" ]
+ENTRYPOINT [ "node", "gallery.js" ]

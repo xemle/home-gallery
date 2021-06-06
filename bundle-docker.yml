@@ -1,0 +1,16 @@
+entries:
+  - ./bundle-entry.js
+includes:
+  - package.json
+  - CHANGELOG.md
+  - README.md
+  - LICENSE
+  - gallery.js
+  - gallery.config-example.yml
+  - node_modules/@home-gallery
+excludes:
+  - node_modules/@home-gallery/bundle
+  - node_modules/@home-gallery/webapp
+output:
+  dir: dist
+  name: home-gallery

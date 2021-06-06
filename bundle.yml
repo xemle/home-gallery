@@ -29,12 +29,7 @@ run:
   - command: npm --prefix=node_modules/sharp --platform=win32 --arch=x64 run install
     platformArch: win-x64
 entries:
-  - ./gallery.js
-  - ./packages/index
-  - ./packages/extractor
-  - ./packages/database
-  - ./packages/server
-  - ./packages/export
+  - ./bundle-entry.js
   - sharp
   - sharp:dependencies
 includes:
