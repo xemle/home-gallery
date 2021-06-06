@@ -39,6 +39,7 @@ entries:
   - sharp:dependencies
 includes:
   - package.json
+  - CHANGELOG.md
   - README.md
   - LICENSE
   - gallery.js
