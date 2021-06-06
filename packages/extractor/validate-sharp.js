@@ -8,10 +8,12 @@ const os = require('os')
 const fs = require('fs').promises;
 const path = require('path');
 const { spawn } = require('child_process');
+const libc = require('detect-libc')
 
 const FALLBACK_HOST = 'https://dl.home-gallery.org/npm/libvips'
 const platform = process.env.npm_config_platform || process.platform
 const arch = process.env.npm_config_arch || process.arch
+const hasLibC = libc.family == libc.GLIBC
 const isLinuxX64 = platform.match(/linux/i) && arch == 'x64'
 const requiredCpuFlags = ['sse4_2']
 
@@ -76,7 +78,7 @@ const findPackage = async (dir, name) => {
 }
 
 const requiresFallback = async () => {
-  if (!isLinuxX64) {
+  if (!isLinuxX64 || !hasLibC) {
     return false;
   }
   const flags = await getCpuFlags();
