@@ -11,6 +11,7 @@ const runCli = require('./run')
 
 const cli = () => {
   yargs.usage('Usage: $0 [global options] <command> [options]')
+    .env('GALLERY')
     .command(fileIndexCli)
     .command(extractCli)
     .command(databaseCli)
