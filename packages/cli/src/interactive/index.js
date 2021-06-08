@@ -3,7 +3,7 @@ const path = require('path');
 const galleryDir = path.dirname(process.argv[1])
 
 const { loadConfig } = require('../config')
-const { runner } = require('./runner')
+const { runner } = require('./menu')
 
 const command = {
   command: ['interactive', '$0'],
@@ -19,7 +19,7 @@ const command = {
   },
   handler: (argv) => {
     const options = {
-      configFile: argv.config,
+      configFile: process.env['GALLERY_CONFIG'] || argv.config,
       configFallback: path.join(galleryDir, 'gallery.config-example.yml')
     }
     loadConfig(options)

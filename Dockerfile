@@ -20,18 +20,22 @@ FROM node:14-alpine
 RUN apk add --no-cache \
   perl
 
-WORKDIR /app
+COPY --from=builder /app/home-gallery.tar.gz /app/home-gallery.tar.gz
 
-COPY --from=builder /app/home-gallery.tar.gz home-gallery.tar.gz
-
-RUN tar xf home-gallery.tar.gz && \
-  rm home-gallery.tar.gz
+RUN cd /app && \
+  tar xvf /app/home-gallery.tar.gz && \
+  rm /app/home-gallery.tar.gz
 
 VOLUME [ "/data" ]
+
+WORKDIR /data
+
+ENV HOME=/data
 ENV GALLERY_BASE_DIR=/data
 ENV GALLERY_CONFIG_DIR=/data/config
 ENV GALLERY_CACHE_DIR=/data
 ENV GALLERY_CONFIG=/data/config/gallery.config.yml
+
 EXPOSE 3000
 
-ENTRYPOINT [ "node", "gallery.js" ]
+ENTRYPOINT [ "node", "/app/gallery.js" ]

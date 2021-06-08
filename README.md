@@ -14,6 +14,18 @@ support. Ask questions on [gitter.im](https://gitter.im/home-gallery/community).
 
 [MIT License](https://en.wikipedia.org/wiki/MIT_License)
 
+## Links
+
+* [Homepage](https://home-gallery.org)
+* [Demo gallery](https://demo.home-gallery.org)
+* [Documentation](https://docs.home-gallery.org)
+
+Quickstart
+
+```
+docker run -ti --rm -v $(pwd)/data:/data -v $HOME/Pictures:/data/Pictures -u $(id -u):$(id -g) -p 3000:3000 xemle/home-gallery
+```
+
 ## Motivation
 
 * The source of all my private images and videos are stored local on my NAS at home
@@ -179,7 +191,11 @@ for file indexer, extractor, database builder or extractor. See `./cli.js -h` fo
 
 Instead of installing node and other required libraries you can use also docker to run the gallery
 
-### Build
+### Official image
+
+You can use the official docker image `xemle/home-gallery` from the [docker hub](https://hub.docker.com/r/xemle/home-gallery).
+
+### Build youself
 
 Build the docker image by following command
 
@@ -210,7 +226,7 @@ sources:
 Run the docker container
 
 ```
-docker run -ti --rm -v $(pwd)/data:/data -u $(id -u):$(id -g) -p 3000:3000 home-gallery
+docker run -ti --rm -v $(pwd)/data:/data -u $(id -u):$(id -g) -p 3000:3000 xemle/home-gallery
 ```
 
 and follow the CLI to render preview files and start the webserver
@@ -222,7 +238,7 @@ These folders and partitions should be mounted as docker volumes into `/data/sou
 As example for a media partition `/mnt/media` run
 
 ```
-docker run -ti --rm -v $(pwd)/data:/data -v /mnt/media:/data/sources/media -u $(id -u):$(id -g) -p 3000:3000 home-gallery
+docker run -ti --rm -v $(pwd)/data:/data -v /mnt/media:/data/sources/media -u $(id -u):$(id -g) -p 3000:3000 xemle/home-gallery
 ```
 
 with source configuration in `gallery.config.yml`:
