@@ -61,16 +61,22 @@ const parseJsonChunks = (filename) => {
 }
 
 const readStream = (filename, cb) => {
-  debug(`Reading file index from ${filename}`)
-  const indexName = path.basename(filename).replace(/\.[^.]+$/, '');
-  let indexHead;
-  const stream = fs.createReadStream(filename)
-    .pipe(zlib.createGunzip())
-    .pipe(split2('},{'))
-    .pipe(parseJsonChunks(filename)).on('head', head => indexHead = head)
-    .pipe(map(e => Object.assign(e, { indexName, url: `file://${path.join(indexHead.base, e.filename)}` })))
+  fs.access(filename, fs.constants.F_OK | fs.constants.R_OK, err => {
+    if (err) {
+      return cb(err)
+    }
 
-  cb(null, stream)
+    debug(`Reading file index from ${filename}`)
+    const indexName = path.basename(filename).replace(/\.[^.]+$/, '');
+    let indexHead;
+    const stream = fs.createReadStream(filename)
+      .pipe(zlib.createGunzip())
+      .pipe(split2('},{'))
+      .pipe(parseJsonChunks(filename)).on('head', head => indexHead = head)
+      .pipe(map(e => Object.assign(e, { indexName, url: `file://${path.join(indexHead.base, e.filename)}` })))
+
+    cb(null, stream)
+  })
 }
 
 const appendStream = (nextStream) => {
@@ -99,10 +105,15 @@ const readStreams = (indexFilenames, cb) => {
     }
     const filename = indexFilenames[i++]
     readStream(filename, (err, stream) => {
-      if (!err) {
-        return cb(stream);
-      } else if (i < indexFilenames.length) {
+      if (err && err.code === 'ENOENT') {
+        debug(`File '${filename}' does not exist. Continue`);
+      } else if (err) {
         debug(`Could not read file index '${filename}': ${err}. Continue`)
+      } else {
+        return cb(stream);
+      }
+
+      if (i < indexFilenames.length) {
         return nextStream(cb)
       } else {
         return cb();

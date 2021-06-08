@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - config: Fix example parameter `apiServer`
 - server: Fix database cache middleware
+- index: Fix incremental import with multiple indices
 
 ## [1.0.1] - 2020-05-20
 
