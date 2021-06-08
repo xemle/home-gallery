@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - index: Calculate file checksum by default. Use `--no-checksum` to disable it
 - index: Changed sort order. Initial import imports latest dirs first
 - docker: Use docker builder and app bundle
+- database: Add atomic write for database
 
 ### Fixed
 

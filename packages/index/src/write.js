@@ -2,16 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const { writeJsonGzip } = require('@home-gallery/common');
 
-const rename = (from, to, index, cb) => {
-  fs.rename(from, to, (err) => {
-    if (err) {
-      cb(err);
-    } else {
-      cb(null, index);
-    }
-  });
-}
-
 /**
  * Sorts directory descending and filename ascending
  *
@@ -53,12 +43,11 @@ const writeIndex = (filename, index, cb) => {
   index.created = new Date().toISOString();
   index.data.sort(mapSortValueFor(e => e.filename, byDirDescFileAsc));
   const tmp = `${filename}.tmp`;
-  writeJsonGzip(tmp, index, (err) => {
+  writeJsonGzip(tmp, index, err => {
     if (err) {
       cb(err);
-    } else {
-      rename(tmp, filename, index, cb);
     }
+    fs.rename(tmp, filename, err => cb(err, err ? null : index));
   });
 }
 
