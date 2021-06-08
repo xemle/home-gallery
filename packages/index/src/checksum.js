@@ -35,11 +35,11 @@ const checksum = (index, sha1sumDate, cb) => {
   const totalBytes = index.data.reduce((all, entry) => { all += entry.size; return all}, 0);
   const bytes = missingChecksumEntries.reduce((all, entry) => { all += entry.size; return all}, 0);
   let bytesCalculated = 0;
-  debug(`Calculating checksums for ${missingChecksumEntries.length} entries with ${humanize(bytes)} of total size ${humanize(totalBytes)} (${(100 * bytes / totalBytes).toFixed(1)}%)`);
+  debug(`Calculating ids for ${missingChecksumEntries.length} entries with ${humanize(bytes)} of total size ${humanize(totalBytes)} (${(100 * bytes / totalBytes).toFixed(1)}%)`);
 
   const gracefulShutdown = () => {
     if (!interrupted) {
-      console.log(`Graceful shutdown. Checksums of ${humanize(bytesCalculated)} (${(100 * bytesCalculated / bytes).toFixed(1)}%) were calculated, ${(100 * (totalBytes - bytes + bytesCalculated) / totalBytes).toFixed(0)}% of ${humanize(totalBytes)} are done. Please be patient to avoid data loss!`);
+      console.log(`Graceful shutdown. Ids of ${humanize(bytesCalculated)} (${(100 * bytesCalculated / bytes).toFixed(1)}%) were calculated, ${(100 * (totalBytes - bytes + bytesCalculated) / totalBytes).toFixed(0)}% of ${humanize(totalBytes)} are done. Please be patient to avoid data loss!`);
       interrupted = true;
       cb(null, index, true);
     } else {
@@ -65,7 +65,7 @@ const checksum = (index, sha1sumDate, cb) => {
       entry.sha1sumDate = sha1sumDate;
 
       bytesCalculated += entry.size;
-      debug(`Created checksum of ${entry.filename} with ${humanize(entry.size)}`);
+      debug(`Calculated id ${sha1sum.substr(0, 7)}... for ${entry.filename} with ${humanize(entry.size)}`);
       calculateAll(base, entries, done);
     })
   }
@@ -75,7 +75,7 @@ const checksum = (index, sha1sumDate, cb) => {
     if (err) {
       return cb(err);
     }
-    debug(`All checksums of ${humanize(totalBytes)} are calculated. Calculated checksums of ${humanize(bytesCalculated)} (${(100 * bytesCalculated / totalBytes).toFixed(1)}%) in ${Date.now() - t0}ms`);
+    debug(`All ids of ${humanize(totalBytes)} are calculated. Calculated ids of ${humanize(bytesCalculated)} (${(100 * bytesCalculated / totalBytes).toFixed(1)}%) in ${Date.now() - t0}ms`);
     cb(null, index, true);
   });
 }
