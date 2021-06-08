@@ -13,30 +13,6 @@ const createEntryMap = (entries) => {
   }, {})
 }
 
-const byDirName = (a, b) => {
-  const aDirs = a.split(path.sep);
-  const bDirs = b.split(path.sep);
-
-  let i = 0;
-  let max = Math.min(aDirs.length, bDirs.length);
-  while (i < max) {
-    if (aDirs[i] < bDirs[i]) {
-      return -1;
-    } else if (aDirs[i] > bDirs[i]) {
-      return 1;
-    }
-    i++;
-  }
-  
-  if (aDirs.length > max) {
-    return -1;
-  } else if (bDirs.length > max) {
-    return 1;
-  }
-
-  return 0;
-}
-
 const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
   const t0 = Date.now();
   if (!fileEntries.length) {
@@ -61,7 +37,6 @@ const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
   }
 
   const updatedEntryKeys = commonKeys.concat(onlyFsKeys);
-  updatedEntryKeys.sort(byDirName);
 
   const updatedEntries = updatedEntryKeys.map(key => commonEntryMap[key] || fsEntryMap[key]);
 

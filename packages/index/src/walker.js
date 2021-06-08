@@ -58,10 +58,11 @@ function walkFiles(dir, filesMapper, fileStats, cb, done) {
   return done();
 }
 
-function sortByDirAndNameRevert(a, b) {
+function byDirDescNameAsc(a, b) {
   const aIsDir = a.stat.isDirectory();
   if (aIsDir === b.stat.isDirectory()) {
-    return a.filename < b.filename ? 1 : -1;
+    const rev = aIsDir ? -1 : 1
+    return a.filename < b.filename ? rev : -1 * rev;
   } else {
     return aIsDir ? 1 : -1;
   }
@@ -84,8 +85,8 @@ function walkDir(dir, filesMapper, cb, done) {
       if (err) {
         return done(err);
       }
-      
-      fileStats.sort(sortByDirAndNameRevert);
+
+      fileStats.sort(byDirDescNameAsc);
       walkFiles(dir, filesMapper, fileStats, cb, done);
     });
   })
