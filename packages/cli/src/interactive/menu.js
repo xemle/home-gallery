@@ -42,7 +42,7 @@ const menu = {
       }
       let sources = config.sources.filter(source => !source.offline)
       if (sources.length > 1) {
-        const indices = await runner(menu.selectSources, config)
+        const indices = await runner('selectSources', config)
         sources = sources.filter(source => indices.indexOf(source.index) >= 0)
       }
 
@@ -86,7 +86,7 @@ const menu = {
       } else if (command === 'debugExtractor') {
         let sources = config.sources.filter(source => !source.offline)
         if (sources.length > 1) {
-          const indices = await runner(menu.selectSources, config)
+          const indices = await runner('selectSources', config)
           sources = sources.filter(source => indices.indexOf(source.index) >= 0)
         }
         console.log('Debugging extractor: Adjust concurrent, skip and limit parameter to your need. Add --print-entry parameter to fine tune')
@@ -102,4 +102,17 @@ const menu = {
   }
 }
 
-module.exports = { menu }
+const runner = (name, config, ...args) => {
+  const item = menu[name]
+  return item.prompt(config)
+    .then(result => item.action ? item.action(result, config, ...args) : result)
+    .then(result => {
+      if (menu[result]) {
+        return runner(result, config, ...args);
+      } else {
+        return result;
+      }
+    })
+}
+
+module.exports = { menu, runner }
