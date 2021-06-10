@@ -1,6 +1,10 @@
 import fs from 'fs/promises'
 import path from 'path'
+
+import { logger } from './log'
 import { hash } from './hash'
+
+const log = logger.child({module: 'updateHash'});
 
 const read = async (hashFile: string) => {
   const content = await fs.readFile(hashFile, 'utf8')
@@ -25,6 +29,7 @@ export const updateHash = async (files: string[], algorithm: string, hashFile: s
   const newHases = files.reduce((result: any, file, i) => {
     const filename = path.relative(path.dirname(hashFile), file)
     result[filename] = hashes[i]
+    log.info(`Calculated ${algorithm} hash for '${file}': ${hashes[i]}`)
     return result
   }, {})
 

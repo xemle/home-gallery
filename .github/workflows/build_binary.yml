@@ -1,0 +1,70 @@
+---
+name: 'build images'
+
+on: push
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Prepare
+        id: prepare
+        run: |
+          SHORTREF=${GITHUB_SHA::8}
+          BRANCH=${GITHUB_REF#refs/heads/}
+          VERSION=${BRANCH//\//-}
+          SNAPSHOT="-$(date +%Y%m%d)-${SHORTREF}"
+          TARGET_DIR=unstable/
+
+          # If this is git tag, use the tag name as a docker tag
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            TAG_VERSION=${GITHUB_REF#refs/tags/v}
+            # If we have a major.minor.patch version install
+            # binary below the root
+            if [[ $TAG_VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+              VERSION=$TAG_VERSION
+              SNAPSHOT=
+              TARGET_DIR=/
+            fi
+          fi
+
+          # Set output parameters.
+          echo ::set-output name=VERSION::${VERSION}
+          echo ::set-output name=SNAPSHOT::${SNAPSHOT}
+          echo ::set-output name=TARGET_DIR::${TARGET_DIR}
+
+          # Exclude api-server and styleguide from binary build
+          cp package.json package.json.org
+          cat package.json.org | grep -v -e api-server -e styleguide > package.json
+
+      - name: Install packages
+        id: install
+        run: |
+          npm install
+
+      - name: Build packages
+        id: build
+        run: |
+          npm run build -- --scope '@home-gallery/bundle'
+          node scripts/bundle.js "--version=${{ steps.prepare.outputs.VERSION }}" "--snapshot=${{ steps.prepare.outputs.SNAPSHOT }}"
+
+      - name: Deploy via rsync
+        id: deploy
+        uses: up9cloud/action-rsync@master
+        env:
+          HOST: ${{secrets.SSH_HOSTNAME}}
+          USER: ${{secrets.SSH_USERNAME}}
+          KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          SOURCE: ./dist/
+          TARGET: ${{ steps.prepare.outputs.TARGET_DIR }}
+          ARGS: -avz
+          SSH_ARGS: '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+          VERBOSE: true

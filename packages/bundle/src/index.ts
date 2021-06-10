@@ -2,7 +2,6 @@ import os from 'os'
 import path from 'path'
 
 import { logger } from './log'
-import { uniq } from './utils'
 import { RunStep, Mapping, readConfig, Target } from './config'
 import { runSimple } from './run'
 import { resolvePackages } from './dependency-tree'
@@ -49,6 +48,7 @@ const filterTargets = (targets: Target[], filter: string | undefined) => {
 
 export interface BundleOptions {
     version: string
+    snapshot?: string
     bundleFile?: string
     filter?: string
     noBefore?: boolean
@@ -66,6 +66,7 @@ export const bundle = async (options: BundleOptions): Promise<void> => {
     }
 
     const outputDir = path.join(output.dir, version)
+    const snapshot = options.snapshot || ''
     const archivePrefix = output.prefix
     const hashAlgorithm = 'sha256'
     const hashFile = path.join(outputDir, 'sha256sums.txt')
@@ -74,9 +75,14 @@ export const bundle = async (options: BundleOptions): Promise<void> => {
     for (const target of filteredTargets) {
         log.info(`Bundling target ${target.platform}-${target.arch}`)
         const isWin = target.platform.startsWith('win')
-        const fileBase = `${output.name}-${version}-${target.platform}-${target.arch}`;
+
+        const fileBase = `${output.name}-${version}${snapshot}-${target.platform}-${target.arch}`;
         const archiveFile = path.join(outputDir, `${fileBase}.tar.gz`);
         const binFile = path.join(outputDir, `${fileBase}${isWin ? '.exe' : ''}`);
+
+        const linkBase = `${output.name}-${snapshot ? `${version}-latest` : 'latest'}-${target.platform}-${target.arch}`;
+        const archiveLatestLink = path.join(output.dir, 'latest', `${linkBase}.tar.gz`);
+        const binLatestLink = path.join(output.dir, 'latest', `${linkBase}${isWin ? '.exe' : ''}`);
 
         if (!options.noRun) {
             await runSteps(run, target.platform, target.arch)
@@ -94,8 +100,11 @@ export const bundle = async (options: BundleOptions): Promise<void> => {
         await pack(archiveFile, archivePrefix, `${output.name}/${version}`, target.platform, target.command, binFile)
         log.info(`Created binary ${binFile}`)
 
+        await updateHash([archiveFile], hashAlgorithm, `${archiveFile}.${hashAlgorithm}sum`)
+        await updateHash([binFile], hashAlgorithm, `${binFile}.${hashAlgorithm}sum`)
         await updateHash([archiveFile, binFile], hashAlgorithm, hashFile)
-        await Promise.all([archiveFile, binFile].map(file => symlink(file, file.replace(new RegExp(version, 'g'), 'latest'))))
+        await symlink(archiveFile, archiveLatestLink)
+        await symlink(binFile, binLatestLink)
         log.debug(`Updated checksum file and latest links`)
     }
 }
