@@ -1,6 +1,6 @@
 # Credits https://blog.oddbit.com/post/2020-09-25-building-multi-architecture-im/
 ---
-name: 'build images'
+name: 'build docker images'
 
 on:
   push:
