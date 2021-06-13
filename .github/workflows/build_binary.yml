@@ -42,8 +42,8 @@ jobs:
           echo ::set-output name=TARGET_DIR::${TARGET_DIR}
 
           # Exclude api-server and styleguide from binary build
-          cp package.json package.json.org
-          cat package.json.org | grep -v -e api-server -e styleguide > package.json
+          cp package.json package.json.orig
+          grep -v -e api-server -e styleguide package.json.orig > package.json
 
       - name: Install packages
         id: install
