@@ -1,9 +1,10 @@
+# Image builder
 FROM node:14-alpine AS builder
 
-COPY package.json *.js lerna.json *.md *.yml LICENSE /app/
-COPY packages /app/packages/
-COPY scripts /app/scripts/
-WORKDIR /app
+COPY package.json *.js lerna.json *.md *.yml LICENSE /build/
+COPY packages /build/packages/
+COPY scripts /build/scripts/
+WORKDIR /build
 
 RUN cp package.json package.json.orig && \
   grep -v -e api-server -e styleguide package.json.orig > package.json && \
@@ -11,20 +12,18 @@ RUN cp package.json package.json.orig && \
   find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
 
 RUN npm run build --loglevel verbose
-
 RUN node scripts/bundle.js --bundle-file=bundle-docker.yml && \
-  cp dist/latest/home-gallery-*.tar.gz home-gallery.tar.gz
+  mkdir -p app && tar -xvf dist/latest/home-gallery-*.tar.gz -C app
 
+
+# Final image
 FROM node:14-alpine
+LABEL org.opencontainers.image.authors="sebastian@silef.de"
 
 RUN apk add --no-cache \
   perl
 
-COPY --from=builder /app/home-gallery.tar.gz /app/home-gallery.tar.gz
-
-RUN cd /app && \
-  tar xvf /app/home-gallery.tar.gz && \
-  rm /app/home-gallery.tar.gz
+COPY --from=builder /build/app /app
 
 VOLUME [ "/data" ]
 
