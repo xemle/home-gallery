@@ -1,16 +1,29 @@
+const fs = require('fs/promises')
 const path = require('path')
 
-const { loadConfig } = require('./config')
+const { loadConfig, initConfig } = require('./config')
 const { startServer, importSources } = require('./tasks')
 
 const galleryDir = path.dirname(process.argv[1])
 
-const config = (argv) => {
-  const options = {
+const createOptions = argv => {
+  return {
     configFile: argv.config,
     configFallback: path.join(galleryDir, 'gallery.config-example.yml')
   }
+}
+
+const config = async argv => {
+  const options = createOptions(argv)
   return loadConfig(options)
+}
+
+const createConfig = argv => {
+  const options = createOptions(argv)
+
+  return fs.access(options.configFile).then(() => {
+    console.log(`Skip configuration initialization. File already exists: ${options.configFile}`)
+  }).catch(() => initConfig(options))
 }
 
 const runServer = options => {
@@ -36,6 +49,13 @@ const command = {
         describe: 'Configuration file'
       },
     })
+    .command(
+      'init',
+      'Initialize the gallery configuration',
+      (yargs) => yargs,
+      (argv) => createConfig(argv)
+          .catch(err => console.log(`Error: ${err}`))
+      )
     .command(
       'server',
       'Start the webserver',

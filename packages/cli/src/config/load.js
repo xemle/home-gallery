@@ -5,7 +5,7 @@ const YAML = require('yaml')
 const { expandConfigDefaults } = require('./expand')
 const { resolveConfig } = require('./resolve')
 const { validateConfig  } = require('./validate')
-const { initExampleConfig } = require('./init')
+const { initConfig } = require('./init')
 
 const loadConfig = async options => {
   const isYaml = options.configFile.match(/\.ya?ml$/i);
@@ -14,7 +14,7 @@ const loadConfig = async options => {
     throw new Error(`Unknown file extension of '${options.configFile}'. Expect a .yaml or .json file`)
   }
 
-  const data = await fs.readFile(options.configFile, 'utf8').catch(e => initExampleConfig(options, e))
+  const data = await fs.readFile(options.configFile, 'utf8').catch(err => initConfig(options, err))
   const config = isYaml ? YAML.parse(data) : JSON.parse(data)
   const env = {...process.env, ...{
     HOME: process.env['HOME'] || process.env['HOMEPATH'],
