@@ -1,6 +1,22 @@
 const fs = require('fs/promises')
 const path = require('path')
 
+const addSources = async (data, sources) => {
+  if (!sources || !sources.length) {
+    return data
+  }
+  const lines = data.split('\n')
+  const sourcesIndex = lines.indexOf('sources:')
+  if (sourcesIndex < 0) {
+    console.log(`Could not find sources marker to add ${sources.length} sources`)
+    return data
+  }
+
+  lines.splice(sourcesIndex + 1, 1, ...sources.map(source => `  - dir: '${source}'`))
+  console.log(`Set sources directories: ${sources.map(s => `'${s}'`).join(', ')}`)
+  return lines.join('\n')
+}
+
 const initConfig = async (options, origErr) => {
   const target = options.configFile
   const fallback = options.configFallback
@@ -17,8 +33,9 @@ const initConfig = async (options, origErr) => {
   }
 
   return fs.mkdir(path.dirname(target), {recursive: true})
-    .then(() => fs.copyFile(fallback, target))
-    .then(() => fs.readFile(target, 'utf8'))
+    .then(() => fs.readFile(fallback, 'utf-8'))
+    .then(data => addSources(data, options.sources))
+    .then(data => fs.writeFile(target, data, 'utf8').then(() => data))
     .then(data => {
       console.log(`Initialized configuration '${target}' from ${fallback}`)
       return data

@@ -9,7 +9,8 @@ const galleryDir = path.dirname(process.argv[1])
 const createOptions = argv => {
   return {
     configFile: argv.config,
-    configFallback: path.join(galleryDir, 'gallery.config-example.yml')
+    configFallback: path.join(galleryDir, 'gallery.config-example.yml'),
+    sources: argv.sources || false
   }
 }
 
@@ -21,9 +22,13 @@ const config = async argv => {
 const createConfig = argv => {
   const options = createOptions(argv)
 
-  return fs.access(options.configFile).then(() => {
-    console.log(`Skip configuration initialization. File already exists: ${options.configFile}`)
-  }).catch(() => initConfig(options))
+  if (argv.force) {
+    return initConfig(options)
+  }
+
+  return fs.access(options.configFile)
+    .then(() => console.log(`Skip configuration initialization. File already exists: ${options.configFile}`))
+    .catch(() => initConfig(options))
 }
 
 const runServer = options => {
@@ -52,7 +57,21 @@ const command = {
     .command(
       'init',
       'Initialize the gallery configuration',
-      (yargs) => yargs,
+      (yargs) => yargs
+        .option({
+          sources: {
+            alias: 's',
+            array: true,
+            description: 'Initial source directories'
+          }
+        })
+        .option({
+          force: {
+            alias: 'f',
+            boolean: true,
+            description: 'Force, overwrite existing configuration'
+          }
+        }),
       (argv) => createConfig(argv)
           .catch(err => console.log(`Error: ${err}`))
       )
