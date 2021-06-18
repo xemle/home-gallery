@@ -1,11 +1,12 @@
-# Credits https://blog.oddbit.com/post/2020-09-25-building-multi-architecture-im/
 ---
-name: 'build docker images'
+name: 'build api-server docker images'
 
 on:
   push:
     branches:
       - master
+    paths:
+      - packages/api-server/**
 
 jobs:
   docker:
@@ -17,25 +18,11 @@ jobs:
       - name: Prepare
         id: prepare
         run: |
-          DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/${GITHUB_REPOSITORY#*/}
+          DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/${GITHUB_REPOSITORY#*/}-api-server
           SHORTREF=${GITHUB_SHA::8}
 
           # Use latest as default image tag
           TAGS="${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${SHORTREF}"
-
-          # If this is git tag, check tag name for semver
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            # Extract semver tag v1.0.1 to VERSION 1.0.1
-            VERSION=${GITHUB_REF#refs/tags/v}
-
-            # If the VERSION looks like a semver version major.minor.patch,
-            # tag image also with major, major.minor
-            if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-              MAJOR=$(echo ${VERSION} | cut -d. -f1)
-              MAJOR_MINOR=$(echo ${VERSION} | cut -d. -f1,2)
-              TAGS="${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${MAJOR},${DOCKER_IMAGE}:${MAJOR_MINOR},${DOCKER_IMAGE}:${VERSION}"
-            fi
-          fi
 
           # Set output parameters.
           echo ::set-output name=tags::${TAGS}
@@ -61,8 +48,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           builder: ${{ steps.buildx.outputs.name }}
-          context: .
-          file: ./Dockerfile
+          context: ./packages/api-server
+          file: ./packages/api-server/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.prepare.outputs.tags }}
