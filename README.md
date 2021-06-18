@@ -9,8 +9,12 @@ to browse personal photos and videos featuring tagging, mobile-friendly, and AI
 powered image and face discovery. Try the [demo gallery](https://demo.home-gallery.org)
 or enjoy the [food images](https://demo.home-gallery.org/similar/c7f8a3bf0142fc9694f517c23e42d988c97233c3)!
 
-Note: This software is a private pet/spare time project without any warranty or any
-support. Ask questions on [gitter.im](https://gitter.im/home-gallery/community).
+**Note:** This software is a private pet/spare time project without any warranty.
+Ask questions on [gitter.im](https://gitter.im/home-gallery/community).
+
+Do not hesitate to support this project through
+recurring support to my [patreon.com/xemle](https://www.patreon.com/xemle) or
+one time support to my [paypal.me/xemle](https://paypal.me/xemle) account.
 
 [MIT License](https://en.wikipedia.org/wiki/MIT_License)
 
