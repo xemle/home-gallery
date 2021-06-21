@@ -1,8 +1,0 @@
-# Media folder to import to the HomeGallery. Change it properly
-export SOURCE_DIR=$HOME/Pictures
-
-# Directory for configuration and database files
-export CONFIG_DIR=$HOME/.config/home-gallery
-
-# Storage directory of preview files and meta data
-export STORAGE_DIR=$HOME/.cache/home-gallery/storage
