@@ -10,7 +10,7 @@ const createOptions = argv => {
   return {
     configFile: argv.config,
     configFallback: path.join(galleryDir, 'gallery.config-example.yml'),
-    sources: argv.sources || false
+    sources: argv.source || false
   }
 }
 
@@ -59,10 +59,10 @@ const command = {
       'Initialize the gallery configuration',
       (yargs) => yargs
         .option({
-          sources: {
+          source: {
             alias: 's',
             array: true,
-            description: 'Initial source directories'
+            description: 'Initial source directory or directories'
           }
         })
         .option({
