@@ -12,9 +12,10 @@ or enjoy the [food images](https://demo.home-gallery.org/similar/c7f8a3bf0142fc9
 **Note:** This software is a private pet/spare time project without any warranty.
 Ask questions on [gitter.im](https://gitter.im/home-gallery/community).
 
-Do not hesitate to support this project through
-recurring support to my [patreon.com/xemle](https://www.patreon.com/xemle) or
-one time support to my [paypal.me/xemle](https://paypal.me/xemle) account.
+Do you like HomeGallery? Does it solve your media problem?
+Please support this project through any recurring support to my
+[patreon.com/xemle](https://www.patreon.com/xemle) or one time support to my
+[paypal.me/xemle](https://paypal.me/xemle) account. Thank you in advance.
 
 [MIT License](https://en.wikipedia.org/wiki/MIT_License)
 
@@ -22,33 +23,88 @@ one time support to my [paypal.me/xemle](https://paypal.me/xemle) account.
 
 * [Homepage](https://home-gallery.org)
 * [Demo gallery](https://demo.home-gallery.org)
+* Latest binaries for [Linux](https://dl.home-gallery.org/dist/latest/home-gallery-latest-linux-x64),
+[Mac](https://dl.home-gallery.org/dist/latest/home-gallery-latest-darwin-x64),
+[Windows](https://dl.home-gallery.org/dist/latest/home-gallery-latest-win-x64) or
+[Docker](https://hub.docker.com/r/xemle/home-gallery)
 * [Documentation](https://docs.home-gallery.org)
-
-Quickstart
-
-```
-docker run -ti --rm -v $(pwd)/data:/data -v $HOME/Pictures:/data/Pictures -u $(id -u):$(id -g) -p 3000:3000 xemle/home-gallery
-```
 
 ## Motivation
 
-* The source of all my private images and videos are stored local on my NAS at home
+* The source of all my private images and videos are stored local on my NAS at home. The gallery should be on top/close of the source.
 * Cloud service do not cover my privacy concerns
 * All gallery software are lacking to have a fast user experience on mobile phones
-* The gallery software should help to browse or discover forgotten memories from the image archive
+* The gallery software should help to browse and discover forgotten memories from the complete media archive
 
 ## Target Users
 
-* Computer/Terminal affine users who solve their own problems, familiar with shell
+* Computer affine users who solve their own problems and go the extra mile
 * Serve your local data without usage of cloud services
 * One user only - all files are served
 * View your own photos and videos from mobile phones
-* Serve all your images from multiple source directories (hard drive, camara files, mobile phone files, etc)
+* Serve all your images from multiple media source directories (hard drive, camara files, mobile phone files, etc)
+
+## Quickstart
+
+Following steps need to be performed to use HomeGallery
+
+* **Download** the gallery software as prebuilt binary or docker image
+* **Init the configuration** with media sources like `~/Pictures`
+* **Start the server** on [localhost:3000](http://localhost:3000)
+* **Import media** source(s) via CLI
+
+```
+curl -sL https://dl.home-gallery.org/dist/latest/home-gallery-latest-linux-x64 -o gallery
+chmod 755 gallery
+./gallery init --source ~/Pictures
+./gallery run server &
+./gallery run import --initial
+```
+
+and open [localhost:3000](http://localhost:3000) in your browser. Run `./gallery -h` for
+further help of the CLI.
+
+See [dl.home-gallery.org/dist](https://dl.home-gallery.org/dist) for further binaries.
+Eg. latest binaries for [Linux](https://dl.home-gallery.org/dist/latest/home-gallery-latest-linux-x64),
+[Mac](https://dl.home-gallery.org/dist/latest/home-gallery-latest-darwin-x64)
+or [Windows](https://dl.home-gallery.org/dist/latest/home-gallery-latest-win-x64).
+
+The configuration `gallery.config.yml` can be found in the current directory for
+fine tuning.
+See [install section](https://docs.home-gallery.org/install/index.html) in the documentation
+for further information.
+
+### Quickstart using Docker
+
+```
+mkdir -p data
+alias gallery="docker run -ti --rm \
+  -v $(pwd)/data:/data \
+  -v $HOME/Pictures:/data/Pictures \
+  -u $(id -u):$(id -g) \
+  -p 3000:3000 xemle/home-gallery"
+gallery init --source /data/Pictures
+gallery run server &
+gallery run import --initial
+```
+
+and open [localhost:3000](http://localhost:3000) in your browser. Run `gallery -h` for
+further help of the CLI.
+
+The gallery configuration can be found in `./data/config/gallery.config.yml` for fine tuning.
+
+Want to use docker compose? See [install](https://docs.home-gallery.org/install/index.html)
+section in the documentation for further information.
 
 ## Documentation
 
-See [docs.home-gallery.org](https://docs.home-gallery.org) for general documentation. The general
-architecture is described [here](https://docs.home-gallery.org/internals/index.html).
+See [docs.home-gallery.org](https://docs.home-gallery.org) for general documentation.
+
+* [Installation](https://docs.home-gallery.org/install)
+* [CLI help](https://docs.home-gallery.org/cli)
+* [Configuration](https://docs.home-gallery.org/configuration)
+* [FAQ](https://docs.home-gallery.org/faq)
+* [Architecture](https://docs.home-gallery.org/internals)
 
 ## Features
 
@@ -77,56 +133,7 @@ HomeGallery has prebuilt binaries for
 [Windows](https://dl.home-gallery.org/dist/latest/home-gallery-latest-win-x64.exe).
 Further download options can be found [here](https://dl.home-gallery.org/dist).
 
-The initial start of the binary takes longer due the extraction of app files to
-a temporary directory. Future starts are faster.
-
-If no `gallery.config.yml` file exists it is created by the example configuration.
-See details below.
-
-## Configure HomeGallery
-
-Copy `gallery.config-example.yml` to `gallery.config.yml` and configure
-`gallery.config.yml` with source media directories and other settings.
-
-A bare minimal configuration is
-
-```
-sources:
-  - dir: ~/Pictures
-```
-
-to include all images and videos from your `$HOME/Pictures` directory. The previews
-are stored in `~/.cache/home-gallery` and the configuration files like
-file index, database, events are stored in `~/.config/home-gallery` directory.
-
-A more advance configuration with all gallery files in `/mnt/gallery` would be have
-
-```
-baseDir: /mnt/gallery
-configDir: '{baseDir}/config'
-cacheDir: '{baseDir}'
-sources:
-  - dir: /mnt/media
-    index: '{configDir}/mnt-media.idx
-    exclude:
-      - *.CR2
-      - *.cr2
-  - dir: ~/Pictures
-    index: '{configDir}/{basename(dir)}.idx'
-server:
-  port: 8080
-  key: '{configDir}/server.key'
-  cert: '{configDir}/server.crt'
-```
-
-to use media files from directories `/mnt/media` and `$HOME/Pictures`.
-The storage directory is
-`/mnt/gallery/storage` and other gallery configuration files are located at
-`/mnt/gallery/config`. The server uses https on port 8080.
-
-See [gallery.config-example.yml](gallery.config-example.yml) for more configuration details.
-The gallery configuration can be also written in JSON format and must end with `.json` like
-`gallery.config.json`.
+See [installation](https://docs.home-gallery.org/install) section for usage.
 
 # External Services and Privacy
 
@@ -146,8 +153,8 @@ its own public API at `api.home-gallery.org`. This public API supports
 low powered devices such as the SoC Raspberry PI and all preview images are
 send to this public API by default. No images or privacy data are kept.
 
-The API can be configured and ran also locally or as Docker container. See
-`api-service` package for further information.
+The API can be configured and ran also locally or as Docker container.
+See [installation](https://docs.home-gallery.org/api-) section for usage.
 
 ## Customized Environments
 
@@ -177,80 +184,6 @@ bindings.
 * make
 * g++
 * python
-
-### Run HomeGallery
-
-Run `./gallery.js` (or `node gallery.js`) to
-
-- update and process media files
-- start the web server
-- update the gallery application (requires git)
-
-Use different configurations by `--config <file>` parameter. E.g. `./gallery.js --config other-gallery.config.yml`.
-
-Note: `./gallery.js` is a wrapper of `./cli.js` which offers more granular functionality
-for file indexer, extractor, database builder or extractor. See `./cli.js -h` for details.
-
-## Docker
-
-Instead of installing node and other required libraries you can use also docker to run the gallery
-
-### Official image
-
-You can use the official docker image `xemle/home-gallery` from the [docker hub](https://hub.docker.com/r/xemle/home-gallery).
-
-### Build youself
-
-Build the docker image by following command
-
-```
-docker build -t home-gallery .
-```
-
-### Data volume structure
-
-The gallery is located at `/app` whereas the data is stored in `/data` within the container.
-The `/data` folder has following structure:
-
-```
-`-- ./data - Docker data volume
-  +-- sources - Your media file sources or other volumne mounts
-  +-- config - Configuration files
-  | `-- gallery.config.yml - Main configuration file
-  `-- storage - Preview images and meta data
-```
-
-Configure your `./data/config/gallery.config.yml` configuration to use media files from `./data/sources`
-
-```
-sources:
-  - dir: '{baseDir}/sources'
-```
-
-Run the docker container
-
-```
-docker run -ti --rm -v $(pwd)/data:/data -u $(id -u):$(id -g) -p 3000:3000 xemle/home-gallery
-```
-
-and follow the CLI to render preview files and start the webserver
-
-### Mount files and folders
-
-Media files might be located at multiple folders and paritions.
-These folders and partitions should be mounted as docker volumes into `/data/sources` directory.
-As example for a media partition `/mnt/media` run
-
-```
-docker run -ti --rm -v $(pwd)/data:/data -v /mnt/media:/data/sources/media -u $(id -u):$(id -g) -p 3000:3000 xemle/home-gallery
-```
-
-with source configuration in `gallery.config.yml`:
-
-```
-sources:
-  - dir: '{baseDir}/sources/media'
-```
 
 ## Development
 

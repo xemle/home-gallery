@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add initial `docker-compose.yml`
 - Add incremental import with database reload support
 - Add run cli command to init config, start the server or source import directly
 - config: Add `matcher` for index file matcher

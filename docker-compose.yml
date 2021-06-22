@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  api:
+    # custom build via
+    #build: packages/api-server
+    image: xemle/home-gallery-api-server
+    environment:
+      # TensorflowJS backends: cpu, wasm and node. Use wasm
+      # if you have troubles.
+      #- BACKEND=cpu
+      #- BACKEND=wasm
+      - BACKEND=node
+    ports:
+      - "3000"
+  gallery:
+    # custom build via
+    #build: .
+    image: xemle/home-gallery
+    environment:
+      - GALLERY_API_SERVER=http://api:3000
+    volumes:
+      - ./data:/data
+      # Mount your media directories below /data
+      - ${HOME}/Pictures:/data/Pictures
+    expose:
+      - "3000:3000"
+    user: "${CURRENT_USER}"
+    entrypoint: ['node', '/app/gallery.js', 'run', 'server']
