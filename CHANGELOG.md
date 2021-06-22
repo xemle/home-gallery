@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.1.0] - 2020-06-22
+## [1.1.0] - 2021-06-22
 
 This release improves the installation options, the initial usage
 and adds valuable configuration options.
@@ -39,7 +39,7 @@ and better local setup through docker-compose.
 - server: Fix database cache middleware
 - index: Fix incremental import with multiple indices
 
-## [1.0.1] - 2020-05-20
+## [1.0.1] - 2021-05-20
 
 Bugfix release
 
@@ -48,6 +48,6 @@ Bugfix release
 - webapp: Fix empty search query
 - cli: Fix source directories with whitespaces
 
-## [1.0.0] - 2020-05-15
+## [1.0.0] - 2021-05-15
 
 Initial release of 1.0.0
