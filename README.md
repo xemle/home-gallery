@@ -26,8 +26,9 @@ Please support this project through any recurring support to my
 * Latest binaries for [Linux](https://dl.home-gallery.org/dist/latest/home-gallery-latest-linux-x64),
 [Mac](https://dl.home-gallery.org/dist/latest/home-gallery-latest-darwin-x64),
 [Windows](https://dl.home-gallery.org/dist/latest/home-gallery-latest-win-x64) or
-[Docker](https://hub.docker.com/r/xemle/home-gallery)
+[Docker image](https://hub.docker.com/r/xemle/home-gallery)
 * [Documentation](https://docs.home-gallery.org)
+* [Changelog](CHANGELOG.md)
 
 ## Motivation
 

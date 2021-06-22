@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2020-06-22
+
+This release improves the installation options, the initial usage
+and adds valuable configuration options.
+It offers official docker images `xemle/home-gallery` and `xemle/home-gallery-api-server`
+and better local setup through docker-compose.
 ### Added
 
 - Add initial `docker-compose.yml`
