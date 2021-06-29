@@ -1,13 +1,13 @@
-const fileFilter = require('./file-filter.js');
-const { fileTypes, getFileTypeByExtension } = require('./file-types.js');
-const humanize = require('./humanize.js');
-const lruCache = require('./lru-cache.js');
-const mkdir = require('./mkdir.js');
-const { readDir, readDirCreate } = require('./readdir.js');
-const readJsonGzip = require('./read-json-gzip.js');
-const sha1Hex = require('./sha1-hex.js');
-const writeJsonGzip = require('./write-json-gzip.js');
-const writeSafe = require('./write-safe.js');
+const fileFilter = require('./file-filter');
+const { fileTypes, getFileTypeByExtension } = require('./file-types');
+const humanize = require('./humanize');
+const lruCache = require('./lru-cache');
+const mkdir = require('./mkdir');
+const { readDir, readDirCreate } = require('./readdir');
+const readJsonGzip = require('./read-json-gzip');
+const sha1Hex = require('./sha1-hex');
+const writeJsonGzip = require('./write-json-gzip');
+const writeSafe = require('./write-safe');
 
 module.exports = {
   fileFilter,
