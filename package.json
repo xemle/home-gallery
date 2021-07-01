@@ -4,12 +4,13 @@
   "description": "",
   "main": "gallery.js",
   "scripts": {
-    "postinstall": "link-parent-bin && node packages/extractor/validate-sharp.js",
+    "postinstall": "link-parent-bin && node packages/extractor/validate-sharp.js && npm --prefix e2e install",
     "clean": "lerna run clean",
     "build": "lerna run build",
     "build:database": "lerna run build --scope \"@home-gallery/{common,stream,index,extractor,database}\"",
     "build:web": "lerna run build --scope \"@home-gallery/{common,server,webapp,query,events}\"",
     "test": "lerna run test",
+    "test:e2e": "gauge -d e2e run specs",
     "watch": "lerna run watch --concurrency 20 --stream",
     "watch:database": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{common,stream,index,extractor,database}\"",
     "watch:web": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{common,server,webapp,query,events}\""
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.13.1",
+    "@getgauge/cli": "^1.2.1",
     "@types/chai": "^4.2.12",
     "@types/debug": "^4.1.5",
     "@types/glob-to-regexp": "^0.4.0",
@@ -68,6 +70,7 @@
     "@home-gallery/cli": "file:packages/cli",
     "@home-gallery/common": "file:packages/common",
     "@home-gallery/database": "file:packages/database",
+    "@home-gallery/e2e": "file:e2e",
     "@home-gallery/events": "file:packages/events",
     "@home-gallery/export": "file:packages/export",
     "@home-gallery/extractor": "file:packages/extractor",
