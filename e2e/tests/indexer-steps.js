@@ -13,7 +13,8 @@ step("Init files from <dir>", async (dir) => {
 });
 
 step(["Create index", "Update index"], async () => {
-  const [code, command] = await runCli(['index', '-d', getFilesDir(), '-i', getIndexFilename()]);
+  const code = await runCli(['index', '-d', getFilesDir(), '-i', getIndexFilename()]);
+  const command = gauge.dataStore.scenarioStore.get('lastCommand')
   
   assert(code == 0, `Failed to run ${command} in ${process.env.PWD}. Exit code was ${code}`)
 })

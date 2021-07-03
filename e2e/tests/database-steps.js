@@ -10,7 +10,8 @@ step("Prepare database from <dir>", async (dir) => {
 })
 
 step("Create database", async () => {
-  const [code, command] = await runCli(['database', '-i', getIndexFilename(), '-s', getStorageDir(), '-d', getDatabaseFilename()]);
+  const code = await runCli(['database', '-i', getIndexFilename(), '-s', getStorageDir(), '-d', getDatabaseFilename()]);
+  const command = gauge.dataStore.scenarioStore.get('lastCommand')
   
   assert(code == 0, `Failed to run ${command} in ${process.env.PWD}. Exit code was ${code}`)
 })
