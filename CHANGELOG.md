@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add end to end tests
 - index: Add file index journal via option `--journal`
 
+### Fixed
+
+- index: Fix checksum option. Use `--no-checksum` to disable it
+
 ## [1.1.0] - 2021-06-22
 
 This release improves the installation options, the initial usage
