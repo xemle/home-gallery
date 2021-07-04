@@ -1,11 +1,17 @@
 const path = require('path');
 const fs = require('fs');
 const zlib = require('zlib');
-const { PassThrough, Transform } = require('stream')
+const { PassThrough, Transform, Readable } = require('stream')
 const split2 = require('split2');
 const debug = require('debug')('index:readStream');
 
+const { callbackify } = require('@home-gallery/common')
 const { map } = require('@home-gallery/stream')
+
+const { getJournalFilename, readJournal } = require('./journal')
+const { getIndexName } = require('./utils')
+
+const readJournalCb = callbackify(readJournal)
 
 const readHead = (filename, chunk, next) => {
   const [headData, entry] = chunk.split('data":[{');
@@ -60,23 +66,46 @@ const parseJsonChunks = (filename) => {
   });
 }
 
-const readStream = (filename, cb) => {
-  fs.access(filename, fs.constants.F_OK | fs.constants.R_OK, err => {
+const exists = (filename, cb) => fs.access(filename, fs.constants.F_OK | fs.constants.R_OK, cb)
+
+const ifThen = (ifFn, thenFn) => cb => ifFn(err => err ? cb(err) : thenFn(cb))
+
+const ifThenElse = (ifFn, thenFn, elseFn) => cb => ifFn(err => err ? elseFn(cb) : thenFn(cb))
+
+const fromIndex = (indexFilename, cb) => {
+  debug(`Reading file index from ${indexFilename}`)
+  let indexHead;
+  const indexName = getIndexName(indexFilename)
+  const stream = fs.createReadStream(indexFilename)
+    .pipe(zlib.createGunzip())
+    .pipe(split2('},{'))
+    .pipe(parseJsonChunks(indexFilename)).on('head', head => indexHead = head)
+    .pipe(map(e => Object.assign(e, { indexName, url: `file://${path.join(indexHead.base, e.filename)}` })))
+
+  cb(null, stream)
+}
+
+const fromJournal = (indexFilename, journal, cb) => {
+  const indexName = getIndexName(indexFilename)
+  const journalFilename = getJournalFilename(indexFilename, journal)
+  debug(`Reading file index journal ${journalFilename}`)
+  readJournalCb(indexFilename, journal, (err, journal) => {
     if (err) {
       return cb(err)
     }
+    const entries = journal.data.adds.concat(journal.data.changes)
+      .map(e => Object.assign(e, { indexName, url: `file://${path.join(journal.base, e.filename)}` }))
 
-    debug(`Reading file index from ${filename}`)
-    const indexName = path.basename(filename).replace(/\.[^.]+$/, '');
-    let indexHead;
-    const stream = fs.createReadStream(filename)
-      .pipe(zlib.createGunzip())
-      .pipe(split2('},{'))
-      .pipe(parseJsonChunks(filename)).on('head', head => indexHead = head)
-      .pipe(map(e => Object.assign(e, { indexName, url: `file://${path.join(indexHead.base, e.filename)}` })))
-
-    cb(null, stream)
+    cb(null, Readable.from(entries))
   })
+}
+
+const readStream = (indexFilename, journal, cb) => {
+  const journalFilename = getJournalFilename(indexFilename, journal)
+  const asStream = ifThen(cb => exists(indexFilename, cb), cb => fromIndex(indexFilename, cb))
+  const asJournalOrStream = ifThenElse(cb => exists(journalFilename, cb), cb => fromJournal(indexFilename, journal, cb), asStream)
+
+  return journal ? asJournalOrStream(cb) : asStream(cb)
 }
 
 const appendStream = (nextStream) => {
@@ -97,14 +126,14 @@ const appendStream = (nextStream) => {
   return output
 }
 
-const readStreams = (indexFilenames, cb) => {
+const readStreams = (indexFilenames, journal, cb) => {
   let i = 0;
   const nextStream = (cb) => {
     if (i == indexFilenames.length) {
       return cb();
     }
     const filename = indexFilenames[i++]
-    readStream(filename, (err, stream) => {
+    readStream(filename, journal, (err, stream) => {
       if (err && err.code === 'ENOENT') {
         debug(`File '${filename}' does not exist. Continue`);
       } else if (err) {

@@ -32,6 +32,8 @@ const getIndexFilename = () => {
   return path.join(baseDir, 'config', 'files.idx')
 }
 
+const getJournalFilename = id => `${getIndexFilename()}.${id}.journal`
+
 const getStorageDir = () => {
   const baseDir = gauge.dataStore.scenarioStore.get('baseDir');
   return path.join(baseDir, 'storage')
@@ -80,16 +82,30 @@ const readJsonGz = async (filename) => {
   return new Promise((resolve, reject) => {
     const chunks = []
     createReadStream(filename)
+      .on('error', reject)
       .pipe(zlib.createGunzip())
       .on('data', chunk => chunks.push(chunk))
       .on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
       .on('error', reject)
   })
   .then(data => JSON.parse(data))
+  .catch(err => {
+    if (err.code === 'ENOENT') {
+      throw new Error(`File ${filename} not found`)
+    }
+    const error = new Error(`Failed to read ${filename}: ${err}`)
+    error.cause = err
+    throw error
+  })
 }
 
 const readIndex = async () => {
   const filename = getIndexFilename()
+  return await readJsonGz(filename)
+}
+
+const readJournal = async (id) => {
+  const filename = getJournalFilename(id)
   return await readJsonGz(filename)
 }
 
@@ -122,12 +138,14 @@ module.exports = {
   getTestDataDir,
   getFilesDir,
   getIndexFilename,
+  getJournalFilename,
   getStorageDir,
   getDatabaseFilename,
   getEventsFilename,
   runCli,
   runCliAsync,
   readIndex,
+  readJournal,
   readDatabase,
   dateFormat
 }

@@ -44,7 +44,13 @@ const command = {
         describe: `File matcher for index merge by: size, size-ctime, size-ctime-inode`
       },
       'add-limits': {
+        string: true,
         describe: `Limits of new index files for incremental imports. Format is initial,add?,factor?,max? eg. 200,500,1.25,8000`
+      },
+      'journal': {
+        alias: 'j',
+        string: true,
+        describe: `Create index journal with given id`
       },
     })
     .demandOption(['index', 'directory'])
@@ -66,9 +72,13 @@ const command = {
       excludeIfPresent: argv['exclude-if-present'],
       dryRun: argv['dry-run'],
       matcherFn: matcherFns[argv.m] || matcherFns['size-ctime-inode'],
-      addLimits: argv.addLimits
+      addLimits: argv.addLimits,
+      journal: argv.journal
     }
     update(argv.directory, argv.index, options, (err, _, limitExceeded) => {
+      if (err) {
+        console.log(`Failed to create index: ${err}`)
+      }
       process.exit(err ? 2 : (limitExceeded ? 1 : 0))
     })
   }

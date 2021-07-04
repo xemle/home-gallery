@@ -21,7 +21,7 @@ const { updateEntryFilesCache } = require('./update-entry-files-cache');
 
 function extractData(config, cb) {
   const {indexFilenames} = config;
-  readStreams(indexFilenames, (err, entryStream) => {
+  readStreams(indexFilenames, false, (err, entryStream) => {
     if (err) {
       return cb(err);
     }

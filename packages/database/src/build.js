@@ -20,7 +20,7 @@ const uniq = (list, keyFn) => list.reduce(([result, keys], entry) => {
 }, [[], {}])[0]
 
 function build(indexFilenames, storageDir, databaseFilename, fileFilterFn, cb) {
-  readStreams(indexFilenames, (err, entryStream) => {
+  readStreams(indexFilenames, false, (err, entryStream) => {
     if (err) {
       return cb(err);
     }

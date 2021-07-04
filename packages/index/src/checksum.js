@@ -48,9 +48,9 @@ const checksum = (index, sha1sumDate, cb) => {
   };
   process.on('SIGINT', gracefulShutdown);
 
-  const calculateAll = (base, entries, done) => {
+  const calculateAll = (base, entries, updatedEntries, done) => {
     if (!entries.length || interrupted) {
-      return done();
+      return done(null, updatedEntries);
     }
     const entry = entries.shift();
     const filename = path.join(base, entry.filename);
@@ -63,20 +63,21 @@ const checksum = (index, sha1sumDate, cb) => {
       }
       entry.sha1sum = sha1sum;
       entry.sha1sumDate = sha1sumDate;
+      updatedEntries.push(entry)
 
       bytesCalculated += entry.size;
       debug(`Calculated id ${sha1sum.substr(0, 7)}... for ${entry.filename} with ${humanize(entry.size)}`);
-      calculateAll(base, entries, done);
+      calculateAll(base, entries, updatedEntries, done);
     })
   }
 
-  calculateAll(index.base, missingChecksumEntries, (err) => {
+  calculateAll(index.base, missingChecksumEntries, [], (err, updatedEntries) => {
     process.off('SIGINT', gracefulShutdown);
     if (err) {
       return cb(err);
     }
     debug(`All ids of ${humanize(totalBytes)} are calculated. Calculated ids of ${humanize(bytesCalculated)} (${(100 * bytesCalculated / totalBytes).toFixed(1)}%) in ${Date.now() - t0}ms`);
-    cb(null, index, true);
+    cb(null, index, updatedEntries);
   });
 }
 

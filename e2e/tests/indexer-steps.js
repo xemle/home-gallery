@@ -1,16 +1,8 @@
 /* globals gauge*/
 "use strict";
-const path = require('path')
-const assert = require('assert')
-const { mkdir, cp, mv, rm } = require('shelljs')
-const { getTestDataDir, getFilesDir, getIndexFilename, runCli, readIndex } = require('../utils');
-
-
-step("Init files from <dir>", async (dir) => {
-  const filesDir = getFilesDir()
-  mkdir('-p', path.dirname(filesDir))
-  cp('-R', path.join(getTestDataDir(), dir), filesDir)
-});
+const assert = require('assert');
+const checksum = require('../../packages/index/src/checksum');
+const { getFilesDir, getIndexFilename, runCli, readIndex, readJournal } = require('../utils');
 
 step(["Create index", "Update index"], async () => {
   const code = await runCli(['index', '-d', getFilesDir(), '-i', getIndexFilename()]);
@@ -19,30 +11,49 @@ step(["Create index", "Update index"], async () => {
   assert(code == 0, `Failed to run ${command} in ${process.env.PWD}. Exit code was ${code}`)
 })
 
-step("Add file <file>", async (file) => {
-  const filesDir = getFilesDir()
-  mkdir('-p', filesDir)
-  cp(path.join(getTestDataDir(), file), filesDir)
+step(["Create index with args <args>", "Update index with args <args>"], async (args) => {
+  const argList = args.split(/\s+/)
+  return runCli(['index', '-d', getFilesDir(), '-i', getIndexFilename(), ...argList]);
 })
 
 step("Index has <amount> entries", async (amount) => {
-  const data = await readIndex()
-  assert(data.data.length == amount, `Expecting ${amount} entries but have ${data.data.length} entries`)
+  const index = await readIndex()
+  assert(index.data.length == amount, `Expecting ${amount} entries but have ${index.data.length} entries`)
 })
 
-step("Index has entry with checksum <checksum> and filename <filename>", async (checksum, filename) => {
-  const data = await readIndex()
-  const entry = data.data.find(entry => entry.sha1sum.startsWith(checksum))
-  assert(!!entry, `Could not find a entry with checksum ${checksum}`)
-  assert(entry.filename == filename, `Expected file path to be ${filename} of entry ${checksum} but was ${entry.filename}`)
+const assertEntryChecksum = (entry, checksum, prop) => {
+  if (checksum) {
+    assert(entry[prop].startsWith(checksum), `Expected filename ${entry.filename} to have checksum ${checksum} but was ${entry[prop]}`)
+  } else {
+    assert(!entry[prop], `Expected filename ${entry.filename} to have no checksum but was ${entry[prop]}`)
+  }
+}
+
+const assertChecksum = async (filename, checksum, prop) => {
+  const index = await readIndex()
+  const entry = index.data.find(entry => entry.filename == filename)
+  assert(!!entry, `Could not find a entry with filename ${filename}`)
+  assertEntryChecksum(entry, checksum, prop)
+}
+
+step("Index has entry <filename> with checksum <checksum>", async (filename, checksum) => assertChecksum(filename, checksum, 'sha1sum'))
+
+step("Index has entry <filename> with prev checksum <checksum>", async (filename, checksum) => assertChecksum(filename, checksum, 'prevSha1sum'))
+
+step("Journal <id> has entries of <adds> adds, <changes> changes and <removals> removals", async (id, adds, changes, removals) => {
+  const journal = await readJournal(id)
+  assert(journal.data.adds.length == adds, `Expecting ${adds} add entries but have ${journal.data.adds.length}`)
+  assert(journal.data.changes.length == changes, `Expecting ${changes} change entries but have ${journal.data.changes.length}`)
+  assert(journal.data.removes.length == removals, `Expecting ${removals} remove entries but have ${journal.data.removes.length}`)
 })
 
-step("Remove file <file>", async (file) => {
-  rm(path.join(getFilesDir(), file))
-})
+const assertJournalChecksum = async (id, filename, type, checksum, prop) => {
+  const journal = await readJournal(id)
+  const entry = journal.data[type].find(entry => entry.filename == filename)
+  assert(!!entry, `Could not find a journal entry with filename ${filename} in ${type}`)
+  assertEntryChecksum(entry, checksum, prop)
+}
 
-step("Rename file <file> to <other>", async (file, other) => {
-  const filesDir = getFilesDir()
-  mkdir('-p', path.dirname(path.join(filesDir, other)))
-  mv(path.join(filesDir, file), path.join(filesDir, other))
-})
+step("Journal <id> entry <file> in <type> has checksum <checksum>", async (id, filename, type, checksum) => assertJournalChecksum(id, filename, type, checksum, 'sha1sum'))
+
+step("Journal <id> entry <file> in <type> has prev checksum <checksum>", async (id, filename, type, checksum) => assertJournalChecksum(id, filename, type, checksum, 'prevSha1sum'))
