@@ -6,14 +6,21 @@
   "scripts": {
     "postinstall": "link-parent-bin && node packages/extractor/validate-sharp.js && npm --prefix e2e install",
     "clean": "lerna run clean",
+    "clean:backend": "lerna run clean --scope \"@home-gallery/{common,stream,cli,index,extractor,database}\"",
+    "clean:web": "lerna run clean --scope \"@home-gallery/{common,cli,server,webapp,query,events}\"",
     "build": "lerna run build",
-    "build:database": "lerna run build --scope \"@home-gallery/{common,stream,index,extractor,database}\"",
-    "build:web": "lerna run build --scope \"@home-gallery/{common,server,webapp,query,events}\"",
+    "build:backend": "lerna run build --scope \"@home-gallery/{common,stream,cli,index,extractor,database}\"",
+    "build:web": "lerna run build --scope \"@home-gallery/{common,cli,server,webapp,query,events}\"",
     "test": "lerna run test",
     "test:e2e": "gauge -d e2e run specs",
-    "watch": "lerna run watch --concurrency 20 --stream",
-    "watch:database": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{common,stream,index,extractor,database}\"",
-    "watch:web": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{common,server,webapp,query,events}\""
+    "watch": "npm-run-all -p watch:backend watch:web",
+    "watch:backend": "npm-run-all -p watch:backend:common watch:backend:db watch:backend:rest",
+    "watch:backend:common": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/common\"",
+    "watch:backend:db": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{extractor,database}\"",
+    "watch:backend:rest": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{cli,stream,index}\"",
+    "watch:web": "npm-run-all -p watch:web:common watch:web:rest",
+    "watch:web:common": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{common,query,events}\"",
+    "watch:web:rest": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{server,webapp}\""
   },
   "bin": {
     "gallery": "./gallery.js"
