@@ -10,16 +10,17 @@ const parseJson = () => {
       next()
     },
     flush: function(next) {
-      let data
+      let json
       try {
-        data = JSON.parse(Buffer.concat(chunks).toString())
-        this.push(data)
-        next(null);
+        const data = Buffer.concat(chunks).toString('utf8')
+        chunks.splice(0, chunks.length)
+        json = JSON.parse(data)
       } catch (e) {
-        next(new Error(`Could not parse JSON: ${e}`))
+        json = null
+        return next(new Error(`Could not parse JSON: ${e}`))
       }
-      data = null;
-      chunks.splice(0, chunks.length)
+      this.push(json)
+      next(null)
     }
   });
 }
