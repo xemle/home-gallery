@@ -98,6 +98,25 @@ const readDatabase = async () => {
   return await readJsonGz(filename)
 }
 
+const pad = (value, len, char) => {
+  while (`${value}`.length < len) {
+    value = `${char || '0'}${value}`
+  }
+  return value
+}
+
+const dateFormat = (now, format) => format.replace(/%(.)/g, (_, c) => {
+  switch (c) {
+    case 'Y': return now.getUTCFullYear()
+    case 'M': return pad(now.getUTCMonth() + 1, 2)
+    case 'D': return pad(now.getUTCDate(), 2)
+    case 'H': return pad(now.getUTCHours(), 2)
+    case 'm': return pad(now.getUTCMinutes(), 2)
+    case 's': return pad(now.getUTCSeconds(), 2)
+    default: return ''
+  }
+})
+
 module.exports = {
   generateId,
   getTestDataDir,
@@ -109,5 +128,6 @@ module.exports = {
   runCli,
   runCliAsync,
   readIndex,
-  readDatabase
+  readDatabase,
+  dateFormat
 }
