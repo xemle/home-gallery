@@ -12,7 +12,7 @@ beforeSuite(async () => {
   gauge.message(`Unique run ID is ${runId}`)
 })
 
-const sanitizeName = name => name.replace(/[^_0-9A-Za-z]/g, '-').toLocaleLowerCase()
+const sanitizeName = name => name.replace(/[^_0-9A-Za-z]/g, '-').replace(/[-]+/g, '-').toLocaleLowerCase()
 
 const createBaseDir = context => {
   const runId = gauge.dataStore.suiteStore.get('runId')
