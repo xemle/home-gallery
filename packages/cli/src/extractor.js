@@ -55,6 +55,10 @@ const command = {
         describe: 'Preferred address languages for geo code reverse lookups',
         array: true,
         default: ['en', 'de']
+      },
+      'journal': {
+        describe: 'File index journal suffix',
+        string: true
       }
     })
     .demandOption(['index', 'storage'])
@@ -78,7 +82,8 @@ const command = {
           skip: argv['skip'],
           limit: argv['limit'],
           printEntry: argv['print-entry'],
-          geoAddressLanguage: argv['geo-address-language']
+          geoAddressLanguage: argv['geo-address-language'],
+          journal: argv.journal
         }
         extract(config, (err, count) => {
           if (err) {

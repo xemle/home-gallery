@@ -20,8 +20,8 @@ const groupByEntryFilesCacheKey = require('./group-entry-files-cache');
 const { updateEntryFilesCache } = require('./update-entry-files-cache');
 
 function extractData(config, cb) {
-  const {indexFilenames} = config;
-  readStreams(indexFilenames, false, (err, entryStream) => {
+  const {indexFilenames, journal} = config;
+  readStreams(indexFilenames, journal, (err, entryStream) => {
     if (err) {
       return cb(err);
     }

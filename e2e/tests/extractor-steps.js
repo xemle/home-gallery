@@ -9,3 +9,8 @@ step("Extract files", async () => {
   
   assert(code == 0, `Failed to run ${command} in ${process.env.PWD}. Exit code was ${code}`)
 })
+
+step("Extract files with args <args>", async (args) => {
+  const argList = args.split(/\s+/)
+  return runCli(['extract', '-i', getIndexFilename(), '-s', getStorageDir(), ...argList]);
+})
