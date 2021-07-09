@@ -5,12 +5,18 @@ const path = require('path')
 const { mkdir, cp, mv, rm } = require('shelljs')
 const assert = require("assert")
 
-const { getTestDataDir, getFilesDir } = require('../utils')
+const { getTestDataDir, getBaseDir, getFilesDir } = require('../utils')
 
 step("Exit code was <code>", (code) => {
   const lastCode = gauge.dataStore.scenarioStore.get('lastExitCode')
   assert(lastCode == code, `Expected exit code to be ${code} but was ${lastCode}`)
 })
+
+step("Init dir from <dir>", async (dir) => {
+  const baseDir = getBaseDir()
+  mkdir('-p', path.dirname(baseDir))
+  cp('-R', path.join(getTestDataDir(), dir), baseDir)
+});
 
 step("Init files from <dir>", async (dir) => {
   const filesDir = getFilesDir()

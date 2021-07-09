@@ -1,5 +1,5 @@
 const through2 = require('through2');
-const debug = require('debug')('storage:map:media');
+const debug = require('debug')('database:map:media');
 const colorConvert = require('color-convert');
 
 function getEntryMetaByKey(entry, key) {

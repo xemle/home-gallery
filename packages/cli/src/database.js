@@ -26,6 +26,10 @@ const command = {
       'exclude-from-file': {
         alias: 'E',
         describe: 'Exclude gitignore patterns from file'
+      },
+      journal: {
+        string: true,
+        describe: 'Journal id'
       }
     })
     .demandOption(['index', 'storage', 'database'])
@@ -41,10 +45,13 @@ const command = {
       } else {
         const options = {
           fileFilterFn,
+          journal: argv.journal,
           supportedTypes: ['image', 'rawImage', 'video']
         }
         buildDatabase(argv.index, argv.storage, argv.database, options, (err, database) => {
-          if (err) {
+          if (err && err.code == 'ENOCHANGE') {
+            debug(`Database unchanged: ${err}`);
+          } else if (err) {
             debug(`Could not build catalog database: ${err}`);
           } else {
             debug(`Build catalog database ${argv.database} with ${database.data.length} entries in ${Date.now() - t0}ms`);

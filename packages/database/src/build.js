@@ -2,22 +2,20 @@ const { pipeline } = require('stream');
 
 const { readStreams } = require('@home-gallery/index');
 
-const { memoryIndicator, processIndicator, filter, flatten, sort, each, toList } = require('@home-gallery/stream');
+const { memoryIndicator, processIndicator, filter, flatten, sort, toList } = require('@home-gallery/stream');
 const mapToDatabaseEntry = require('./map-database-entry');
 const readEntryFilesGrouped = require('./read-entry-files-grouped');
 const groupByDir = require('./group-by-dir');
 const groupSidecarFiles = require('./group-sidecar-files');
 const mapToMedia = require('./map-media');
 const { writeDatabase } = require('./write-database');
+const { mergeEntry, mergeFromJournal } = require('./merge')
 
-const uniq = (list, keyFn) => list.reduce(([result, keys], entry) => {
+const uniq = (list, keyFn, mergeFn) => Object.values(list.reduce((id2Entry, entry) => {
   const key = keyFn(entry)
-  if (!keys[key]) {
-    keys[key] = true
-    result.push(entry)
-  }
-  return [result, keys]
-}, [[], {}])[0]
+  id2Entry[key] = id2Entry[key] ? mergeFn(id2Entry[key], entry) : entry
+  return id2Entry
+}, {}))
 
 const createEntries = (entryStream, storageDir, options, cb) => {
   const { fileFilterFn, supportedTypes } = options;
@@ -54,16 +52,14 @@ function build(indexFilenames, storageDir, databaseFilename, options, cb) {
         debug(`Could not build database: ${err}`);
         return cb(err);
       }
-      const uniqueEntries = uniq(entries, entry => entry.id);
-      writeDatabase(databaseFilename, uniqueEntries, (err, database) => {
-        if (err) {
-          return cb(err);
-        }
-        cb(null, database);
-      });
+      if (journal) {
+        mergeFromJournal(indexFilenames, journal, databaseFilename, entries, cb)
+      } else {
+        const uniqueEntries = uniq(entries, entry => entry.id, mergeEntry);
+        writeDatabase(databaseFilename, uniqueEntries, cb);
+      }
     })
   })
-
 }
 
 module.exports = build;

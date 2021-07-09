@@ -22,32 +22,19 @@ const generateId = (size) => {
 
 const getTestDataDir = () => path.resolve(testDataDir)
 
-const getFilesDir = () => {
-  const baseDir = gauge.dataStore.scenarioStore.get('baseDir');
-  return path.join(baseDir, 'files')
-}
+const getBaseDir = () => gauge.dataStore.scenarioStore.get('baseDir')
 
-const getIndexFilename = () => {
-  const baseDir = gauge.dataStore.scenarioStore.get('baseDir');
-  return path.join(baseDir, 'config', 'files.idx')
-}
+const getFilesDir = () => path.join(getBaseDir(), 'files')
+
+const getIndexFilename = () => path.join(getBaseDir(), 'config', 'files.idx')
 
 const getJournalFilename = id => `${getIndexFilename()}.${id}.journal`
 
-const getStorageDir = () => {
-  const baseDir = gauge.dataStore.scenarioStore.get('baseDir');
-  return path.join(baseDir, 'storage')
-}
+const getStorageDir = () => path.join(getBaseDir(), 'storage')
 
-const getDatabaseFilename = () => {
-  const baseDir = gauge.dataStore.scenarioStore.get('baseDir');
-  return path.join(baseDir, 'config', 'database.db')
-}
+const getDatabaseFilename = () => path.join(getBaseDir(), 'config', 'database.db')
 
-const getEventsFilename = () => {
-  const baseDir = gauge.dataStore.scenarioStore.get('baseDir');
-  return path.join(baseDir, 'config', 'events.db')
-}
+const getEventsFilename = () => path.join(getBaseDir(), 'config', 'events.db')
 
 const runCliAsync = (args, cb) => {
   const command = [galleryBin, ...galleryBinArgs, ...args].map(v => `${v}`.match(/\s/) ? `"${v}"` : v).join(' ')
@@ -136,6 +123,7 @@ const dateFormat = (now, format) => format.replace(/%(.)/g, (_, c) => {
 module.exports = {
   generateId,
   getTestDataDir,
+  getBaseDir,
   getFilesDir,
   getIndexFilename,
   getJournalFilename,

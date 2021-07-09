@@ -35,4 +35,4 @@ const writeDatabasePlain = (filename, entries, cb) => {
   });
 }
 
-module.exports = { writeDatabase, writeDatabasePlain } ;
+module.exports = { wrapEntries, writeDatabase, writeDatabasePlain } ;
