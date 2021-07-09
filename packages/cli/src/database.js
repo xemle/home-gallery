@@ -39,7 +39,11 @@ const command = {
       if (err) {
         debug(`${err}`);
       } else {
-        buildDatabase(argv.index, argv.storage, argv.database, fileFilterFn, (err, database) => {
+        const options = {
+          fileFilterFn,
+          supportedTypes: ['image', 'rawImage', 'video']
+        }
+        buildDatabase(argv.index, argv.storage, argv.database, options, (err, database) => {
           if (err) {
             debug(`Could not build catalog database: ${err}`);
           } else {
