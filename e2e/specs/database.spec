@@ -1,5 +1,7 @@
 # Database
 
+Tags: database
+
 ## Create
 
 * Prepare database from "database/basic"

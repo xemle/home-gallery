@@ -1,5 +1,7 @@
 # Server
 
+Tags: server
+
 ## Serve
 
 * Prepare database from "database/basic"

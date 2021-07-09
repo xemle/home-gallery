@@ -1,5 +1,7 @@
 # File Index
 
+Tags: index
+
 ## Create index
 
 * Init files from "index/basic"

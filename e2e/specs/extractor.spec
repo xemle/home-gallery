@@ -1,5 +1,7 @@
 # Extractor
 
+Tags: extractor
+
 ## Create previews
 
 * Init index from "index/basic"
