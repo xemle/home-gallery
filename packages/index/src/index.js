@@ -13,7 +13,7 @@ const { statIndex, prettyPrint } = require('./stat')
 const { matcherFns } = require('./merge');
 const { readStream, readStreams } = require('./read-stream');
 const createLimitFilter = require('./limit-filter');
-const { getJournalFilename, createJournal, readJournal } = require('./journal')
+const { getJournalFilename, createJournal, readJournal, removeJournal } = require('./journal')
 const { getIndexName } = require('./utils')
 
 const asyncReadIndex = promisify(readIndex)
@@ -81,6 +81,7 @@ const asyncUpdate = async (directory, filename, options) => {
 module.exports = {
   getIndexName,
   getJournalFilename,
+  removeJournal: callbackify(removeJournal),
   readStream,
   readStreams,
   readJournal: callbackify(readJournal),

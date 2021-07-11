@@ -48,3 +48,10 @@ Tags: index, option, journal
 * Journal "abc" has entries of "0" adds, "2" changes and "0" removals
 * Journal "abc" entry "README.md" in "changes" has checksum "cd0c0890b92695037143c16c5bee6d098bafcc76"
 * Journal "abc" entry "index.md" in "changes" has checksum "9fc4ebc6fc993ebf08efb6d7a02a1fceda59e561"
+
+## Delete journal
+
+* Create index with args "--journal abc"
+* Journal "abc" exists
+* Delete journal "abc"
+* Journal "abc" does not exist

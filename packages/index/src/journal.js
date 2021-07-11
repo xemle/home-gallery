@@ -1,3 +1,4 @@
+const { access, unlink } = require('fs/promises')
 const path = require('path')
 const debug = require('debug')('index:journal')
 
@@ -61,8 +62,21 @@ const readJournal = async (indexFilename, journal) => {
   return data
 }
 
+const removeJournal = async (indexFilename, journal) => {
+  const journalFilename = getJournalFilename(indexFilename, journal)
+
+  const exists = await access(journalFilename).then(() => true).catch(() => false)
+  if (!exists) {
+    debug(`No journal ${journal} found for file index ${indexFilename}. Skip removal`)
+    return
+  }
+  debug(`Remove journal ${journal} from file index ${indexFilename}`)
+  return unlink(journalFilename)
+}
+
 module.exports = {
   getJournalFilename,
   createJournal,
-  readJournal
+  readJournal,
+  removeJournal
 }

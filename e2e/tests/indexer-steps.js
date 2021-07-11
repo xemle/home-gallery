@@ -1,8 +1,9 @@
 /* globals gauge*/
 "use strict";
+const { access, unlink } = require('fs/promises')
 const assert = require('assert');
 const checksum = require('../../packages/index/src/checksum');
-const { getFilesDir, getIndexFilename, runCli, readIndex, readJournal } = require('../utils');
+const { getFilesDir, getIndexFilename, getJournalFilename, runCli, readIndex, readJournal } = require('../utils');
 
 step(["Create index", "Update index"], async () => {
   const code = await runCli(['index', '-d', getFilesDir(), '-i', getIndexFilename()]);
@@ -57,3 +58,17 @@ const assertJournalChecksum = async (id, filename, type, checksum, prop) => {
 step("Journal <id> entry <file> in <type> has checksum <checksum>", async (id, filename, type, checksum) => assertJournalChecksum(id, filename, type, checksum, 'sha1sum'))
 
 step("Journal <id> entry <file> in <type> has prev checksum <checksum>", async (id, filename, type, checksum) => assertJournalChecksum(id, filename, type, checksum, 'prevSha1sum'))
+
+step("Delete journal <id>", async id => runCli(['index', 'journal', '-i', getIndexFilename(), '-j', id, '-r']))
+
+const existsJournal = async id => access(getJournalFilename(id)).then(() => true).catch(() => false)
+
+step("Journal <id> exists", async (id) => {
+  const exists = await existsJournal(id)
+  assert(exists, `Expected journal ${id} exists but it does not`)
+})
+
+step("Journal <id> does not exist", async (id) => {
+  const exists = await existsJournal(id)
+  assert(!exists, `Expected journal ${id} does not exist but it is`)
+})

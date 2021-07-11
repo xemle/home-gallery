@@ -1,7 +1,7 @@
-const debug = require('debug')('cli:index');
+const debug = require('debug')('cli:index:update');
 
 const command = {
-  command: 'index',
+  command: ['$0', 'create', 'update'],
   describe: 'Create or update file index',
   builder: (yargs) => {
     return yargs.option({
@@ -54,13 +54,6 @@ const command = {
       },
     })
     .demandOption(['index', 'directory'])
-    .command(
-      'stats',
-      'Print index statistics',
-      (yargs) => yargs,
-      (argv) => {
-        stats(argv.index, () => true)
-      })
   },
   handler: (argv) => {
     const { update, matcherFns } = require('@home-gallery/index');
@@ -82,19 +75,6 @@ const command = {
       process.exit(err ? 2 : (limitExceeded ? 1 : 0))
     })
   }
-}
-
-const stats = (indexFilename, cb) => {
-  const { statIndex, prettyPrint } = require('@home-gallery/index');
-
-  statIndex(indexFilename, (err, stats) => {
-    if (err) {
-      debug(`Could not read file index ${indexFilename}: ${err}`);
-      return cb(err);
-    }
-    console.log(prettyPrint(stats));
-    cb(null, stats);
-  })
 }
 
 module.exports = command
