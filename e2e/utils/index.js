@@ -26,6 +26,8 @@ const getBaseDir = () => gauge.dataStore.scenarioStore.get('baseDir')
 
 const getFilesDir = () => path.join(getBaseDir(), 'files')
 
+const getConfigFilename = () => path.join(getBaseDir(), 'config', 'gallery.config.yml')
+
 const getIndexFilename = () => path.join(getBaseDir(), 'config', 'files.idx')
 
 const getJournalFilename = id => `${getIndexFilename()}.${id}.journal`
@@ -36,11 +38,17 @@ const getDatabaseFilename = () => path.join(getBaseDir(), 'config', 'database.db
 
 const getEventsFilename = () => path.join(getBaseDir(), 'config', 'events.db')
 
-const runCliAsync = (args, cb) => {
+const runCliAsync = (args, options, cb) => {
+  if (!cb) {
+    cb = options
+    options = {}
+  } else if (!options) {
+    options = {}
+  }
   const command = [galleryBin, ...galleryBinArgs, ...args].map(v => `${v}`.match(/\s/) ? `"${v}"` : v).join(' ')
-  const options = {
+  const spawnOptions = {
     silent: false,
-    env: process.env,
+    env: Object.assign({}, process.env, options.env),
     cwd: projectRoot,
     shell: false
   }
@@ -49,7 +57,7 @@ const runCliAsync = (args, cb) => {
 
   const stdout = []
   const stderr = []
-  const child = spawn(galleryBin, [...galleryBinArgs, ...args], options)
+  const child = spawn(galleryBin, [...galleryBinArgs, ...args], spawnOptions)
   child.stdout.on('data', chunk => stdout.push(chunk))
   child.stderr.on('data', chunk => stderr.push(chunk))
 
@@ -63,7 +71,7 @@ const runCliAsync = (args, cb) => {
   return child;
 }
 
-const runCli = async args => new Promise(resolve => runCliAsync(args, resolve))
+const runCli = async (args, options) => new Promise(resolve => runCliAsync(args, options, resolve))
 
 const readJsonGz = async (filename) => {
   return new Promise((resolve, reject) => {
@@ -125,6 +133,7 @@ module.exports = {
   getTestDataDir,
   getBaseDir,
   getFilesDir,
+  getConfigFilename,
   getIndexFilename,
   getJournalFilename,
   getStorageDir,

@@ -1,8 +1,7 @@
 /* globals gauge*/
 "use strict";
-const { access, unlink } = require('fs/promises')
+const { access } = require('fs/promises')
 const assert = require('assert');
-const checksum = require('../../packages/index/src/checksum');
 const { getFilesDir, getIndexFilename, getJournalFilename, runCli, readIndex, readJournal } = require('../utils');
 
 step(["Create index", "Update index"], async () => {
