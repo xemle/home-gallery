@@ -9,11 +9,13 @@ steps:
 - name: install
   image: node:14-alpine
   commands:
-  - apk add --no-cache perl
-  - npm set registry http://npm.home.local
+  - npm set registry $NPM_REGISTRY
   - npm config set unsafe-perm true
   - npm install
   - find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
+  environment:
+    NPM_REGISTRY:
+      from_secret: npm_registry
 
 - name: build
   image: node:14-alpine
