@@ -27,6 +27,22 @@ steps:
   commands:
   - npm run test -- --ignore @home-gallery/api-server
 
+- name: test:e2e
+  image: node:14-alpine
+  commands:
+  - apk add --no-cache git git-lfs perl
+  - git clone $E2E_DATA_REPO ./data
+  - npm run test:e2e
+  environment:
+    TZ: Europe/Berlin
+    E2E_DATA_REPO:
+      from_secret: e2e_data_repo
+  when:
+    branch:
+    - master
+    event:
+    - push
+
 - name: notify
   image: sfelis/drone-email
   settings:
