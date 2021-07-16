@@ -41,13 +41,10 @@ jobs:
           echo ::set-output name=SNAPSHOT::${SNAPSHOT}
           echo ::set-output name=TARGET_DIR::${TARGET_DIR}
 
-          # Exclude api-server and styleguide from binary build
-          cp package.json package.json.orig
-          grep -v -e api-server -e styleguide package.json.orig > package.json
-
       - name: Install packages
         id: install
         run: |
+          node scripts/disable-dependency.js api-server styleguide e2e
           npm install
 
       - name: Build packages

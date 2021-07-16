@@ -11,6 +11,7 @@ steps:
   commands:
   - npm set registry $NPM_REGISTRY
   - npm config set unsafe-perm true
+  - node scripts/disable-dependency.js api-server
   - npm install
   - find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
   environment:
