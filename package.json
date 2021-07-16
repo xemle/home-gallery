@@ -4,7 +4,7 @@
   "description": "",
   "main": "gallery.js",
   "scripts": {
-    "postinstall": "link-parent-bin && node packages/extractor/validate-sharp.js && npm --prefix e2e install",
+    "postinstall": "link-parent-bin && node packages/extractor/validate-sharp.js",
     "clean": "lerna run clean",
     "clean:backend": "lerna run clean --scope \"@home-gallery/{common,stream,cli,index,extractor,database}\"",
     "clean:web": "lerna run clean --scope \"@home-gallery/{common,cli,server,webapp,query,events}\"",

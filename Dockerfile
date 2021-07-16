@@ -2,6 +2,7 @@
 FROM node:14-alpine AS builder
 
 COPY package.json *.js lerna.json *.md *.yml LICENSE /build/
+COPY e2e /build/e2e/
 COPY packages /build/packages/
 COPY scripts /build/scripts/
 WORKDIR /build
