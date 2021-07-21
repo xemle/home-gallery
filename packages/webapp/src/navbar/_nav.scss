@@ -55,4 +55,8 @@ $nav-background-color: $background-color-08dp;
   &:hover {
     background-color: #444;
   }
+
+  .fas {
+    text-shadow: 0 0 1px black;
+  }
 }
