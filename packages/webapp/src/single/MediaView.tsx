@@ -53,8 +53,10 @@ export const MediaView = () => {
 
   const entries = useStoreState(state => state.entries.entries);
   const showDetails = useStoreState(state => state.singleViewModel.showDetails);
+  const showNavigation = useStoreState(state => state.singleViewModel.showNavigation);
   const search = useStoreActions(actions => actions.search.search);
   const setShowDetails = useStoreActions(actions => actions.singleViewModel.setShowDetails);
+  const setShowNavigation = useStoreActions(actions => actions.singleViewModel.setShowNavigation);
 
   let index = findEntryIndex(location, entries, id);
 
@@ -82,6 +84,8 @@ export const MediaView = () => {
       history.push(`/similar/${current.id}`);
     } else if (type === 'toggleDetails') {
       setShowDetails(!showDetails);
+    } else if (type === 'toggleNavigation') {
+      setShowNavigation(!showNavigation);
     } else if (type == 'first' && entries.length) {
       history.push(`/view/${entries[0].id}`, {listPathname: location.pathname, index: 0});
     } else if (type == 'last' && entries.length) {
@@ -114,7 +118,8 @@ export const MediaView = () => {
     'esc': 'list',
     'i': 'toggleDetails',
     's': 'similar',
-    'c': 'chronology'
+    'c': 'chronology',
+    't': 'toggleNavigation'
   }
 
   useHotkeys(Object.keys(hotkeysToAction).join(','), (ev, handler) => {
@@ -139,7 +144,7 @@ export const MediaView = () => {
       <div className={`single ${showDetails ? '-withDetail' : ''}`}>
         <div className="single__media position-fixed-md">
           <div className="MediaViewContainer">
-            <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} onClick={onNavClick} />
+            <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} onClick={dispatchAction} />
             {isImage &&
               <Zoomable key={key} childWidth={scaleSize.width} childHeight={scaleSize.height} onSwipe={onSwipe}>
                 <MediaViewImage key={key} media={current} next={next} prev={prev} showDetails={showDetails}/>
