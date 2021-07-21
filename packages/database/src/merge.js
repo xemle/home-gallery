@@ -21,7 +21,7 @@ const uniqFilter = valueFn => (v, i, a) => {
 
 const getUniqFileSizeSum = a => a.files.filter(uniqFilter(e => e.id)).map(e => e.size).reduce((r, v) => r + v)
 
-const hasFirstMoreUniqFileSizeSum = (a, b) => {
+const hasMoreUniqFileSizeSum = (a, b) => {
   if (a.files.length == 1 && b.files.length == 1) {
     return true
   }
@@ -30,7 +30,7 @@ const hasFirstMoreUniqFileSizeSum = (a, b) => {
   return aSizeSum > bSizeSum
 }
 
-const isFirstPrimary = (a, b) => hasFirstMoreUniqFileSizeSum(a, b) && hasFirstShorterFilename(a, b)
+const isFirstPrimary = (a, b) => hasMoreUniqFileSizeSum(a, b) && hasFirstShorterFilename(a, b)
 
 const addMissingFilesFrom = (target, other) => {
   other.files.forEach(bFile => {
