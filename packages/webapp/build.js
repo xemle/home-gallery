@@ -6,7 +6,7 @@ const targets = [
   {
     entryPoints: ['./src/App.ts'],
     bundle: true,
-    minify: true,
+    minify: !watch,
     sourcemap: true,
     platform: 'browser',
     outdir: 'dist',
