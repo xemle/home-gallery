@@ -1,24 +1,19 @@
 import { Action, action } from 'easy-peasy';
 
-export enum SingleViewMode {
-  VIEW,
-  DETAIL
-}
-
 export interface IdMap {
   [key: string]: boolean;
 }
 
 export interface SingleViewModel {
-  viewMode: SingleViewMode;
+  showDetails: boolean;
 
-  setViewMode: Action<SingleViewModel, SingleViewMode>;
+  setShowDetails: Action<SingleViewModel, boolean>;
 }
 
 export const singleViewModel : SingleViewModel = {
-  viewMode: SingleViewMode.VIEW,
+  showDetails: false,
 
-  setViewMode: action((state, mode) => {
-    state.viewMode = mode;
+  setShowDetails: action((state, show) => {
+    state.showDetails = show;
   }),
 };

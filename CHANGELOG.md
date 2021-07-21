@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add keyboard shortcuts to single view
 - Add end to end tests
 - Add file index journal
 - Speedup incemental database updates via file index journal

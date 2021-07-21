@@ -6,9 +6,9 @@ import {
   useHistory
 } from "react-router-dom";
 import Hammer from 'hammerjs';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { useStoreState, useStoreActions } from '../store/hooks';
-import { SingleViewMode } from '../store/single-view';
 import useListLocation from './useListLocation';
 
 import { MediaNav } from './MediaNav';
@@ -52,9 +52,9 @@ export const MediaView = () => {
   const dimensions = useBodyDimensions();
 
   const entries = useStoreState(state => state.entries.entries);
-  const viewMode = useStoreState(state => state.singleViewModel.viewMode);
+  const showDetails = useStoreState(state => state.singleViewModel.showDetails);
   const search = useStoreActions(actions => actions.search.search);
-  const setViewMode = useStoreActions(actions => actions.singleViewModel.setViewMode);
+  const setShowDetails = useStoreActions(actions => actions.singleViewModel.setShowDetails);
 
   let index = findEntryIndex(location, entries, id);
 
@@ -69,29 +69,70 @@ export const MediaView = () => {
   const key = current ? current.id : (Math.random() * 100000).toFixed(0);
   const scaleSize = scaleDimensions(current, dimensions);
   console.log(scaleSize, dimensions, current);
+  console.log('debug entries', entries)
 
-  const onNavClick = ({type}) => {
-    if (type === 'similar' && current.similarityHash) {
+  const dispatchAction = ({type}) => {
+    let prevNextMatch = type.match(/(prev|next)(-(\d+))?/)
+    if (prevNextMatch && entries.length) {
+      const offset = prevNextMatch[3] ? +prevNextMatch[3] : 1
+      const negate = prevNextMatch[1] == 'prev' ? -1 : 1
+      const i = Math.min(entries.length - 1, Math.max(0, index + (negate * offset)))
+      history.push(`/view/${entries[i].id}`, {listPathname: location.pathname, index: i});
+    } else if (type === 'similar' && current?.similarityHash) {
       history.push(`/similar/${current.id}`);
-    } else if (type === 'info') {
-      setViewMode(viewMode === SingleViewMode.VIEW ? SingleViewMode.DETAIL : SingleViewMode.VIEW);
-    } else {
+    } else if (type === 'toggleDetails') {
+      setShowDetails(!showDetails);
+    } else if (type == 'first' && entries.length) {
+      history.push(`/view/${entries[0].id}`, {listPathname: location.pathname, index: 0});
+    } else if (type == 'last' && entries.length) {
+      history.push(`/view/${entries[entries.length - 1].id}`, {listPathname: location.pathname, index: entries.length - 1});
+    } else if (type == 'list') {
+      history.push(listLocation);
+    } else if (type == 'chronology') {
       search({type: 'none'});
       history.push('/');
     }
   }
 
   const onSwipe = (ev) => {
-    if (ev.direction === Hammer.DIRECTION_LEFT && next) {
-      history.push(`/view/${next.id}`, {listPathname: location.pathname, index: index + 1});
-    } else if (ev.direction === Hammer.DIRECTION_RIGHT && prev) {
-      history.push(`/view/${prev.id}`, {listPathname: location.pathname, index: index - 1});
+    if (ev.direction === Hammer.DIRECTION_LEFT) {
+      dispatchAction({type: 'next'})
+    } else if (ev.direction === Hammer.DIRECTION_RIGHT) {
+      dispatchAction({type: 'prev'})
     }
   }
 
-  const showDetails = useMemo(() => viewMode === SingleViewMode.DETAIL, [viewMode])
+  const hotkeysToAction = {
+    'home': 'fist',
+    'left,j,backspace': 'prev',
+    'ctrl+left': 'prev-10',
+    'ctrl+shift+left': 'prev-100',
+    'right,k,space': 'next',
+    'ctrl+right': 'next-10',
+    'ctrl+shift+right': 'next-100',
+    'end': 'last',
+    'esc': 'list',
+    'i': 'toggleDetails',
+    's': 'similar',
+    'c': 'chronology'
+  }
 
-  console.log('Media object', current, viewMode);
+  useHotkeys(Object.keys(hotkeysToAction).join(','), (ev, handler) => {
+    const found = Object.keys(hotkeysToAction).find(hotkey => {
+      const keys = hotkey.split(',')
+      const found = keys.find(key => handler.key == key)
+      if (found) {
+        console.log(`Catch hotkey ${found} for ${hotkeysToAction[hotkey]}`)
+        dispatchAction({type: hotkeysToAction[hotkey]})
+        return true
+      }
+    })
+    if (found) {
+      ev.preventDefault()
+    }
+  }, [index, showDetails, showNavigation])
+
+  console.log('Media object', current, showDetails);
 
   return (
     <>
