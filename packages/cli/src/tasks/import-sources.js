@@ -124,4 +124,4 @@ const importSources = async (config, sources, initialImport, incrementalUpdate) 
   }
 }
 
-module.exports = { importSources, extract }
+module.exports = { importSources, extract, buildDatabase }
