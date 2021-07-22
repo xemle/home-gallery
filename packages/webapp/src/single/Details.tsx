@@ -1,4 +1,7 @@
 import * as React from "react";
+import {
+  useHistory
+} from "react-router-dom";
 
 const pad = (s: number | string, len: number, char: string = '0') => {
   let result = '' + s;
@@ -51,23 +54,41 @@ const humanizeDuration = duration => {
 }
 
 export const Details = ({current}) => {
+  const history = useHistory();
+
   if (!current) {
     return (<></>)
   }
+
+  const firstFile = current.files[0] || {}
+  const mainFileParts = firstFile.filename?.split(/[/\\]/)
+  const mainFilename = mainFileParts.pop()
+
+  const dispatchSearch = (query) => {
+    history.push(`/search/${query}`);
+  }
+
+  const searchTerm = (text, query = false) => {
+    query = query || text
+    return <a onClick={() => dispatchSearch(query)} title={`Quick search for '${query}'`}>{text}</a>
+  }
+
+  const joinReducer = c => (prev, cur) => prev.length ? [prev, c, cur] : [cur]
+
   const rows = [
     { title: 'Short ID', value: current.id.substring(0, 7) },
-    { title: 'Type', value: current.type },
-    { title: 'Date', value: formatDate('%d.%m.%Y, %H:%M:%S', current.date) },
-    { title: 'Filename', value: `${current.files[0].index}:${current.files[0].filename}` },
+    { title: 'Type', value: searchTerm(current.type) },
+    { title: 'Date', value: searchTerm(formatDate('%d.%m.%Y, %H:%M:%S', current.date), current.date.substr(0, 10)) },
+    { title: 'Filename', value: [searchTerm(firstFile.index), ':', mainFileParts.map<React.ReactNode>(v => searchTerm(v)).reduce(joinReducer('/'), [])] },
     { title: 'Size', value: humanizeBytes(current.files[0].size) },
     { title: 'Duration', value: humanizeDuration(current.duration) },
     { title: 'Dimensions', value: `${current.width}x${current.height}` },
-    { title: 'Camera', value: [current.make, current.model].filter(v => !!v).join('/') },
+    { title: 'Camera', value: [current.make, current.model].filter(v => !!v).map<React.ReactNode>(v => searchTerm(v)).reduce(joinReducer('/'), []) },
     { title: 'Camera Settings', value: `ISO ${current.iso}, Aperture ${current.aperture}` },
     { title: 'Geo Position', value: [current.latitude, current.longitude].filter(v => !!v).map(v => +v.toFixed(4)).join(',') },
-    { title: 'Address', value: [current.road, current.city, current.country].filter(v => !!v).join(', ') },
-    { title: 'Tags', value: (current.tags || []).join(', ') },
-    { title: 'Objects', value: (current.objects || []).map(object => `${object.class} (${object.score})`).join(', ') },
+    { title: 'Address', value: [current.road, current.city, current.country].filter(v => !!v).map<React.ReactNode>(v => searchTerm(v)).reduce(joinReducer(', '), []) },
+    { title: 'Tags', value: (current.tags || []).map<React.ReactNode>(v => searchTerm(v)).reduce(joinReducer(', '), []) },
+    { title: 'Objects', value: (current.objects || []).map<React.ReactNode[]>(object => [searchTerm(object.class), ` (${object.score})`]).reduce(joinReducer(', '), []) },
     { title: 'Faces', value: (current.faces || []).map(face => `${face.gender} (~${face.age.toFixed()}y)`).join(', ') },
   ];
 
