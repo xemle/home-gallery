@@ -58,6 +58,8 @@ export const MediaView = () => {
   const setShowDetails = useStoreActions(actions => actions.singleViewModel.setShowDetails);
   const setShowNavigation = useStoreActions(actions => actions.singleViewModel.setShowNavigation);
 
+  const [hideNavigation, setHideNavigation] = useState(false)
+
   let index = findEntryIndex(location, entries, id);
 
   const current = entries[index];
@@ -106,6 +108,14 @@ export const MediaView = () => {
     }
   }
 
+  const onVideoDispatch = ({type}) => {
+    if (type == 'play') {
+      setHideNavigation(true);
+    } else if (type == 'pause') {
+      setHideNavigation(false);
+    }
+  }
+
   const hotkeysToAction = {
     'home': 'fist',
     'left,j,backspace': 'prev',
@@ -144,14 +154,16 @@ export const MediaView = () => {
       <div className={`single ${showDetails ? '-withDetail' : ''}`}>
         <div className="single__media position-fixed-md">
           <div className="MediaViewContainer">
-            <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} onClick={dispatchAction} />
+            {!hideNavigation &&
+              <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} onClick={dispatchAction} />
+            }
             {isImage &&
               <Zoomable key={key} childWidth={scaleSize.width} childHeight={scaleSize.height} onSwipe={onSwipe}>
                 <MediaViewImage key={key} media={current} next={next} prev={prev} showDetails={showDetails}/>
               </Zoomable>
             }
             {isVideo &&
-              <MediaViewVideo key={key} media={current} next={next} prev={prev}/>
+              <MediaViewVideo key={key} media={current} next={next} prev={prev} onDispatch={onVideoDispatch}/>
             }
             {isUnknown &&
               <MediaViewUnknownType key={key} media={current} next={next} prev={prev}/>
