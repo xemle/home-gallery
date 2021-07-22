@@ -94,6 +94,7 @@ export const Details = ({current}) => {
 
   return (
     <>
+      <h3 className="mb-8">{mainFilename}</h3>
       <table className="-striped">
         <thead>
           <tr><th>Type</th><th>Value</th></tr>
