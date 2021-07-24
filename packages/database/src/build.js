@@ -1,4 +1,5 @@
 const { pipeline } = require('stream');
+const debug = require('debug')('database:build')
 
 const { readStreams } = require('@home-gallery/index');
 
@@ -55,8 +56,18 @@ function build(indexFilenames, storageDir, databaseFilename, options, cb) {
       if (journal) {
         mergeFromJournal(indexFilenames, journal, databaseFilename, entries, cb)
       } else {
+        const t0 = Date.now()
         const uniqueEntries = uniq(entries, entry => entry.id, mergeEntry);
-        writeDatabase(databaseFilename, uniqueEntries, cb);
+        debug(`Merged ${entries.length} entries to ${uniqueEntries.length} unique entries in ${Date.now() - t0}ms`);
+
+        const t1 = Date.now()
+        writeDatabase(databaseFilename, uniqueEntries, (err, database) => {
+          if (err) {
+            return cb(err)
+          }
+          debug(`Wrote database with ${database.data.length} entries to ${databaseFilename} in ${Date.now() - t1}ms`)
+          cb(null, database)
+        });
       }
     })
   })
