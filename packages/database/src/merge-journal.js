@@ -1,4 +1,5 @@
-const debug = require('debug')('database:merge')
+const debug = require('debug')('database:merge-journal')
+const { mergeEntry, matchFile } = require('./merge-entry')
 
 const { getIndexName, getJournalFilename, readJournal } = require('@home-gallery/index');
 
@@ -10,49 +11,6 @@ const toMap = (values, keyFn) => values.reduce((result, value) => {
   result[key] = value
   return result
 }, {})
-
-const hasFirstShorterFilename = (a, b) => a.files[0].filename <= b.files[0].filename
-
-const uniqFilter = valueFn => (v, i, a) => {
-  if (i == 0) {
-    return true
-  }
-  const value = valueFn(v)
-  const firstEntry = a.find(e => valueFn(e) == value)
-  return i === a.indexOf(firstEntry)
-}
-
-const getUniqFileSizeSum = a => a.files.filter(uniqFilter(e => e.id)).map(e => e.size).reduce((r, v) => r + v, 0)
-
-const compareUniqFileSizeSum = (a, b) => getUniqFileSizeSum(b) - getUniqFileSizeSum(a)
-
-const isFirstPrimary = (a, b) => {
-  const sizeSumCmp = compareUniqFileSizeSum(a, b)
-  if (sizeSumCmp == 0) {
-    return hasFirstShorterFilename(a, b)
-  }
-  return sizeSumCmp < 0
-}
-
-const addMissingFilesFrom = (target, other) => {
-  other.files.forEach(bFile => {
-    const found = target.files.find(file => matchFile(file, bFile))
-    if (!found) {
-      target.files.push(bFile)
-    }
-  })
-  return target
-}
-
-const mergeEntry = (a, b) => {
-  if (!isFirstPrimary(a, b)) {
-    return mergeEntry(b, a)
-  }
-
-  return addMissingFilesFrom(a, b)
-}
-
-const matchFile = (a, b) => a.id == b.id && a.index == b.index && a.filename == b.filename
 
 const removeFile = (dbEntry, removedFile) => {
   dbEntry.files = dbEntry.files.filter(file => !matchFile(file, removedFile))
@@ -153,6 +111,5 @@ const mergeFromJournal = (indexFilenames, journal, databaseFilename, entries, cb
 }
 
 module.exports = {
-  mergeEntry,
   mergeFromJournal
 }

@@ -10,7 +10,8 @@ const groupByDir = require('./group-by-dir');
 const groupSidecarFiles = require('./group-sidecar-files');
 const mapToMedia = require('./map-media');
 const { writeDatabase } = require('./write-database');
-const { mergeEntry, mergeFromJournal } = require('./merge')
+const { mergeEntry } = require('./merge-entry')
+const { mergeFromJournal } = require('./merge-journal')
 
 const uniq = (list, keyFn, mergeFn) => Object.values(list.reduce((id2Entry, entry) => {
   const key = keyFn(entry)
