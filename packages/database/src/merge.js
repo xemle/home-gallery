@@ -14,23 +14,25 @@ const toMap = (values, keyFn) => values.reduce((result, value) => {
 const hasFirstShorterFilename = (a, b) => a.files[0].filename <= b.files[0].filename
 
 const uniqFilter = valueFn => (v, i, a) => {
+  if (i == 0) {
+    return true
+  }
   const value = valueFn(v)
   const firstEntry = a.find(e => valueFn(e) == value)
   return i === a.indexOf(firstEntry)
 }
 
-const getUniqFileSizeSum = a => a.files.filter(uniqFilter(e => e.id)).map(e => e.size).reduce((r, v) => r + v)
+const getUniqFileSizeSum = a => a.files.filter(uniqFilter(e => e.id)).map(e => e.size).reduce((r, v) => r + v, 0)
 
-const hasMoreUniqFileSizeSum = (a, b) => {
-  if (a.files.length == 1 && b.files.length == 1) {
-    return true
+const compareUniqFileSizeSum = (a, b) => getUniqFileSizeSum(b) - getUniqFileSizeSum(a)
+
+const isFirstPrimary = (a, b) => {
+  const sizeSumCmp = compareUniqFileSizeSum(a, b)
+  if (sizeSumCmp == 0) {
+    return hasFirstShorterFilename(a, b)
   }
-  const aSizeSum = getUniqFileSizeSum(a)
-  const bSizeSum = getUniqFileSizeSum(b)
-  return aSizeSum > bSizeSum
+  return sizeSumCmp < 0
 }
-
-const isFirstPrimary = (a, b) => hasMoreUniqFileSizeSum(a, b) && hasFirstShorterFilename(a, b)
 
 const addMissingFilesFrom = (target, other) => {
   other.files.forEach(bFile => {
