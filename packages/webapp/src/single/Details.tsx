@@ -60,10 +60,6 @@ export const Details = ({current}) => {
     return (<></>)
   }
 
-  const firstFile = current.files[0] || {}
-  const mainFileParts = firstFile.filename?.split(/[/\\]/)
-  const mainFilename = mainFileParts.pop()
-
   const dispatchSearch = (query) => {
     history.push(`/search/${query}`);
   }
@@ -75,12 +71,21 @@ export const Details = ({current}) => {
 
   const joinReducer = c => (prev, cur) => prev.length ? [prev, c, cur] : [cur]
 
+  const getFileParts = file => file.filename.split(/[/\\]/)
+
+  const mapFile = file => {
+    const fileParts: React.ReactNode[] = getFileParts(file)
+    const links = fileParts.map<React.ReactNode>(v => searchTerm(v)).reduce(joinReducer('/'), [])
+    return [file.index, ':', links, ` ${humanizeBytes(file.size)}`]
+  }
+
+  const mainFilename = getFileParts(current.files[0]).pop()
+
   const rows = [
     { title: 'Short ID', value: current.id.substring(0, 7) },
     { title: 'Type', value: searchTerm(current.type) },
     { title: 'Date', value: searchTerm(formatDate('%d.%m.%Y, %H:%M:%S', current.date), current.date.substr(0, 10)) },
-    { title: 'Filename', value: [searchTerm(firstFile.index), ':', mainFileParts.map<React.ReactNode>(v => searchTerm(v)).reduce(joinReducer('/'), [])] },
-    { title: 'Size', value: humanizeBytes(current.files[0].size) },
+    { title: 'File', value: current.files.map(mapFile).reduce(joinReducer(', '), []) },
     { title: 'Duration', value: humanizeDuration(current.duration) },
     { title: 'Dimensions', value: `${current.width}x${current.height}` },
     { title: 'Camera', value: [current.make, current.model].filter(v => !!v).map<React.ReactNode>(v => searchTerm(v)).reduce(joinReducer('/'), []) },
