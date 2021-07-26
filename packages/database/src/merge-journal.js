@@ -72,6 +72,12 @@ const getJournalRemoves = (journals) => {
 
 const hasJournalChanges = (entries, removedFiles) => !entries.length && !removedFiles.length
 
+const diffCount = (newData, oldData) => {
+  const diff = newData.length - oldData.length
+  const sign = diff > 0 ? '+' : ''
+  return `${sign}${diff}`
+}
+
 const mergeFromJournal = (indexFilenames, journal, databaseFilename, entries, cb) => {
   readJournals(indexFilenames, journal, (err, journals) => {
     if (err) {
@@ -96,7 +102,7 @@ const mergeFromJournal = (indexFilenames, journal, databaseFilename, entries, cb
 
       const t1 = Date.now()
       const mergedEntries = mergeEntries(database.data, entries, removedFiles)
-      debug(`Merged ${entries.length} new entries and ${removedFiles.length} removed entries from journals to ${mergeEntries.length} entries to the database in ${Date.now() - t1}ms`)
+      debug(`Merged ${entries.length} new and ${removedFiles.length} removed entries from journals to ${mergedEntries.length} entries (${diffCount(mergedEntries, database.data)}) to the database in ${Date.now() - t1}ms`)
 
       const t2 = Date.now()
       writeDatabase(databaseFilename, mergedEntries, (err, database) => {
