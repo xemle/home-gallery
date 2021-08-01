@@ -4,12 +4,26 @@ const crypto = require('crypto');
 
 const log = require('@home-gallery/logger')('index.checksum');
 const { humanize } = require('@home-gallery/common');
+const { bps, percent, remainingTime, humanizeDuration } = require('./format')
 
-const percent = (current, total, precision) => (100 * current / total).toFixed(precision || 1) + '%'
+const createByteProgressLog = (totalBytes, intervalMs) => {
+  const startTime = Date.now()
+  let last = startTime
+  let lastWritten = 0
+  let written = 0
+  return data => {
+    lastWritten += data.length
+    const now = Date.now()
+    if (now - last > intervalMs) {
+      written += lastWritten
+      log.info(`Processed ${humanize(written)} (${percent(written, totalBytes)}) with ${bps(lastWritten, last)}. Estimated remaining time is ${humanizeDuration(remainingTime(startTime, written, totalBytes))}`)
+      lastWritten = 0
+      last = now
+    }
+  }
+}
 
-const bps = (bytes, startTime) => humanize(bytes / Math.max(0.001, (Date.now() - startTime) / 1000)) + '/s'
-
-const createSha1 = (filename, cb) => {
+const createSha1 = (filename, progress, cb) => {
   var input = fs.createReadStream(filename);
   var digest = crypto.createHash('sha1');
 
@@ -19,7 +33,8 @@ const createSha1 = (filename, cb) => {
   process.on('SIGINT', destroyStream)
 
   input.addListener('error', cb);
-  input.addListener('data', (data) => digest.update(data));
+  input.addListener('data', data => digest.update(data));
+  input.addListener('data', progress);
   input.addListener('close', () => {
     process.off('SIGINT', destroyStream);
     cb(null, digest.digest('hex'));
@@ -28,7 +43,8 @@ const createSha1 = (filename, cb) => {
 };
 
 const checksum = (index, sha1sumDate, cb) => {
-  const missingChecksumEntries = index.data.filter(e => e.isFile && !e.sha1sum);
+  const fileEntries = index.data.filter(e => e.isFile);
+  const missingChecksumEntries = fileEntries.filter(e => !e.sha1sum);
   let interrupted = false;
   const t0 = Date.now();
 
@@ -36,14 +52,14 @@ const checksum = (index, sha1sumDate, cb) => {
     return cb(null, index, false);
   }
 
-  const totalBytes = index.data.reduce((all, entry) => { all += entry.size; return all}, 0);
-  const bytes = missingChecksumEntries.reduce((all, entry) => { all += entry.size; return all}, 0);
+  const totalBytes = fileEntries.reduce((all, entry) => all + entry.size, 0);
+  const missingBytes = missingChecksumEntries.reduce((all, entry) => all + entry.size, 0);
   let bytesCalculated = 0;
-  log.info(`Calculating ids for ${missingChecksumEntries.length} entries with ${humanize(bytes)} of total size ${humanize(totalBytes)} (${percent(bytes, totalBytes)})`);
+  log.info(`Calculating ids for ${missingChecksumEntries.length} entries with ${humanize(missingBytes)} of total size ${humanize(totalBytes)} (${percent(missingBytes, totalBytes)})`);
 
   const gracefulShutdown = () => {
     if (!interrupted) {
-      console.warn(`Graceful shutdown. Ids of ${humanize(bytesCalculated)} (${percent(bytesCalculated, bytes)}) were calculated, ${percent(totalBytes - bytes + bytesCalculated, totalBytes)} of ${humanize(totalBytes)} are done. Please be patient to avoid data loss!`);
+      console.warn(`Graceful shutdown. Ids of ${humanize(bytesCalculated)} (${percent(bytesCalculated, missingBytes)}) were calculated, ${percent(totalBytes - missingBytes + bytesCalculated, totalBytes)} of ${humanize(totalBytes)} are done. Please be patient to avoid data loss!`);
       interrupted = true;
       cb(null, index, true);
     } else {
@@ -51,6 +67,8 @@ const checksum = (index, sha1sumDate, cb) => {
     }
   };
   process.on('SIGINT', gracefulShutdown);
+
+  const progressLog = createByteProgressLog(missingBytes, 30 * 1000)
 
   const calculateAll = (base, entries, updatedEntries, done) => {
     if (!entries.length || interrupted) {
@@ -60,7 +78,7 @@ const checksum = (index, sha1sumDate, cb) => {
     const filename = path.join(base, entry.filename);
 
     const t0 = Date.now()
-    createSha1(filename, (err, sha1sum) => {
+    createSha1(filename, progressLog, (err, sha1sum) => {
       if (interrupted) {
         return;
       } else if (err) {
