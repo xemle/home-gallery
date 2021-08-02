@@ -32,7 +32,7 @@ const loadConfig = async options => {
       console.log(YAML.stringify(config))
       throw e
     })
-  log.info(`Loaded gallery configuration from ${options.configFile}`)
+  log.debug(`Loaded gallery configuration from ${options.configFile}`)
   options.config = config;
   return options;
 }

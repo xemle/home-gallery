@@ -33,6 +33,10 @@ const expandConfigDefaults = (config, env) => {
     file: '{configDir}/{configPrefix}events.db'
   }, config.events);
 
+  config.logger = config.logger || [
+    {type: 'console', level: 'info'},
+    {type: 'file', level: 'debug', file: '{configDir}/{configPrefix}gallery.log'}
+  ]
   return config;
 }
 

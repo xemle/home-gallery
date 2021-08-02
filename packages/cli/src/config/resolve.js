@@ -73,6 +73,12 @@ const resolveConfig = (config, env) => {
   }
 
   resolveAll(config, ['storage.dir', 'database.file', 'events.file', 'server.key', 'server.cert'], config, env)
+
+  const loggers = config.logger || [];
+  for (const logger of loggers) {
+    resolveAll(logger, ['file'], config, env)
+  }
+
   return config
 }
 

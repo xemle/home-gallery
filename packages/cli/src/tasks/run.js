@@ -1,6 +1,6 @@
 const { spawn } = require('child_process');
 
-const log = require('@home-gallery/logger')('cli.run')
+const log = require('@home-gallery/logger')('cli.task.run')
 
 const nodeBin = process.argv[0]
 const cliScript = process.argv[1]
@@ -21,4 +21,19 @@ const run = async (command, args, options) => {
 
 const runCli = async(args, options, nodeArgs) => run(nodeBin, [...(nodeArgs || []), cliScript, ...args], options)
 
-module.exports = { run, runCli }
+const isValidLevel = level => ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent'].indexOf(level) >= 0
+
+const loggerArgs = config => {
+  const loggers = config.logger || []
+  const args = []
+  loggers.forEach(logger => {
+    if (logger.type == 'console' && isValidLevel(logger.level)) {
+      args.push('--log-level', logger.level)
+    } else if (logger.type == 'file' && isValidLevel(logger.level) && logger.file) {
+      args.push('--log-file', logger.file, '--log-file-level', logger.level)
+    }
+  })
+  return args
+}
+
+module.exports = { run, runCli, loggerArgs }

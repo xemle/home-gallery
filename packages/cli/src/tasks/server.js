@@ -1,9 +1,9 @@
-const { runCli } = require('./run')
+const { runCli, loggerArgs } = require('./run')
 
 const startServer = async config => {
   const server = config.server || {};
 
-  const args = ['server',
+  const args = [...loggerArgs(config), 'server',
     '--storage', config.storage.dir,
     '--database', config.database.file,
     '--events', config.events.file,

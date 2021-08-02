@@ -104,7 +104,7 @@ const command = {
       (argv) => config(argv)
           .then(options => runImport(options.config, argv.initial, argv.update))
           .then(() => log.info(`Have a good day...`))
-          .catch(err => log.error(`Error: ${err}`))
+          .catch(err => log.error(err, `Error: ${err}`))
       )
     .demandCommand()
   },

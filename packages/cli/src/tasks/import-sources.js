@@ -1,10 +1,10 @@
-const { runCli } = require('./run')
+const { runCli, loggerArgs } = require('./run')
 
 const log = require('@home-gallery/logger')('cli.task.import')
 
-const updateIndex = async (source, options) => {
+const updateIndex = async (config, source, options) => {
   const { initialImport, journal } = options
-  const args = ['index', '--directory', source.dir, '--index', source.index]
+  const args = [...loggerArgs(config), 'index', '--directory', source.dir, '--index', source.index]
   source.matcher && args.push('--matcher', source.matcher)
   source.excludeFromFile && args.push('--exclude-from-file', source.excludeFromFile)
   source.excludeIfPresent && args.push('--exclude-if-present', source.excludeIfPresent)
@@ -17,23 +17,23 @@ const updateIndex = async (source, options) => {
   await runCli(args)
 }
 
-const updateIndices = async (sources, options) => {
+const updateIndices = async (config, sources, options) => {
   for (const source of sources) {
-    await updateIndex(source, options);
+    await updateIndex(config, source, options);
   }
 }
 
-const deleteJournal = async (source, journal) => {
-  const args = ['index', 'journal', '--index', source.index, '--journal', journal, '-r']
+const deleteJournal = async (config, source, journal) => {
+  const args = [...loggerArgs(config), 'index', 'journal', '--index', source.index, '--journal', journal, '-r']
   await runCli(args)
 }
 
-const deleteJournals = async (sources, journal) => {
+const deleteJournals = async (config, sources, journal) => {
   if (!journal) {
     return
   }
   for (const source of sources) {
-    await deleteJournal(source, journal);
+    await deleteJournal(config, source, journal);
   }
 }
 
@@ -42,7 +42,7 @@ const extract = async (config, sources, options) => {
     log.warn(`Sources list is empty. No files to extract`);
     return;
   }
-  const args = ['extract'];
+  const args = [...loggerArgs(config), 'extract'];
   const extractor = config.extractor || {};
   sources.forEach(source => args.push('--index', source.index));
 
@@ -65,7 +65,7 @@ const extract = async (config, sources, options) => {
 }
 
 const buildDatabase = async (config, options) => {
-  const args = ['database'];
+  const args = [...loggerArgs(config), 'database'];
   const storage = config.storage || {}
   config.sources.forEach(source => args.push('--index', source.index));
   args.push('--storage', storage.dir, '--database', config.database.file);
@@ -115,10 +115,10 @@ const importSources = async (config, sources, initialImport, incrementalUpdate) 
   while (processing) {
     const journal = requireJournal(initialImport, incrementalUpdate) ? generateJournal() : false
 
-    await updateIndices(sources, { initialImport, journal }).then(() => processing = false).catch(catchIndexLimitExceeded)
+    await updateIndices(config, sources, { initialImport, journal }).then(() => processing = false).catch(catchIndexLimitExceeded)
     await extract(config, sources, { journal })
     await buildDatabase(config, { journal })
-    await deleteJournals(sources, journal)
+    await deleteJournals(config, sources, journal)
 
     if (processing) {
       log.info(`New chunk of media is processed and is ready to browse. Continue with next chunk to process...`)
