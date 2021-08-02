@@ -4,7 +4,7 @@
   "description": "",
   "main": "gallery.js",
   "scripts": {
-    "postinstall": "link-parent-bin && node packages/extractor/validate-sharp.js",
+    "postinstall": "npm --prefix e2e install && link-parent-bin && node packages/extractor/validate-sharp.js",
     "clean": "lerna run clean",
     "clean:backend": "lerna run clean --scope \"@home-gallery/{logger,common,stream,cli,index,extractor,database}\"",
     "clean:web": "lerna run clean --scope \"@home-gallery/{common,cli,server,webapp,query,events}\"",
@@ -78,7 +78,6 @@
     "@home-gallery/cli": "file:packages/cli",
     "@home-gallery/common": "file:packages/common",
     "@home-gallery/database": "file:packages/database",
-    "@home-gallery/e2e": "file:e2e",
     "@home-gallery/events": "file:packages/events",
     "@home-gallery/export": "file:packages/export",
     "@home-gallery/extractor": "file:packages/extractor",

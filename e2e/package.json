@@ -7,7 +7,6 @@
     "test": "tests"
   },
   "scripts": {
-    "postinstall": "shx test -d node_modules || npm install",
     "test:e2e": "gauge run specs"
   },
   "author": "Sebastian Felis <sebastian@silef.de>",

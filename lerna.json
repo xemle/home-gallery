@@ -1,6 +1,5 @@
 {
   "packages": [
-    "e2e",
     "packages/*"
   ],
   "version": "1.0.0"
