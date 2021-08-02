@@ -1,0 +1,28 @@
+{
+  "name": "@home-gallery/logger",
+  "version": "1.0.0",
+  "description": "Logger for HomeGallery",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "cpx \"src/**\" dist",
+    "watch": "onchange \"src/**\" -- npm run build"
+  },
+  "keywords": [
+    "HomeGallery",
+    "logger"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xemle/home-gallery.git",
+    "directory": "packages/logger"
+  },
+  "dependencies": {
+    "chalk": "^4.1.1",
+    "pino": "^6.11.3",
+    "pino-multi-stream": "^5.3.0",
+    "pino-pretty": "^4.7.1"
+  }
+}
