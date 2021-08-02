@@ -45,7 +45,8 @@ const runCliAsync = (args, options, cb) => {
   } else if (!options) {
     options = {}
   }
-  const command = [galleryBin, ...galleryBinArgs, ...args].map(v => `${v}`.match(/\s/) ? `"${v}"` : v).join(' ')
+  const logOptions = ['--log-file', path.join(getBaseDir(), 'e2e.log'), '--log-file-level', 'debug']
+  const command = [galleryBin, ...galleryBinArgs, ...logOptions, ...args].map(v => `${v}`.match(/\s/) ? `"${v}"` : v).join(' ')
   const spawnOptions = {
     silent: false,
     env: Object.assign({}, process.env, options.env),
@@ -57,7 +58,7 @@ const runCliAsync = (args, options, cb) => {
 
   const stdout = []
   const stderr = []
-  const child = spawn(galleryBin, [...galleryBinArgs, ...args], spawnOptions)
+  const child = spawn(galleryBin, [...galleryBinArgs, ...logOptions, ...args], spawnOptions)
   child.stdout.on('data', chunk => stdout.push(chunk))
   child.stderr.on('data', chunk => stderr.push(chunk))
 
