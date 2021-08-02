@@ -1,10 +1,12 @@
 const fs = require('fs/promises')
 
+const log = require('@home-gallery/logger')('cli.config.validate')
+
 const assertError = (message, ...args) => { throw new Error(message, ...args) };
 
 const validateSources = async sources => {
   if (!sources || !sources.length) {
-    console.log(`Warn: Sources list is empty`)
+    log.warn(`Sources list is empty`)
     return
   }
 

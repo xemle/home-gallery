@@ -20,6 +20,7 @@
     "watch": "onchange \"src/**\" -- npm run build"
   },
   "dependencies": {
+    "@home-gallery/logger": "file:../logger",
     "enquirer": "^2.3.6",
     "yaml": "^1.10.2"
   }

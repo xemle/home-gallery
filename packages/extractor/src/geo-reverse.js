@@ -1,6 +1,6 @@
 const request = require('request');
-const debug = require('debug')('extract:geo-lookup');
 
+const log = require('@home-gallery/logger')('extractor.geoReverse');
 const { throttleAsync } = require('@home-gallery/stream');
 
 const getAcceptLanguageValue = (languages) => {
@@ -43,7 +43,7 @@ function geoReverse(storage, languages) {
     }
     const geoPosition = entry.meta['exif'].GPSPosition;
     if (!geoPosition.match(/^[-0-9+.eE]+ [-0-9+.eE]+$/)) {
-      debug(`Invalid geo position of ${entry}: ${entry.meta['exif'].GPSPosition}. Expecting space separated lat lon values`);
+      log.warn(`Invalid geo position of ${entry}: ${entry.meta['exif'].GPSPosition}. Expecting space separated lat lon values`);
       return cb();
     }
     const latLon = entry.meta['exif'].GPSPosition.split(' ');
@@ -51,7 +51,7 @@ function geoReverse(storage, languages) {
     const lon = (+latLon[1]).toFixed(7);
     const geo = `${lat}/${lon}`;
     if (lat === 'NaN' || lon === 'NaN' || Math.max(Math.abs(lat), Math.abs(lon)) < 0.001) {
-      debug(`Invalid geo position values of ${entry}: ${entry.meta['exif'].GPSPosition}`);
+      log.warn(`Invalid geo position values of ${entry}: ${entry.meta['exif'].GPSPosition}`);
       return cb();
     }
 
@@ -67,20 +67,20 @@ function geoReverse(storage, languages) {
     const t0 = Date.now();
     request(options, (err, res, body) => {
       if (err) {
-        debug(`Could not query geo reverse of ${entry} for ${geo} by URL ${url}: ${err}`);
+        log.error(`Could not query geo reverse of ${entry} for ${geo} by URL ${url}: ${err}`);
         return cb();
       } else if (res.statusCode < 100 || res.statusCode >= 300) {
         if (res.statusCode === 429) {
-          debug(`Bandwidth limit exceeded. Stop querying geo data`);
+          log.warn(`Bandwidth limit exceeded. Stop querying geo data`);
           isLimitExceeded = true;
         } else {
-          debug(`Could not query geo reverse of ${entry} for ${geo} by URL ${url}: response code is ${res.statusCode} with body ${res.body.replace(/\n/g, '\\n')})`);
+          log.warn(`Could not query geo reverse of ${entry} for ${geo} by URL ${url}: response code is ${res.statusCode} with body ${res.body.replace(/\n/g, '\\n')})`);
         }
         return cb();
       }
       storage.writeEntryFile(entry, geoReverseSuffix, body, (err) => {
         if (err) {
-          debug(`Could write geo reverse of ${entry} for ${geo}: ${err}`);
+          log.warn(`Could write geo reverse of ${entry} for ${geo}: ${err}`);
         } else {
           let info = '';
           try {
@@ -88,10 +88,10 @@ function geoReverse(storage, languages) {
             const address = data.address || {};
             const countryCode = address.country_code || '??';
             info = `${data.osm_type} at ${[address.city, address.country].filter(v => !!v).join(', ')} (${countryCode.toUpperCase()})`;
+            log.info(t0, `Successful geo reverse lookup for ${entry} for ${geo}: ${info}`);
           } catch (e) {
-            debug(`Could not parse json data ${body}: ${e}`);
+            log.warn(`Could not parse json data ${body}: ${e}`);
           }           
-          debug(`Successful geo reverse lookup for ${entry} for ${geo} in ${Date.now() - t0}ms: ${info}`);
         }
         cb();
       });

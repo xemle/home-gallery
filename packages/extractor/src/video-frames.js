@@ -1,7 +1,8 @@
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const ffprobePath = require('@ffprobe-installer/ffprobe').path;
 const ffmpeg = require('fluent-ffmpeg');
-const debug = require('debug')('extract:video:frame');
+
+const log = require('@home-gallery/logger')('extractor.video.frames');
 
 const { getStoragePaths } = require('@home-gallery/storage');
 const { toPipe, conditionalTask } = require('./task');
@@ -23,7 +24,7 @@ function extractVideoFames(src, dir, filenamePattern, frameCount, cb) {
       files = filenames;
     })
     .on('end', () => {
-      debug(`Extracted ${files.length} video frames from ${src} in ${Date.now() - t0}ms`);
+      log.info(t0, `Extracted ${files.length} video frames from ${src}`);
       cb(null, files);
     })
     .screenshot({
@@ -42,7 +43,7 @@ function videoFrames(storage, frameCount) {
     const filenamePattern = storage.getEntryBasename(entry, framePatternSuffix);
     extractVideoFames(videoPreview, entryDir, filenamePattern, frameCount, (err, filenames) => {
       if (err) {
-        debug(`Could not extract video frames from ${entry}: ${err}`);
+        log.error(`Could not extract video frames from ${entry}: ${err}`);
       } else {
         filenames.forEach(filename => {
           storage.addEntryBasename(entry, filename);

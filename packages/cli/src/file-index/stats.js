@@ -1,4 +1,4 @@
-const debug = require('debug')('cli:index:stats');
+const log = require('@home-gallery/logger')('cli.index.stats')
 
 const command = {
   command: 'stats',
@@ -19,7 +19,7 @@ const command = {
     const indexFilename = argv.index;
     statIndex(indexFilename, (err, stats) => {
       if (err) {
-        debug(`Could not read file index ${indexFilename}: ${err}`);
+        log.error(`Could not read file index ${indexFilename}: ${err}`);
         return cb(err);
       }
       console.log(prettyPrint(stats));

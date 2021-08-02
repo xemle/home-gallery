@@ -1,6 +1,8 @@
 const fs = require('fs/promises')
 const path = require('path')
 
+const log = require('@home-gallery/logger')('cli.config.init')
+
 const addSources = async (data, sources) => {
   if (!sources || !sources.length) {
     return data
@@ -8,12 +10,12 @@ const addSources = async (data, sources) => {
   const lines = data.split('\n')
   const sourcesIndex = lines.indexOf('sources:')
   if (sourcesIndex < 0) {
-    console.log(`Could not find sources marker to add ${sources.length} sources`)
+    log.error(`Could not find sources marker to add ${sources.length} sources`)
     return data
   }
 
   lines.splice(sourcesIndex + 1, 1, ...sources.map(source => `  - dir: '${source}'`))
-  console.log(`Set sources directories: ${sources.map(s => `'${s}'`).join(', ')}`)
+  log.info(`Set sources directories: ${sources.map(s => `'${s}'`).join(', ')}`)
   return lines.join('\n')
 }
 
@@ -28,7 +30,7 @@ const initConfig = async (options, origErr) => {
   const exists = await fs.access(fallback).then(() => true).catch(() => false)
   if (!exists) {
     const msg = `Could not read initial configuration file '${fallback}' for initialization`
-    console.log(msg)
+    log.error(msg)
     throw origErr ? origErr : new Error(msg)
   }
 
@@ -37,11 +39,11 @@ const initConfig = async (options, origErr) => {
     .then(data => addSources(data, options.sources))
     .then(data => fs.writeFile(target, data, 'utf8').then(() => data))
     .then(data => {
-      console.log(`Initialized configuration '${target}' from ${fallback}`)
+      log.info(`Initialized configuration '${target}' from ${fallback}`)
       return data
     })
     .catch(err => {
-      console.log(`Failed to initialize configuration '${target}' from ${fallback}: ${err}`)
+      log.error(`Failed to initialize configuration '${target}' from ${fallback}: ${err}`)
       throw err;
     })
 }

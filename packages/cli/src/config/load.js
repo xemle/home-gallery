@@ -2,6 +2,8 @@ const fs = require('fs/promises')
 const path = require('path')
 const YAML = require('yaml')
 
+const log = require('@home-gallery/logger')('cli.config.load')
+
 const { expandConfigDefaults } = require('./expand')
 const { resolveConfig } = require('./resolve')
 const { validateConfig  } = require('./validate')
@@ -25,11 +27,12 @@ const loadConfig = async options => {
   resolveConfig(config, env)
   await validateConfig(config)
     .catch(e => {
+      console.error(`Check your expanded configuration file: ${e}`)
       console.log(`Check your expanded configuration file:`)
       console.log(YAML.stringify(config))
       throw e
     })
-  console.log(`Loaded gallery configuration from ${options.configFile}`)
+  log.info(`Loaded gallery configuration from ${options.configFile}`)
   options.config = config;
   return options;
 }

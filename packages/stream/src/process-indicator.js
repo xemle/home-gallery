@@ -1,5 +1,5 @@
 const through2 = require('through2');
-const debug = require('debug')('stream:pipe');
+const log = require('@home-gallery/logger')('stream.pipe');
 
 function processIndicator({name, intervalMs, totalFn, onTick}) {
   name = name || '';
@@ -11,7 +11,7 @@ function processIndicator({name, intervalMs, totalFn, onTick}) {
 
   const defaultTickFn = ({name, count, diff}) => {
     const total = totalFn ? totalFn() || 0 : 0;
-    debug(`Processed ${name ? name + ' ' : ''}${count}${total ? ` of ${total} (${(100 * count / total).toFixed(1)}%)` : ''} (+${diff})`);
+    log.info(`Processed ${name ? name + ' ' : ''}${count}${total ? ` of ${total} (${(100 * count / total).toFixed(1)}%)` : ''} (+${diff})`);
   }
 
   onTick = onTick || defaultTickFn

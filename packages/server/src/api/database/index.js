@@ -1,4 +1,4 @@
-const debug = require('debug')('server:api:database');
+const log = require('@home-gallery/logger')('server.api.database');
 
 const { waitReadWatch } = require('./read-database');
 const { cache } = require('./cache-middleware');
@@ -38,7 +38,7 @@ function databaseApi(eventbus) {
     init: (databaseFilename) => {
       waitReadWatch(databaseFilename, (err, newDatabase) => {
         if (err) {
-          debug(`Could not read database file ${databaseFilename}: ${err}`);
+          log.error(`Could not read database file ${databaseFilename}: ${err}`);
         } else {
           newDatabase.data = uniqEntries(newDatabase.data)
           database = newDatabase;

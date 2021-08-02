@@ -1,5 +1,6 @@
 const path = require('path');
-const debug = require('debug')('stat');
+
+const log = require('@home-gallery/logger')('index.stat');
 
 const readIndex = require('./read');
 const { humanize, fileTypes } = require('@home-gallery/common');
@@ -71,11 +72,11 @@ function statIndex(indexFilename, cb) {
   const t0 = Date.now();
   readIndex(indexFilename, (err, index) => {
     if (err) {
-      debug(`Failed to read index file ${indexFilename}: ${err}`);
+      log.error(`Failed to read index file ${indexFilename}: ${err}`);
       return cb(err);
     } 
     index.data.forEach(countEntry)
-    debug(`Read stats of ${indexFilename} in ${Date.now() - t0}ms`);
+    log.info(t0, `Read stats of ${indexFilename}`);
     stats.extensions.sort();
     stats.unknownExtensions.sort();
     cb(null, stats);

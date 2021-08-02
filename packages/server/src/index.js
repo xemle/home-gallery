@@ -3,9 +3,9 @@ const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const morgan = require('morgan');
-
-const debug = require('debug')('server');
+const pinoHttp = require('pino-http')
+const logger = require('@home-gallery/logger')
+const log = logger('server')
 
 const databaseApi = require('./api/database');
 const eventsApi = require('./api/events');
@@ -35,15 +35,35 @@ function createServer(key, cert, app) {
   }
 }
 
+const createLogger = () => {
+  const customMessage = log => `${log.statusCode} ${log.req.method} ${log.req.url} ${Date.now() - log[pinoHttp.startTime]}ms`
+
+  return pinoHttp({
+    logger: logger('server.request'),
+    customLogLevel: (res, err) => {
+      if (res.statusCode >= 400 && res.statusCode < 500) {
+        return 'warn'
+      } else if (res.statusCode >= 500 || err) {
+        return 'error'
+      } else if (res.req.originalUrl.startsWith('/files')) {
+        return 'debug'
+      }
+      return 'info'
+    },
+    customSuccessMessage: customMessage,
+    customErrorMessage: (err, o) => customMessage(o)
+  })
+}
+
 function startServer({host, port, storageDir, databaseFilename, eventsFilename, webappDir, key, cert}, cb) {
   const app = express();
   app.disable('x-powered-by');
 
+  app.use(createLogger())
   app.use(cors());
   app.use(compression({ filter: shouldCompress }))
   app.use('/files', express.static(storageDir, {index: false, maxAge: '2d', immutable: true}));
 
-  app.use(morgan('tiny'));
   app.use(bodyParser.json({limit: '1mb'}))
 
   const { read, push, stream, eventbus } = eventsApi(eventsFilename);
@@ -59,12 +79,12 @@ function startServer({host, port, storageDir, databaseFilename, eventsFilename, 
   server.listen(port, host)
     .on('error', (e) => {
       if (e.code === 'EADDRINUSE') {
-        console.log(`Address is already in use!`);
+        log.error(`Address is already in use!`);
       }
       cb(e);
     })
     .on('listening', () => {
-      console.log(`Open Home Gallery on ${key && cert ? 'https' : 'http'}://localhost:${port}`);
+      log.info(`Open Home Gallery on ${key && cert ? 'https' : 'http'}://localhost:${port}`);
       dbInit(databaseFilename);
       cb(null, app);
     })

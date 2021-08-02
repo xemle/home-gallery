@@ -1,5 +1,5 @@
 const fs = require('fs');
-const debug = require('debug')('server:api:database:read');
+const log = require('@home-gallery/logger')('server.api.database.read');
 
 const { readDatabase } = require('@home-gallery/database');
 
@@ -9,7 +9,7 @@ function read(filename, cb) {
     if (err) {
       return cb(err);
     }
-    debug(`Read database file ${filename} with ${database.data.length} entries in ${Date.now() - t0}ms`);
+    log.info(t0, `Read database file ${filename} with ${database.data.length} entries`);
     cb(err, database);
   });
 }
@@ -17,7 +17,7 @@ function read(filename, cb) {
 function watch(filename, cb) {
   fs.watch(filename, () => {
     setTimeout(() => {
-      debug(`Database file ${filename} changed. Re-import it`);
+      log.info(`Database file ${filename} changed. Re-import it`);
       read(filename, cb);
     }, 250);
   })

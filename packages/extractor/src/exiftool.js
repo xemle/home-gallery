@@ -1,5 +1,6 @@
 const ExifTool = require('exiftool-vendored').ExifTool;
-const debug = require('debug')('extract:exif');
+
+const log = require('@home-gallery/logger')('extractor.image.exif');
 
 const { toPipe, conditionalTask } = require('./task');
 
@@ -20,12 +21,12 @@ function exif(storage) {
           if (err) {
             return cb(err);
           }
-          debug(`Extracted exif data from ${entry} in ${Date.now() - t0}ms`);
+          log.info(t0, `Extracted exif data from ${entry}`);
           cb();
         })
       })
       .catch(err => {
-        debug(`Could not extract exif of ${entry}: ${err}`);
+        log.warn(`Could not extract exif of ${entry}: ${err}`);
         cb();
       })
   }
@@ -34,7 +35,7 @@ function exif(storage) {
     exiftool.end()
       .then(cb)
       .catch(err => {
-        debug(`Could not close exiftool: ${err}`);
+        log.warn(`Could not close exiftool: ${err}`);
         cb();
       })
   })

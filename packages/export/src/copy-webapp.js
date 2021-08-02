@@ -1,6 +1,7 @@
 const path = require('path');
 const glob = require('glob');
-const debug = require('debug')('export:copy-webapp');
+
+const log = require('@home-gallery/logger')('export.copy.webapp');
 
 const copyFile = require('./copy-file');
 
@@ -32,15 +33,15 @@ const copyWebapp = (database, outputDirectory, basePath, cb) => {
     dot: true
   }, (err, files) => {
     if (err) {
-      debug(`Could not copy webapp sources to ${dstDir}: ${err}`);
+      log.error(`Could not copy webapp sources to ${dstDir}: ${err}`);
       return cb(err);
     }
     copyFiles(files, srcDir, dstDir, (err) => {
       if (err) {
-        debug(`Could not copy webapp sources to ${dstDir}: ${err}`)
+        log.error(`Could not copy webapp sources to ${dstDir}: ${err}`)
         return cb(err);
       }
-      debug(`Copied webapp sources to ${dstDir} in ${Date.now() - t0}ms`);
+      log.info(t0, `Copied webapp sources to ${dstDir}`);
       cb(null, database, outputDirectory, basePath);
     })
   })

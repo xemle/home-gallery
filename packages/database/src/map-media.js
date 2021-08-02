@@ -1,10 +1,11 @@
 const through2 = require('through2');
-const debug = require('debug')('database:map:media');
+
+const log = require('@home-gallery/logger')('database.mapMedia');
 const colorConvert = require('color-convert');
 
 function getEntryMetaByKey(entry, key) {
   if (!entry.meta) {
-    debug(`Meta data is missing for entry ${entry}`);
+    log.warn(`Meta data is missing for entry ${entry}`);
     return false;
   } else if (entry.meta[key]) {
     return entry.meta[key];
@@ -12,7 +13,7 @@ function getEntryMetaByKey(entry, key) {
     for (let i = 0; i < entry.sidecars.length; i++) {
       const sidecar = entry.sidecars[i];
       if (!sidecar.meta) {
-        debug(`Missing meta data of sidecar ${sidecar} of entry ${entry}`);
+        log.warn(`Missing meta data of sidecar ${sidecar} of entry ${entry}`);
       } else if (sidecar.meta && sidecar.meta[key]) {
         return sidecar.meta[key];
       }
@@ -37,7 +38,7 @@ function useExif(entry) {
 
     const match = value.match(/(\d{4}).(\d{2}).(\d{2}).(\d{2}).(\d{2}).(\d{2})(\.\d+)?(([-+](\d{2}:\d{2}|\d{4}))|Z)?\s*$/);
     if (!match) {
-      debug(`Unknown time format ${value} of ${JSON.stringify(date)} of entry ${entry}`);
+      log.warn(`Unknown time format ${value} of ${JSON.stringify(date)} of entry ${entry}`);
       return false;
     }
 
@@ -56,7 +57,7 @@ function useExif(entry) {
     try {
       return new Date(iso8601).toISOString();
     } catch(e) {
-      debug(`Could not create valid ISO8601 date '${iso8601}' from '${JSON.stringify(date)}' of entry ${entry}: ${e}`);
+      log.error(`Could not create valid ISO8601 date '${iso8601}' from '${JSON.stringify(date)}' of entry ${entry}: ${e}`);
       return false;
     }
   }
@@ -235,7 +236,7 @@ const mapMedia = through2.obj(function (entry, enc, cb) {
   try {
     exifData = useExif(entry);
   } catch (e) {
-    debug(`Could not extract exif data from entry ${entry}: ${e}`);
+    log.error(`Could not extract exif data from entry ${entry}: ${e}`);
   }
 
   let geoInfo = {};

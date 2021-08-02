@@ -1,6 +1,6 @@
 const { pipeline } = require('stream');
-const debug = require('debug')('database:build')
 
+const log = require('@home-gallery/logger')('database.build');
 const { readStreams } = require('@home-gallery/index');
 
 const { memoryIndicator, processIndicator, filter, flatten, sort, toList } = require('@home-gallery/stream');
@@ -51,7 +51,7 @@ function build(indexFilenames, storageDir, databaseFilename, options, cb) {
     }
     createEntries(entryStream, storageDir, options, (err, entries) => {
       if (err) {
-        debug(`Could not build database: ${err}`);
+        log.error(`Could not build database: ${err}`);
         return cb(err);
       }
       if (journal) {
@@ -59,14 +59,14 @@ function build(indexFilenames, storageDir, databaseFilename, options, cb) {
       } else {
         const t0 = Date.now()
         const uniqueEntries = uniq(entries, entry => entry.id, mergeEntry);
-        debug(`Merged ${entries.length} entries to ${uniqueEntries.length} unique entries in ${Date.now() - t0}ms`);
+        log.info(t0, `Merged ${entries.length} entries to ${uniqueEntries.length} unique entries`);
 
         const t1 = Date.now()
         writeDatabase(databaseFilename, uniqueEntries, (err, database) => {
           if (err) {
             return cb(err)
           }
-          debug(`Wrote database with ${database.data.length} entries to ${databaseFilename} in ${Date.now() - t1}ms`)
+          log.info(t1, `Wrote database with ${database.data.length} entries to ${databaseFilename}`)
           cb(null, database)
         });
       }

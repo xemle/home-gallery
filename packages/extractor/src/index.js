@@ -1,6 +1,6 @@
 const { pipeline } = require('stream');
-const debug = require('debug')('extract:main');
 
+const log = require('@home-gallery/logger')('extractor');
 const { readStreams } = require('@home-gallery/index');
 const { concurrent, each, filter, limit, purge, memoryIndicator, processIndicator, skip } = require('@home-gallery/stream');
 const mapToStorageEntry = require('./map-storage-entry');
@@ -50,7 +50,7 @@ function extractData(config, cb) {
       each(() => stats.queued++),
       queueEntry,
       each(() => stats.processing++),
-      each(entry => config.printEntry && debug(`Processing entry #${config.skip + stats.processed} ${entry}`)),
+      each(entry => config.printEntry && log.info(`Processing entry #${config.skip + stats.processed} ${entry}`)),
       // read existing files and meta data (json files)
       readAllEntryFiles(storage),
 
@@ -92,7 +92,7 @@ function extractData(config, cb) {
 
       releaseEntry,
       each(() => stats.processed++),
-      processIndicator({onTick: ({diff}) => debug(`Processed ${stats.processed} entries (#${config.skip + stats.processed}, +${diff}, processing ${stats.processing - stats.processed} and queued ${stats.queued - stats.processing} entries)`)}),
+      processIndicator({onTick: ({diff}) => log.info(`Processed ${stats.processed} entries (#${config.skip + stats.processed}, +${diff}, processing ${stats.processing - stats.processed} and queued ${stats.queued - stats.processing} entries)`)}),
 
       groupByEntryFilesCacheKey(),
       updateEntryFilesCache(storage),

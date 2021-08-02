@@ -1,4 +1,4 @@
-const debug = require('debug')('cli:server');
+const log = require('@home-gallery/logger')('cli.server');
 
 const command = {
   command: 'server',
@@ -59,9 +59,9 @@ const command = {
     }
     startServer(config, (err) => {
       if (err) {
-        debug(`Could not start server: ${err}`);
+        log.error(`Could not start server: ${err}`);
       } else {
-        debug(`Server started. Open it at http://${argv.host === '0.0.0.0' ? 'localhost' : argv.host}:${argv.port}`);
+        log.info(`Server started. Open it at http://${argv.host === '0.0.0.0' ? 'localhost' : argv.host}:${argv.port}`);
       }
     })
   }

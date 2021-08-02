@@ -1,4 +1,4 @@
-const debug = require('debug')('cli:index:update');
+const log = require('@home-gallery/logger')('cli.index.update')
 
 const command = {
   command: ['$0', 'create', 'update'],
@@ -70,7 +70,7 @@ const command = {
     }
     update(argv.directory, argv.index, options, (err, _, limitExceeded) => {
       if (err) {
-        console.log(`Failed to create index: ${err}`)
+        log.error(`Failed to create index: ${err}`)
       }
       process.exit(err ? 2 : (limitExceeded ? 1 : 0))
     })

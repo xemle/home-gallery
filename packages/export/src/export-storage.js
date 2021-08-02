@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const debug = require('debug')('export:storage');
+
+const log = require('@home-gallery/logger')('export.storage');
 
 const copyFile = require('./copy-file');
 
@@ -14,7 +15,7 @@ const exportEntry = (entry, storageDir, directory, cb) => {
     const filename = previews[i++];
     copyFile(filename, storageDir, directory, (err) => {
       if (err) {
-        debug(`Could not export preview file ${filename} of entry ${entryToString(entry)}. Continue`);
+        log.error(`Could not export preview file ${filename} of entry ${entryToString(entry)}. Continue`);
       }
       next();
     })
@@ -63,7 +64,7 @@ const exportStorage = (database, storageDir, outputDirectory, basePath, cb) => {
   let i = 0;
   const next = () => {
     if (i === entries.length) {
-      debug(`Exported ${entries.length} entries in ${Date.now() - t0}ms`);
+      log.info(t0, `Exported ${entries.length} entries`);
       return cb(null, database, outputDirectory, basePath);
     }
 

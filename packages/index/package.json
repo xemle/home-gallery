@@ -23,8 +23,7 @@
   },
   "dependencies": {
     "@home-gallery/common": "file:../common",
-    "debug": "^4.1.1",
-    "split2": "^3.2.2",
-    "yargs": "^16.2.0"
+    "@home-gallery/logger": "file:../logger",
+    "split2": "^3.2.2"
   }
 }

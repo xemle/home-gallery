@@ -1,6 +1,7 @@
 const { access, unlink } = require('fs/promises')
 const path = require('path')
-const debug = require('debug')('index:journal')
+
+const log = require('@home-gallery/logger')('index.journal');
 
 const { mkdir, readJsonGzip, writeJsonGzip, promisify } = require('@home-gallery/common')
 
@@ -49,7 +50,7 @@ const createJournal = async (indexFilename, index, changes, checksumChanges, jou
     return data
   }
   await writeJournal(journalFilename, data)
-  debug(`Journal ${journalFilename} created`)
+  log.info(`Journal ${journalFilename} created`)
   return data
 }
 
@@ -67,10 +68,10 @@ const removeJournal = async (indexFilename, journal) => {
 
   const exists = await access(journalFilename).then(() => true).catch(() => false)
   if (!exists) {
-    debug(`No journal ${journal} found for file index ${indexFilename}. Skip removal`)
+    log.warn(`No journal ${journal} found for file index ${indexFilename}. Skip removal`)
     return
   }
-  debug(`Remove journal ${journal} from file index ${indexFilename}`)
+  log.info(`Remove journal ${journal} from file index ${indexFilename}`)
   return unlink(journalFilename)
 }
 

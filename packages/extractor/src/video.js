@@ -2,14 +2,15 @@ const fs = require('fs');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const ffprobePath = require('@ffprobe-installer/ffprobe').path;
 const ffmpeg = require('fluent-ffmpeg');
-const debug = require('debug')('extract:video');
+
+const log = require('@home-gallery/logger')('extractor.video');
 
 const { toPipe, conditionalTask } = require('./task');
 
 const videoSuffix = 'video-preview-720.mp4';
 
 function convertVideo(storage, entry, cb) {
-  debug(`Start video conversion of ${entry}`);
+  log.info(`Start video conversion of ${entry}`);
 
   const t0 = Date.now();
   const input = entry.src;
@@ -28,7 +29,7 @@ function convertVideo(storage, entry, cb) {
           return cb(`Failed to rename file to ${filename} for ${entry}`);
         }
         storage.addEntryFilename(entry, videoSuffix);
-        debug(`Video conversion of ${entry} done in ${Date.now() - t0}ms`);
+        log.info(t0, `Video conversion of ${entry} done`);
         cb();
       })
     })
@@ -52,7 +53,7 @@ function convertVideo(storage, entry, cb) {
     .on('progress', progress => {
       const now = Date.now();
       if (now > last + intervalMs) {
-        debug(`Video conversion of ${entry} at ${progress.timemark} is ${progress.percent.toFixed()}% done`);
+        log.debug(`Video conversion of ${entry} at ${progress.timemark} is ${progress.percent.toFixed()}% done`);
         last = now;
       }
     })
@@ -65,7 +66,7 @@ function video(storage) {
   const task = (entry, cb) => {
     convertVideo(storage, entry, (err) => {
       if (err) {
-        debug(`Video preview conversion of ${entry} failed: ${err}`);
+        log.error(`Video preview conversion of ${entry} failed: ${err}`);
       }
       cb();
     })

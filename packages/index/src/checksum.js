@@ -1,9 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const debug = require('debug')('checksum');
 
+const log = require('@home-gallery/logger')('index.checksum');
 const { humanize } = require('@home-gallery/common');
+
+const percent = (current, total, precision) => (100 * current / total).toFixed(precision || 1) + '%'
+
+const bps = (bytes, startTime) => humanize(bytes / Math.max(0.001, (Date.now() - startTime) / 1000)) + '/s'
 
 const createSha1 = (filename, cb) => {
   var input = fs.createReadStream(filename);
@@ -35,11 +39,11 @@ const checksum = (index, sha1sumDate, cb) => {
   const totalBytes = index.data.reduce((all, entry) => { all += entry.size; return all}, 0);
   const bytes = missingChecksumEntries.reduce((all, entry) => { all += entry.size; return all}, 0);
   let bytesCalculated = 0;
-  debug(`Calculating ids for ${missingChecksumEntries.length} entries with ${humanize(bytes)} of total size ${humanize(totalBytes)} (${(100 * bytes / totalBytes).toFixed(1)}%)`);
+  log.info(`Calculating ids for ${missingChecksumEntries.length} entries with ${humanize(bytes)} of total size ${humanize(totalBytes)} (${percent(bytes, totalBytes)})`);
 
   const gracefulShutdown = () => {
     if (!interrupted) {
-      console.log(`Graceful shutdown. Ids of ${humanize(bytesCalculated)} (${(100 * bytesCalculated / bytes).toFixed(1)}%) were calculated, ${(100 * (totalBytes - bytes + bytesCalculated) / totalBytes).toFixed(0)}% of ${humanize(totalBytes)} are done. Please be patient to avoid data loss!`);
+      console.warn(`Graceful shutdown. Ids of ${humanize(bytesCalculated)} (${percent(bytesCalculated, bytes)}) were calculated, ${percent(totalBytes - bytes + bytesCalculated, totalBytes)} of ${humanize(totalBytes)} are done. Please be patient to avoid data loss!`);
       interrupted = true;
       cb(null, index, true);
     } else {
@@ -55,6 +59,7 @@ const checksum = (index, sha1sumDate, cb) => {
     const entry = entries.shift();
     const filename = path.join(base, entry.filename);
 
+    const t0 = Date.now()
     createSha1(filename, (err, sha1sum) => {
       if (interrupted) {
         return;
@@ -66,7 +71,7 @@ const checksum = (index, sha1sumDate, cb) => {
       updatedEntries.push(entry)
 
       bytesCalculated += entry.size;
-      debug(`Calculated id ${sha1sum.substr(0, 7)}... for ${entry.filename} with ${humanize(entry.size)}`);
+      log.debug({duration: Date.now() - t0, bytes: entry.size}, `Calculated id ${sha1sum.substr(0, 7)}... for ${entry.filename} with ${humanize(entry.size)} (${bps(entry.size, t0)})`);
       calculateAll(base, entries, updatedEntries, done);
     })
   }
@@ -76,7 +81,7 @@ const checksum = (index, sha1sumDate, cb) => {
     if (err) {
       return cb(err);
     }
-    debug(`All ids of ${humanize(totalBytes)} are calculated. Calculated ids of ${humanize(bytesCalculated)} (${(100 * bytesCalculated / totalBytes).toFixed(1)}%) in ${Date.now() - t0}ms`);
+    log.info(t0, `All ids of ${humanize(totalBytes)} are calculated. Calculated ids of ${humanize(bytesCalculated)} (${(100 * bytesCalculated / totalBytes).toFixed(1)}%)`);
     cb(null, index, updatedEntries);
   });
 }

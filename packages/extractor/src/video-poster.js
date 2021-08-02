@@ -1,4 +1,4 @@
-const debug = require('debug')('extract:video:poster');
+const log = require('@home-gallery/logger')('extractor.video.poster');
 
 const { resizeImage } = require('./image-preview');
 const { extractVideoFames } = require('./video-frames');
@@ -22,7 +22,7 @@ function videoPoster(storage, previewImageSizes) {
       const posterSrc = storage.getEntryFilename(entry, videoPosterSuffix);
       resizeImage(storage, entry, posterSrc, previewImageSizes, (err, calculatedSizes) => {
         if (!err && calculatedSizes.length) {
-          debug(`Created ${calculatedSizes.length} video preview images from ${entry} with sizes of ${calculatedSizes.join(',')} in ${Date.now() - t0}ms`);
+          log.info(t0, `Created ${calculatedSizes.length} video preview images from ${entry} with sizes of ${calculatedSizes.join(',')}`);
         }
         cb(err);
       });

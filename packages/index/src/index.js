@@ -1,5 +1,6 @@
 const path = require('path');
-const debug = require('debug')('index:update');
+
+const log = require('@home-gallery/logger')('index');
 
 const { fileFilter, promisify, callbackify } = require('@home-gallery/common');
 
@@ -67,14 +68,14 @@ const asyncUpdateChecksum = async (filename, index, withChecksum, isDryRun) => {
 
 const asyncUpdate = async (directory, filename, options) => {
   const t0 = Date.now();
-  debug(`Updating file index for directory ${directory}`);
+  log.info(`Updating file index for directory ${directory}`);
 
   const filter = await asyncFileFilter(options.exclude, options.excludeFromFile)
   const [index, limitExceeded, changes] = await asyncCreateOrUpdate(directory, filename, {...options, filter})
   const [updateIndex, checksumChanges] = await asyncUpdateChecksum(filename, index, options.checksum, options.dryRun)
   await createJournal(filename, updateIndex, changes, checksumChanges, options.journal, options.dryRun)
 
-  debug(`Updated file index for directory ${directory} in ${Date.now() - t0}ms`);
+  log.info(t0, `Updated file index for directory ${directory}`);
   return [updateIndex, limitExceeded]
 }
 

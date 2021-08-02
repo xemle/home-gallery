@@ -1,10 +1,11 @@
 const fs = require('fs');
 const path = require('path');
-const debug = require('debug')('walker');
+
+const log = require('@home-gallery/logger')('index.walker');
 
 function handleReaddirError(dir, err, done) {
   if (err.code === 'EACCES') {
-    debug(`Read of directory ${dir} failed: Permission denied`);
+    log.warn(`Read of directory ${dir} failed: Permission denied`);
     return done();
   }
   return done(err);
@@ -26,7 +27,7 @@ function readFileStats(dir, files, cb) {
         return;
       } else if (err) {
         hasError = true;
-        debug(`Could not read file stat of ${filename}: ${err}`);
+        log.warn(`Could not read file stat of ${filename}: ${err}`);
         return cb(err);
       }
 

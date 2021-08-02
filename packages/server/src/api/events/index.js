@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
-const debug = require('debug')('server:events');
+const log = require('@home-gallery/logger')('server.api.events');
 
 const { readEvents, appendEvent } = require('@home-gallery/events/dist/node');
 
@@ -57,20 +57,20 @@ const events = (eventsFilename) => {
     };
 
     clients.push(newClient);
-    debug(`Add new client ${newClient}`);
+    log.info(`Add new client ${newClient}`);
 
     req.on('end', () => {
-      debug(`Client connection ended. Remove client ${newClient}`);
+      log.info(`Client connection ended. Remove client ${newClient}`);
       removeClient(newClient);
     });
 
     req.on('close', () => {
-      debug(`Client connection closed. Remove client ${newClient}`);
+      log.info(`Client connection closed. Remove client ${newClient}`);
       removeClient(newClient);
     });
 
     res.on('err', () => {
-      debug(`Connection error. Remove client ${newClient}`);
+      log.warn(`Connection error. Remove client ${newClient}`);
       removeClient(newClient);
     });
   };
@@ -78,7 +78,7 @@ const events = (eventsFilename) => {
   const push = (req, res, next) => {
     const event = req.body;
     if (!isValidEvent(event)) {
-      debug(`Received invalid event: ${JSON.stringify(event)}`);
+      log.warn(`Received invalid event: ${JSON.stringify(event)}`);
       res.status(400).end();
       return;
     }
@@ -90,10 +90,10 @@ const events = (eventsFilename) => {
     }
     appendEvent(eventsFilename, event, (err) => {
       if (err) {
-        console.log(`Could not save event to ${eventsFilename}. Error: ${err}. Event ${JSON.stringify(event).substr(0, 50)}...`);
+        console.error(`Could not save event to ${eventsFilename}. Error: ${err}. Event ${JSON.stringify(event).substr(0, 50)}...`);
         res.status(500).end();
       } else {
-        debug(`New event ${event.id} created`);
+        log.info(`New event ${event.id} created`);
         if (eventsCache !== false) {
           eventsCache.push(event);
         }
@@ -105,14 +105,14 @@ const events = (eventsFilename) => {
 
   const read = (req, res, next) => {
     if (eventsCache !== false) {
-      debug(`Send ${eventsCache.length} cached events`);
+      log.debug(`Send ${eventsCache.length} cached events`);
       return res.json({ data: eventsCache });
     }
 
     const t0 = Date.now();
     readEvents(eventsFilename, (err, events) => {
       if (err && err.code === 'ENOENT') {
-        debug(`Events file ${eventsFilename} does not exist yet. Create an event to initialize it`);
+        log.info(`Events file ${eventsFilename} does not exist yet. Create an event to initialize it`);
         const err = {
           error: {
             code: 404,
@@ -121,7 +121,7 @@ const events = (eventsFilename) => {
         }
         return res.status(404).json(err).send();
       } else if (err) {
-        debug(`Failed to read events file ${eventsFilename}: ${err}`);
+        log.error(`Failed to read events file ${eventsFilename}: ${err}`);
         const err = {
           error: {
             code: 500,
@@ -131,7 +131,7 @@ const events = (eventsFilename) => {
         return res.status(500).json(err).end();
       }
       eventsCache = events;
-      debug(`Read events file ${eventsFilename} in ${Date.now() - t0}ms and send ${eventsCache.length} events`);
+      log.info(t0, `Read events file ${eventsFilename} and send ${eventsCache.length} events`);
       return res.json({ data: eventsCache });
     });
   }

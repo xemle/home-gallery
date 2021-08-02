@@ -1,4 +1,4 @@
-const debug = require('debug')('cli:extract');
+const log = require('@home-gallery/logger')('cli.extract')
 
 const command = {
   command: 'extract',
@@ -70,7 +70,7 @@ const command = {
     const t0 = Date.now();
     fileFilter(argv.exclude, argv['exclude-from-file'], (err, fileFilterFn) => {
       if (err) {
-        debug(err);
+        log.error(err);
       } else {
         const config = {
           indexFilenames: argv.index,
@@ -87,9 +87,9 @@ const command = {
         }
         extract(config, (err, count) => {
           if (err) {
-            debug(`Could not extract all meta data and preview files: ${err}`);
+            log.error(`Could not extract all meta data and preview files: ${err}`);
           } else {
-            debug(`Extract all meta data and calculated all preview files from ${count} entries in ${Date.now() - t0}ms`);
+            log.info(t0, `Extract all meta data and calculated all preview files from ${count} entries`);
           }
         })
       }

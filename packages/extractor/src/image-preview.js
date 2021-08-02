@@ -1,10 +1,10 @@
-const debug = require('debug')('extract:preview');
+const log = require('@home-gallery/logger')('extractor.image.preview');
 
 let sharp;
 try {
   sharp = require('sharp');
 } catch (e) {
-  debug(`Could not load sharp: ${e}`)
+  log.error(`Could not load sharp: ${e}`)
 }
 
 const { toPipe, conditionalTask } = require('./task');
@@ -63,9 +63,9 @@ function imagePreview(storage, sizes) {
     const t0 = Date.now();
     resizeImage(storage, entry, entry.src, sizes, (err, calculatedSizes) => {
       if (err) {
-        debug(`Could not calculate image preview of ${entry}: ${err}`);
+        log.error(`Could not calculate image preview of ${entry}: ${err}`);
       } else if (calculatedSizes.length) {
-        debug(`Created ${calculatedSizes.length} image previews from ${entry} with sizes of ${calculatedSizes.join(',')} in ${Date.now() - t0}ms`)
+        log.info(t0, `Created ${calculatedSizes.length} image previews from ${entry} with sizes of ${calculatedSizes.join(',')}`)
       }
       cb();
     })

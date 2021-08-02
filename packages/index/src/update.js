@@ -1,11 +1,11 @@
-const debug = require('debug')('index:update');
+const log = require('@home-gallery/logger')('index.update');
 
 const { mergeIndex }  = require('./merge');
 
 const toMap = (values, keyFn) => values.reduce((result, value) => {
   const key = keyFn(value)
   if (!key) {
-    debug(`Could not find key for ${value}`)
+    log.info(`Could not find key for ${value}`)
   } else {
     result[key] = value
   }
@@ -31,7 +31,7 @@ const initialChanges = entries => {
 const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
   const t0 = Date.now();
   if (!fileEntries.length) {
-    debug(`Initiate index with ${fsEntries.length} entries`);
+    log.info(`Initiate index with ${fsEntries.length} entries`);
     return cb(null, fsEntries, initialChanges(fsEntries));
   }
 
@@ -47,7 +47,7 @@ const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
   const { commonEntryMap, changedKeys } = mergeIndex(fileEntryMap, fsEntryMap, commonKeys, matcherFn);
 
   if (hasChanges(onlyFileKeys, onlyFsKeys, changedKeys)) {
-    debug(`No changes found in ${Date.now() - t0}ms`);
+    log.info(t0, `No changes found`);
     return cb(null, fileEntries, false);
   }
 
@@ -55,8 +55,8 @@ const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
   const updatedEntryKeys = commonKeys.concat(onlyFsKeys);
   const updatedEntries = updatedEntryKeys.map(key => commonEntryMap[key] || fsEntryMap[key]);
 
-  debug(`Index merged of ${updatedEntryKeys.length} entries (${onlyFsKeys.length} added, ${changedKeys.length} changed, ${onlyFileKeys.length} deleted) in ${Date.now() - t0}ms.`)
-  debug(`Changes:\n\t${onlyFsKeys.map(f => `A ${f}`).concat(changedKeys.map(f => `C ${f}`)).concat(onlyFileKeys.map(f => `D ${f}`)).join('\n\t')}`)
+  log.info(t0, `Index merged of ${updatedEntryKeys.length} entries (${onlyFsKeys.length} added, ${changedKeys.length} changed, ${onlyFileKeys.length} deleted)`)
+  log.info(`Changes:\n\t${onlyFsKeys.map(f => `A ${f}`).concat(changedKeys.map(f => `C ${f}`)).concat(onlyFileKeys.map(f => `D ${f}`)).join('\n\t')}`)
 
   const changes = {
     adds: onlyFsKeys.map(key => fsEntryMap[key]),

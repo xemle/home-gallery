@@ -12,7 +12,7 @@ const startServer = async config => {
   server.port && args.push('--port', server.port)
   server.key && server.cert && args.push('--key', server.key, '--cert', server.cert)
 
-  await runCli(args, { env: {DEBUG: 'server*' } })
+  await runCli(args)
   return 'exit'
 }
 

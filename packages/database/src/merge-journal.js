@@ -1,8 +1,7 @@
-const debug = require('debug')('database:merge-journal')
-const { mergeEntry, matchFile } = require('./merge-entry')
-
+const log = require('@home-gallery/logger')('database.mergeJournal');
 const { getIndexName, getJournalFilename, readJournal } = require('@home-gallery/index');
 
+const { mergeEntry, matchFile } = require('./merge-entry')
 const readDatabase = require('./read-database')
 const { wrapEntries, writeDatabase } = require('./write-database')
 
@@ -50,7 +49,7 @@ const readJournals = (indexFilenames, journal, cb) => {
     const index = getIndexName(indexFilename)
     readJournal(indexFilename, journal, (err, journalData) => {
       if (!err) {
-        debug(`Read file index journal ${getJournalFilename(indexFilename, journal)}`)
+        log.info(`Read file index journal ${getJournalFilename(indexFilename, journal)}`)
         result.push({index, data: journalData.data})
       }
       next()
@@ -92,24 +91,24 @@ const mergeFromJournal = (indexFilenames, journal, databaseFilename, entries, cb
     const t0 = Date.now()
     readDatabase(databaseFilename, (err, database) => {
       if (err && err.code == 'ENOENT') {
-        debug(`Initialize non existing database file ${databaseFilename}`)
+        log.info(`Initialize non existing database file ${databaseFilename}`)
         database = wrapEntries([])
       } else if (err) {
         return cb(err)
       } else {
-        debug(`Read database from ${databaseFilename} with ${database.data.length} entries in ${Date.now() - t0}ms`)
+        log.info(t0, `Read database from ${databaseFilename} with ${database.data.length} entries`)
       }
 
       const t1 = Date.now()
       const mergedEntries = mergeEntries(database.data, entries, removedFiles)
-      debug(`Merged ${entries.length} new and ${removedFiles.length} removed entries from journals to ${mergedEntries.length} entries (${diffCount(mergedEntries, database.data)}) to the database in ${Date.now() - t1}ms`)
+      log.info(t1, `Merged ${entries.length} new and ${removedFiles.length} removed entries from journals to ${mergedEntries.length} entries (${diffCount(mergedEntries, database.data)}) to the database`)
 
       const t2 = Date.now()
       writeDatabase(databaseFilename, mergedEntries, (err, database) => {
         if (err) {
           return cb(err)
         }
-        debug(`Wrote database with ${database.data.length} entries to ${databaseFilename} in ${Date.now() - t2}ms`)
+        log.info(t2, `Wrote database with ${database.data.length} entries to ${databaseFilename}`)
         cb(err, database)
       });
     })

@@ -21,6 +21,6 @@
   },
   "dependencies": {
     "@home-gallery/common": "file:../common",
-    "debug": "^4.1.1"
+    "@home-gallery/logger": "file:../logger"
   }
 }

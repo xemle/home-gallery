@@ -1,5 +1,4 @@
 const { waterfall } = require('async');
-const debug = require('debug')('export:builder');
 
 const readDatabase = require('./read-database');
 const applyEvents = require('./apply-events');

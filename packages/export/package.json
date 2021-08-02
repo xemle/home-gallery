@@ -25,14 +25,13 @@
     "@home-gallery/common": "file:../common",
     "@home-gallery/database": "file:../database",
     "@home-gallery/events": "file:../events",
+    "@home-gallery/logger": "file:../logger",
     "@home-gallery/query": "file:../query",
     "@home-gallery/storage": "file:../storage",
     "@home-gallery/webapp": "file:../webapp",
     "archiver": "^5.0.0",
     "async": "^3.2.0",
-    "debug": "^4.1.1",
     "glob": "^7.1.6",
-    "through2": "^3.0.1",
-    "yargs": "^16.2.0"
+    "through2": "^3.0.1"
   }
 }

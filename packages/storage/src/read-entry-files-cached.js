@@ -1,5 +1,6 @@
 const path = require('path');
-const debug = require('debug')('extract:meta');
+
+const log = require('@home-gallery/logger')('storage.cache.readEntryFiles');
 
 const readEntryFilesSingle = require('./read-entry-files');
 const { getEntryFilesCacheKey, getEntryFilesCacheFilename } = require('./entry-files-cache-file');
@@ -27,14 +28,14 @@ function readEntryFilesCached(storageDir, dirCacheSize) {
       }
 
       if (err && err.code === 'ENOENT') {
-        debug(`Entry files cache for ${entry} is missing. Read files and meta from storage`);
+        log.warn(`Entry files cache for ${entry} is missing. Read files and meta from storage`);
       } else if (err) {
-        debug(`Could not read entry files cache for ${entry}: ${err}. Read files and meta from storage`);
+        log.warn(`Could not read entry files cache for ${entry}: ${err}. Read files and meta from storage`);
       }
 
       readEntryFilesSingle(entry, storageDir, (err, filesAndMeta) => {
         if (err) {
-          debug(`Could not read files and metadata of ${entry}: ${err}`);
+          log.error(`Could not read files and metadata of ${entry}: ${err}`);
           return cb(err);
         }
         cb(null, filesAndMeta);

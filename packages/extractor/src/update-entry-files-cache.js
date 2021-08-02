@@ -1,5 +1,4 @@
-const path = require('path');
-const debug = require('debug')('extract:writeEntryFilesCache');
+const log = require('@home-gallery/logger')('extractor.cache.updateEntryFiles');
 
 const { toPipe } = require('./task');
 
@@ -8,7 +7,7 @@ const updateEntryFilesCache = (storage) => {
   const task = (entries, cb) => {
     storage.updateEntryFilesCache(entries, (err) => {
       if (err) {
-        debug(`Could not write entry files cache: ${err}`)
+        log.warn(`Could not write entry files cache: ${err}`)
       }
       cb();
     })

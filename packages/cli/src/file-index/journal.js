@@ -1,4 +1,4 @@
-const debug = require('debug')('cli:index:journal');
+const log = require('@home-gallery/logger')('cli.index.journal')
 
 const command = {
   command: 'journal',
@@ -28,14 +28,14 @@ const command = {
     const remove = argv.remove;
 
     if (!remove) {
-      debug('Only remove option is currentyl supported. Nothing to do')
+      log.info('Only remove option is currentyl supported. Nothing to do')
       return
     }
     const { removeJournal } = require('@home-gallery/index')
 
     removeJournal(indexFilename, journal, (err) => {
       if (err) {
-        debug(`Could not remove journal ${journal} from file index ${indexFilename}: ${err}`)
+        log.warn(`Could not remove journal ${journal} from file index ${indexFilename}: ${err}`)
       }
     })
   }

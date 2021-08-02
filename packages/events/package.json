@@ -20,5 +20,8 @@
     "type": "git",
     "url": "https://github.com/xemle/home-gallery.git",
     "directory": "packages/events"
+  },
+  "dependencies": {
+    "@home-gallery/logger": "file:../logger"
   }
 }

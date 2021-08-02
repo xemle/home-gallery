@@ -22,7 +22,7 @@
     "directory": "packages/common"
   },
   "dependencies": {
-    "debug": "^4.1.1",
+    "@home-gallery/logger": "file:../logger",
     "ignore": "^5.1.4"
   }
 }

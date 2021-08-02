@@ -1,4 +1,4 @@
-const debug = require('debug')('export:database-cleanup');
+const log = require('@home-gallery/logger')('export.database.cleanup');
 
 const cleanup = (database, cb) => {
   const t0 = Date.now();
@@ -8,7 +8,7 @@ const cleanup = (database, cb) => {
     return entry;
   })
   database.data = cleanEntries;
-  debug(`Cleanup ${cleanEntries.length} database entries in ${Date.now() - t0}ms`);
+  log.info(t0, `Cleanup ${cleanEntries.length} database entries`);
   cb(null, database);
 }
 

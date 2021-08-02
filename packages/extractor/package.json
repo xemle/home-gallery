@@ -26,16 +26,15 @@
     "@ffprobe-installer/ffprobe": "^1.1.0",
     "@home-gallery/common": "file:../common",
     "@home-gallery/index": "file:../index",
+    "@home-gallery/logger": "file:../logger",
     "@home-gallery/storage": "file:../storage",
     "@home-gallery/stream": "file:../stream",
-    "debug": "^4.1.1",
     "exiftool-vendored": "^14.4.0",
     "ffprobe": "^1.1.0",
     "fluent-ffmpeg": "^2.1.2",
     "node-vibrant": "^3.1.5",
     "request": "^2.88.2",
     "sharp": "^0.28.2",
-    "through2": "^3.0.1",
-    "yargs": "^16.2.0"
+    "through2": "^3.0.1"
   }
 }

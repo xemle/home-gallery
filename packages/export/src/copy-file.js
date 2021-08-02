@@ -1,13 +1,13 @@
 const fs = require('fs');
 const path = require('path');
-const debug = require('debug')('export:copy');
 
+const log = require('@home-gallery/logger')('export.copy');
 const { mkdir } = require('@home-gallery/common')
 
 const cp = (src, dst, size, cb) => {
   fs.copyFile(src, dst, (err) => {
     if (err) {
-      debug(`Copy of ${src} to ${dst} failed: ${err}`);
+      log.error(`Copy of ${src} to ${dst} failed: ${err}`);
       return cb(err);
     }
     cb();
@@ -51,7 +51,7 @@ const copyFile = (filename, srcDir, dstDir, cb) => {
       }
 
       if (shouldOverwrite(srcStats, dstStats)) {
-        debug(`Overwrite ${filename}`);
+        log.info(`Overwrite ${filename}`);
         cp(src, dst, srcStats.size, cb);
       } else {
         cb();

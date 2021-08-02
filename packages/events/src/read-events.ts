@@ -1,11 +1,10 @@
 import fs, { PathLike } from 'fs';
 import readline from 'readline';
-import Debug from 'debug';
+
+const log = require('@home-gallery/logger')('events.read');
 
 import { Event } from './models';
 import { HeaderType } from './header';
-
-const debug = Debug('events:read');
 
 export const readEvents = (filename: fs.PathLike, cb: (...args: any[]) => void) => {
   let isClosed = false;
@@ -41,7 +40,7 @@ export const readEvents = (filename: fs.PathLike, cb: (...args: any[]) => void) 
         return checkHeader(data);
       }
     } catch (e) {
-      debug(`Could not parse line ${lineNumber}: ${line}`);
+      log.error(`Could not parse line ${lineNumber}: ${line}`);
     }
   });
 

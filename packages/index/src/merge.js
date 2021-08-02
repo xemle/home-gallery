@@ -1,4 +1,4 @@
-const debug = require('debug')('index:merge');
+const log = require('@home-gallery/logger')('index.merge');
 
 const matcherFns = {
   size: (fileEntry, fsEntry) => {
@@ -48,7 +48,7 @@ const mergeIndex = (fileEntryMap, fsEntryMap, commonKeys, matcherFn) => {
     return entryMap;
   }, {});
 
-  debug(`Merged ${commonKeys.length} entries in ${Date.now() - t0}ms`);
+  log.info(t0, `Merged ${commonKeys.length} entries`);
   return {commonEntryMap, changedKeys};
 }
 

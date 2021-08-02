@@ -1,5 +1,6 @@
 const path = require('path');
-const debug = require('debug')('export:set-base-path')
+
+const log = require('@home-gallery/logger')('export.webapp.basePath');
 
 const rewriteFile = require('./rewrite-file');
 
@@ -19,7 +20,7 @@ const setBasePath = (outputDirectory, basePath, cb) => {
     if (err) {
       return cb(err);
     }
-    debug(`Set base path to ${base} in ${Date.now() - t0}ms`)
+    log.info(t0, `Set base path to ${base}`)
     cb(null, outputDirectory)
   });
 }

@@ -1,6 +1,8 @@
 const fs = require('fs/promises')
 const path = require('path')
 
+const log = require('@home-gallery/logger')('cli.run')
+
 const { loadConfig, initConfig } = require('./config')
 const { startServer, importSources } = require('./tasks')
 
@@ -27,19 +29,19 @@ const createConfig = argv => {
   }
 
   return fs.access(options.configFile)
-    .then(() => console.log(`Skip configuration initialization. File already exists: ${options.configFile}`))
+    .then(() => log.info(`Skip configuration initialization. File already exists: ${options.configFile}`))
     .catch(() => initConfig(options))
 }
 
 const runServer = options => {
-  console.log(`Starting server`)
+  log.info(`Starting server`)
   return startServer(options.config)
 }
 
 const runImport = (config, initialImport, incrementalUpdate) => {
   const sources = config.sources.filter(source => !source.offline)
 
-  console.log(`Import online sources from: ${sources.map(source => source.dir)}`)
+  log.info(`Import online sources from: ${sources.map(source => source.dir)}`)
   return importSources(config, sources, initialImport, incrementalUpdate)
 }
 
@@ -73,7 +75,7 @@ const command = {
           }
         }),
       (argv) => createConfig(argv)
-          .catch(err => console.log(`Error: ${err}`))
+          .catch(err => log.error(`Error: ${err}`))
       )
     .command(
       'server',
@@ -81,8 +83,8 @@ const command = {
       (yargs) => yargs,
       (argv) => config(argv)
           .then(runServer)
-          .then(() => console.log(`Have a good day...`))
-          .catch(err => console.log(`Error: ${err}`))
+          .then(() => log.info(`Have a good day...`))
+          .catch(err => log.error(`Error: ${err}`))
       )
     .command(
       'import',
@@ -101,8 +103,8 @@ const command = {
       }),
       (argv) => config(argv)
           .then(options => runImport(options.config, argv.initial, argv.update))
-          .then(() => console.log(`Have a good day...`))
-          .catch(err => console.log(`Error: ${err}`))
+          .then(() => log.info(`Have a good day...`))
+          .catch(err => log.error(`Error: ${err}`))
       )
     .demandCommand()
   },

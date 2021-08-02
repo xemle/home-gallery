@@ -1,5 +1,7 @@
 const { spawn } = require('child_process');
 
+const log = require('@home-gallery/logger')('cli.run')
+
 const nodeBin = process.argv[0]
 const cliScript = process.argv[1]
 
@@ -9,7 +11,7 @@ const run = async (command, args, options) => {
   const optionsEnvList = Object.keys(optionsEnv).map(name => `${name}=${optionsEnv[name]}`)
 
   return new Promise((resolve, reject) => {
-    console.log(`Execute: ${optionsEnvList.length ? `${optionsEnvList.join(' ')} ` : ''}${[command, ...args].map(v => / /.test(v) ? `"${v}"` : v).join(' ')}`)
+    log.info(`Execute: ${optionsEnvList.length ? `${optionsEnvList.join(' ')} ` : ''}${[command, ...args].map(v => / /.test(v) ? `"${v}"` : v).join(' ')}`)
     const env = {...process.env, ...optionsEnv};
     const cmd = spawn(command, args, {...defaults, ...options, env});
     cmd.on('exit', (code, signal) => code == 0 ? resolve(code, signal) : reject(code, signal));

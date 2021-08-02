@@ -1,7 +1,8 @@
 const path = require('path');
 
+const log = require('@home-gallery/logger')('index.create');
+
 const walk = require('./walker');
-const debug = require('debug')('index:create');
 
 const createFilesMapper = (excludeIfPresent) => {
   if (!excludeIfPresent) {
@@ -35,10 +36,10 @@ const createIndex = (dir, options, cb) => {
     return true;
   }, (err) => {
     if (err) {
-      debug(`Could not read files in ${dir}: ${err}`);
+      log.err(`Could not read files in ${dir}: ${err}`);
       return cb(err);
     } 
-    debug(`Read ${entries.length} files in ${dir} in ${Date.now() - t0}ms`);
+    log.info(t0, `Read ${entries.length} files in ${dir}`);
     cb(null, entries);
   });
 }

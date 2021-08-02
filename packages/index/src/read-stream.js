@@ -3,8 +3,8 @@ const fs = require('fs');
 const zlib = require('zlib');
 const { PassThrough, Transform, Readable } = require('stream')
 const split2 = require('split2');
-const debug = require('debug')('index:readStream');
 
+const log = require('@home-gallery/logger')('index.readStream');
 const { callbackify } = require('@home-gallery/common')
 const { map } = require('@home-gallery/stream')
 
@@ -73,7 +73,7 @@ const ifThen = (ifFn, thenFn) => cb => ifFn(err => err ? cb(err) : thenFn(cb))
 const ifThenElse = (ifFn, thenFn, elseFn) => cb => ifFn(err => err ? elseFn(cb) : thenFn(cb))
 
 const fromIndex = (indexFilename, cb) => {
-  debug(`Reading file index from ${indexFilename}`)
+  log.info(`Reading file index from ${indexFilename}`)
   let indexHead;
   const indexName = getIndexName(indexFilename)
   const stream = fs.createReadStream(indexFilename)
@@ -88,7 +88,7 @@ const fromIndex = (indexFilename, cb) => {
 const fromJournal = (indexFilename, journal, cb) => {
   const indexName = getIndexName(indexFilename)
   const journalFilename = getJournalFilename(indexFilename, journal)
-  debug(`Reading file index journal ${journalFilename}`)
+  log.info(`Reading file index journal ${journalFilename}`)
   readJournalCb(indexFilename, journal, (err, journal) => {
     if (err) {
       return cb(err)
@@ -135,9 +135,9 @@ const readStreams = (indexFilenames, journal, cb) => {
     const filename = indexFilenames[i++]
     readStream(filename, journal, (err, stream) => {
       if (err && err.code === 'ENOENT') {
-        debug(`File '${filename}' does not exist. Continue`);
+        log.warn(`File '${filename}' does not exist. Continue`);
       } else if (err) {
-        debug(`Could not read file index '${filename}': ${err}. Continue`)
+        log.warn(`Could not read file index '${filename}': ${err}. Continue`)
       } else {
         return cb(stream);
       }

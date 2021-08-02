@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const debug = require('debug')('extract:meta');
+
+const log = require('@home-gallery/logger')('storage.entryFile');
 
 const { readDir } = require('@home-gallery/common');
 const getStoragePaths = require('./storage-path');
@@ -32,7 +33,7 @@ function readJsonFiles(storageDir, filenames, cb) {
   filenames.forEach(filename => {
     readJsonFile(path.join(storageDir, filename), (err, json) => {
       if (err) {
-        debug(`Could not parse ${filename}: Error: ${err}. Continue`);
+        log.error(`Could not parse ${filename}: Error: ${err}. Continue`);
       } else {
         const name = getMetaKeyName(filename);
         meta[name] = json;

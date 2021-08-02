@@ -1,5 +1,6 @@
 const Vibrant = require('node-vibrant');
-const debug = require('debug')('extract:vibrant');
+
+const log = require('@home-gallery/logger')('extractor.vibrant');
 
 const { toPipe, conditionalTask } = require('./task');
 
@@ -11,7 +12,7 @@ function vibrantColors(storage) {
     if (['image', 'video'].indexOf(entry.type) < 0 || storage.hasEntryFile(entry, vibrantSuffix)) {
       return false;
     } else if (!storage.hasEntryFile(entry, imageSuffix)) {
-      debug(`Image preview ${imageSuffix} is missing from ${entry}`);
+      log.warn(`Image preview ${imageSuffix} is missing from ${entry}`);
       return false;
     }
     return true;
@@ -23,14 +24,14 @@ function vibrantColors(storage) {
       .from(storage.getEntryFilename(entry, imageSuffix))
       .getPalette((err, palette) => {
         if (err) {
-          debug(`Could not extract vibrant colors of ${entry}: ${err}`);
+          log.error(`Could not extract vibrant colors of ${entry}: ${err}`);
           return cb();
         }
         storage.writeEntryFile(entry, vibrantSuffix, JSON.stringify(palette), (err) => {
           if (err) {
-            debug(`Could not write vibrant colors of ${entry}: ${err}`);
+            log.info(`Could not write vibrant colors of ${entry}: ${err}`);
           } else {
-            debug(`Extracted vibrant colors from ${entry} in ${Date.now() - t0}ms`);
+            log.info(t0, `Extracted vibrant colors from ${entry}`);
           }
           cb();
         })

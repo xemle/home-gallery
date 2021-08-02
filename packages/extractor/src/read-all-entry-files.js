@@ -1,4 +1,4 @@
-const debug = require('debug')('extractor:readAllEntryFiles');
+const log = require('@home-gallery/logger')('extractor.readAllEntryFiles');
 
 const { toPipe } = require('./task');
 
@@ -6,7 +6,7 @@ const readAllEntryFiles = (storage) => {
   const task = (entry, cb) => {
     storage.readAllEntryFiles(entry, (err, {files, meta}) => {
       if (err) {
-        debug(`Could not read all entry files of ${entry}: ${err}`);
+        log.warn(`Could not read all entry files of ${entry}: ${err}`);
         return cb();
       }
       entry.files = files;

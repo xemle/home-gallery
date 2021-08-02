@@ -1,6 +1,7 @@
 const fs = require('fs');
 const archiver = require('archiver');
-const debug = require('debug')('export:archive');
+
+const log = require('@home-gallery/logger')('export.archive');
 
 const zipOpitons = {
   zlib: {
@@ -34,7 +35,7 @@ const createArchive = (outputDirectory, archiveFilename, cb) => {
   const match = archiveFilename.match(/\.(zip|tar\.gz)$/i);
   if (!match) {
     const err = new Error(`Archive filename ${archiveFilename} must end with .zip or .tar.gz`);
-    debug(err.message);
+    log.error(err.message);
     cb(err)
   }
   const isZip = 'zip' === match[1];
@@ -42,18 +43,18 @@ const createArchive = (outputDirectory, archiveFilename, cb) => {
   const options = isZip ? zipOpitons : tarOptions
 
   const t0 = Date.now();
-  debug(`Creating archive ${archiveFilename}`);
+  log.info(`Creating archive ${archiveFilename}`);
 
   const output = fs.createWriteStream(archiveFilename);
   const archive = archiver(format, options);
 
   output.on('close', () => {
-    debug(`Created archive ${archiveFilename} with ${toHuman(archive.pointer())} in ${Date.now() - t0}ms`);
+    log.info(t0, `Created archive ${archiveFilename} with ${toHuman(archive.pointer())}`);
     return cb(null, outputDirectory, archiveFilename);
   });
 
   archive.on('error', (err) => {
-    debug(`Failed to create archive ${archiveFilename}: ${err}`)
+    log.error(`Failed to create archive ${archiveFilename}: ${err}`)
     cb(err);
   });
 

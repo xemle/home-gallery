@@ -1,4 +1,4 @@
-const debug = require('debug')('cli:extract');
+const log = require('@home-gallery/logger')('cli.config.validate')
 
 const command = {
   command: 'export',
@@ -58,9 +58,9 @@ const command = {
     const t0 = Date.now();
     exportBuilder(argv.database, argv.storage, options, (err, outputDirectory, archiveFilename) => {
       if (err) {
-        console.log(`Export failed: ${err}`);
+        log.error(`Export failed: ${err}`);
       } else {
-        console.log(`Created export to ${archiveFilename ? archiveFilename : outputDirectory} in ${Date.now() - t0}ms`);
+        log.info(t0, `Created export to ${archiveFilename ? archiveFilename : outputDirectory}`);
       }
     });
   }

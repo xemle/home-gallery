@@ -1,5 +1,6 @@
 const path = require('path');
-const debug = require('debug')('export:set-base-path')
+
+const log = require('@home-gallery/logger')('export.webapp.injectState');
 
 const rewriteFile = require('./rewrite-file');
 
@@ -15,7 +16,7 @@ const injectState = (database, outputDirectory, basePath, cb) => {
     if (err) {
       return cb(err);
     }
-    debug(`Inject state in ${Date.now() - t0}ms`)
+    log.info(t0, `Inject state`)
     cb(null, outputDirectory, basePath)
   });
 }

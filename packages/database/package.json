@@ -19,10 +19,9 @@
   "dependencies": {
     "@home-gallery/common": "file:../common",
     "@home-gallery/index": "file:../index",
+    "@home-gallery/logger": "file:../logger",
     "@home-gallery/storage": "file:../storage",
     "@home-gallery/stream": "file:../stream",
-    "color-convert": "^2.0.1",
-    "debug": "^4.1.1",
-    "yargs": "^16.2.0"
+    "color-convert": "^2.0.1"
   }
 }

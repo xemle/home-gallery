@@ -1,5 +1,7 @@
 const { runCli } = require('./run')
 
+const log = require('@home-gallery/logger')('cli.task.import')
+
 const updateIndex = async (source, options) => {
   const { initialImport, journal } = options
   const args = ['index', '--directory', source.dir, '--index', source.index]
@@ -12,7 +14,7 @@ const updateIndex = async (source, options) => {
 
   initialImport && args.push('--add-limits', '200,500,1.25,8000')
   journal && args.push('--journal', journal)
-  await runCli(args, {env: {DEBUG: '*'}})
+  await runCli(args)
 }
 
 const updateIndices = async (sources, options) => {
@@ -23,7 +25,7 @@ const updateIndices = async (sources, options) => {
 
 const deleteJournal = async (source, journal) => {
   const args = ['index', 'journal', '--index', source.index, '--journal', journal, '-r']
-  await runCli(args, {env: {DEBUG: '*'}})
+  await runCli(args)
 }
 
 const deleteJournals = async (sources, journal) => {
@@ -37,7 +39,7 @@ const deleteJournals = async (sources, journal) => {
 
 const extract = async (config, sources, options) => {
   if (!sources.length) {
-    console.log(`Warn: Sources list is empty. No files to extract`);
+    log.warn(`Sources list is empty. No files to extract`);
     return;
   }
   const args = ['extract'];
@@ -59,7 +61,7 @@ const extract = async (config, sources, options) => {
     args.push('--limit', options.limit || 0)
   }
 
-  await runCli(args, {env: {DEBUG: '*'}})
+  await runCli(args)
 }
 
 const buildDatabase = async (config, options) => {
@@ -72,7 +74,7 @@ const buildDatabase = async (config, options) => {
   excludes.forEach(exclude => args.push('--exclude', exclude))
 
   options.journal && args.push('--journal', options.journal)
-  await runCli(args, {env: {DEBUG: '*'}}, ['--max-old-space-size=4096'])
+  await runCli(args, {}, ['--max-old-space-size=4096'])
 }
 
 const catchIndexLimitExceeded = exitCode => {
@@ -119,7 +121,7 @@ const importSources = async (config, sources, initialImport, incrementalUpdate) 
     await deleteJournals(sources, journal)
 
     if (processing) {
-      console.log(`New chunk of media is processed and is ready to browse. Continue with next chunk to process...`)
+      log.info(`New chunk of media is processed and is ready to browse. Continue with next chunk to process...`)
     }
   }
 }
