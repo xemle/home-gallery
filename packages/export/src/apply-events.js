@@ -9,8 +9,11 @@ const events = (database, eventsFilename, cb) => {
   
   const t0 = Date.now();
   readEvents(eventsFilename, (err, events) => {
-    if (err) {
-      log.error(`Failed to load events from ${eventsFilename}: ${err}`);
+    if (err && err.code == 'ENOENT') {
+      log.warn(`Events file ${eventsFilename} does not exists. Continue without events`);
+      return cb(null, database);
+    } else if (err) {
+      log.error(err, `Failed to load events from ${eventsFilename}: ${err}`);
       return cb(err);
     }
     log.info(t0, `Read events from ${eventsFilename} with ${events.length} events`);

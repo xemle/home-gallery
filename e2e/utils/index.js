@@ -38,6 +38,8 @@ const getDatabaseFilename = () => path.join(getBaseDir(), 'config', 'database.db
 
 const getEventsFilename = () => path.join(getBaseDir(), 'config', 'events.db')
 
+const getExportOutputDir = () => path.join(getBaseDir(), 'export-output')
+
 const runCliAsync = (args, options, cb) => {
   if (!cb) {
     cb = options
@@ -140,6 +142,7 @@ module.exports = {
   getStorageDir,
   getDatabaseFilename,
   getEventsFilename,
+  getExportOutputDir,
   runCli,
   runCliAsync,
   readIndex,

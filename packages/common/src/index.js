@@ -1,4 +1,5 @@
 const callbackify = require('./callbackify');
+const forEach = require('./for-each');
 const fileFilter = require('./file-filter');
 const { fileTypes, getFileTypeByExtension } = require('./file-types');
 const humanize = require('./humanize');
@@ -13,6 +14,7 @@ const writeSafe = require('./write-safe');
 
 module.exports = {
   callbackify,
+  forEach,
   fileFilter,
   fileTypes,
   getFileTypeByExtension,

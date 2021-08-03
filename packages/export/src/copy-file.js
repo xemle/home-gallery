@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const log = require('@home-gallery/logger')('export.copy');
+const log = require('@home-gallery/logger')('export.copy.file');
 const { mkdir } = require('@home-gallery/common')
 
 const cp = (src, dst, size, cb) => {
@@ -31,6 +31,11 @@ const copyFile = (filename, srcDir, dstDir, cb) => {
       const e = new Error(`Could not get file stats of ${src}`)
       e.cause = err;
       return cb(e);
+    }
+
+    if (srcStats.isDirectory()) {
+      log.debug(`Skip copy of directory ${src}`);
+      return cb();
     }
 
     fs.stat(dst, (err, dstStats) => {
