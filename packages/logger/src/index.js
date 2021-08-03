@@ -1,4 +1,9 @@
 "use strict";
+const pino = require('pino')
+const pinoms = require('pino-multi-stream')
+
+const prettyStream = require('./pretty-stream')
+const fileStream = require('./file-stream')
 
 let instance;
 
@@ -6,9 +11,6 @@ const hasFirstArgNumber = inputArgs => inputArgs.length >= 2 && typeof inputArgs
 
 const createInstance = options => {
   options = options || {}
-  const pino = require('pino')
-  const pinoms = require('pino-multi-stream')
-
   const ms = pinoms.multistream([])
   const logger = pino({
     level: 'trace',
@@ -32,16 +34,14 @@ const createPrettyStream = level => {
   if (!instance) {
     console.log(`No logging instance exists`)
   }
-  const createStream = require('./pretty-stream')
-  instance.add({level: level || 'info', stream: createStream()})
+  instance.add({level: level || 'info', stream: prettyStream()})
 }
 
 const createFileStream = (filename, level, cb) => {
   if (!instance) {
     return cb ? cb(new Error(`No logging instance exists`)) : console.log(`No logging instance exists`)
   }
-  const createStream = require('./file-stream')
-  createStream(filename, (err, stream) => {
+  fileStream(filename, (err, stream) => {
     if (err && cb) {
       cb(err)
     } else if (err) {

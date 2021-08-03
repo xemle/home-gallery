@@ -1,7 +1,7 @@
-const createStream = (filename, cb) => {
-  const fs = require('fs')
-  const path = require('path')
+const fs = require('fs')
+const path = require('path')
 
+const createStream = (filename, cb) => {
   const createWriteStream = () => cb(null, fs.createWriteStream(filename, {flags: 'a'}))
 
   const dir = path.dirname(filename)

@@ -1,3 +1,4 @@
+const pretty = require('pino-pretty')
 const pinoms = require('pino-multi-stream')
 
 const { colorFns } = require('./colors')
@@ -62,7 +63,7 @@ const createStream = () => {
         ].join('')
       }
     },
-    prettifier: require('pino-pretty')
+    prettifier: pretty
   })
 }
 
