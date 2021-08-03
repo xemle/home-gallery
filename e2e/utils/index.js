@@ -4,7 +4,7 @@ const zlib = require('zlib')
 const { spawn } = require('child_process')
 
 const galleryBin = process.env.gallery_bin || 'node'
-const galleryBinArgs = (process.env.gallery_bin_args || 'gallery.js').split(/\s/)
+const galleryBinArgs = process.env.gallery_bin_args ? process.env.gallery_bin_args.split(/\s/) : []
 
 const projectRoot = path.resolve(process.cwd(), '..')
 const testDataDir = path.join(projectRoot, process.env.gallery_data_dir || 'data')
