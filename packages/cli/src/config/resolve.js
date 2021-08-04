@@ -4,7 +4,7 @@ const resolveKey = (obj, key) => {
   const parts = key.split('.');
   let parent = obj;
   let prop = false;
-  while (parts.length && typeof obj[parts[0]] != 'undefined') {
+  while (parts.length && obj && typeof obj[parts[0]] != 'undefined') {
     prop = parts.shift();
     parent = obj;
     obj = parent[prop];
