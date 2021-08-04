@@ -94,6 +94,8 @@ sources:
   # security configuration for https
   # key: '{configDir}/server.key'
   # cert: '{configDir}/server.crt'
+  # Open browser when server starts
+  # openBrowser: false
 
 logger:
   # Currently console and file loggers are available

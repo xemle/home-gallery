@@ -11,6 +11,9 @@ const startServer = async config => {
   server.host && args.push('--host', server.host)
   server.port && args.push('--port', server.port)
   server.key && server.cert && args.push('--key', server.key, '--cert', server.cert)
+  if (server.openBrowser !== undefined) {
+    server.openBrowser ? args.push('--open-browser') : args.push('--no-open-browser')
+  }
 
   await runCli(args)
   return 'exit'

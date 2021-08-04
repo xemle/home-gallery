@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add option to open browser on server start
 - Add logger with console and file logger
 - Add quick search links on some media meta data
 - Add keyboard shortcuts to single view

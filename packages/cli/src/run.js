@@ -75,7 +75,7 @@ const command = {
           }
         }),
       (argv) => createConfig(argv)
-          .catch(err => log.error(`Error: ${err}`))
+          .catch(err => log.error(err, `Error: ${err}`))
       )
     .command(
       'server',
@@ -84,7 +84,7 @@ const command = {
       (argv) => config(argv)
           .then(runServer)
           .then(() => log.info(`Have a good day...`))
-          .catch(err => log.error(`Error: ${err}`))
+          .catch(err => log.error(err, `Error: ${err}`))
       )
     .command(
       'import',

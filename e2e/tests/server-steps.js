@@ -24,7 +24,7 @@ const waitForUrl = async (url, timeout) => {
 step("Start server", async () => {
   const serverId = generateId(4)
   const port = 38000 + +(Math.random() * 999).toFixed()
-  const child = runCliAsync(['server', '-s', getStorageDir(), '-d', getDatabaseFilename(), '-e', getEventsFilename(), '--port', port])
+  const child = runCliAsync(['server', '-s', getStorageDir(), '-d', getDatabaseFilename(), '-e', getEventsFilename(), '--port', port, '--no-open-browser'])
 
   servers[serverId] = {
     child,

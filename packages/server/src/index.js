@@ -4,12 +4,16 @@ const compression = require('compression');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const pinoHttp = require('pino-http')
-const logger = require('@home-gallery/logger')
-const log = logger('server')
+const open = require('open')
 
+const logger = require('@home-gallery/logger')
+const { callbackify } = require('@home-gallery/common')
 const databaseApi = require('./api/database');
 const eventsApi = require('./api/events');
 const webapp = require('./webapp');
+
+const log = logger('server')
+const openCb = callbackify(open)
 
 function shouldCompress (req, res) {
   if (req.headers['x-no-compression']) {
@@ -55,7 +59,10 @@ const createLogger = () => {
   })
 }
 
-function startServer({host, port, storageDir, databaseFilename, eventsFilename, webappDir, key, cert}, cb) {
+const serverUrl = (port, key, cert) =>`${key && cert ? 'https' : 'http'}://localhost:${port}`
+
+function startServer(options, cb) {
+  const {host, port, storageDir, databaseFilename, eventsFilename, webappDir, key, cert, openBrowser} = options
   const app = express();
   app.disable('x-powered-by');
 
@@ -84,8 +91,13 @@ function startServer({host, port, storageDir, databaseFilename, eventsFilename, 
       cb(e);
     })
     .on('listening', () => {
-      log.info(`Open Home Gallery on ${key && cert ? 'https' : 'http'}://localhost:${port}`);
+      const url = serverUrl(port, key, cert)
+      log.info(`Open Home Gallery on ${url}`);
       dbInit(databaseFilename);
+      if (openBrowser) {
+        log.debug(`Open browser with url ${url}`)
+        return openCb(url, () => cb(null, app))
+      }
       cb(null, app);
     })
 

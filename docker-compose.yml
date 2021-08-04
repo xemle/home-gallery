@@ -18,6 +18,7 @@ services:
     image: xemle/home-gallery
     environment:
       - GALLERY_API_SERVER=http://api:3000
+      - GALLERY_OPEN_BROWSER=false
     volumes:
       - ./data:/data
       # Mount your media directories below /data

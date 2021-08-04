@@ -39,6 +39,11 @@ const command = {
       cert: {
         alias: 'C',
         describe: 'SSL certificate file'
+      },
+      'open-browser': {
+        boolean: true,
+        default: true,
+        describe: 'Open browser on server start'
       }
     })
     .demandOption(['storage', 'database', 'events'])
@@ -55,7 +60,8 @@ const command = {
       eventsFilename: argv.events,
       webappDir,
       key: argv.key,
-      cert: argv.cert
+      cert: argv.cert,
+      openBrowser: argv.openBrowser
     }
     startServer(config, (err) => {
       if (err) {
