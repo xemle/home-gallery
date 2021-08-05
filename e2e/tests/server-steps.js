@@ -23,7 +23,7 @@ const waitForUrl = async (url, timeout) => {
 
 step("Start server", async () => {
   const serverId = generateId(4)
-  const port = 38000 + +(Math.random() * 999).toFixed()
+  const port = gauge.dataStore.scenarioStore.get('port')
   const child = runCliAsync(['server', '-s', getStorageDir(), '-d', getDatabaseFilename(), '-e', getEventsFilename(), '--port', port, '--no-open-browser'])
 
   servers[serverId] = {
@@ -41,8 +41,16 @@ step("Stop server", async () => {
   assert(!!server, `Server ${serverId} not found`)
 
   return new Promise(resolve => {
-    server.child.on('exit', resolve)
+    const id = setTimeout(() => {
+      server.child.kill('SIGKILL')
+    }, 1000)
+
+    server.child.on('exit', () => {
+      clearTimeout(id)
+      resolve()
+    })
     server.child.kill('SIGTERM')
+
     delete servers[serverId]
   })
 })

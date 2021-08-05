@@ -5,7 +5,7 @@ const assert = require('assert');
 const { getFilesDir, getIndexFilename, getJournalFilename, runCli, readIndex, readJournal } = require('../utils');
 
 step(["Create index", "Update index"], async () => {
-  const code = await runCli(['index', '-d', getFilesDir(), '-i', getIndexFilename()]);
+  const {code} = await runCli(['index', '-d', getFilesDir(), '-i', getIndexFilename()]);
   const command = gauge.dataStore.scenarioStore.get('lastCommand')
   
   assert(code == 0, `Failed to run ${command} in ${process.env.PWD}. Exit code was ${code}`)

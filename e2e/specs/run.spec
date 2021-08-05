@@ -1,6 +1,6 @@
 # Run actions
 
-Tags: run
+Tags: run,docker
 
 * Init files from "index/basic"
 * Init config

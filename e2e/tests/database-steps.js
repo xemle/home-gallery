@@ -3,10 +3,10 @@ const assert = require("assert");
 const { getIndexFilename, getStorageDir, getDatabaseFilename, runCli, readDatabase } = require('../utils');
 
 step("Create database", async () => {
-  const code = await runCli(['database', '-i', getIndexFilename(), '-s', getStorageDir(), '-d', getDatabaseFilename()]);
+  const {code, stdout, stderr} = await runCli(['database', '-i', getIndexFilename(), '-s', getStorageDir(), '-d', getDatabaseFilename()]);
   const command = gauge.dataStore.scenarioStore.get('lastCommand')
   
-  assert(code == 0, `Failed to run ${command} in ${process.env.PWD}. Exit code was ${code}`)
+  assert(code == 0, `Failed to run ${command} in ${process.env.PWD}. Exit code was ${code}: output: ${stdout}, err: ${stderr}`)
 })
 
 step("Create database with args <args>", async (args) => {

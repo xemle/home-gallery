@@ -2,6 +2,7 @@ const path = require('path')
 const { createReadStream } = require('fs')
 const zlib = require('zlib')
 const { spawn } = require('child_process')
+const userInfo = require("os").userInfo()
 
 const galleryBin = process.env.gallery_bin || 'node'
 const galleryBinArgs = process.env.gallery_bin_args ? process.env.gallery_bin_args.split(/\s/) : []
@@ -40,27 +41,22 @@ const getEventsFilename = () => path.join(getBaseDir(), 'config', 'events.db')
 
 const getExportOutputDir = () => path.join(getBaseDir(), 'export-output')
 
-const runCliAsync = (args, options, cb) => {
-  if (!cb) {
-    cb = options
-    options = {}
-  } else if (!options) {
-    options = {}
-  }
-  const logOptions = ['--log-file', path.join(getBaseDir(), 'e2e.log'), '--log-file-level', 'debug']
-  const command = [galleryBin, ...galleryBinArgs, ...logOptions, ...args].map(v => `${v}`.match(/\s/) ? `"${v}"` : v).join(' ')
+const resolveArgs = (args, vars) => [].concat(args).map(arg => arg.replace(/\{([^}]+)\}/g, (_, name) => vars[name.trim()] || ''))
+
+const runCommand = (command, args, options, cb) => {
   const spawnOptions = {
     silent: false,
     env: Object.assign({}, process.env, options.env),
     cwd: projectRoot,
     shell: false
   }
-  gauge.message(`Call CLI async: ${command}`)
-  gauge.dataStore.scenarioStore.put('lastCommand', command)
+  const commandLine = [command, ...args].map(v => `${v}`.match(/\s/) ? `"${v}"` : v).join(' ')
+  gauge.message(`Execute command: ${commandLine}`)
+  gauge.dataStore.scenarioStore.put('lastCommand', commandLine)
 
   const stdout = []
   const stderr = []
-  const child = spawn(galleryBin, [...galleryBinArgs, ...logOptions, ...args], spawnOptions)
+  const child = spawn(command, args, spawnOptions)
   child.stdout.on('data', chunk => stdout.push(chunk))
   child.stderr.on('data', chunk => stderr.push(chunk))
 
@@ -74,7 +70,30 @@ const runCliAsync = (args, options, cb) => {
   return child;
 }
 
-const runCli = async (args, options) => new Promise(resolve => runCliAsync(args, options, resolve))
+const runCliAsync = (args, options, cb) => {
+  if (!cb) {
+    cb = options
+    options = {}
+  } else if (!options) {
+    options = {}
+  }
+
+  const vars = {
+    projectRoot,
+    baseDir: getBaseDir(),
+    port: gauge.dataStore.scenarioStore.get('port'),
+    uid: userInfo.uid,
+    gid: userInfo.gid
+  }
+  const galleryArgsResolved = resolveArgs(galleryBinArgs, vars)
+
+  const logOptions = ['--log-file', path.join(getBaseDir(), 'e2e.log'), '--log-file-level', 'debug']
+  const commandArgs = [...galleryArgsResolved, ...logOptions, ...args]
+
+  return runCommand(galleryBin, commandArgs, {TZ: 'Europe/Berlin', ...options}, cb)
+}
+
+const runCli = async (args, options) => new Promise(resolve => runCliAsync(args, options, (code, stdout, stderr) => resolve({code, stdout, stderr})))
 
 const readJsonGz = async (filename) => {
   return new Promise((resolve, reject) => {

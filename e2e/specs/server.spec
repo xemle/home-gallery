@@ -1,6 +1,6 @@
 # Server
 
-Tags: server
+Tags: server,docker
 
 ## Serve
 

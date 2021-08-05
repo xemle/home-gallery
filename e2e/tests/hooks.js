@@ -37,6 +37,9 @@ const createBaseDir = context => {
 beforeScenario(async (context) => {
   const baseDir = createBaseDir(context)
   gauge.dataStore.scenarioStore.put('baseDir', baseDir)
+
+  const port = 38000 + +(Math.random() * 999).toFixed()
+  gauge.dataStore.scenarioStore.put('port', port)
 })
 
 afterSuite(async (context) => {
