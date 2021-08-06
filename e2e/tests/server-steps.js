@@ -26,13 +26,15 @@ step("Start server", async () => {
   const port = gauge.dataStore.scenarioStore.get('port')
   const child = runCliAsync(['server', '-s', getStorageDir(), '-d', getDatabaseFilename(), '-e', getEventsFilename(), '--port', port, '--no-open-browser'])
 
+  const url = `http://localhost:${port}`
   servers[serverId] = {
     child,
-    port
+    port,
+    url
   }
   gauge.dataStore.scenarioStore.put('serverId', serverId)
 
-  return waitForUrl(`http://localhost:${port}`, 10 * 1000)
+  return waitForUrl(url, 10 * 1000)
 })
 
 step("Stop server", async () => {
@@ -60,8 +62,7 @@ step("Server has file <file>", async (file) => {
   const server = servers[serverId]
   assert(!!server, `Server ${serverId} not found`)
 
-  const url = `http://localhost:${server.port}${file}`
-  return fetch(url)
+  return fetch(server.url, {timeout: 500})
     .then(res => {
       if (!res.ok) {
         throw new Error(`Could not fetch ${file}`)
