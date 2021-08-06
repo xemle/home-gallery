@@ -14,14 +14,14 @@ step("Exit code was <code>", (code) => {
 
 step("Init dir from <dir>", async (dir) => {
   const baseDir = getBaseDir()
-  mkdir('-p', path.dirname(baseDir))
-  cp('-R', path.join(getTestDataDir(), dir), baseDir)
+  mkdir('-p', baseDir)
+  cp('-R', path.join(getTestDataDir(), dir, '*'), baseDir)
 });
 
 step("Init files from <dir>", async (dir) => {
   const filesDir = getFilesDir()
-  mkdir('-p', path.dirname(filesDir))
-  cp('-R', path.join(getTestDataDir(), dir), filesDir)
+  mkdir('-p', filesDir)
+  cp('-R', path.join(getTestDataDir(), dir, '*'), filesDir)
 });
 
 step("Add file <file>", async (file) => {
