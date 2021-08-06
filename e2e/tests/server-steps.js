@@ -8,11 +8,11 @@ const servers = {}
 const wait = async ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const waitForUrl = async (url, timeout) => {
-  const max = Date.now() + timeout
+  const startTime = Date.now()
 
   const next = async () => {
-    if (Date.now() < timeout) {
-      throw new Error(`Timeout exceeded`)
+    if (Date.now() - startTime > timeout) {
+      throw new Error(`Wait timeout exceeded for url: ${url}`)
     }
     return fetch(url)
       .catch(() => wait(200).then(next))
