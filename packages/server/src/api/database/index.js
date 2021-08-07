@@ -18,12 +18,21 @@ function uniqEntries(entries) {
 }
 
 function databaseApi(eventbus) {
-  let database = { data: [] };
+  let database = false;
   const databaseCache = cache(3600);
   let entryCache = {};
 
   function send(req, res) {
-    if (req.query && (req.query.offset || req.query.limit)) {
+    if (!database) {
+      log.info(`Database file is not loaded yet.`);
+      const err = {
+        error: {
+          code: 404,
+          message: 'Database file is not loaded yet.'
+        }
+      }
+      return res.status(404).json(err);
+    } else if (req.query && (req.query.offset || req.query.limit)) {
       const length = database.data.length;
       const offset = sanitizeInt(req.query.offset, 0, length, 0);
       const limit = sanitizeInt(req.query.limit, Math.min(10, length), length, length);
@@ -53,7 +62,7 @@ function databaseApi(eventbus) {
     getFirstEntries: (count) => {
       const key = `firstEntries:${count}`;
       if (typeof entryCache[key] === 'undefined') {
-        entryCache[key] = database.data.slice(0, count);
+        entryCache[key] = database ? database.data.slice(0, count) : [];
       }
       return entryCache[key]
     },

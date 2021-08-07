@@ -1,41 +1,9 @@
 const log = require('@home-gallery/logger')('database.mergeJournal');
 const { getIndexName, getJournalFilename, readJournal } = require('@home-gallery/index');
 
-const { mergeEntry, matchFile } = require('./merge-entry')
-const readDatabase = require('./read-database')
-const { wrapEntries, writeDatabase } = require('./write-database')
-
-const toMap = (values, keyFn) => values.reduce((result, value) => {
-  const key = keyFn(value)
-  result[key] = value
-  return result
-}, {})
-
-const removeFile = (dbEntry, removedFile) => {
-  dbEntry.files = dbEntry.files.filter(file => !matchFile(file, removedFile))
-  return !dbEntry.files.length
-}
-
-const mergeEntries = (dbEntries, newEntries, removedFiles) => {
-  const dbById = toMap(dbEntries, e => e.id)
-
-  removedFiles.forEach(file => {
-    if (!dbById[file.id]) {
-      return
-    }
-    if (removeFile(dbById[file.id], file)) {
-      delete dbById[file.id]
-    }
-  })
-
-  newEntries.forEach(entry => {
-    dbById[entry.id] = dbById[entry.id] ? mergeEntry(dbById[entry.id], entry) : entry
-  })
-
-  const updatedEntries = Object.values(dbById)
-  updatedEntries.sort((a, b) => a.date < b.date ? 1 : -1)
-  return updatedEntries
-}
+const { mergeEntries } = require('./merge-entry')
+const { initDatabase, readDatabase } = require('./read-database')
+const { writeDatabase } = require('./write-database')
 
 const readJournals = (indexFilenames, journal, cb) => {
   let i = 0;
@@ -92,7 +60,7 @@ const mergeFromJournal = (indexFilenames, journal, databaseFilename, entries, cb
     readDatabase(databaseFilename, (err, database) => {
       if (err && err.code == 'ENOENT') {
         log.info(`Initialize non existing database file ${databaseFilename}`)
-        database = wrapEntries([])
+        database = initDatabase([])
       } else if (err) {
         return cb(err)
       } else {

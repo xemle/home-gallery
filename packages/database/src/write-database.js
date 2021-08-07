@@ -1,17 +1,10 @@
 const fs = require('fs');
 
 const { writeJsonGzip, writeSafe } = require('@home-gallery/common');
-
-const wrapEntries = (entries) => {
-  return {
-    type: 'home-gallery/database@1.0',
-    created: new Date().toISOString(),
-    data: entries
-  }
-}
+const { initDatabase } = require('./read-database')
 
 const writeDatabase = (filename, entries, cb) => {
-  const database = wrapEntries(entries);
+  const database = initDatabase(entries);
 
   const tmp = `${filename}.tmp`;
   writeJsonGzip(tmp, database, err => {
@@ -23,7 +16,7 @@ const writeDatabase = (filename, entries, cb) => {
 }
 
 const writeDatabasePlain = (filename, entries, cb) => {
-  const database = wrapEntries(entries);
+  const database = initDatabase(entries);
   const data = JSON.stringify(database);
 
   const tmp = `${filename}.tmp`;
@@ -35,4 +28,4 @@ const writeDatabasePlain = (filename, entries, cb) => {
   });
 }
 
-module.exports = { wrapEntries, writeDatabase, writeDatabasePlain } ;
+module.exports = { writeDatabase, writeDatabasePlain } ;

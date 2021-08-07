@@ -1,4 +1,4 @@
-const log = require('@home-gallery/logger')('cli.config.validate')
+const log = require('@home-gallery/logger')('cli.export')
 
 const command = {
   command: 'export',

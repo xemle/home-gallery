@@ -1,14 +1,16 @@
-import fs, { PathLike } from 'fs';
+import fs from 'fs';
 import readline from 'readline';
+import { promisify } from 'util';
 
 const log = require('@home-gallery/logger')('events.read');
 
 import { Event } from './models';
-import { HeaderType } from './header';
+import { EventDatabase, HeaderType, isEventTypeCompatible } from './header';
 
-export const readEvents = (filename: fs.PathLike, cb: (...args: any[]) => void) => {
+const readEventsCb = (filename: fs.PathLike, cb: (...args: any[]) => void) => {
   let isClosed = false;
 
+  let header: false | any = false;
   const events: Event[] = [];
   let reader: readline.Interface;
   let lineNumber = 0;
@@ -20,10 +22,13 @@ export const readEvents = (filename: fs.PathLike, cb: (...args: any[]) => void) 
     reader && reader.close();
   });
 
-  const checkHeader = (header: any) => {
-    if (header?.type != HeaderType) {
-      readStream.destroy(new Error(`Unknown events database header: '${JSON.stringify(header).substring(0, 25)}...'. Expect '{"type":"${HeaderType}",...}'. Read CHANGELOG for migration`));
+  const checkHeader = (data: any) => {
+    if (!isEventTypeCompatible(data?.type)) {
+      const err = new Error(`Unknown events database header: '${JSON.stringify(data).substring(0, 45)}...'. Expect '{"type":"${HeaderType}",...}'`)
+      log.error(err, err.message)
+      return readStream.destroy(err);
     }
+    header = data;
   }
 
   reader = readline.createInterface({
@@ -40,7 +45,7 @@ export const readEvents = (filename: fs.PathLike, cb: (...args: any[]) => void) 
         return checkHeader(data);
       }
     } catch (e) {
-      log.error(`Could not parse line ${lineNumber}: ${line}`);
+      log.error(e, `Could not parse line ${lineNumber}: ${line}`);
     }
   });
 
@@ -51,8 +56,13 @@ export const readEvents = (filename: fs.PathLike, cb: (...args: any[]) => void) 
   });
 
   reader.on('close', () => {
-    if (!isClosed) {
-      cb(null, events);
+    if (isClosed) {
+      return
+    } else if (header) {
+      header.data = events;
     }
+    cb(null, header);
   });
 }
+
+export const readEvents = promisify<fs.PathLike, EventDatabase>(readEventsCb)

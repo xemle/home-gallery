@@ -1,11 +1,17 @@
-const { stat } = require('fs/promises')
+const { stat, access } = require('fs/promises')
 const assert = require("assert");
 const { getIndexFilename, getStorageDir, getDatabaseFilename, runCli, readDatabase } = require('../utils');
+
+step('Database does not exist', async () => {
+  const exists = await access(getDatabaseFilename()).then(() => true).catch(() => false)
+
+  assert(!exists, `Expected database file ${getDatabaseFilename()} does not exist but found it`)
+})
 
 step("Create database", async () => {
   const {code, stdout, stderr} = await runCli(['database', '-i', getIndexFilename(), '-s', getStorageDir(), '-d', getDatabaseFilename()]);
   const command = gauge.dataStore.scenarioStore.get('lastCommand')
-  
+
   assert(code == 0, `Failed to run ${command} in ${process.env.PWD}. Exit code was ${code}: output: ${stdout}, err: ${stderr}`)
 })
 
@@ -31,7 +37,7 @@ step("Database entry <id> has property <property> with value <value>", async (id
   assert(entry[property] == value, `Expected property ${property} of entry ${id} to be ${value} but it is ${entry[property]}`)
 })
 
-step("Database entry <id> has <amoung> files", async (id, amount) => {
+step("Database entry <id> has <amount> files", async (id, amount) => {
   const entry = await getEntry(id)
   assert(entry.files.length == amount, `Expected ${amount} files but has ${entry.files.length}`)
 })

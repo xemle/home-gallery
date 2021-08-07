@@ -41,7 +41,41 @@ const mergeEntry = (a, b) => {
   return addMissingFilesFrom(a, b)
 }
 
+const toMap = (values, keyFn) => values.reduce((result, value) => {
+  const key = keyFn(value)
+  result[key] = value
+  return result
+}, {})
+
+const removeFile = (dbEntry, removedFile) => {
+  dbEntry.files = dbEntry.files.filter(file => !matchFile(file, removedFile))
+  return !dbEntry.files.length
+}
+
+const mergeEntries = (dbEntries, newEntries, removedFiles) => {
+  removedFiles = removedFiles || []
+  const dbById = toMap(dbEntries, e => e.id)
+
+  removedFiles.forEach(file => {
+    if (!dbById[file.id]) {
+      return
+    }
+    if (removeFile(dbById[file.id], file)) {
+      delete dbById[file.id]
+    }
+  })
+
+  newEntries.forEach(entry => {
+    dbById[entry.id] = dbById[entry.id] ? mergeEntry(dbById[entry.id], entry) : entry
+  })
+
+  const updatedEntries = Object.values(dbById)
+  updatedEntries.sort((a, b) => a.date < b.date ? 1 : -1)
+  return updatedEntries
+}
+
 module.exports = {
   mergeEntry,
-  matchFile
+  matchFile,
+  mergeEntries
 }

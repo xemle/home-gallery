@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add fetch command to fetch and merge a remote gallery
+
 ### Fixed
 
 - index: Fix graceful abort by user (ctrl-c)

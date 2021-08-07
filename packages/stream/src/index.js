@@ -7,6 +7,7 @@ const limit = require('./limit');
 const log = require('./log');
 const map = require('./map');
 const memoryIndicator = require('./memory-indicator');
+const noopWriter = require('./noop-writer');
 const parallel = require('./parallel');
 const parseJson = require('./parse-json');
 const purge = require('./purge');
@@ -26,6 +27,7 @@ module.exports = {
   log,
   map,
   memoryIndicator,
+  noopWriter,
   parallel,
   parseJson,
   purge,

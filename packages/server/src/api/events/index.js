@@ -1,11 +1,16 @@
 const { v4: uuidv4 } = require('uuid');
+const { callbackify } = require('util')
+
 const log = require('@home-gallery/logger')('server.api.events');
 
 const { readEvents, appendEvent } = require('@home-gallery/events/dist/node');
 
+const readEventsCb = callbackify(readEvents)
+const appendEventCb = callbackify(appendEvent)
+
 const events = (eventsFilename) => {
   let clients = [];
-  let eventsCache = false;
+  let events = false;
 
   const create = (type, data) => {
     return Object.assign(data, {
@@ -88,14 +93,14 @@ const events = (eventsFilename) => {
     if (!event.date) {
       event.date = new Date().toISOString();
     }
-    appendEvent(eventsFilename, event, (err) => {
+    appendEventCb(eventsFilename, event, (err) => {
       if (err) {
         console.error(`Could not save event to ${eventsFilename}. Error: ${err}. Event ${JSON.stringify(event).substr(0, 50)}...`);
         res.status(500).end();
       } else {
-        log.info(`New event ${event.id} created`);
-        if (eventsCache !== false) {
-          eventsCache.push(event);
+        log.info(`Saved event ${event.id} to ${eventsFilename}`);
+        if (events !== false) {
+          events.data.push(event);
         }
         emit(event);
         res.status(201).end();
@@ -103,14 +108,14 @@ const events = (eventsFilename) => {
     });
   }
 
-  const read = (req, res, next) => {
-    if (eventsCache !== false) {
-      log.debug(`Send ${eventsCache.length} cached events`);
-      return res.json({ data: eventsCache });
+  const read = (_, res) => {
+    if (events !== false) {
+      log.debug(`Send ${events.data.length} cached events`);
+      return res.json(events);
     }
 
     const t0 = Date.now();
-    readEvents(eventsFilename, (err, events) => {
+    readEventsCb(eventsFilename, (err, data) => {
       if (err && err.code === 'ENOENT') {
         log.info(`Events file ${eventsFilename} does not exist yet. Create an event to initialize it`);
         const err = {
@@ -119,20 +124,20 @@ const events = (eventsFilename) => {
             message: 'Events file does not exist yet. Create an event to initialize it'
           }
         }
-        return res.status(404).json(err).send();
+        return res.status(404).json(err);
       } else if (err) {
-        log.error(`Failed to read events file ${eventsFilename}: ${err}`);
+        log.error(err, `Failed to read events file ${eventsFilename}: ${err}`);
         const err = {
           error: {
             code: 500,
-            message: 'Loading event file failded. See server logs'
+            message: 'Loading event file failed. See server logs'
           }
         }
-        return res.status(500).json(err).end();
+        return res.status(500).json(err);
       }
-      eventsCache = events;
-      log.info(t0, `Read events file ${eventsFilename} and send ${eventsCache.length} events`);
-      return res.json({ data: eventsCache });
+      events = data;
+      log.info(t0, `Read events file ${eventsFilename} and send ${events.data.length} events`);
+      return res.json(events);
     });
   }
 

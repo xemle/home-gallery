@@ -46,7 +46,7 @@ afterSuite(async (context) => {
   if (keepTempDir) {
     return
   }
-  const tmpDir = path.join(testBaseDir, 'run-e2e')
+  const tmpDir = path.join(testBaseDir, runDirName)
   rm('-rf', tmpDir)
   gauge.message(`Remove tmpDir ${tmpDir}`)
 })

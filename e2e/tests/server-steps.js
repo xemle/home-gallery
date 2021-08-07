@@ -1,13 +1,17 @@
 const assert = require("assert")
 const fetch = require('node-fetch')
+const express = require('express')
 
-const { generateId, runCliAsync, getStorageDir, getDatabaseFilename, getEventsFilename } = require('../utils')
+const { generateId, runCliAsync, getBaseDir, getStorageDir, getDatabaseFilename, getEventsFilename } = require('../utils')
 
 const servers = {}
 
 const wait = async ms => new Promise(resolve => setTimeout(resolve, ms))
 
-const waitForUrl = async (url, timeout) => {
+const onResponseNoop = res => res
+
+const waitForUrl = async (url, timeout, onResponse) => {
+  timeout = timeout || 10 * 1000
   const startTime = Date.now()
 
   const next = async () => {
@@ -15,10 +19,25 @@ const waitForUrl = async (url, timeout) => {
       throw new Error(`Wait timeout exceeded for url: ${url}`)
     }
     return fetch(url)
+      .then(onResponse || onResponseNoop)
       .catch(() => wait(200).then(next))
   }
 
   return next()
+}
+
+const waitForDatabase = async (url, timeout) => {
+  return waitForUrl(`${url}/api/database`, timeout, res => {
+    if (!res.ok) {
+      throw new Error(`Database response is not successfull: Code is ${res.status}`)
+    }
+    return res.json().then(database => {
+      if (!database.data.length) {
+        return Promise.reject(new Error(`Database is empty`))
+      }
+      return database
+    })
+  })
 }
 
 step("Start server", async () => {
@@ -33,28 +52,68 @@ step("Start server", async () => {
     url
   }
   gauge.dataStore.scenarioStore.put('serverId', serverId)
+  gauge.dataStore.scenarioStore.put('serverUrl', url)
 
   return waitForUrl(url, 10 * 1000)
 })
+
+step("Start static server", async () => {
+  const serverId = generateId(4)
+  const port = gauge.dataStore.scenarioStore.get('port')
+
+  const app = express()
+  app.use(express.static(getBaseDir()))
+
+  const url = `http://localhost:${port}`
+  servers[serverId] = {
+    server: false,
+    port,
+    url
+  }
+  gauge.dataStore.scenarioStore.put('serverId', serverId)
+  gauge.dataStore.scenarioStore.put('serverUrl', url)
+
+  return new Promise((resolve, reject) => {
+    const server = app.listen(port, (err) => {
+      if (err) {
+        return reject(err)
+      }
+      servers[serverId].server = server;
+      resolve()
+    })
+  })
+})
+
+step("Wait for database", async () => {
+  const serverUrl = gauge.dataStore.scenarioStore.get('serverUrl')
+  await waitForDatabase(serverUrl, 10 * 1000)
+})
+
+const killChildProcess = async child => {
+  return new Promise(resolve => {
+    const id = setTimeout(() => {
+      child.kill('SIGKILL')
+    }, 1000)
+
+    child.on('exit', () => {
+      clearTimeout(id)
+      resolve()
+    })
+    child.kill('SIGTERM')
+  })
+}
 
 step("Stop server", async () => {
   const serverId = gauge.dataStore.scenarioStore.get('serverId')
   const server = servers[serverId]
   assert(!!server, `Server ${serverId} not found`)
 
-  return new Promise(resolve => {
-    const id = setTimeout(() => {
-      server.child.kill('SIGKILL')
-    }, 1000)
-
-    server.child.on('exit', () => {
-      clearTimeout(id)
-      resolve()
-    })
-    server.child.kill('SIGTERM')
-
-    delete servers[serverId]
-  })
+  delete servers[serverId]
+  if (server.child) {
+    return killChildProcess(server.child)
+  } else if (server.server) {
+    server.server.close()
+  }
 })
 
 step("Server has file <file>", async (file) => {
@@ -62,7 +121,7 @@ step("Server has file <file>", async (file) => {
   const server = servers[serverId]
   assert(!!server, `Server ${serverId} not found`)
 
-  return fetch(server.url, {timeout: 500})
+  return fetch(`${server.url}/${file}`, {timeout: 500})
     .then(res => {
       if (!res.ok) {
         throw new Error(`Could not fetch ${file}`)

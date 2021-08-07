@@ -7,3 +7,9 @@
 
 * Init index from <dir>
 * Extract files
+
+# Start server from <dir>
+
+* Init dir from <dir>
+* Create database
+* Start server

@@ -16,16 +16,16 @@ const events = (database, eventsFilename, cb) => {
       log.error(err, `Failed to load events from ${eventsFilename}: ${err}`);
       return cb(err);
     }
-    log.info(t0, `Read events from ${eventsFilename} with ${events.length} events`);
+    log.info(t0, `Read events from ${eventsFilename} with ${events.data.length} events`);
 
     const t1 = Date.now();
     const entryMap = database.data.reduce((result, entry) => {
       result.set(entry.id, entry);
       return result;
     }, new Map());
-    const changedEntries = applyEvents(entryMap, events);
+    const changedEntries = applyEvents(entryMap, events.data);
     database.data = Array.from(entryMap.values());
-    log.info(t1, `Applied ${events.length} events to ${changedEntries.length} entries`);
+    log.info(t1, `Applied ${events.data.length} events to ${changedEntries.length} entries`);
 
     cb(null, database);
   })
