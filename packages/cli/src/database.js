@@ -50,7 +50,7 @@ const command = {
         }
         buildDatabase(argv.index, argv.storage, argv.database, options, (err, database) => {
           if (err && err.code == 'ENOCHANGE') {
-            log.infor(`Database unchanged: ${err}`);
+            log.info(`Database unchanged: ${err}`);
           } else if (err) {
             log.error(`Could not build catalog database: ${err}`);
           } else {
