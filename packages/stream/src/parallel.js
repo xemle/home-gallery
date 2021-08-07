@@ -4,7 +4,9 @@ const parallel = ({testSync, test, task, concurrent}) => {
   let runningTasks = 0;
   const queue = [];
 
-  if (testSync && !test) {
+  if (!testSync && !test) {
+    test = (_, cb) => cb(true)
+  } else if (testSync && !test) {
     test = (entry, cb) => testSync(entry) ? cb(true) : cb(false);
   }
 
@@ -37,17 +39,29 @@ const parallel = ({testSync, test, task, concurrent}) => {
 
     nextTask.running = true;
     runningTasks++;
-    task(nextTask.entry, () => {
+
+    const taskDone = () => {
       runningTasks--;
       nextTask.completed = true;
       consumeHead();
-    });
+    }
+
+    test(nextTask.entry, runTask => runTask ? task(nextTask.entry, taskDone) : taskDone())
+    next()
   }
 
-  return through2.obj((entry, _, cb) => {
-    const done = () => cb(null, entry);
+  return through2.obj(function(entry, _, cb) {
+    const that = this
+    const isMaxRunning = runningTasks >= concurrent
+
+    // if isMaxRunning defer entry consumption, signal consumption immediately otherwise to queue up next entry
+    const done = isMaxRunning ? () => cb(null, entry) : () => that.push(entry);
     queue.push({entry, done, running: false, completed: false, isFlush: false});
-    next();
+
+    if (!isMaxRunning) {
+      cb()
+      next()
+    }
   }, (cb) => {
     queue.push({entry: null, done: cb, running: false, completed: false, isFlush: true});
     next();
