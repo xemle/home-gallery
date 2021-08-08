@@ -54,16 +54,21 @@ const runCommand = (command, args, options, cb) => {
   gauge.message(`Execute command: ${commandLine}`)
   gauge.dataStore.scenarioStore.put('lastCommand', commandLine)
 
-  const stdout = []
-  const stderr = []
+  const stdoutChunks = []
+  const stderrChunks = []
   const child = spawn(command, args, spawnOptions)
-  child.stdout.on('data', chunk => stdout.push(chunk))
-  child.stderr.on('data', chunk => stderr.push(chunk))
+  child.stdout.on('data', chunk => stdoutChunks.push(chunk))
+  child.stderr.on('data', chunk => stderrChunks.push(chunk))
 
   child.on('exit', (code) => {
+    const stdout = Buffer.concat(stdoutChunks).toString('utf8')
+    const stderr = Buffer.concat(stderrChunks).toString('utf8')
+    const commandHistory = gauge.dataStore.scenarioStore.get('commandHistory') || []
+    commandHistory.push({code, command, args, stdout, stderr})
+    gauge.dataStore.scenarioStore.put('commandHistory', commandHistory)
     gauge.dataStore.scenarioStore.put('lastExitCode', code)
     if (cb) {
-      cb(code, Buffer.concat(stdout).toString('utf8'), Buffer.concat(stderr).toString('utf8'))
+      cb(code, stdout, stderr)
     }
   })
 

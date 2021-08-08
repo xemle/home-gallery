@@ -32,6 +32,7 @@ Tags: database, option, journal
 * Create index with args "--journal abc"
 * Create database with args "--journal abc"
 * Database file stat are unchanged
+* Stderr is empty
 
 ## Add file
 
