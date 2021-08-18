@@ -21,6 +21,9 @@ function uniqEntries(entries) {
 
 const filterDatabase = (entries, query, cb) => query ? filterEntriesByQuery(entries, query, cb) : cb(null, entries)
 
+/**
+ * @param {EventBus} eventbus
+ */
 function databaseApi(eventbus) {
   let database = false;
   const databaseCache = cache(3600);
@@ -58,6 +61,9 @@ function databaseApi(eventbus) {
   }
 
   return {
+    /**
+     * @param {string} databaseFilename
+     */
     init: (databaseFilename) => {
       waitReadWatch(databaseFilename, (err, newDatabase) => {
         if (err) {
@@ -67,9 +73,9 @@ function databaseApi(eventbus) {
           database = newDatabase;
           databaseCache.clear();
           entryCache = {};
-          eventbus.emit(eventbus.create('server', {
+          eventbus.emit('server', {
             action: 'databaseReloaded'
-          }))
+          })
         }
       })
     },

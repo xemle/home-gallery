@@ -9,12 +9,14 @@ const logger = require('@home-gallery/logger')
 const { callbackify } = require('@home-gallery/common')
 
 const { loggerMiddleware } = require('./logger-middleware')
+const { EventBus } = require('./eventbus');
 const databaseApi = require('./api/database');
 const eventsApi = require('./api/events');
 const webapp = require('./webapp');
 
 const log = require('@home-gallery/logger')('server')
 const openCb = callbackify(open)
+const eventbus = new EventBus()
 
 function shouldCompress (req, res) {
   if (req.headers['x-no-compression']) {
@@ -54,7 +56,7 @@ function startServer(options, cb) {
 
   app.use(bodyParser.json({limit: '1mb'}))
 
-  const { read, push, stream, eventbus } = eventsApi(eventsFilename);
+  const { read, push, stream } = eventsApi(eventbus, eventsFilename);
   const { read: dbRead, init: dbInit, getFirstEntries } = databaseApi(eventbus);
   app.get('/api/database.json', dbRead);
   app.get('/api/events.json', read);

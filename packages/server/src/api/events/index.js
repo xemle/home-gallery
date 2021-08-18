@@ -8,7 +8,12 @@ const { readEvents, appendEvent } = require('@home-gallery/events/dist/node');
 const readEventsCb = callbackify(readEvents)
 const appendEventCb = callbackify(appendEvent)
 
-const events = (eventsFilename) => {
+/**
+ * @param {EventBus} eventbus
+ * @param {string} eventsFilename
+ * @returns
+ */
+const events = (eventbus, eventsFilename) => {
   let clients = [];
   let events = false;
 
@@ -25,6 +30,19 @@ const events = (eventsFilename) => {
       console.log(`Send data to client ${c.id}`);
       c.res.write(`data: ${JSON.stringify(event)}\n\n`);
     });
+  }
+
+  const brideServerEvents = eventNames => {
+    eventNames.forEach(name => {
+      eventbus.on(name, event => {
+        emit(create(name, event))
+      })
+    })
+  }
+
+  const bridgeClientEvents = (event) => {
+    emit(event)
+    eventbus.emit(event.type, event)
   }
 
   const removeClient = (client) => {
@@ -102,7 +120,7 @@ const events = (eventsFilename) => {
         if (events !== false) {
           events.data.push(event);
         }
-        emit(event);
+        bridgeClientEvents(event)
         res.status(201).end();
       }
     });
@@ -141,8 +159,8 @@ const events = (eventsFilename) => {
     });
   }
 
-  const eventbus = { create, emit };
-  return { read, stream, push, eventbus };
+  brideServerEvents(['server']);
+  return { read, stream, push };
 }
 
 module.exports = events;
