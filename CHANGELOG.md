@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- server: Allow query parameter for database api
 - Add fetch command to fetch and merge a remote gallery
 
 ### Changed

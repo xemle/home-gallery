@@ -121,10 +121,23 @@ step("Server has file <file>", async (file) => {
   const server = servers[serverId]
   assert(!!server, `Server ${serverId} not found`)
 
-  return fetch(`${server.url}/${file}`, {timeout: 500})
+  return fetch(`${server.url}${file}`, {timeout: 500})
     .then(res => {
-      if (!res.ok) {
-        throw new Error(`Could not fetch ${file}`)
-      }
+      assert(res.ok, `Could not fetch ${fetch}`)
+    })
+})
+
+step("Database with query <query> has <amount> entries", async (query, amount) => {
+  const serverId = gauge.dataStore.scenarioStore.get('serverId')
+  const server = servers[serverId]
+  assert(!!server, `Server ${serverId} not found`)
+
+  return fetch(`${server.url}/api/database${query}`, {timeout: 500})
+    .then(res => {
+      assert(res.ok, `Could not fetch ${fetch}`)
+      return res.json()
+    })
+    .then(data => {
+      assert(data.data.length == amount, `Expected ${amount} entries but got ${data.data.length}`)
     })
 })
