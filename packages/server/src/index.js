@@ -3,16 +3,17 @@ const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const pinoHttp = require('pino-http')
 const open = require('open')
 
 const logger = require('@home-gallery/logger')
 const { callbackify } = require('@home-gallery/common')
+
+const { loggerMiddleware } = require('./logger-middleware')
 const databaseApi = require('./api/database');
 const eventsApi = require('./api/events');
 const webapp = require('./webapp');
 
-const log = logger('server')
+const log = require('@home-gallery/logger')('server')
 const openCb = callbackify(open)
 
 function shouldCompress (req, res) {
@@ -39,26 +40,6 @@ function createServer(key, cert, app) {
   }
 }
 
-const createLogger = () => {
-  const customMessage = log => `${log.statusCode} ${log.req.method} ${log.req.url} ${Date.now() - log[pinoHttp.startTime]}ms`
-
-  return pinoHttp({
-    logger: logger('server.request'),
-    customLogLevel: (res, err) => {
-      if (res.statusCode >= 400 && res.statusCode < 500) {
-        return 'warn'
-      } else if (res.statusCode >= 500 || err) {
-        return 'error'
-      } else if (res.req.originalUrl.startsWith('/files')) {
-        return 'debug'
-      }
-      return 'info'
-    },
-    customSuccessMessage: customMessage,
-    customErrorMessage: (err, o) => customMessage(o)
-  })
-}
-
 const serverUrl = (port, key, cert) =>`${key && cert ? 'https' : 'http'}://localhost:${port}`
 
 function startServer(options, cb) {
@@ -66,7 +47,7 @@ function startServer(options, cb) {
   const app = express();
   app.disable('x-powered-by');
 
-  app.use(createLogger())
+  app.use(loggerMiddleware())
   app.use(cors());
   app.use(compression({ filter: shouldCompress }))
   app.use('/files', express.static(storageDir, {index: false, maxAge: '2d', immutable: true}));
