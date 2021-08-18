@@ -2,6 +2,8 @@ const fs = require('fs');
 const log = require('@home-gallery/logger')('server.api.database.read');
 
 const { readDatabase } = require('@home-gallery/database');
+const { applyEvents } = require('./apply-events')
+const { buildEntriesTextCache } = require('@home-gallery/query')
 
 function read(filename, cb) {
   const t0 = Date.now();
@@ -14,14 +16,6 @@ function read(filename, cb) {
   });
 }
 
-function watch(filename, cb) {
-  fs.watch(filename, () => {
-    setTimeout(() => {
-      log.info(`Database file ${filename} changed. Re-import it`);
-      read(filename, cb);
-    }, 250);
-  })
-}
 
 const exists = (filename, cb) => {
   fs.stat(filename, err => {
@@ -47,14 +41,42 @@ const wait = (filename, delay, cb) => {
   })
 }
 
-function waitReadWatch(filename, cb) {
+const mergeEvents = (database, getEvents, cb) => {
+  getEvents((err, events) => {
+    if ((err && err.code == 'ENOENT')) {
+      cb(null, database)
+    } else if (err) {
+      log.warn(err, `Could not read events. Skip merging events to database: ${err}`)
+      cb(null, database)
+    } else {
+      const t0 = Date.now()
+      const changedEntries = applyEvents(database.data, events)
+      log.debug(t0, `Applied ${events.length} events to ${changedEntries.length} entries of ${database.data.length} database entries`)
+      cb(null, database)
+    }
+  })
+}
+
+function waitReadWatch(filename, getEvents, cb) {
+  const onChange = () => {
+    setTimeout(() => {
+      log.info(`Database file ${filename} changed. Re-import it`);
+      next()
+    }, 250)
+  }
+
   const next = () => {
-    read(filename, (err, data) => {
+    read(filename, (err, database) => {
       if (err) {
         return cb(err);
       }
-      cb(null, data);
-      watch(filename, cb);
+      mergeEvents(database, getEvents, (err, database) => {
+        if (err) {
+          return cb(err)
+        }
+        buildEntriesTextCache(database.data)
+        cb(null, database);
+      })
     });
   }
 
@@ -68,6 +90,7 @@ function waitReadWatch(filename, cb) {
           return cb(err);
         }
         log.info(`Database file ${filename} exists now. Continue`);
+        fs.watchFile(filename, onChange)
         next();
       });
     } else {

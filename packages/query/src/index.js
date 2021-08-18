@@ -52,4 +52,8 @@ const filterEntriesByQuery = (entries, query, cb) => {
   })
 }
 
-module.exports = { filterEntriesByQuery, stringifyEntry, parse, createFilter };
+const clearEntriesTextCache = entries => entries.forEach(entry => entry.textCache = false)
+
+const buildEntriesTextCache = entries => entries.forEach(entry => entry.textCache = stringifyEntry(entry))
+
+module.exports = { filterEntriesByQuery, stringifyEntry, parse, createFilter, clearEntriesTextCache, buildEntriesTextCache };

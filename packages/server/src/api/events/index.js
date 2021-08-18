@@ -1,12 +1,8 @@
 const { v4: uuidv4 } = require('uuid');
-const { callbackify } = require('util')
 
 const log = require('@home-gallery/logger')('server.api.events');
 
 const { readEvents, appendEvent } = require('@home-gallery/events/dist/node');
-
-const readEventsCb = callbackify(readEvents)
-const appendEventCb = callbackify(appendEvent)
 
 /**
  * @param {EventBus} eventbus
@@ -111,29 +107,45 @@ const events = (eventbus, eventsFilename) => {
     if (!event.date) {
       event.date = new Date().toISOString();
     }
-    appendEventCb(eventsFilename, event, (err) => {
-      if (err) {
-        console.error(`Could not save event to ${eventsFilename}. Error: ${err}. Event ${JSON.stringify(event).substr(0, 50)}...`);
-        res.status(500).end();
-      } else {
+    appendEvent(eventsFilename, event)
+      .then(() => {
         log.info(`Saved event ${event.id} to ${eventsFilename}`);
         if (events !== false) {
           events.data.push(event);
         }
         bridgeClientEvents(event)
         res.status(201).end();
-      }
-    });
+      })
+      .catch(err => {
+        log.error(err, `Could not save event to ${eventsFilename}. Error: ${err}. Event ${JSON.stringify(event).substr(0, 50)}...`);
+        res.status(500).json({
+          error: {
+            code: 500,
+            message: 'Failed to save event. See server logs for details.'
+          }
+        })
+      })
+  }
+
+  const getEvents = cb => {
+    if (events !== false) {
+      return cb(null, events)
+    }
+    const t0 = Date.now();
+    readEvents(eventsFilename)
+      .then(data => {
+        events = data;
+        log.info(t0, `Read events file ${eventsFilename} with ${events.data.length} events`);
+        cb(null, events)
+      })
+      .catch(err => {
+        cb(err)
+      })
   }
 
   const read = (_, res) => {
-    if (events !== false) {
-      log.debug(`Send ${events.data.length} cached events`);
-      return res.json(events);
-    }
-
     const t0 = Date.now();
-    readEventsCb(eventsFilename, (err, data) => {
+    getEvents((err, events) => {
       if (err && err.code === 'ENOENT') {
         log.info(`Events file ${eventsFilename} does not exist yet. Create an event to initialize it`);
         const err = {
@@ -153,14 +165,18 @@ const events = (eventbus, eventsFilename) => {
         }
         return res.status(500).json(err);
       }
-      events = data;
-      log.info(t0, `Read events file ${eventsFilename} and send ${events.data.length} events`);
+      log.debug(`Send ${events.data.length} events`)
       return res.json(events);
     });
   }
 
   brideServerEvents(['server']);
-  return { read, stream, push };
+  return {
+    read,
+    stream,
+    push,
+    getEvents
+  };
 }
 
 module.exports = events;

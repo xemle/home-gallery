@@ -56,7 +56,7 @@ function startServer(options, cb) {
 
   app.use(bodyParser.json({limit: '1mb'}))
 
-  const { read, push, stream } = eventsApi(eventbus, eventsFilename);
+  const { read, push, stream, getEvents } = eventsApi(eventbus, eventsFilename);
   const { read: dbRead, init: dbInit, getFirstEntries } = databaseApi(eventbus);
   app.get('/api/database.json', dbRead);
   app.get('/api/events.json', read);
@@ -80,7 +80,7 @@ function startServer(options, cb) {
     .on('listening', () => {
       const url = serverUrl(port, key, cert)
       log.info(`Open Home Gallery on ${url}`);
-      dbInit(databaseFilename);
+      dbInit(databaseFilename, getEvents);
       if (openBrowser) {
         log.debug(`Open browser with url ${url}`)
         return openCb(url, () => cb(null, app))
