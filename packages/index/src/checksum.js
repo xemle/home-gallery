@@ -82,7 +82,8 @@ const checksum = (index, sha1sumDate, cb) => {
       if (interrupted) {
         return;
       } else if (err) {
-        done(err);
+        log.warn(err, `Could not create checksum of ${filename}: ${err}. Continue.`)
+        return calculateAll(base, entries, updatedEntries, done);
       }
       entry.sha1sum = sha1sum;
       entry.sha1sumDate = sha1sumDate;
