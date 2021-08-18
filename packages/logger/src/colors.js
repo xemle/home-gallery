@@ -3,7 +3,7 @@ const chalk = require('chalk')
 // credits to TJ Holowaychuk <tj@vision-media.ca> from debug package
 // for color values and hash algorithm
 const colors16 = [
-  6, 2, 3, 4, 5, 1
+  chalk.cyan, chalk.green, chalk.yellow, chalk.blue, chalk.red, chalk.magenta
 ]
 
 const colors256 = [
@@ -39,10 +39,10 @@ const colorNoneFns = {
 }
 
 const color16Fns = {
-  moduleColorFn: module => chalk.ansi256(colors16[moduleHash(module) % colors16.length]).bold,
-  durationColorFn: chalk.grey.dim,
-  trace: { levelColorFn: chalk.grey, msgColorFn: chalk.grey.dim },
-  debug: { levelColorFn: chalk.grey, msgColorFn: chalk.grey.dim },
+  moduleColorFn: module => colors16[moduleHash(module) % colors16.length].bold,
+  durationColorFn: chalk.grey,
+  trace: { levelColorFn: chalk.grey, msgColorFn: chalk.grey },
+  debug: { levelColorFn: chalk.grey, msgColorFn: chalk.grey },
   info: { levelColorFn: identityFn, msgColorFn: identityFn },
   warn: { levelColorFn: chalk.yellow.bold, msgColorFn: chalk.yellow },
   error: { levelColorFn: chalk.red.bold, msgColorFn: chalk.red },

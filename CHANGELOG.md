@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix logger colors for terminals with color level 1 (16 colors)
 - index: Fix error handling on checksum calculation
 
 ## [1.2.1] - 2021-08-08
