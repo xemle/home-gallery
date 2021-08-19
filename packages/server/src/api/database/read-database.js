@@ -62,12 +62,12 @@ function waitReadWatch(filename, cb) {
     if (err) {
       return cb(err);
     } else if (!hasFile) {
-      console.log(`Database file ${filename} does not exists. Waiting for the database file...`)
+      log.info(`Database file ${filename} does not exists. Waiting for the database file...`)
       wait(filename, 10 * 1000, err => {
         if (err) {
           return cb(err);
         }
-        console.log(`Database file ${filename} exists now. Continue`);
+        log.info(`Database file ${filename} exists now. Continue`);
         next();
       });
     } else {
