@@ -15,7 +15,7 @@ export const fetchAll = async (limits, onChunk) => {
   let offset = 0;
 
   const next = async () => {
-    let url = `api/database?offset=${offset}`;
+    let url = `api/database.json?offset=${offset}`;
     let limit = limits[limitIndex];
     if (limit > 0) {
       url += `&limit=${limit}`
@@ -52,7 +52,7 @@ class EventError extends Error {
 }
 
 export const getEvents = async () => {
-  return await fetch(`api/events`)
+  return await fetch(`api/events.json`)
       .then(res => {
         if (isSuccessfullResponse(res)) {
           return res.json()

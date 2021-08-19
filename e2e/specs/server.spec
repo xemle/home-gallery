@@ -8,6 +8,6 @@ Tags: server,docker
 * Create database
 * Start server
 * Server has file "/index.html"
-* Server has file "/api/database"
+* Server has file "/api/database.json"
 ___
 * Stop server

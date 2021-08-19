@@ -75,10 +75,14 @@ function startServer(options, cb) {
 
   const { read, push, stream, eventbus } = eventsApi(eventsFilename);
   const { read: dbRead, init: dbInit, getFirstEntries } = databaseApi(eventbus);
-  app.get('/api/database', dbRead);
-  app.get('/api/events', read);
+  app.get('/api/database.json', dbRead);
+  app.get('/api/events.json', read);
   app.get('/api/events/stream', stream);
   app.post('/api/events', push);
+
+  // deprecated
+  app.get('/api/database', dbRead);
+  app.get('/api/events', read);
 
   app.use(webapp(webappDir, getFirstEntries, 50));
 

@@ -13,7 +13,7 @@ const log = require('@home-gallery/logger')('fetch.api')
 const fetchDatabase = async serverUrl => {
   log.debug(`Fetching database from remote ${serverUrl}...`)
   const t0 = Date.now()
-  return fetch(`${serverUrl}/api/database`)
+  return fetch(`${serverUrl}/api/database.json`)
     .then(res => {
       if (res.status == 404) {
         log.debug(t0, `Remote ${serverUrl} has no database. Continue with empty database`)
@@ -35,7 +35,7 @@ const fetchDatabase = async serverUrl => {
 const fetchEvents = async serverUrl => {
   log.debug(`Fetching events from remote ${serverUrl}...`)
   const t0 = Date.now()
-  return fetch(`${serverUrl}/api/events`)
+  return fetch(`${serverUrl}/api/events.json`)
     .then(res => {
       if (res.status == 404) {
         log.debug(t0, `Remote has no events. Continue with empty events`)

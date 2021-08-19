@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add fetch command to fetch and merge a remote gallery
 
+### Changed
+
+- Use `/api/database.json` instead of `/api/database`
+- Use `/api/events.json` instead of `/api/events`
+
 ### Fixed
 
 - index: Fix graceful abort by user (ctrl-c)

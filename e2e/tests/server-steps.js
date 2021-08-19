@@ -27,7 +27,7 @@ const waitForUrl = async (url, timeout, onResponse) => {
 }
 
 const waitForDatabase = async (url, timeout) => {
-  return waitForUrl(`${url}/api/database`, timeout, res => {
+  return waitForUrl(`${url}/api/database.json`, timeout, res => {
     if (!res.ok) {
       throw new Error(`Database response is not successfull: Code is ${res.status}`)
     }
