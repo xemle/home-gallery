@@ -13,7 +13,9 @@ function cache(duration) {
     } else {
       res.sendResponse = res.send
       res.send = (body) => {
-        currentCache.put(key, body, duration * 1000);
+        if (res.statusCode == 200) {
+          currentCache.put(key, body, duration * 1000);
+        }
         res.sendResponse(body)
       }
       next();
