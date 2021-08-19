@@ -4,7 +4,7 @@ const express = require('express');
 
 const isIndex = path => path === '/' || path === '/index.html';
 
-const injectState = (indexFile, getEntries, count) => {
+const injectState = (indexFile, getFirstEntries, count) => {
   return (req, res, next) => {
     if (!isIndex(req.path)) {
       return next();
@@ -15,7 +15,7 @@ const injectState = (indexFile, getEntries, count) => {
         return res.status(404).json({error: `${err}`});
       }
       const state = {
-        entries: getEntries(count)
+        entries: getFirstEntries(count)
       }
       data = data.replace('window.__homeGallery={}', `window.__homeGallery=${JSON.stringify(state)}`)
       res.set({

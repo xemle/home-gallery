@@ -50,8 +50,8 @@ function databaseApi(eventbus) {
         }
       })
     },
-    getEntries: (count) => {
-      const key = `${count}`;
+    getFirstEntries: (count) => {
+      const key = `firstEntries:${count}`;
       if (typeof entryCache[key] === 'undefined') {
         entryCache[key] = database.data.slice(0, count);
       }

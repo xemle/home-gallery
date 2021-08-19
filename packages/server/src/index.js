@@ -74,13 +74,13 @@ function startServer(options, cb) {
   app.use(bodyParser.json({limit: '1mb'}))
 
   const { read, push, stream, eventbus } = eventsApi(eventsFilename);
-  const { read: dbRead, init: dbInit, getEntries } = databaseApi(eventbus);
+  const { read: dbRead, init: dbInit, getFirstEntries } = databaseApi(eventbus);
   app.get('/api/database', dbRead);
   app.get('/api/events', read);
   app.get('/api/events/stream', stream);
   app.post('/api/events', push);
 
-  app.use(webapp(webappDir, getEntries, 50));
+  app.use(webapp(webappDir, getFirstEntries, 50));
 
   const server = createServer(key, cert, app);
   server.listen(port, host)
