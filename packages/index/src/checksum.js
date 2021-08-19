@@ -49,21 +49,22 @@ const checksum = (index, sha1sumDate, cb) => {
   const t0 = Date.now();
 
   if (!missingChecksumEntries.length) {
-    return cb(null, index, false);
+    return cb(null, index, false, interrupted);
   }
 
   const totalBytes = fileEntries.reduce((all, entry) => all + entry.size, 0);
   const missingBytes = missingChecksumEntries.reduce((all, entry) => all + entry.size, 0);
+  const updatedEntries = []
   let bytesCalculated = 0;
   log.info(`Calculating ids for ${missingChecksumEntries.length} entries with ${humanize(missingBytes)} of total size ${humanize(totalBytes)} (${percent(missingBytes, totalBytes)})`);
 
   const gracefulShutdown = () => {
     if (!interrupted) {
-      console.warn(`Graceful shutdown. Ids of ${humanize(bytesCalculated)} (${percent(bytesCalculated, missingBytes)}) were calculated, ${percent(totalBytes - missingBytes + bytesCalculated, totalBytes)} of ${humanize(totalBytes)} are done. Please be patient to avoid data loss!`);
+      log.warn(`Graceful shutdown. Ids of ${humanize(bytesCalculated)} (${percent(bytesCalculated, missingBytes)}) were calculated, ${percent(totalBytes - missingBytes + bytesCalculated, totalBytes)} of ${humanize(totalBytes)} are done. Please be patient to avoid data loss!`);
       interrupted = true;
-      cb(null, index, true);
+      cb(null, index, updatedEntries, interrupted);
     } else {
-      console.log(`Shutdown in progress. Please be patient to avoid data loss!`);
+      log.warn(`Shutdown in progress. Please be patient to avoid data loss!`);
     }
   };
   process.on('SIGINT', gracefulShutdown);
@@ -71,7 +72,9 @@ const checksum = (index, sha1sumDate, cb) => {
   const progressLog = createByteProgressLog(missingBytes, 30 * 1000)
 
   const calculateAll = (base, entries, updatedEntries, done) => {
-    if (!entries.length || interrupted) {
+    if (interrupted) {
+      return;
+    } else if (!entries.length) {
       return done(null, updatedEntries);
     }
     const entry = entries.shift();
@@ -95,13 +98,13 @@ const checksum = (index, sha1sumDate, cb) => {
     })
   }
 
-  calculateAll(index.base, missingChecksumEntries, [], (err, updatedEntries) => {
+  calculateAll(index.base, missingChecksumEntries, updatedEntries, (err, updatedEntries) => {
     process.off('SIGINT', gracefulShutdown);
     if (err) {
       return cb(err);
     }
     log.info(t0, `All ids of ${humanize(totalBytes)} are calculated. Calculated ids of ${humanize(bytesCalculated)} (${(100 * bytesCalculated / totalBytes).toFixed(1)}%)`);
-    cb(null, index, updatedEntries);
+    cb(null, index, updatedEntries, interrupted);
   });
 }
 

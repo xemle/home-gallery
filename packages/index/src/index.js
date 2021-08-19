@@ -56,14 +56,20 @@ const asyncUpdateChecksum = async (filename, index, withChecksum, isDryRun) => {
   }
 
   const sha1sumDate = new Date().toISOString();
-  const [updateIndex, checksumChanges] = await asyncChecksum(index, sha1sumDate)
+  const [updateIndex, checksumChanges, interrupted] = await asyncChecksum(index, sha1sumDate)
 
-  if (!checksumChanges || isDryRun) {
-    return [index, checksumChanges]
+  if (checksumChanges && checksumChanges.length && !isDryRun) {
+    const t0 = Date.now()
+    index = await asyncWriteIndex(filename, updateIndex);
+    log.info(t0, `File index was saved to ${filename} and ${checksumChanges.length} entries have new checkums/ids`)
+  }
+  if (interrupted) {
+    const err = new Error(`Checksum calculation was aborted by user`)
+    err.code = 'EUSERABORT'
+    return Promise.reject(err)
   }
 
-  const writeIndex = await asyncWriteIndex(filename, updateIndex);
-  return [writeIndex, checksumChanges];
+  return [index, checksumChanges];
 }
 
 const asyncUpdate = async (directory, filename, options) => {

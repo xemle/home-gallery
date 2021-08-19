@@ -69,7 +69,9 @@ const command = {
       journal: argv.journal
     }
     update(argv.directory, argv.index, options, (err, _, limitExceeded) => {
-      if (err) {
+      if (err && err.code == 'EUSERABORT') {
+        log.warn(`Index creation aborted: ${err}`)
+      } else if (err) {
         log.error(`Failed to create index: ${err}`)
       }
       process.exit(err ? 2 : (limitExceeded ? 1 : 0))
