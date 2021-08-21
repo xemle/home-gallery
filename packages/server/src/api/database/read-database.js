@@ -58,11 +58,18 @@ const mergeEvents = (database, getEvents, cb) => {
 }
 
 function waitReadWatch(filename, getEvents, cb) {
-  const onChange = () => {
-    setTimeout(() => {
-      log.info(`Database file ${filename} changed. Re-import it`);
-      next()
-    }, 250)
+  let changeTimer
+
+  const onChange = (cur, prev) => {
+    clearTimeout(changeTimer)
+    if (cur.size) {
+      changeTimer = setTimeout(() => {
+        log.info(`Database file ${filename} changed. Re-import it`);
+        next()
+      }, 250)
+    } else if (!cur.size && prev.size) {
+      log.warn(`Database file ${filename} was removed. Ignore`);
+    }
   }
 
   const next = () => {
@@ -94,6 +101,7 @@ function waitReadWatch(filename, getEvents, cb) {
         next();
       });
     } else {
+      fs.watchFile(filename, onChange)
       next();
     }
   })
