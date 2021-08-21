@@ -4,6 +4,9 @@ const log = require('@home-gallery/logger')('server.api.events');
 
 const { readEvents, appendEvent } = require('@home-gallery/events/dist/node');
 
+const { sendError } = require('../error');
+const { send } = require('process');
+
 /**
  * @param {EventBus} eventbus
  * @param {string} eventsFilename
@@ -98,8 +101,7 @@ const events = (eventbus, eventsFilename) => {
     const event = req.body;
     if (!isValidEvent(event)) {
       log.warn(`Received invalid event: ${JSON.stringify(event)}`);
-      res.status(400).end();
-      return;
+      return sendError(res, 400, `Invalid event data`)
     }
     if (!event.id) {
       event.id = uuidv4();
@@ -118,12 +120,7 @@ const events = (eventbus, eventsFilename) => {
       })
       .catch(err => {
         log.error(err, `Could not save event to ${eventsFilename}. Error: ${err}. Event ${JSON.stringify(event).substr(0, 50)}...`);
-        res.status(500).json({
-          error: {
-            code: 500,
-            message: 'Failed to save event. See server logs for details.'
-          }
-        })
+        return sendError(res, 500, 'Failed to save event. See server logs for details.')
       })
   }
 
@@ -148,24 +145,12 @@ const events = (eventbus, eventsFilename) => {
     getEvents((err, events) => {
       if (err && err.code === 'ENOENT') {
         log.info(`Events file ${eventsFilename} does not exist yet. Create an event to initialize it`);
-        const err = {
-          error: {
-            code: 404,
-            message: 'Events file does not exist yet. Create an event to initialize it'
-          }
-        }
-        return res.status(404).json(err);
+        return sendError(res, 404, 'Events file does not exist yet. Create an event to initialize it')
       } else if (err) {
         log.error(err, `Failed to read events file ${eventsFilename}: ${err}`);
-        const err = {
-          error: {
-            code: 500,
-            message: 'Loading event file failed. See server logs'
-          }
-        }
-        return res.status(500).json(err);
+        return sendError(res, 500, 'Loading event file failed. See server logs')
       }
-      log.debug(`Send ${events.data.length} events`)
+      log.debug(t0, `Send ${events.data.length} events`)
       return res.json(events);
     });
   }

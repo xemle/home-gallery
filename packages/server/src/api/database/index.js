@@ -8,6 +8,8 @@ const { cache } = require('./cache-middleware');
 const { sanitizeInt } = require('./sanitize');
 const { applyEvents } = require('./apply-events')
 
+const { sendError } = require('../error')
+
 const filterDatabase = (entries, query, cb) => query ? filterEntriesByQuery(entries, query, cb) : cb(null, entries)
 
 /**
@@ -21,22 +23,12 @@ function databaseApi(eventbus) {
   function send(req, res) {
     if (!database) {
       log.info(`Database file is not loaded yet.`);
-      const err = {
-        error: {
-          code: 404,
-          message: 'Database file is not loaded yet.'
-        }
-      }
-      return res.status(404).json(err);
+      return sendError(res, 404, 'Database file is not loaded yet.')
     } else if (req.query && (req.query.offset || req.query.limit || req.query.q)) {
       filterDatabase(database.data, req.query.q, (err, entries) => {
         if (err) {
           log.error(err, `Failed to filter database with query '${req.query.q}': ${err}`)
-          return res.status(400).json({
-            type: 'error',
-            code: 400,
-            message: `Failed to filter database with query '${req.query.q}': ${err}`
-          })
+          return sendError(res, 400, `Failed to filter database with query '${req.query.q}': ${err}`)
         }
         const length = entries.length;
         const offset = sanitizeInt(req.query.offset, 0, length, 0);
