@@ -50,8 +50,8 @@ const mergeEvents = (database, getEvents, cb) => {
       cb(null, database)
     } else {
       const t0 = Date.now()
-      const changedEntries = applyEvents(database.data, events)
-      log.debug(t0, `Applied ${events.length} events to ${changedEntries.length} entries of ${database.data.length} database entries`)
+      const changedEntries = applyEvents(database.data, events.data)
+      log.debug(t0, `Applied ${events.data.length} events to ${changedEntries.length} of ${database.data.length} database entries`)
       cb(null, database)
     }
   })
