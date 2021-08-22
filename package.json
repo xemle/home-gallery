@@ -6,10 +6,10 @@
   "scripts": {
     "postinstall": "npm --prefix e2e install && link-parent-bin && node packages/extractor/validate-sharp.js",
     "clean": "lerna run clean",
-    "clean:backend": "lerna run clean --scope \"@home-gallery/{logger,common,stream,cli,index,extractor,fetch,database}\"",
+    "clean:backend": "lerna run clean --scope \"@home-gallery/{logger,cast,common,stream,cli,index,extractor,fetch,database}\"",
     "clean:web": "lerna run clean --scope \"@home-gallery/{common,cli,server,webapp,query,events}\"",
     "build": "lerna run build",
-    "build:backend": "lerna run build --scope \"@home-gallery/{logger,common,stream,cli,index,extractor,fetch,database}\"",
+    "build:backend": "lerna run build --scope \"@home-gallery/{logger,cast,common,stream,cli,index,extractor,fetch,database}\"",
     "build:web": "lerna run build --scope \"@home-gallery/{common,cli,server,webapp,query,events}\"",
     "test": "lerna run test",
     "test:e2e": "gauge -d e2e run specs",
@@ -18,7 +18,7 @@
     "watch:backend:common": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/common\"",
     "watch:backend:logger": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/logger\"",
     "watch:backend:db": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{extractor,database}\"",
-    "watch:backend:rest": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{cli,stream,index,fetch}\"",
+    "watch:backend:rest": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{cast,cli,stream,index,fetch}\"",
     "watch:web": "npm-run-all -p watch:web:common watch:web:rest",
     "watch:web:common": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{common,query,events}\"",
     "watch:web:rest": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{server,webapp}\""
@@ -75,6 +75,7 @@
   "dependencies": {
     "@home-gallery/api-server": "file:packages/api-server",
     "@home-gallery/bundle": "file:packages/bundle",
+    "@home-gallery/cast": "file:packages/cast",
     "@home-gallery/cli": "file:packages/cli",
     "@home-gallery/common": "file:packages/common",
     "@home-gallery/database": "file:packages/database",

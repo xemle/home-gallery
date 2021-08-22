@@ -41,6 +41,7 @@ const filterDatabaseByQuery = async (database, query) => {
     const t1 = Date.now()
     filterEntriesByQuery(database.data, query, (err, entries) => {
       if (err) {
+        log.error(err, `Could not fitler ${database.data.length} database entries with query ${query}`)
         reject(err)
       } else {
         const filteredDatabase = Object.assign({}, database, {data: entries})

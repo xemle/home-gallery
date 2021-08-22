@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add cast cli for a Chromecast-enabled slide show
 - server: Apply events on database load
 - server: Allow query parameter for database api
 - Add fetch command to fetch and merge a remote gallery

@@ -9,6 +9,7 @@ const databaseCli = require('./database');
 const serverCli = require('./server');
 const exportCli = require('./export');
 const fetchCli = require('./fetch');
+const castCli = require('./cast');
 const interactiveCli = require('./interactive');
 const runCli = require('./run')
 
@@ -23,6 +24,7 @@ const cli = () => {
     .command(serverCli)
     .command(exportCli)
     .command(fetchCli)
+    .command(castCli)
     .command(interactiveCli)
     .command(runCli)
     .demandCommand()
