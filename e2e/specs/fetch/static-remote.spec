@@ -22,6 +22,18 @@ Tags: fetch,static,remote
 * Fetch
 * Event database has "1" events
 
+## Static with query
+
+* Use file space "remote"
+* Init dir from "fetch/static"
+* Start static server
+* Use file space "local"
+* Fetch with args "-q hello"
+* Database has "1" entries
+* Event database has "1" events
+* Storage has no entry for "25d7b73"
+* Storage has entry "image-preview-1920.jpg" for "96419bb"
+
 ___
 * Stop server
 * Stderr is empty

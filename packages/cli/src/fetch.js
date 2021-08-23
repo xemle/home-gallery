@@ -9,6 +9,16 @@ const command = {
         alias: ['u', 'url'],
         describe: 'Gallery server url'
       },
+      insecure: {
+        alias: 'k',
+        boolean: true,
+        describe: 'Do not verify HTTPS certificates'
+      },
+      query: {
+        alias: 'q',
+        string: true,
+        describe: 'Search query'
+      },
       database: {
         alias: 'd',
         describe: 'Database filename'
@@ -21,11 +31,6 @@ const command = {
         alias: 's',
         describe: 'Storage directory'
       },
-      insecure: {
-        alias: 'k',
-        boolean: true,
-        describe: 'Do not verify HTTPS certificates'
-      }
     })
     .demandOption(['url', 'storage', 'database', 'events'])
   },
@@ -36,7 +41,8 @@ const command = {
       databaseFile: argv.database,
       storageDir: argv.storage,
       eventFile: argv.events,
-      insecure: argv.insecure
+      insecure: argv.insecure,
+      query: argv.query
     }
     const t0 = Date.now();
     fetch(options)

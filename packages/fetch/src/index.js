@@ -16,18 +16,24 @@ const handleIncompatbileEvents = err => {
   throw err
 }
 
-const fetch = async ({ serverUrl, databaseFile, storageDir, eventFile, insecure } = {}) => {
+const mergeAndFilterDatabase = async (database, events, query) => {
+  const appliedDatabase = applyEvents(database, events)
+  return filterDatabaseByQuery(appliedDatabase, query)
+}
+
+const fetch = async ({ serverUrl, databaseFile, storageDir, eventFile, insecure, query } = {}) => {
   const [remoteDatabase, remoteEvents, localDatabase] = await Promise.all([
-    fetchDatabase(serverUrl, { insecure }),
+    fetchDatabase(serverUrl, { query, insecure }),
     fetchEvents(serverUrl, { insecure }).catch(handleIncompatbileEvents),
     readDatabase(databaseFile)
   ])
 
-  await handlePreviews(serverUrl, remoteDatabase, localDatabase, storageDir, { insecure })
+  const remoteFilteredDatabase = await mergeAndFilterDatabase(remoteDatabase, remoteEvents, query)
+  await handlePreviews(serverUrl, remoteFilteredDatabase, localDatabase, storageDir, { insecure })
   await handleEvents(remoteEvents, eventFile).catch(err => {
     log.warn(`Failed to merge events: ${err}. Skip events`)
   })
-  await mergeDatabase(remoteDatabase, localDatabase, databaseFile)
+  await mergeDatabase(remoteFilteredDatabase, localDatabase, databaseFile)
 }
 
 const fetchRemote = async (serverUrl, {query, insecure}) => {
@@ -36,8 +42,7 @@ const fetchRemote = async (serverUrl, {query, insecure}) => {
     fetchEvents(serverUrl, { insecure }).catch(handleIncompatbileEvents)
   ])
 
-  const appliedDatabase = applyEvents(database, events)
-  return filterDatabaseByQuery(appliedDatabase, query)
+  return mergeAndFilterDatabase(database, events, query)
 }
 
 module.exports = {
