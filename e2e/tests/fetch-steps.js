@@ -14,7 +14,13 @@ step("Use file space <space>", async (space) => {
   }
 })
 
-step("Fetch", async () => {
+const fetch = async (args = []) => {
   const serverUrl = gauge.dataStore.scenarioStore.get('serverUrl')
-  await runCli(['fetch', '-d', getDatabaseFilename(), '-s', getStorageDir(), '-e', getEventsFilename(), '-r', serverUrl])
+  await runCli(['fetch', '-d', getDatabaseFilename(), '-s', getStorageDir(), '-e', getEventsFilename(), '-r', serverUrl, ...args])
+}
+step("Fetch", fetch)
+
+step("Fetch with args <args>", async (args) => {
+  const argList = args.split(/\s+/)
+  return fetch(argList)
 })

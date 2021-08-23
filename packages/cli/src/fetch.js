@@ -21,6 +21,11 @@ const command = {
         alias: 'r',
         describe: 'Remote server url'
       },
+      insecure: {
+        alias: 'k',
+        boolean: true,
+        describe: 'Do not verify HTTPS certificates'
+      }
     })
     .demandOption(['storage', 'database', 'events', 'remote' ])
   },
@@ -31,6 +36,7 @@ const command = {
       databaseFile: argv.database,
       storageDir: argv.storage,
       eventFile: argv.events,
+      insecure: argv.insecure
     }
     const t0 = Date.now();
     fetch(options)

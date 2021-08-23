@@ -3,6 +3,7 @@ const { createWriteStream } = require('fs')
 const path = require('path')
 const { pipeline } = require('stream')
 const fetch = require('node-fetch')
+const https = require('https');
 
 const { isDatabaseTypeCompatible, HeaderType: DatabaseHeaderType } = require('@home-gallery/database')
 
@@ -10,10 +11,23 @@ const { isEventTypeCompatible, HeaderType: EventHeaderType } = require('@home-ga
 
 const log = require('@home-gallery/logger')('fetch.api')
 
-const fetchDatabase = async serverUrl => {
+const insecureAgent = new https.Agent({
+  rejectUnauthorized: false,
+});
+
+const options = (url, insecure) => {
+  if (url.startsWith('https') && insecure) {
+    return {
+      agent: insecureAgent
+    }
+  }
+  return {}
+}
+
+const fetchDatabase = async (serverUrl, {insecure} = {}) => {
   log.debug(`Fetching database from remote ${serverUrl}...`)
   const t0 = Date.now()
-  return fetch(`${serverUrl}/api/database.json`)
+  return fetch(`${serverUrl}/api/database.json`, options(serverUrl, insecure))
     .then(res => {
       if (res.status == 404) {
         log.debug(t0, `Remote ${serverUrl} has no database. Continue with empty database`)
@@ -32,10 +46,10 @@ const fetchDatabase = async serverUrl => {
     })
 }
 
-const fetchEvents = async serverUrl => {
+const fetchEvents = async (serverUrl, { insecure } = {}) => {
   log.debug(`Fetching events from remote ${serverUrl}...`)
   const t0 = Date.now()
-  return fetch(`${serverUrl}/api/events.json`)
+  return fetch(`${serverUrl}/api/events.json`, options(serverUrl, insecure))
     .then(res => {
       if (res.status == 404) {
         log.debug(t0, `Remote has no events. Continue with empty events`)
@@ -53,7 +67,7 @@ const fetchEvents = async serverUrl => {
     })
 }
 
-const fetchFile = async (serverUrl, file, storageDir) => {
+const fetchFile = async (serverUrl, file, storageDir, { insecure } = {}) => {
   log.trace(`Fetching ${file} from remote ${serverUrl}...`)
   const targetFilename = path.join(storageDir, file)
   const dir = path.dirname(targetFilename)
@@ -61,7 +75,7 @@ const fetchFile = async (serverUrl, file, storageDir) => {
 
   const url = `${serverUrl}/files/${file}`
   const t0 = Date.now()
-  return fetch(url)
+  return fetch(url, options(url, insecure))
     .then(res => {
       if (!res.ok) {
         throw new Error(`HTTP status code is ${res.status}`)

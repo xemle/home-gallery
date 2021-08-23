@@ -29,7 +29,7 @@ const getMissingFiles = (remoteDatabase, localDatabase) => {
   return missingRemoteFiles
 }
 
-const downloadMissingFiles = async (serverUrl, missingFiles, storageDir) => {
+const downloadMissingFiles = async (serverUrl, missingFiles, storageDir, { insecure }) => {
   if (!missingFiles.length) {
     log.info(`No missing files to download`)
     return
@@ -42,7 +42,7 @@ const downloadMissingFiles = async (serverUrl, missingFiles, storageDir) => {
     })
     .catch(() => cb(true))
 
-  const task = (file, cb) => fetchFile(serverUrl, file, storageDir).then(() => cb()).catch(err => cb(err))
+  const task = (file, cb) => fetchFile(serverUrl, file, storageDir, { insecure }).then(() => cb()).catch(err => cb(err))
 
   log.debug(`Starting downloading ${missingFiles.length} from ${serverUrl}`)
   const t0 = Date.now()
@@ -58,9 +58,9 @@ const downloadMissingFiles = async (serverUrl, missingFiles, storageDir) => {
   })
 }
 
-const handlePreviews = async (serverUrl, remoteDatabase, localDatabase, storageDir) => {
+const handlePreviews = async (serverUrl, remoteDatabase, localDatabase, storageDir, { insecure }) => {
   const missingFiles = getMissingFiles(remoteDatabase, localDatabase)
-  await downloadMissingFiles(serverUrl, missingFiles, storageDir)
+  await downloadMissingFiles(serverUrl, missingFiles, storageDir, { insecure })
 }
 
 module.exports = {

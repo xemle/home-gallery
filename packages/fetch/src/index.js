@@ -7,15 +7,15 @@ const { handlePreviews } = require('./preview')
 const { handleEvents } = require('./event')
 
 const fetch = async (options) => {
-  const { serverUrl, databaseFile, storageDir, eventFile } = options;
+  const { serverUrl, databaseFile, storageDir, eventFile, insecure } = options;
 
   const [remoteDatabase, localDatabase] = await Promise.all([
-    fetchDatabase(serverUrl),
+    fetchDatabase(serverUrl, { insecure }),
     readDatabase(databaseFile)
   ])
 
-  await handlePreviews(serverUrl, remoteDatabase, localDatabase, storageDir)
-  await handleEvents(serverUrl, eventFile).catch(err => {
+  await handlePreviews(serverUrl, remoteDatabase, localDatabase, storageDir, { insecure })
+  await handleEvents(serverUrl, eventFile, { insecure }).catch(err => {
     log.warn(`Failed to fetch events: ${err}. Skip events`)
   })
   await mergeDatabase(remoteDatabase, localDatabase, databaseFile)

@@ -25,21 +25,23 @@ const getTestDataDir = () => path.resolve(testDataDir)
 
 const getBaseDir = () => gauge.dataStore.scenarioStore.get('baseDir')
 
-const getFilesDir = () => path.join(getBaseDir(), 'files')
+const getPath = (...parts) => path.join(getBaseDir(), ...parts)
 
-const getConfigFilename = () => path.join(getBaseDir(), 'config', 'gallery.config.yml')
+const getFilesDir = () => getPath('files')
 
-const getIndexFilename = () => path.join(getBaseDir(), 'config', 'files.idx')
+const getConfigFilename = () => getPath('config', 'gallery.config.yml')
+
+const getIndexFilename = () => getPath('config', 'files.idx')
 
 const getJournalFilename = id => `${getIndexFilename()}.${id}.journal`
 
-const getStorageDir = () => path.join(getBaseDir(), 'storage')
+const getStorageDir = () => getPath('storage')
 
-const getDatabaseFilename = () => path.join(getBaseDir(), 'config', 'database.db')
+const getDatabaseFilename = () => getPath('config', 'database.db')
 
-const getEventsFilename = () => path.join(getBaseDir(), 'config', 'events.db')
+const getEventsFilename = () => getPath('config', 'events.db')
 
-const getExportOutputDir = () => path.join(getBaseDir(), 'export-output')
+const getExportOutputDir = () => getPath('export-output')
 
 const resolveArgs = (args, vars) => [].concat(args).map(arg => arg.replace(/\{([^}]+)\}/g, (_, name) => vars[name.trim()] || ''))
 
@@ -92,7 +94,7 @@ const runCliAsync = (args, options, cb) => {
   }
   const galleryArgsResolved = resolveArgs(galleryBinArgs, vars)
 
-  const logOptions = ['--log-file', path.join(getBaseDir(), 'e2e.log'), '--log-file-level', 'debug']
+  const logOptions = ['--log-file', getPath('e2e.log'), '--log-file-level', 'debug']
   const commandArgs = [...galleryArgsResolved, ...logOptions, ...args]
 
   return runCommand(galleryBin, commandArgs, {TZ: 'Europe/Berlin', ...options}, cb)
@@ -159,6 +161,7 @@ module.exports = {
   generateId,
   getTestDataDir,
   getBaseDir,
+  getPath,
   getFilesDir,
   getConfigFilename,
   getIndexFilename,

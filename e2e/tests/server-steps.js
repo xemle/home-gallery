@@ -1,14 +1,21 @@
+const https = require('https');
 const assert = require("assert")
 const fetch = require('node-fetch')
 const express = require('express')
 
-const { generateId, runCliAsync, getBaseDir, getStorageDir, getDatabaseFilename, getEventsFilename } = require('../utils')
+const { generateId, runCliAsync, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename } = require('../utils')
 
 const servers = {}
 
 const wait = async ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const onResponseNoop = res => res
+
+const insecureOption = {
+  agent: new https.Agent({
+    rejectUnauthorized: false,
+  })
+}
 
 const waitForUrl = async (url, timeout, onResponse) => {
   timeout = timeout || 10 * 1000
@@ -18,7 +25,7 @@ const waitForUrl = async (url, timeout, onResponse) => {
     if (Date.now() - startTime > timeout) {
       throw new Error(`Wait timeout exceeded for url: ${url}`)
     }
-    return fetch(url)
+    return fetch(url, url.startsWith('https') ? insecureOption : {})
       .then(onResponse || onResponseNoop)
       .catch(() => wait(200).then(next))
   }
@@ -40,12 +47,13 @@ const waitForDatabase = async (url, timeout) => {
   })
 }
 
-step("Start server", async () => {
+const startServer = async (args = []) => {
   const serverId = generateId(4)
   const port = gauge.dataStore.scenarioStore.get('port')
-  const child = runCliAsync(['server', '-s', getStorageDir(), '-d', getDatabaseFilename(), '-e', getEventsFilename(), '--port', port, '--no-open-browser'])
+  const child = runCliAsync(['server', '-s', getStorageDir(), '-d', getDatabaseFilename(), '-e', getEventsFilename(), '--port', port, '--no-open-browser', ...args])
 
-  const url = `http://localhost:${port}`
+  const protocol = args.includes('-K') ? 'https' : 'http'
+  const url = `${protocol}://localhost:${port}`
   servers[serverId] = {
     child,
     port,
@@ -55,7 +63,10 @@ step("Start server", async () => {
   gauge.dataStore.scenarioStore.put('serverUrl', url)
 
   return waitForUrl(url, 10 * 1000)
-})
+}
+step("Start server", startServer)
+
+step("Start HTTPS server", async () => startServer(['-K', getPath('config', 'server.key'), '-C', getPath('config', 'server.crt')]))
 
 step("Start static server", async () => {
   const serverId = generateId(4)
