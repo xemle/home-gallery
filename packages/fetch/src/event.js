@@ -1,12 +1,23 @@
 const log = require('@home-gallery/logger')('api.events')
 
-const { mergeEvents } = require('@home-gallery/events/dist/node')
+const { applyEvents, mergeEvents } = require('@home-gallery/events/dist/node')
 
-const { fetchEvents } = require('./api')
-
-const handleEvents = async (serverUrl, eventFile, { insecure }) => {
+const applyEventsFacade = (database, events) => {
+  if (!events.data.length) {
+    log.debug(`Events are empty. Skip apply events`)
+  }
   const t0 = Date.now()
-  const remoteEvents = await fetchEvents(serverUrl, { insecure })
+  const entries = database.data.reduce((result, entry) => {
+    result.set(entry.id, entry)
+    return result
+  }, new Map())
+  const changedEntries = applyEvents(entries, events.data)
+  log.debug(t0, `Applied ${events.data.length} events to ${database.data.length} database entries and updated ${changedEntries.length} entries`)
+  return database
+}
+
+const handleEvents = async (remoteEvents, eventFile) => {
+  const t0 = Date.now()
   if (!remoteEvents.data.length) {
     log.info(t0, `Remote has no events. Skip event merge`)
     return
@@ -16,5 +27,6 @@ const handleEvents = async (serverUrl, eventFile, { insecure }) => {
 }
 
 module.exports = {
+  applyEvents: applyEventsFacade,
   handleEvents
 }

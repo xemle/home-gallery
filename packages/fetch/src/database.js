@@ -1,8 +1,10 @@
 
 const log = require('@home-gallery/logger')('fetch.database')
 
-const { readOrCreateDatabase, writeDatabase, mergeEntries } = require('@home-gallery/database')
 const { promisify } = require('@home-gallery/common')
+const { readOrCreateDatabase, writeDatabase, mergeEntries } = require('@home-gallery/database')
+const { applyEvents } = require('./event')
+const { filterEntriesByQuery } = require('@home-gallery/query')
 
 const readOrCreateDatabaseAsync = promisify(readOrCreateDatabase)
 const writeDatabaseAsync = promisify(writeDatabase)
@@ -29,7 +31,28 @@ const mergeDatabase = async (remoteDatabase, localDatabase, databaseFile) => {
     .then(() => log.info(t0, `Updated database with ${missingEntries.length} new entries from remote`))
 }
 
+const filterDatabaseByQuery = async (database, query) => {
+  if (!query) {
+    log.debug(`No query is given, skip query filtering`)
+    return database
+  }
+
+  return new Promise((resolve, reject) => {
+    const t1 = Date.now()
+    filterEntriesByQuery(database.data, query, (err, entries) => {
+      if (err) {
+        reject(err)
+      } else {
+        const filteredDatabase = Object.assign({}, database, {data: entries})
+        log.info(t1, `Filtered database with ${database.data.length} entries by query '${query}' to ${filteredDatabase.data.length} entries`)
+        resolve(filteredDatabase)
+      }
+    })
+  })
+}
+
 module.exports = {
   readDatabase,
-  mergeDatabase
+  mergeDatabase,
+  filterDatabaseByQuery
 }

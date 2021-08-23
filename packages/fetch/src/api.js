@@ -24,10 +24,18 @@ const options = (url, insecure) => {
   return {}
 }
 
-const fetchDatabase = async (serverUrl, {insecure} = {}) => {
-  log.debug(`Fetching database from remote ${serverUrl}...`)
+const createIncompatibleError = (data, expectedType) => {
+  const err = new Error(`Incompabtible data type ${data && data.type}. Expect ${expectedType}`)
+  err.code = 'EINCOMP'
+  err.type = database && database.type
+  err.expectedType = expectedType
+  return err
+}
+
+const fetchDatabase = async (serverUrl, {query, insecure} = {}) => {
+  log.debug(`Fetching database ${query ? `with query '${query}' ` : ''}from remote ${serverUrl}...`)
   const t0 = Date.now()
-  return fetch(`${serverUrl}/api/database.json`, options(serverUrl, insecure))
+  return fetch(`${serverUrl}/api/database.json${query ? `?q=${query}` : ''}`, options(serverUrl, insecure))
     .then(res => {
       if (res.status == 404) {
         log.debug(t0, `Remote ${serverUrl} has no database. Continue with empty database`)
@@ -39,7 +47,7 @@ const fetchDatabase = async (serverUrl, {insecure} = {}) => {
     })
     .then(database => {
       if (!isDatabaseTypeCompatible(database && database.type)) {
-        throw new Error(`Incompabtible remote database type ${database && database.type}. Expect ${DatabaseHeaderType}`)
+        throw createIncompatibleError(data, DatabaseHeaderType)
       }
       log.info(t0, `Fetched database with ${database.data.length} entries from remote ${serverUrl}`)
       return database
@@ -60,7 +68,7 @@ const fetchEvents = async (serverUrl, { insecure } = {}) => {
       return res.json()
     }).then(events => {
       if (!isEventTypeCompatible(events && events.type)) {
-        throw new Error(`Incompatible event type '${events && events.type}. Current version is ${EventHeaderType}`)
+        throw createIncompatibleError(data, EventHeaderType)
       }
       log.info(t0, `Fetched events with ${events.data.length} entries from remote ${serverUrl}`)
       return events
