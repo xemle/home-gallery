@@ -5,6 +5,10 @@ const command = {
   describe: 'Fetch and merge from remote',
   builder: (yargs) => {
     return yargs.option({
+      'server-url': {
+        alias: ['u', 'url'],
+        describe: 'Gallery server url'
+      },
       database: {
         alias: 'd',
         describe: 'Database filename'
@@ -17,22 +21,18 @@ const command = {
         alias: 's',
         describe: 'Storage directory'
       },
-      remote: {
-        alias: 'r',
-        describe: 'Remote server url'
-      },
       insecure: {
         alias: 'k',
         boolean: true,
         describe: 'Do not verify HTTPS certificates'
       }
     })
-    .demandOption(['storage', 'database', 'events', 'remote' ])
+    .demandOption(['url', 'storage', 'database', 'events'])
   },
   handler: (argv) => {
     const { fetch } = require('@home-gallery/fetch');
     const options = {
-      serverUrl: argv.remote,
+      serverUrl: argv.url,
       databaseFile: argv.database,
       storageDir: argv.storage,
       eventFile: argv.events,

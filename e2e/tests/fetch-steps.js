@@ -16,7 +16,7 @@ step("Use file space <space>", async (space) => {
 
 const fetch = async (args = []) => {
   const serverUrl = gauge.dataStore.scenarioStore.get('serverUrl')
-  await runCli(['fetch', '-d', getDatabaseFilename(), '-s', getStorageDir(), '-e', getEventsFilename(), '-r', serverUrl, ...args])
+  await runCli(['fetch', '-u', serverUrl, '-d', getDatabaseFilename(), '-s', getStorageDir(), '-e', getEventsFilename(), ...args])
 }
 step("Fetch", fetch)
 
