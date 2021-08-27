@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- database: Handle incomplete geo data
 - index: Fix graceful abort by user (ctrl-c)
 
 ## [1.2.2] - 2021-08-18

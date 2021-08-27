@@ -225,7 +225,7 @@ const getFaces = (entry, minScore) => {
     })
 }
 
-const mapMedia = through2.obj(function (entry, enc, cb) {
+const createMedia = entry => {
   const allStorageFiles = [entry.files]
     .concat(entry.sidecars.map(sidecar => sidecar.files))
     .reduce((r, a) => { a.forEach(v => r.push(v)); return r}, []);
@@ -236,7 +236,7 @@ const mapMedia = through2.obj(function (entry, enc, cb) {
   try {
     exifData = useExif(entry);
   } catch (e) {
-    log.error(`Could not extract exif data from entry ${entry}: ${e}`);
+    log.warn(e, `Could not extract exif data from entry ${entry}: ${e}`);
   }
 
   let geoInfo = {};
@@ -244,7 +244,7 @@ const mapMedia = through2.obj(function (entry, enc, cb) {
   if (geoReverse) {
     ['lat', 'lon', 'addresstype'].forEach(key => geoInfo[key] = geoReverse[key]);
     ['country', 'state', 'city', 'road', 'house_number' ].forEach(key => {
-      if (geoReverse.address[key]) {
+      if (geoReverse.address && geoReverse.address[key]) {
         geoInfo[key] = geoReverse.address[key];
       }
     });
@@ -263,7 +263,16 @@ const mapMedia = through2.obj(function (entry, enc, cb) {
     faces: getFaces(entry, 0.7)
   }, exifData, geoInfo, similarityHash)
 
-  this.push(media);
+  return media;
+}
+
+const mapMedia = through2.obj(function (entry, _, cb) {
+  try {
+    const media = createMedia(entry)
+    this.push(media);
+  } catch (e) {
+    log.warn(e, `Could not create media entry of ${entry}: ${e}. Skip it`)
+  }
   cb();
 });
 
