@@ -6,14 +6,19 @@ const { readDatabase, mergeDatabase, filterDatabaseByQuery } = require('./databa
 const { handlePreviews } = require('./preview')
 const { handleEvents, applyEvents } = require('./event')
 
-const handleIncompatbileEvents = err => {
-  if (err.code == 'EINCOMP') {
-    log.warn(`Remote events are incompatible. Continue with empty events`)
+const handleEventError = requireEvents => {
+  return err => {
+    if (requireEvents) {
+      throw err
+    } else if (err.code == 'EINCOMP') {
+      log.warn(`Remote events are incompatible. Continue with empty events`)
+    } else {
+      log.warn(`Failed to fetch events: ${err}. Continue with empty events`)
+    }
     return {
       data: []
     }
   }
-  throw err
 }
 
 const mergeAndFilterDatabase = async (database, events, query) => {
@@ -21,10 +26,10 @@ const mergeAndFilterDatabase = async (database, events, query) => {
   return filterDatabaseByQuery(appliedDatabase, query)
 }
 
-const fetch = async ({ serverUrl, databaseFile, storageDir, eventFile, insecure, query } = {}) => {
+const fetch = async ({ serverUrl, databaseFile, storageDir, eventFile, insecure, query, requireEvents } = {}) => {
   const [remoteDatabase, remoteEvents, localDatabase] = await Promise.all([
     fetchDatabase(serverUrl, { query, insecure }),
-    fetchEvents(serverUrl, { insecure }).catch(handleIncompatbileEvents),
+    fetchEvents(serverUrl, { insecure }).catch(handleEventError(requireEvents)),
     readDatabase(databaseFile)
   ])
 
@@ -36,10 +41,10 @@ const fetch = async ({ serverUrl, databaseFile, storageDir, eventFile, insecure,
   await mergeDatabase(remoteFilteredDatabase, localDatabase, databaseFile)
 }
 
-const fetchRemote = async (serverUrl, {query, insecure}) => {
+const fetchRemote = async (serverUrl, {query, insecure, requireEvents}) => {
   const [database, events] = await Promise.all([
     fetchDatabase(serverUrl, {query, insecure}),
-    fetchEvents(serverUrl, { insecure }).catch(handleIncompatbileEvents)
+    fetchEvents(serverUrl, { insecure }).catch(handleEventError(requireEvents))
   ])
 
   return mergeAndFilterDatabase(database, events, query)
