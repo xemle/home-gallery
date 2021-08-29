@@ -243,11 +243,16 @@ const createMedia = entry => {
   const geoReverse = getEntryMetaByKey(entry, 'geoReverse');
   if (geoReverse) {
     ['lat', 'lon', 'addresstype'].forEach(key => geoInfo[key] = geoReverse[key]);
-    ['country', 'state', 'city', 'road', 'house_number' ].forEach(key => {
-      if (geoReverse.address && geoReverse.address[key]) {
-        geoInfo[key] = geoReverse.address[key];
-      }
-    });
+    if (!geoReverse.address) {
+      log.warn(`No geo address found for entry ${entry} with geo coordinates ${geoReverse.lat}/${geoReverse.lon}. Skip address`)
+    } else {
+      const address = geoReverse.address
+      ['country', 'state', 'city', 'road', 'house_number' ].forEach(key => {
+        if (address[key]) {
+          geoInfo[key] = address[key]
+        }
+      });
+    }
   }
 
   const similarityHash = getSimilarityHash(entry);
