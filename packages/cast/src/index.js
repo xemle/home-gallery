@@ -68,7 +68,7 @@ const extractMedia = (entries, baseUrl) => {
         image: `${baseUrl}/files/${image}`,
         toString: function () {
           const firstFile = entry.files[0]
-          return `${entry.id.slice(0, 7)}:${firstFile.index}:${firstFile.filename}, url ${this.video}`
+          return `${entry.id.slice(0, 7)}:${firstFile.index}:${firstFile.filename}, url ${this.image}`
       }
       })
     }
