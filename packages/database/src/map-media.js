@@ -247,9 +247,17 @@ const createMedia = entry => {
       log.warn(`No geo address found for entry ${entry} with geo coordinates ${geoReverse.lat}/${geoReverse.lon}. Skip address`)
     } else {
       const address = geoReverse.address
-      ['country', 'state', 'city', 'road', 'house_number' ].forEach(key => {
+      const keyMapping = {
+        hamlet: 'city',
+        village: 'city',
+        town: 'city',
+      };
+      // Unify city information: hamlet < village < town < city. Latest wins
+      const addressKeys = ['country', 'state', 'hamlet', 'village', 'town', 'city', 'road', 'house_number']
+      addressKeys.forEach(key => {
         if (address[key]) {
-          geoInfo[key] = address[key]
+          const infoKey = keyMapping[key] || key
+          geoInfo[infoKey] = address[key]
         }
       });
     }

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- database: Unify city geo information from hamlet, village, town
 - fetch: Improve error handling for events
 
 ## [1.3.0] - 2021-08-27
