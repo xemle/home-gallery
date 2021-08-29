@@ -14,7 +14,7 @@ function memoryIndicator({name, intervalMs}) {
         const mb = (value / 1024 / 1024).toFixed(1);
         return `${key}: ${mb} MB`
       })
-      log.info(`Used memory${name ? ` (${name})` : ''}: ${list.join(', ')}`)
+      log.debug(`Used memory${name ? ` (${name})` : ''}: ${list.join(', ')}`)
       lastOutput = now;
     }
     this.push(data);

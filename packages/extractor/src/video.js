@@ -26,7 +26,8 @@ function convertVideo(storage, entry, cb) {
     .on('end', () => {
       fs.rename(tmpFile, file, (err) => {
         if (err) {
-          return cb(`Failed to rename file to ${filename} for ${entry}`);
+          log.error(err, `Could not rename file ${tmpFile} to ${file} for ${entry}`)
+          return cb();
         }
         storage.addEntryFilename(entry, videoSuffix);
         log.info(t0, `Video conversion of ${entry} done`);
@@ -53,7 +54,7 @@ function convertVideo(storage, entry, cb) {
     .on('progress', progress => {
       const now = Date.now();
       if (now > last + intervalMs) {
-        log.debug(`Video conversion of ${entry} at ${progress.timemark} is ${progress.percent.toFixed()}% done`);
+        log.info(`Video conversion of ${entry} at ${progress.timemark} is ${progress.percent.toFixed()}% done`);
         last = now;
       }
     })
@@ -66,7 +67,7 @@ function video(storage) {
   const task = (entry, cb) => {
     convertVideo(storage, entry, (err) => {
       if (err) {
-        log.error(`Video preview conversion of ${entry} failed: ${err}`);
+        log.error(err, `Video preview conversion of ${entry} failed: ${err}`);
       }
       cb();
     })

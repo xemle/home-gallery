@@ -92,7 +92,7 @@ function extractData(config, cb) {
 
       releaseEntry,
       each(() => stats.processed++),
-      processIndicator({onTick: ({diff}) => log.info(`Processed ${stats.processed} entries (#${config.skip + stats.processed}, +${diff}, processing ${stats.processing - stats.processed} and queued ${stats.queued - stats.processing} entries)`)}),
+      processIndicator({onTick: ({diff, lastTime}) => log.info(lastTime, `Processed ${stats.processed} entries (#${config.skip + stats.processed}, +${diff}, processing ${stats.processing - stats.processed} and queued ${stats.queued - stats.processing} entries)`)}),
 
       groupByEntryFilesCacheKey(),
       updateEntryFilesCache(storage),

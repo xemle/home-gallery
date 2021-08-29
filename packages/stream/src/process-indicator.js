@@ -1,17 +1,22 @@
 const through2 = require('through2');
 const log = require('@home-gallery/logger')('stream.pipe');
 
-function processIndicator({name, intervalMs, totalFn, onTick}) {
+function processIndicator({name, intervalMs, totalFn, onTick, logLevel}) {
   name = name || '';
   intervalMs = intervalMs || 1000 * 10;
 
   let count = 0;
   let lastCount = 0;
-  let last = Date.now();
+  let lastTime = Date.now();
 
   const defaultTickFn = ({name, count, diff}) => {
     const total = totalFn ? totalFn() || 0 : 0;
-    log.info(`Processed ${name ? name + ' ' : ''}${count}${total ? ` of ${total} (${(100 * count / total).toFixed(1)}%)` : ''} (+${diff})`);
+    const msg = `Processed ${name ? name + ' ' : ''}${count}${total ? ` of ${total} (${(100 * count / total).toFixed(1)}%)` : ''} (+${diff})`
+    if (logLevel == 'info') {
+      log.info(lastTime, msg);
+    } else {
+      log.debug(lastTime, msg)
+    }
   }
 
   onTick = onTick || defaultTickFn
@@ -19,9 +24,9 @@ function processIndicator({name, intervalMs, totalFn, onTick}) {
   return through2.obj(function (data, enc, cb) {
     count++;
     const now = Date.now();
-    if (now - last > intervalMs) {
-      onTick({name, count: count, diff: count - lastCount})
-      last = now;
+    if (now - lastTime > intervalMs) {
+      onTick({name, count: count, diff: count - lastCount, lastTime})
+      lastTime = now;
       lastCount = count;
     }
     this.push(data);

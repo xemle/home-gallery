@@ -39,18 +39,18 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imageSuffix, entr
       request(options, (err, res, body) => {
         if (err) {
           hasError = true;
-          log.warn(`Could not get ${name} of ${entry} from URL ${url}: ${err}. Skip processing of ${name}`);
+          log.warn(err, `Could not get ${name} of ${entry} from URL ${url}: ${err}. Skip processing of ${name}`);
           return cb();
         } else if (res.statusCode < 100 || res.statusCode >= 300) {
           hasError = true;
-          log.error(`Could not get ${name} of ${entry} from URL ${url}: HTTP response code is ${res.statusCode}. Skip processing of ${name}`);
+          log.error(err, `Could not get ${name} of ${entry} from URL ${url}: HTTP response code is ${res.statusCode}. Skip processing of ${name}`);
           return cb();
         }
         storage.writeEntryFile(entry, entrySuffix, body, (err) => {
           if (err) {
-            log.warn(`Could write ${name} of ${entry}: ${err}`);
+            log.warn(err, `Could write ${name} of ${entry}: ${err}`);
           } else {
-            log.info(t0, `Fetched ${name} for ${entry}`);
+            log.debug(t0, `Fetched ${name} for ${entry}`);
           }
           cb();
         });

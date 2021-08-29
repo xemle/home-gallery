@@ -24,7 +24,7 @@ function extractVideoFames(src, dir, filenamePattern, frameCount, cb) {
       files = filenames;
     })
     .on('end', () => {
-      log.info(t0, `Extracted ${files.length} video frames from ${src}`);
+      log.debug(t0, `Extracted ${files.length} video frames from ${src}`);
       cb(null, files);
     })
     .screenshot({
@@ -43,7 +43,7 @@ function videoFrames(storage, frameCount) {
     const filenamePattern = storage.getEntryBasename(entry, framePatternSuffix);
     extractVideoFames(videoPreview, entryDir, filenamePattern, frameCount, (err, filenames) => {
       if (err) {
-        log.error(`Could not extract video frames from ${entry}: ${err}`);
+        log.error(err, `Could not extract video frames from ${entry}: ${err}`);
       } else {
         filenames.forEach(filename => {
           storage.addEntryBasename(entry, filename);

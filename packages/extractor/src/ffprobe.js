@@ -14,16 +14,16 @@ function videoMeta(storage) {
     const t0 = Date.now();
     ffprobe(entry.src, { path: ffprobePath }, function (err, info) {
       if (err) {
-        log.warn(`Could not extract video meta data from ${entry}: ${err}`);
+        log.warn(err, `Could not extract video meta data from ${entry}: ${err}`);
         return cb();
       }
 
       storage.writeEntryFile(entry, ffprobeSuffix, JSON.stringify(info), (err) => {
         if (err) {
-          log.warn(`Could not write video meta data from ${entry}: ${err}`);
-          return cb(err);
+          log.warn(err, `Could not write video meta data from ${entry}: ${err}`);
+          return cb();
         }
-        log.info(t0, `Extracted video meta data from ${entry}`);
+        log.debug(t0, `Extracted video meta data from ${entry}`);
         cb();
       })
     });

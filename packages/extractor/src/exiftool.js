@@ -19,14 +19,15 @@ function exif(storage) {
       .then(tags => {
         storage.writeEntryFile(entry, exifSuffix, JSON.stringify(tags), (err) => {
           if (err) {
-            return cb(err);
+            log.error(err, `Could not write exif data for ${entry}: ${err}`)
+            return cb();
           }
-          log.info(t0, `Extracted exif data from ${entry}`);
+          log.debug(t0, `Extracted exif data from ${entry}`);
           cb();
         })
       })
       .catch(err => {
-        log.warn(`Could not extract exif of ${entry}: ${err}`);
+        log.warn(err, `Could not extract exif of ${entry}: ${err}`);
         cb();
       })
   }

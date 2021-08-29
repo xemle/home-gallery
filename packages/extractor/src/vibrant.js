@@ -24,14 +24,14 @@ function vibrantColors(storage) {
       .from(storage.getEntryFilename(entry, imageSuffix))
       .getPalette((err, palette) => {
         if (err) {
-          log.error(`Could not extract vibrant colors of ${entry}: ${err}`);
+          log.error(err, `Could not extract vibrant colors of ${entry}: ${err}`);
           return cb();
         }
         storage.writeEntryFile(entry, vibrantSuffix, JSON.stringify(palette), (err) => {
           if (err) {
-            log.info(`Could not write vibrant colors of ${entry}: ${err}`);
+            log.warn(err, `Could not write vibrant colors of ${entry}: ${err}`);
           } else {
-            log.info(t0, `Extracted vibrant colors from ${entry}`);
+            log.debug(t0, `Extracted vibrant colors from ${entry}`);
           }
           cb();
         })

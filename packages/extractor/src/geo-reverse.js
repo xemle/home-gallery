@@ -67,7 +67,7 @@ function geoReverse(storage, languages) {
     const t0 = Date.now();
     request(options, (err, res, body) => {
       if (err) {
-        log.error(`Could not query geo reverse of ${entry} for ${geo} by URL ${url}: ${err}`);
+        log.error(err, `Could not query geo reverse of ${entry} for ${geo} by URL ${url}: ${err}`);
         return cb();
       } else if (res.statusCode < 100 || res.statusCode >= 300) {
         if (res.statusCode === 429) {
@@ -80,7 +80,8 @@ function geoReverse(storage, languages) {
       }
       storage.writeEntryFile(entry, geoReverseSuffix, body, (err) => {
         if (err) {
-          log.warn(`Could write geo reverse of ${entry} for ${geo}: ${err}`);
+          log.err(err, `Could write geo reverse of ${entry} for ${geo}: ${err}`);
+          return cb();
         } else {
           let info = '';
           try {
@@ -88,9 +89,9 @@ function geoReverse(storage, languages) {
             const address = data.address || {};
             const countryCode = address.country_code || '??';
             info = `${data.osm_type} at ${[address.city, address.country].filter(v => !!v).join(', ')} (${countryCode.toUpperCase()})`;
-            log.info(t0, `Successful geo reverse lookup for ${entry} for ${geo}: ${info}`);
+            log.debug(t0, `Successful geo reverse lookup for ${entry} for ${geo}: ${info}`);
           } catch (e) {
-            log.warn(`Could not parse json data ${body}: ${e}`);
+            log.warn(e, `Could not parse json data ${body}: ${e}`);
           }           
         }
         cb();

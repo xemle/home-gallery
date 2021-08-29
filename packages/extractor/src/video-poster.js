@@ -16,15 +16,19 @@ function videoPoster(storage, previewImageSizes) {
     const basename = storage.getEntryBasename(entry, videoPosterSuffix);
     extractVideoFames(entry.src, dir, basename, 1, (err) => {
       if (err) {
-        return cb(err);
+        log.warn(err, `Could not extract video frame from ${entry}: ${err}`)
+        return cb();
       }
 
       const posterSrc = storage.getEntryFilename(entry, videoPosterSuffix);
       resizeImage(storage, entry, posterSrc, previewImageSizes, (err, calculatedSizes) => {
-        if (!err && calculatedSizes.length) {
-          log.info(t0, `Created ${calculatedSizes.length} video preview images from ${entry} with sizes of ${calculatedSizes.join(',')}`);
+        if (err) {
+          log.warn(err, `Could not resize video frame from ${entry}: ${err}`)
+          return cb();
+        } else if (calculatedSizes.length) {
+          log.debug(t0, `Created ${calculatedSizes.length} video preview images from ${entry} with sizes of ${calculatedSizes.join(',')}`);
         }
-        cb(err);
+        cb();
       });
 
     })
