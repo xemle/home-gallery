@@ -5,10 +5,11 @@ const { parallel } = require('@home-gallery/stream');
 const { conditionalTask } = require('./task');
 
 const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imageSuffix, entrySuffix, concurrent, timeout}) => {
-  let hasError = false;
+  const ERROR_THRESHOLD = 5;
+  let currentErrors = 0;
 
   const test = entry => {
-    if (hasError) {
+    if (currentErrors > ERROR_THRESHOLD) {
       return false;
     } else if (!storage.hasEntryFile(entry, imageSuffix) || storage.hasEntryFile(entry, entrySuffix)) {
       return false;
@@ -16,6 +17,13 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imageSuffix, entr
       return true;
     } else {
       return false;
+    }
+  }
+
+  const addError = () => {
+    currentErrors++;
+    if (currentErrors > ERROR_THRESHOLD) {
+      log.warn(`Too many errors. Skip processing of ${name}`);
     }
   }
 
@@ -38,18 +46,21 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imageSuffix, entr
       }
       request(options, (err, res, body) => {
         if (err) {
-          hasError = true;
-          log.warn(err, `Could not get ${name} of ${entry} from URL ${url}: ${err}. Skip processing of ${name}`);
+          addError();
+          log.warn(err, `Could not get ${name} of ${entry} from URL ${url}: ${err}`);
           return cb();
         } else if (res.statusCode < 100 || res.statusCode >= 300) {
-          hasError = true;
-          log.error(err, `Could not get ${name} of ${entry} from URL ${url}: HTTP response code is ${res.statusCode}. Skip processing of ${name}`);
+          addError();
+          log.error(err, `Could not get ${name} of ${entry} from URL ${url}: HTTP response code is ${res.statusCode}`);
           return cb();
         }
         storage.writeEntryFile(entry, entrySuffix, body, (err) => {
           if (err) {
             log.warn(err, `Could write ${name} of ${entry}: ${err}`);
           } else {
+            if (currentErrors > 0) {
+              currentErrors--;
+            }
             log.debug(t0, `Fetched ${name} for ${entry}`);
           }
           cb();
