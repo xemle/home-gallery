@@ -34,9 +34,14 @@ const command = {
         describe: 'Do not verify HTTPS certificates. Disable it by --no-insecure if you know what you do'
       },
       random: {
+        alias: ['shuffel', 's'],
         boolean: true,
-        defaut: true,
         describe: 'Randomize playback. Use --no-random for linear order'
+      },
+      reverse: {
+        alias: ['r'],
+        boolean: true,
+        describe: 'Reverse order. Default order is by date oldest first'
       },
       delay: {
         number: true,
@@ -56,6 +61,7 @@ const command = {
       port: argv.port,
       insecure: argv.insecure,
       random: argv.random,
+      reverse: argv.reverse,
       delay: argv.delay * 1000
     }
     const t0 = Date.now();

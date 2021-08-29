@@ -31,8 +31,20 @@ const createSessionId = len => {
   return s
 }
 
-const extractMedia = (database, baseUrl) => {
-  return database.data.reduce((result, entry) => {
+const byDate = reverse => {
+  const reverseFactor = reverse ? -1 : 1
+  return (a, b) => {
+    if (a.date < b.date) {
+      return -1 * reverseFactor
+    } else if (a.date > b.date) {
+      return 1 * reverseFactor
+    }
+    return 0
+  }
+}
+
+const extractMedia = (entries, baseUrl) => {
+  return entries.reduce((result, entry) => {
     const image = entry.previews.find(preview => preview.match('image-preview-1280'))
     const title = path.parse(entry.files[0].filename).name
     if (entry.type == 'video') {
@@ -64,7 +76,7 @@ const extractMedia = (database, baseUrl) => {
   }, [])
 }
 
-const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure, random, delay} = {}) => {
+const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure, random, reverse, delay} = {}) => {
   const [database, device] = await Promise.all([
     fetchRemote(serverUrl, {query, insecure}),
     scanFirst(10 * 1000)
@@ -81,7 +93,7 @@ const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure, random
     log.info(`Started HTTP file proxy ${baseUrl}`)
   }
 
-  const entries = extractMedia(database, baseUrl)
+  const entries = extractMedia(database.data.sort(byDate(reverse)), baseUrl)
   log.info(`Start slideshow to device ${device.name} at ${device.host} with ${entries.length} entries`)
   await slideshow(device.host, entries, { random, delay })
 }
