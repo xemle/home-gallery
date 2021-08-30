@@ -3,7 +3,7 @@ const path = require('path')
 const { Readable, pipeline } = require('stream')
 
 const log = require('@home-gallery/logger')('fetch.preview')
-const { parallel, noopWriter } = require('@home-gallery/stream')
+const { parallel, purge } = require('@home-gallery/stream')
 
 const { fetchFile } = require('./api')
 
@@ -50,7 +50,7 @@ const downloadMissingFiles = async (serverUrl, missingFiles, storageDir, { insec
     pipeline(
       Readable.from(missingFiles),
       parallel({ test, task, concurrent: 10 }),
-      noopWriter(),
+      purge(),
       err => err ? reject(err) : resolve()
     )
   }).then(() => {
