@@ -101,15 +101,35 @@ function useExif(entry) {
     return getFractionNumber('ShutterSpeed');
   }
 
+  function widthHeight(exifMeta) {
+    let width = exifMeta.ImageWidth;
+    let height = exifMeta.ImageHeight;
+    if (exifMeta.Orientation >= 5) {
+      width = exifMeta.ImageHeight;
+      height = exifMeta.ImageWidth;
+    }
+
+    if (!width || !height) {
+      let fixWidth = width
+      let fixHeight = height
+      if (width) {
+        fixHeight = width
+      } else if (height) {
+        fixWidth = height
+      } else {
+        fixWidth = 1280
+        fixHeight = 1280
+      }
+      log.warn(`Entry ${entry} has no valid width/height: ${width}/${height}. Fix it to ${fixWidth}/${fixHeight}`)
+      width = fixWidth
+      height = fixHeight
+    }
+    return [width, height]
+  }
+
   const exifDate = getExifDate(exifMeta);
   const date = exifDate ? exifDate : entry.date;
-
-  let width = exifMeta.ImageWidth;
-  let height = exifMeta.ImageHeight;
-  if (exifMeta.Orientation >= 5) {
-    width = exifMeta.ImageHeight;
-    height = exifMeta.ImageWidth;
-  }
+  const [width, height] = widthHeight(exifMeta);
 
   return Object.assign({
     date,
@@ -117,8 +137,8 @@ function useExif(entry) {
     month: +date.substr(5, 2),
     day: +date.substr(8, 2),
     tz: exifMeta.tz,
-    width: width,
-    height: height,
+    width,
+    height,
     orientation: exifMeta.Orientation,
     duration: exifMeta.MediaDuration || 0,
     make: exifMeta.Make || 'unknown',
