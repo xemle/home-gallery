@@ -84,7 +84,7 @@ function useExif(entry) {
     result[`${prop}Raw`] = exifMeta[prop];
     const match = exifMeta[prop].toString().match(/^(\d+)\/(\d+)$/);
     if (match) {
-      result[`${prop}Vaule`] = (+match[1] / +match[2]);
+      result[`${prop}Value`] = (+match[1] / +match[2]);
       result[`${prop}Numerator`] = +match[1];
       result[`${prop}Divider`] = +match[2];
     } else if (typeof exifMeta[prop] === 'number') {
