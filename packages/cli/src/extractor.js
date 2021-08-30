@@ -51,6 +51,10 @@ const command = {
         default: false,
         boolean: true
       },
+      'geo-server': {
+        describe: 'Geo address server url',
+        default: 'https://nominatim.openstreetmap.org'
+      },
       'geo-address-language': {
         describe: 'Preferred address languages for geo code reverse lookups',
         array: true,
@@ -83,6 +87,7 @@ const command = {
           limit: argv['limit'],
           printEntry: argv['print-entry'],
           geoAddressLanguage: argv['geo-address-language'],
+          geoServerUrl: argv['geo-server'],
           journal: argv.journal
         }
         extract(config, (err, count) => {

@@ -20,10 +20,12 @@ const getAcceptLanguageValue = (languages) => {
 
 const geoReverseSuffix = 'geo-reverse.json';
 
-function geoReverse(storage, languages) {
+function geoReverse(storage, {geoAddressLanguage, geoServerUrl}) {
   let isLimitExceeded = false;
 
-  const acceptLanguageValue = getAcceptLanguageValue([].concat(languages || []));
+  const acceptLanguageValue = getAcceptLanguageValue([].concat(geoAddressLanguage || ['en', 'de']));
+
+  log.debug(`Use geo server ${geoServerUrl} with languages ${geoAddressLanguage}`)
 
   function passThrough(entry) {
     if (isLimitExceeded) {
@@ -55,7 +57,7 @@ function geoReverse(storage, languages) {
       return cb();
     }
 
-    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&polygon_geojson=1`;
+    const url = `${geoServerUrl}/reverse?format=jsonv2&lat=${lat}&lon=${lon}&polygon_geojson=1`;
     const options = {
       url,
       headers: {
@@ -92,13 +94,13 @@ function geoReverse(storage, languages) {
             log.debug(t0, `Successful geo reverse lookup for ${entry} for ${geo}: ${info}`);
           } catch (e) {
             log.warn(e, `Could not parse json data ${body}: ${e}`);
-          }           
+          }
         }
         cb();
       });
     })
   }
-  
+
   // 1req/1s should be fine. See https://operations.osmfoundation.org/policies/nominatim/
   return throttleAsync({passThrough, task, rateLimitMs: 1000, startLimitAfterTask: true});
 }

@@ -25,7 +25,7 @@ function extractData(config, cb) {
     if (err) {
       return cb(err);
     }
-    const {storageDir, fileFilterFn, minChecksumDate, apiServerUrl} = config;
+    const {storageDir, fileFilterFn, minChecksumDate, apiServerUrl, geoAddressLanguage, geoServerUrl} = config;
     const { queueEntry, releaseEntry } = concurrent(config.concurrent, config.skip)
     const storage = createStorage(storageDir);
 
@@ -59,7 +59,7 @@ function extractData(config, cb) {
       imagePreview(storage, imagePreviewSizes),
       videoPoster(storage, imagePreviewSizes),
       vibrant(storage),
-      geoReverse(storage, [].concat(config.geoAddressLanguage || ['en', 'de'])),
+      geoReverse(storage, {geoAddressLanguage, geoServerUrl}),
       apiServerEntry(storage, {
         name: 'similarity embeddings',
         apiServerUrl,
