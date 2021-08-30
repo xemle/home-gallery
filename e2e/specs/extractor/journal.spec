@@ -5,6 +5,7 @@ Tags: extractor, option, journal
 ## Initial index
 
 * Init files from "index/basic"
+* Start mock server
 * Create index with args "--journal abc"
 * Extract files with args "--journal abc"
 * Storage has entry "image-preview-128.jpg" for "25d7b73"
@@ -13,6 +14,7 @@ Tags: extractor, option, journal
 ## Extract only new added files
 
 * Init index from "index/basic"
+* Start mock server
 * Add file "index/images/DJI_0035.JPG"
 * Update index with args "--journal abc"
 * Extract files with args "--journal abc"
@@ -23,6 +25,7 @@ Tags: extractor, option, journal
 ## Extract only new renamed files
 
 * Init index from "index/basic"
+* Start mock server
 * Create index
 * Rename file "IMG_2915.JPG" to "renamed.JPG"
 * Update index with args "--journal abc"
@@ -33,9 +36,13 @@ Tags: extractor, option, journal
 ## No entries for removed files
 
 * Init index from "index/basic"
+* Start mock server
 * Create index
 * Remove file "IMG_2915.JPG"
 * Update index with args "--journal abc"
 * Extract files with args "--journal abc"
 * Storage has no entry for "25d7b73"
 * Storage has no entry for "96419bb"
+
+___
+* Stop server

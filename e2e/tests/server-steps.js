@@ -95,6 +95,63 @@ step("Start static server", async () => {
   })
 })
 
+step("Start mock server", async () => {
+  const serverId = generateId(4)
+  const port = gauge.dataStore.scenarioStore.get('port')
+
+  const mockApiServer = (req, res, next) => {
+    const paths = ['/faces', '/objects', '/embeddings']
+    if (!paths.includes(req.path)) {
+      return next()
+    }
+    return res.json({data:[]})
+  }
+
+  const mockGeoServer = (req, res, next) => {
+    const paths = ['/reverse']
+    if (!paths.includes(req.path)) {
+      return next()
+    }
+    return res.json({
+      osm_type: 'way',
+      address: {
+        road: 'Strada Provinciale SP286 Santa Caterina - Sant\'Isidoro - Porto Cesareo',
+        town: 'Nardò',
+        county: 'Lecce',
+        state: 'Apulien',
+        postcode: '73048',
+        country: 'Italien',
+        country_code: 'it'
+      }
+    })
+  }
+
+  const app = express()
+  app.use(mockApiServer)
+  app.use(mockGeoServer)
+
+  const url = `http://localhost:${port}`
+  servers[serverId] = {
+    server: false,
+    port,
+    url
+  }
+  gauge.dataStore.scenarioStore.put('serverId', serverId)
+  gauge.dataStore.scenarioStore.put('serverUrl', url)
+  gauge.dataStore.scenarioStore.put('apiServerUrl', url)
+  gauge.dataStore.scenarioStore.put('geoServerUrl', url)
+
+  return new Promise((resolve, reject) => {
+    const server = app.listen(port, (err) => {
+      if (err) {
+        return reject(err)
+      }
+      servers[serverId].server = server;
+      resolve()
+    })
+  })
+})
+
 step("Wait for database", async () => {
   const serverUrl = gauge.dataStore.scenarioStore.get('serverUrl')
   await waitForDatabase(serverUrl, 10 * 1000)
