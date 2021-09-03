@@ -1,3 +1,4 @@
+const fs = require('fs')
 const path = require('path')
 const { createReadStream } = require('fs')
 const zlib = require('zlib')
@@ -45,6 +46,15 @@ const getExportOutputDir = () => getPath('export-output')
 
 const resolveArgs = (args, vars) => [].concat(args).map(arg => arg.replace(/\{([^}]+)\}/g, (_, name) => vars[name.trim()] || ''))
 
+const appendLog = (file, data, cb) => {
+  fs.appendFile(getPath(file), JSON.stringify(data) + '\n', err => {
+    if (err) {
+      gauge.message(`Could not write cli log: ${err}`)
+    }
+    cb(err)
+  })
+}
+
 const runCommand = (command, args, options, cb) => {
   const spawnOptions = {
     silent: false,
@@ -58,6 +68,7 @@ const runCommand = (command, args, options, cb) => {
 
   const stdoutChunks = []
   const stderrChunks = []
+  const t0 = Date.now()
   const child = spawn(command, args, spawnOptions)
   child.stdout.on('data', chunk => stdoutChunks.push(chunk))
   child.stderr.on('data', chunk => stderrChunks.push(chunk))
@@ -69,9 +80,12 @@ const runCommand = (command, args, options, cb) => {
     commandHistory.push({code, command, args, stdout, stderr})
     gauge.dataStore.scenarioStore.put('commandHistory', commandHistory)
     gauge.dataStore.scenarioStore.put('lastExitCode', code)
-    if (cb) {
-      cb(code, stdout, stderr)
-    }
+    const data = { command, args, exitCode: code, commandLine, stdout, stderr, time: t0, duration: Date.now() - t0 }
+    appendLog('cli.log', data, () => {
+      if (cb) {
+        cb(code, stdout, stderr)
+      }
+    })
   })
 
   return child;
