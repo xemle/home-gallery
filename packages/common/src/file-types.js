@@ -5,7 +5,8 @@ const fileTypes = {
   video: 'avi,wmv,mov,mpg,mpeg,mp4,m4v,3gp,mjpeg,mts,flv,swf,webm'.split(','),
   sound: 'wav,mp3,ogg,flac,m4a,aac,wma'.split(','),
   gps: 'gpx,kmz'.split(','),
-  text: 'txt,conf,md,yml,html,sh,json,ts,js,csv,xml,ini,svg,m3u,xmp'.split(','),
+  text: 'txt,conf,md,yml,html,sh,json,ts,js,csv,xml,ini,svg,m3u'.split(','),
+  meta: 'xmp'.split(','),
   document: 'txt,doc,docx,md,log,ai,pdf'.split(','),
   archive: 'zip,tar,gz,bzip'.split(','),
   bin: 'exe,dll'.split(',')

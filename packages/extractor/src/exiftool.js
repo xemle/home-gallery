@@ -6,10 +6,12 @@ const { toPipe, conditionalTask } = require('./task');
 
 const exifSuffix = 'exif.json';
 
+const exifTypes = ['image', 'rawImage', 'video', 'meta']
+
 function exif(storage) {
   const exiftool = new ExifTool({ taskTimeoutMillis: 5000 });
 
-  const test = entry => ['image', 'rawImage', 'video'].indexOf(entry.type) >= 0 && !storage.hasEntryFile(entry, exifSuffix)
+  const test = entry => exifTypes.includes(entry.type) && !storage.hasEntryFile(entry, exifSuffix)
 
   const task = (entry, cb) => {
     const src = entry.src;

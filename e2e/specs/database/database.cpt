@@ -5,3 +5,15 @@
 * Add file "index/basic/IMG_2915.JPG"
 * Create index
 * Create database
+
+# Build database
+
+* Create index
+* Extract files
+* Create database
+
+# Update database with journal
+
+* Create index with args "--journal abc"
+* Extract files with args "--journal abc"
+* Create database with args "--journal abc"

@@ -22,6 +22,50 @@ function getEntryMetaByKey(entry, key) {
   return false;
 }
 
+const getAllEntryMetaByKey = (entry, key) => {
+  const result = []
+  if (entry.meta && entry.meta[key]) {
+    result.push(entry.meta[key])
+  }
+  if (entry.sidecars && entry.sidecars.length) {
+    entry.sidecars.forEach(sidecar => {
+      if (sidecar.meta && sidecar.meta[key]) {
+        result.push(sidecar.meta[key])
+      }
+    })
+  }
+  return result
+}
+
+const reduceMeta = (entry, key, reduceFn, initValue) => {
+  const allMeta = getAllEntryMetaByKey(entry, key)
+  return allMeta.reduce(reduceFn, initValue)
+}
+
+const toArray = value => {
+  if (Array.isArray(value)) {
+    return value
+  } else if (value) {
+    return [value]
+  } else {
+    return []
+  }
+}
+
+const addUniqValues = (result, values) => toArray(values).filter(value => !result.includes(value)).forEach(value => result.push(value))
+
+const collectTags = entry => {
+  const reduceFn = (tags, exif) => {
+    addUniqValues(tags, exif.TagList)
+    addUniqValues(tags, exif.HierarchicalSubject)
+    addUniqValues(tags, exif.Keywords)
+    addUniqValues(tags, exif.Subject)
+    return tags
+  }
+
+  return reduceMeta(entry, 'exif', reduceFn, []).sort()
+}
+
 function useExif(entry) {
   const exifMeta = getEntryMetaByKey(entry, 'exif');
   if (!exifMeta) {
@@ -285,6 +329,8 @@ const createMedia = entry => {
 
   const similarityHash = getSimilarityHash(entry);
 
+  const tags = collectTags(entry)
+
   const media = Object.assign({
     id: entry.sha1sum,
     type: entry.type,
@@ -292,6 +338,7 @@ const createMedia = entry => {
     files: [mapFile(entry)].concat(entry.sidecars.map(mapFile)),
     previews: allStorageFiles.filter(file => file.match(/-preview/)),
     vibrantColors: getVibrantColors(entry),
+    tags,
     objects: getObjects(entry, 0.6),
     faces: getFaces(entry, 0.7)
   }, exifData, geoInfo, similarityHash)
