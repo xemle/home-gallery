@@ -1,12 +1,16 @@
+const path = require('path');
 const through2 = require('through2');
 
 const bySize = (a, b) => a.size < b.size ? 1 : -1
 
-function toPrimaryEntry(entries) {
-  entries.sort(bySize);
+const byFilename = (a, b) => a.filename < b.filename ? -1 : 1
 
-  const primary = entries.shift();
-  primary.sidecars = entries;
+function toPrimaryEntry(entries) {
+  const primary = entries[0]
+  if (entries.length > 1) {
+    primary.sidecars = entries.slice(1);
+  }
+
   return primary;
 }
 
@@ -17,31 +21,24 @@ function toPrimaryEntry(entries) {
  * Example: IMG_2635.AVI, IMG_2635.THM, IMG_2635.AVI.xmp -> group(IMG_2635)
  */
 const sidecarFiles = through2.obj(function (entries, enc, cb) {
-  let result = [];
-
   const sidecars = {}
 
-  function addSidecar(entry, basename) {
-    if (sidecars[basename]) {
-      sidecars[basename].push(entry);
+  entries.sort(bySize).forEach(entry => {
+    const { name, ext } = path.parse(entry.filename)
+    const { name: name2, ext: ext2 } = path.parse(name)
+    if (ext && sidecars[name]) {
+      sidecars[name].push(entry)
+    } else if (ext2 && sidecars[name2]) {
+      sidecars[name2].push(entry)
+    } else if (ext) {
+      sidecars[name] = [entry]
     } else {
-      sidecars[basename] = [entry];
-    }
-  }
-
-  entries.forEach(entry => {
-    const filename = entry.filename;
-    const extension = filename.match(/(\.\w{2,4}){1,2}$/);
-    if (extension) {
-      const basename = filename.substr(0, filename.length - extension[0].length)
-      addSidecar(entry, basename);
-    } else {
-      result.push(entry);
+      sidecars[entry.filename] = [entry]
     }
   })
 
   const sidecarEntries = Object.values(sidecars).map(toPrimaryEntry);
-  this.push(result.concat(sidecarEntries));
+  this.push(sidecarEntries.sort(byFilename));
 
   cb()
 });

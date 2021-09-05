@@ -26,7 +26,10 @@ const mergeDatabase = async (remoteDatabase, localDatabase, databaseFile) => {
     return
   }
 
-  const mergedEntries = mergeEntries(localDatabase.data, missingEntries, [])
+  const [mergedEntries, changedEntries] = mergeEntries(localDatabase.data, missingEntries, [])
+  if (changedEntries.length) {
+    log.warn({data: changedEntries.map(e => e.id)}, `Could not resolve change of ${changedEntries.length} database entries completely caused by the database merge. Some data or properties such as tags might be out of sync. See list of ids in the logs for details`)
+  }
   return writeDatabaseAsync(databaseFile, mergedEntries)
     .then(() => log.info(t0, `Updated database with ${missingEntries.length} new entries from remote`))
 }

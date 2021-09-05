@@ -68,7 +68,10 @@ const mergeFromJournal = (indexFilenames, journal, databaseFilename, entries, cb
       }
 
       const t1 = Date.now()
-      const mergedEntries = mergeEntries(database.data, entries, removedFiles)
+      const [mergedEntries, changedEntries] = mergeEntries(database.data, entries, removedFiles)
+      if (changedEntries.length) {
+        log.warn({data: changedEntries.map(e => e.id)}, `Could not resolve change of ${changedEntries.length} database entries completely caused by the database merge. Some data or properties such as tags might be out of sync. See list of ids in the logs for details`)
+      }
       log.info(t1, `Merged ${entries.length} new and ${removedFiles.length} removed entries from journals to ${mergedEntries.length} entries (${diffCount(mergedEntries, database.data)}) to the database`)
 
       const t2 = Date.now()
