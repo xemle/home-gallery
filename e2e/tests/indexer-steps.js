@@ -40,11 +40,12 @@ step("Index has entry <filename> with checksum <checksum>", async (filename, che
 
 step("Index has entry <filename> with prev checksum <checksum>", async (filename, checksum) => assertChecksum(filename, checksum, 'prevSha1sum'))
 
-step("Journal <id> has entries of <adds> adds, <changes> changes and <removals> removals", async (id, adds, changes, removals) => {
+step("Journal <id> has entries of <adds> adds, <changes> changes and <removes> removals", async (id, adds, changes, removes) => {
   const journal = await readJournal(id)
-  assert(journal.data.adds.length == adds, `Expecting ${adds} add entries but have ${journal.data.adds.length}`)
-  assert(journal.data.changes.length == changes, `Expecting ${changes} change entries but have ${journal.data.changes.length}`)
-  assert(journal.data.removes.length == removals, `Expecting ${removals} remove entries but have ${journal.data.removes.length}`)
+  const matchAdds = journal.data.adds.length == adds
+  const matchChanges = journal.data.changes.length == changes
+  const matchRemoves = journal.data.removes.length == removes
+  assert(matchAdds && matchChanges && matchRemoves, `Expecting ${adds} adds, ${changes} changes and ${removes} removes but have ${journal.data.adds.length} adds, ${journal.data.changes.length} changes and ${journal.data.removes.length} removes`)
 })
 
 const assertJournalChecksum = async (id, filename, type, checksum, prop) => {
