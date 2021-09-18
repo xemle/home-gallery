@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const { createReadStream } = require('fs')
+const net = require('net')
 const zlib = require('zlib')
 const { spawn } = require('child_process')
 const userInfo = require("os").userInfo()
@@ -21,6 +22,23 @@ const generateId = (size) => {
   }
   return id
 }
+
+const isPortAvailable = async port => {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer()
+    server.once('error', err => reject(err))
+    server.listen({port, host: '0.0.0.0'}, () => server.close(() => resolve(port)))
+  })
+}
+
+const portStart = port => {
+  let lastPort = port
+  const check = async () => isPortAvailable(lastPort++).catch(() => check())
+
+  return check
+}
+
+const nextPort = portStart(38000)
 
 const getTestDataDir = () => path.resolve(testDataDir)
 
@@ -173,6 +191,7 @@ const dateFormat = (now, format) => format.replace(/%(.)/g, (_, c) => {
 
 module.exports = {
   generateId,
+  nextPort,
   getTestDataDir,
   getBaseDir,
   getPath,

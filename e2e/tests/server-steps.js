@@ -7,7 +7,7 @@ const assert = require('assert')
 const fetch = require('node-fetch')
 const express = require('express')
 
-const { generateId, runCliAsync, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename } = require('../utils')
+const { generateId, nextPort, runCliAsync, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename } = require('../utils')
 
 const servers = {}
 
@@ -60,9 +60,16 @@ const waitForDatabase = async (timeout) => {
   })
 }
 
-const startServer = async (args = []) => {
+const createServerId = () => {
   const serverId = generateId(4)
-  const port = gauge.dataStore.scenarioStore.get('port')
+  const serverIds = gauge.dataStore.scenarioStore.get('serverIds') || []
+  gauge.dataStore.scenarioStore.put('serverIds', [...serverIds, serverId])
+  return serverId
+}
+
+const startServer = async (args = []) => {
+  const serverId = createServerId()
+  const port = await nextPort()
   const child = runCliAsync(['server', '-s', getStorageDir(), '-d', getDatabaseFilename(), '-e', getEventsFilename(), '--port', port, '--no-open-browser', ...args])
 
   const protocol = args.includes('-K') ? 'https' : 'http'
@@ -72,13 +79,12 @@ const startServer = async (args = []) => {
     port,
     url
   }
-  gauge.dataStore.scenarioStore.put('serverId', serverId)
   gauge.dataStore.scenarioStore.put('serverUrl', url)
 
   return waitForPath('', 10 * 1000)
 }
 
-step("Start server", async () => await startServer())
+step("Start server", startServer)
 
 step("Start server with args <args>", async (args) => {
   const argList = args.split(/\s+/)
@@ -88,8 +94,8 @@ step("Start server with args <args>", async (args) => {
 step("Start HTTPS server", async () => startServer(['-K', getPath('config', 'server.key'), '-C', getPath('config', 'server.crt')]))
 
 step("Start static server", async () => {
-  const serverId = generateId(4)
-  const port = gauge.dataStore.scenarioStore.get('port')
+  const serverId = createServerId()
+  const port = await nextPort()
 
   const app = express()
   app.use(express.static(getBaseDir()))
@@ -100,7 +106,6 @@ step("Start static server", async () => {
     port,
     url
   }
-  gauge.dataStore.scenarioStore.put('serverId', serverId)
   gauge.dataStore.scenarioStore.put('serverUrl', url)
 
   return new Promise((resolve, reject) => {
@@ -115,8 +120,8 @@ step("Start static server", async () => {
 })
 
 step("Start mock server", async () => {
-  const serverId = generateId(4)
-  const port = gauge.dataStore.scenarioStore.get('port')
+  const serverId = createServerId()
+  const port = await nextPort()
 
   const mockApiServer = (req, res, next) => {
     const paths = ['/faces', '/objects', '/embeddings']
@@ -155,8 +160,7 @@ step("Start mock server", async () => {
     port,
     url
   }
-  gauge.dataStore.scenarioStore.put('serverId', serverId)
-  gauge.dataStore.scenarioStore.put('serverUrl', url)
+
   gauge.dataStore.scenarioStore.put('apiServerUrl', url)
   gauge.dataStore.scenarioStore.put('geoServerUrl', url)
 
@@ -187,8 +191,7 @@ const killChildProcess = async child => {
   })
 }
 
-step("Stop server", async () => {
-  const serverId = gauge.dataStore.scenarioStore.get('serverId')
+const stopServer = async serverId => {
   const server = servers[serverId]
   assert(!!server, `Server ${serverId} not found`)
 
@@ -198,6 +201,11 @@ step("Stop server", async () => {
   } else if (server.server) {
     server.server.close()
   }
+}
+
+step("Stop server", async () => {
+  const serverIds = gauge.dataStore.scenarioStore.get('serverIds')
+  await Promise.all(serverIds.map(id => stopServer(id)))
 })
 
 step("Request file <file>", async (file) => {
