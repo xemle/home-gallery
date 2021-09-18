@@ -20,7 +20,7 @@ const uniq = (list, keyFn, mergeFn) => Object.values(list.reduce((id2Entry, entr
 }, {}))
 
 const createEntries = (entryStream, storageDir, options, cb) => {
-  const { fileFilterFn, supportedTypes } = options;
+  const { fileFilterFn, supportedTypes, updated } = options;
   pipeline(
     entryStream,
     filter(entry => entry.fileType === 'f' && entry.sha1sum && entry.size > 0),
@@ -34,7 +34,7 @@ const createEntries = (entryStream, storageDir, options, cb) => {
     // Stream single entry
     flatten(),
     filter(entry => supportedTypes.indexOf(entry.type) >= 0),
-    mapToMedia,
+    mapToMedia(updated),
     processIndicator({name: 'map to media'}),
     memoryIndicator({intervalMs: 30 * 1000}),
     toList(),

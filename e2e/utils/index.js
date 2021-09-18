@@ -65,7 +65,7 @@ const getExportOutputDir = () => getPath('export-output')
 const resolveArgs = (args, vars) => [].concat(args).map(arg => arg.replace(/\{([^}]+)\}/g, (_, name) => vars[name.trim()] || ''))
 
 const appendLog = (file, data, cb) => {
-  fs.appendFile(getPath(file), JSON.stringify(data) + '\n', err => {
+  fs.appendFile(file, JSON.stringify(data) + '\n', err => {
     if (err) {
       gauge.message(`Could not write cli log: ${err}`)
     }
@@ -87,6 +87,7 @@ const runCommand = (command, args, options, cb) => {
   const stdoutChunks = []
   const stderrChunks = []
   const t0 = Date.now()
+  const logFile = getPath('cli.log')
   const child = spawn(command, args, spawnOptions)
   child.stdout.on('data', chunk => stdoutChunks.push(chunk))
   child.stderr.on('data', chunk => stderrChunks.push(chunk))
@@ -99,7 +100,7 @@ const runCommand = (command, args, options, cb) => {
     gauge.dataStore.scenarioStore.put('commandHistory', commandHistory)
     gauge.dataStore.scenarioStore.put('lastExitCode', code)
     const data = { command, args, exitCode: code, commandLine, stdout, stderr, time: t0, duration: Date.now() - t0 }
-    appendLog('cli.log', data, () => {
+    appendLog(logFile, data, () => {
       if (cb) {
         cb(code, stdout, stderr)
       }
@@ -157,17 +158,17 @@ const readJsonGz = async (filename) => {
 
 const readIndex = async () => {
   const filename = getIndexFilename()
-  return await readJsonGz(filename)
+  return readJsonGz(filename)
 }
 
 const readJournal = async (id) => {
   const filename = getJournalFilename(id)
-  return await readJsonGz(filename)
+  return readJsonGz(filename)
 }
 
 const readDatabase = async () => {
   const filename = getDatabaseFilename()
-  return await readJsonGz(filename)
+  return readJsonGz(filename)
 }
 
 const pad = (value, len, char) => {

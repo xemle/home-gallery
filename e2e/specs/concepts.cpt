@@ -8,6 +8,17 @@
 * Init index from <dir>
 * Extract files
 
+# Init database from <dir>
+
+* Init storage from <dir>
+* Create database
+
+# Init server from <dir>
+
+* Init database from <dir>
+* Start server
+* Wait for database
+
 # Start server from <dir>
 
 * Init dir from <dir>

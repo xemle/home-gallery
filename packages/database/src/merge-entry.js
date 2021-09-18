@@ -16,6 +16,9 @@ const getUniqFileSizeSum = a => a.files.filter(uniqFilter(e => e.id)).map(e => e
 const compareUniqFileSizeSum = (a, b) => getUniqFileSizeSum(b) - getUniqFileSizeSum(a)
 
 const isFirstPrimary = (a, b) => {
+  if (a.updated && a.updated > b.updated) {
+    return true
+  }
   const sizeSumCmp = compareUniqFileSizeSum(a, b)
   if (sizeSumCmp == 0) {
     return hasFirstShorterFilename(a, b)

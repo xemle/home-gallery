@@ -19,19 +19,19 @@ const readDatabase = async (databaseFile) => {
 
 const mergeDatabase = async (remoteDatabase, localDatabase, databaseFile) => {
   const t0 = Date.now()
-  const localIds = localDatabase.data.reduce((ids, entry) => { ids[entry.id] = true; return ids }, {})
-  const missingEntries = remoteDatabase.data.filter(entry => !localIds[entry.id])
-  if (!missingEntries.length) {
+  const id2local = localDatabase.data.reduce((ids, entry) => { ids[entry.id] = entry; return ids }, {})
+  const remoteEntries = remoteDatabase.data.filter(entry => !id2local[entry.id] || entry.updated > id2local[entry.id].updated)
+  if (!remoteEntries.length) {
     log.info(`No new entries found. Skip database merge`)
     return
   }
 
-  const [mergedEntries, changedEntries] = mergeEntries(localDatabase.data, missingEntries, [])
+  const [mergedEntries, changedEntries] = mergeEntries(localDatabase.data, remoteEntries, [])
   if (changedEntries.length) {
     log.warn({data: changedEntries.map(e => e.id)}, `Could not resolve change of ${changedEntries.length} database entries completely caused by the database merge. Some data or properties such as tags might be out of sync. See list of ids in the logs for details`)
   }
   return writeDatabaseAsync(databaseFile, mergedEntries)
-    .then(() => log.info(t0, `Updated database with ${missingEntries.length} new entries from remote`))
+    .then(() => log.info(t0, `Updated database with ${remoteEntries.length} new entries from remote`))
 }
 
 const filterDatabaseByQuery = async (database, query) => {

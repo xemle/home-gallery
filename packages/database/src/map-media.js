@@ -289,7 +289,7 @@ const getFaces = (entry, minScore) => {
     })
 }
 
-const createMedia = entry => {
+const createMedia = (entry, updated) => {
   const allStorageFiles = [entry.files]
     .concat(entry.sidecars.map(sidecar => sidecar.files))
     .reduce((r, a) => { a.forEach(v => r.push(v)); return r}, []);
@@ -334,6 +334,7 @@ const createMedia = entry => {
   const media = Object.assign({
     id: entry.sha1sum,
     type: entry.type,
+    updated,
     date: entry.date,
     files: [mapFile(entry)].concat(entry.sidecars.map(mapFile)),
     previews: allStorageFiles.filter(file => file.match(/-preview/)),
@@ -346,14 +347,16 @@ const createMedia = entry => {
   return media;
 }
 
-const mapMedia = through2.obj(function (entry, _, cb) {
-  try {
-    const media = createMedia(entry)
-    this.push(media);
-  } catch (e) {
-    log.warn(e, `Could not create media entry of ${entry}: ${e}. Skip it`)
-  }
-  cb();
-});
+const mapMedia = (updated) => {
+  return through2.obj(function (entry, _, cb) {
+    try {
+      const media = createMedia(entry, updated)
+      this.push(media);
+    } catch (e) {
+      log.warn(e, `Could not create media entry of ${entry}: ${e}. Skip it`)
+    }
+    cb();
+  });
+}
 
 module.exports = mapMedia;

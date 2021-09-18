@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- database: Add updated timestamp
 - database: Support IPTC keywords as tags
 - index: Improve journal for sidecar changes
 - server: Add optional basic authentication of users and ip whitelists

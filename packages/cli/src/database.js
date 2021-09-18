@@ -46,7 +46,8 @@ const command = {
         const options = {
           fileFilterFn,
           journal: argv.journal,
-          supportedTypes: ['image', 'rawImage', 'video']
+          supportedTypes: ['image', 'rawImage', 'video'],
+          updated: new Date().toISOString()
         }
         buildDatabase(argv.index, argv.storage, argv.database, options, (err, database) => {
           if (err && err.code == 'ENOCHANGE') {
