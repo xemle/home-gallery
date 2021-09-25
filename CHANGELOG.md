@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- server: Add optional basic authentication of users and ip whitelists
 - webapp: Add a tab to list tags (by biolds)
 - extractor: Add option for geo address server
 - extractor: Add error threshold for api calls

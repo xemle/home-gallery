@@ -96,6 +96,16 @@ sources:
   # cert: '{configDir}/server.crt'
   # Open browser when server starts
   # openBrowser: false
+  # Enable basic authentication users and ip whitelist rules which require no authentication
+  # First matching rule wins. Default rules are: allow: localhost and deny: all.
+  # auth:
+  #   users:
+  #     - username: password
+  #     - username: '{SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g='
+  #   rules:
+  #     - allow: localhost
+  #     - allow: '192.168/16'
+  #     - deny: all
 
 logger:
   # Currently console and file loggers are available

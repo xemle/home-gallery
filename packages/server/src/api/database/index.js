@@ -15,7 +15,7 @@ const filterDatabase = (entries, query, cb) => query ? filterEntriesByQuery(entr
 /**
  * @param {EventBus} eventbus
  */
-function databaseApi(eventbus) {
+function databaseApi(eventbus, databaseFilename, getEvents) {
   let database = false;
   const databaseCache = cache(3600);
   let entryCache = {};
@@ -70,7 +70,7 @@ function databaseApi(eventbus) {
     /**
      * @param {string} databaseFilename
      */
-    init: (databaseFilename, getEvents) => {
+    init: () => {
       waitReadWatch(databaseFilename, getEvents, (err, newDatabase) => {
         if (err) {
           log.error(`Could not read database file ${databaseFilename}: ${err}`);

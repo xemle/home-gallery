@@ -5,10 +5,12 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpx \"src/**\" dist",
+    "build": "cpx \"src/**/!(*.test.js|*.ne)\" dist",
     "postbuild": "cpx \"../webapp/dist/**\" dist/public",
     "run": "node index.js",
-    "watch": "onchange -d 200 \"src/**\" -- npm run build"
+    "watch": "onchange -d 200 \"src/**\" -- npm run build",
+    "test": "tap --no-check-coverage --no-coverage-report src/*/*.test.js",
+    "watch:test": "tap --no-check-coverage --no-coverage-report -w src/*/*.test.js"
   },
   "keywords": [
     "HomeGallery",

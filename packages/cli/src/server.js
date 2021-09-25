@@ -1,5 +1,21 @@
 const log = require('@home-gallery/logger')('cli.server');
 
+const mapUsers = user => {
+  const pos = user.indexOf(':')
+  return {
+    username: user.slice(0, pos),
+    password: user.slice(pos + 1)
+  }
+}
+
+const mapRules = rule => {
+  const pos = rule.indexOf(':')
+  return {
+    type: rule.slice(0, pos),
+    value: rule.slice(pos + 1)
+  }
+}
+
 const command = {
   command: 'server',
   describe: 'Start web server',
@@ -40,6 +56,16 @@ const command = {
         alias: 'C',
         describe: 'SSL certificate file'
       },
+      user: {
+        alias: 'U',
+        array: true,
+        describe: 'User and password for basic authentication. Format is username:password. Password schema can be {SHA}, otherwise it is plain'
+      },
+      'ip-whitelist-rule': {
+        alias: ['rule', 'R'],
+        array: true,
+        describe: 'IP whitelist rule in format type:network. E.g. allow:192.168.0/24 or deny:all. First matching rule wins.'
+      },
       'open-browser': {
         boolean: true,
         default: true,
@@ -61,7 +87,9 @@ const command = {
       webappDir,
       key: argv.key,
       cert: argv.cert,
-      openBrowser: argv.openBrowser
+      users: argv.user ? argv.user.map(mapUsers) : false,
+      ipWhitelistRules: argv.ipWhitelistRule ? argv.ipWhitelistRule.map(mapRules) : [],
+      openBrowser: argv.openBrowser,
     }
     startServer(config, (err) => {
       if (err) {

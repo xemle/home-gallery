@@ -1,17 +1,15 @@
 const fs = require('fs');
 const path = require('path');
-const express = require('express');
 
-const isIndex = path => path === '/' || path === '/index.html';
+const log = require('@home-gallery/logger')('server.webapp')
 
-const injectState = (indexFile, getFirstEntries, count) => {
-  return (req, res, next) => {
-    if (!isIndex(req.path)) {
-      return next();
-    }
+const { useIf, isIndex } = require('./utils')
 
+const injectStateMiddleware = (indexFile, getFirstEntries, count) => {
+  return (_, res) => {
     fs.readFile(indexFile, 'utf8', (err, data) => {
       if (err) {
+        log.error(err, `Could not read index file ${indexFile}`)
         return res.status(404).json({error: `${err}`});
       }
       const state = {
@@ -27,11 +25,11 @@ const injectState = (indexFile, getFirstEntries, count) => {
   }
 }
 
-const app = (webappDir, getEntries, count) => {
+const app = (webappDir, getFirstEntries, count) => {
   const indexFile = path.resolve(webappDir, 'index.html')
+  const injectState = injectStateMiddleware(indexFile, getFirstEntries, count)
   return [
-    injectState(indexFile, getEntries, count),
-    express.static(webappDir),
+    useIf(injectState, isIndex),
     (_, res) => res.sendFile(indexFile)
   ];
 }

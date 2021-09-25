@@ -1,5 +1,9 @@
-const https = require('https');
-const assert = require("assert")
+/* globals gauge*/
+"use strict"
+
+const { Buffer } = require('buffer')
+const https = require('https')
+const assert = require('assert')
 const fetch = require('node-fetch')
 const express = require('express')
 
@@ -17,15 +21,24 @@ const insecureOption = {
   })
 }
 
-const waitForUrl = async (url, timeout, onResponse) => {
+const fetchFacade = path => {
+  const url = gauge.dataStore.scenarioStore.get('serverUrl')
+  assert(!!url, `Expected serverUrl but was empty. Start server first`)
+
+  const headers = gauge.dataStore.scenarioStore.get('request.headers') || {}
+  const agent = url.startsWith('https') ? insecureOption : {}
+  return fetch(`${url}${path}`, Object.assign({timeout: 500, headers}, agent))
+}
+
+const waitForPath = async (path, timeout, onResponse) => {
   timeout = timeout || 10 * 1000
   const startTime = Date.now()
 
   const next = async () => {
     if (Date.now() - startTime > timeout) {
-      throw new Error(`Wait timeout exceeded for url: ${url}`)
+      throw new Error(`Wait timeout exceeded for path: ${path}`)
     }
-    return fetch(url, url.startsWith('https') ? insecureOption : {})
+    return fetchFacade(path)
       .then(onResponse || onResponseNoop)
       .catch(() => wait(200).then(next))
   }
@@ -33,8 +46,8 @@ const waitForUrl = async (url, timeout, onResponse) => {
   return next()
 }
 
-const waitForDatabase = async (url, timeout) => {
-  return waitForUrl(`${url}/api/database.json`, timeout, res => {
+const waitForDatabase = async (timeout) => {
+  return waitForPath('/api/database.json', timeout, res => {
     if (!res.ok) {
       throw new Error(`Database response is not successfull: Code is ${res.status}`)
     }
@@ -62,9 +75,15 @@ const startServer = async (args = []) => {
   gauge.dataStore.scenarioStore.put('serverId', serverId)
   gauge.dataStore.scenarioStore.put('serverUrl', url)
 
-  return waitForUrl(url, 10 * 1000)
+  return waitForPath('', 10 * 1000)
 }
-step("Start server", startServer)
+
+step("Start server", async () => await startServer())
+
+step("Start server with args <args>", async (args) => {
+  const argList = args.split(/\s+/)
+  await startServer(argList)
+})
 
 step("Start HTTPS server", async () => startServer(['-K', getPath('config', 'server.key'), '-C', getPath('config', 'server.crt')]))
 
@@ -152,10 +171,7 @@ step("Start mock server", async () => {
   })
 })
 
-step("Wait for database", async () => {
-  const serverUrl = gauge.dataStore.scenarioStore.get('serverUrl')
-  await waitForDatabase(serverUrl, 10 * 1000)
-})
+step("Wait for database", async () => await waitForDatabase(10 * 1000))
 
 const killChildProcess = async child => {
   return new Promise(resolve => {
@@ -184,25 +200,35 @@ step("Stop server", async () => {
   }
 })
 
-step("Server has file <file>", async (file) => {
-  const serverId = gauge.dataStore.scenarioStore.get('serverId')
-  const server = servers[serverId]
-  assert(!!server, `Server ${serverId} not found`)
+step("Request file <file>", async (file) => {
+  return fetchFacade(file)
+    .then(res => gauge.dataStore.scenarioStore.put('response.status', res.status))
+})
 
-  return fetch(`${server.url}${file}`, {timeout: 500})
+step("Response status is <status>", async (status) => {
+  const responseStatus = gauge.dataStore.scenarioStore.get('response.status')
+  assert(responseStatus == status, `Expected response status ${status} but was ${responseStatus}`)
+})
+
+const btoa = text => Buffer.from(text).toString('base64')
+
+step("Set user <user> with password <password>", async (user, password) => {
+  const headers = gauge.dataStore.scenarioStore.get('request.headers') || {}
+  headers['Authorization'] = `Basic ${btoa(user + ':' + password)}`
+  gauge.dataStore.scenarioStore.put('request.headers', headers)
+})
+
+step("Server has file <file>", async (file) => {
+  return fetchFacade(file)
     .then(res => {
-      assert(res.ok, `Could not fetch ${fetch}`)
+      assert(res.ok, `Could not fetch file ${file}`)
     })
 })
 
 step("Database with query <query> has <amount> entries", async (query, amount) => {
-  const serverId = gauge.dataStore.scenarioStore.get('serverId')
-  const server = servers[serverId]
-  assert(!!server, `Server ${serverId} not found`)
-
-  return fetch(`${server.url}/api/database${query}`, {timeout: 500})
+  return fetchFacade(`/api/database${query}`)
     .then(res => {
-      assert(res.ok, `Could not fetch ${fetch}`)
+      assert(res.ok, `Could not fetch file ${fetch}`)
       return res.json()
     })
     .then(data => {

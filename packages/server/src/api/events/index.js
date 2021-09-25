@@ -5,7 +5,6 @@ const log = require('@home-gallery/logger')('server.api.events');
 const { readEvents, appendEvent } = require('@home-gallery/events/dist/node');
 
 const { sendError } = require('../error');
-const { send } = require('process');
 
 /**
  * @param {EventBus} eventbus
