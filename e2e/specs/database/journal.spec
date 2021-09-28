@@ -48,10 +48,8 @@ Tags: database, option, journal
 * Add file "index/basic/IMG_2915.JPG" as "other/IMG_2915.JPG"
 * Create index with args "--journal abc"
 * Create database with args "--journal abc"
-* Database has "2" entries
-* Database entry "96419bb" has "2" files
-* Database entry "96419bb" has file "IMG_2915.JPG"
-* Database entry "96419bb" has file "other/IMG_2915.JPG"
+* Database has "3" entries
+* Database entry "96419bb" has "1" files
 
 ## Remove file
 

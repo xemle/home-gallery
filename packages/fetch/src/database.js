@@ -3,7 +3,6 @@ const log = require('@home-gallery/logger')('fetch.database')
 
 const { promisify } = require('@home-gallery/common')
 const { readOrCreateDatabase, writeDatabase, mergeEntries } = require('@home-gallery/database')
-const { applyEvents } = require('./event')
 const { filterEntriesByQuery } = require('@home-gallery/query')
 
 const readOrCreateDatabaseAsync = promisify(readOrCreateDatabase)
@@ -26,10 +25,7 @@ const mergeDatabase = async (remoteDatabase, localDatabase, databaseFile) => {
     return
   }
 
-  const [mergedEntries, changedEntries] = mergeEntries(localDatabase.data, remoteEntries, [])
-  if (changedEntries.length) {
-    log.warn({data: changedEntries.map(e => e.id)}, `Could not resolve change of ${changedEntries.length} database entries completely caused by the database merge. Some data or properties such as tags might be out of sync. See list of ids in the logs for details`)
-  }
+  const mergedEntries = mergeEntries(localDatabase.data, remoteEntries, [])
   return writeDatabaseAsync(databaseFile, mergedEntries)
     .then(() => log.info(t0, `Updated database with ${remoteEntries.length} new entries from remote`))
 }

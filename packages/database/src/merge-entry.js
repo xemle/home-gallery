@@ -63,119 +63,76 @@ const toMap = (values, keysFn) => values.reduce((result, value) => {
   return result
 }, {})
 
-const handleRemovedFiles = (dbEntries, id2Entry, removedFiles) => {
-  if (!removedFiles.length) {
+const getFileKey = file => `${file.index}:${file.filename}`
+
+const getEntryFileKeys = entry => entry.files.map(getFileKey)
+
+const removeFileFromEntry = (file, entry) => {
+  const fileKey = getFileKey(file)
+  const fileIndex = entry.files.findIndex(entryFile => fileKey == getFileKey(entryFile))
+  if (fileIndex < 0) {
+    log.warn(`Expect to find file ${fileKey} in entry ${entryToString(entry)}`)
+    return
+  }
+  log.trace(`Remove file ${fileToString(file)} from entry ${entryToString(entry)}`)
+  entry.files.splice(fileIndex, 1)
+}
+
+const removeFilesFromEntries = (files, file2Entry) => {
+  if (!files.length) {
     return []
   }
-  const fileKeyFn = file => `${file.id}:${file.index}:${file.filename}`
-  const file2Entry = toMap(dbEntries, e => e.files.map(fileKeyFn))
 
-  const changedEntries = removedFiles.reduce((changedEntries, file) => {
-    const key = fileKeyFn(file)
-    const entry = file2Entry[key]
+  files.forEach(file => {
+    const fileKey = getFileKey(file)
+    const entry = file2Entry[fileKey]
     if (!entry) {
-      log.trace(`Database has not entry with file key ${key}`)
-      return changedEntries
+      log.trace(`Database has not entry for file ${fileToString(file)}`)
+      return
     }
-
-    const index = entry.files.findIndex(entryFile => key == fileKeyFn(entryFile))
-    if (index < 0) {
-      log.warn(`Expect to find file ${key} in entry ${entryToString(entry)}`)
-      return changedEntries
-    }
-    entry.files.splice(index, 1)
-    log.trace(`Remove file ${fileToString(file)} from entry ${entryToString(entry)}`)
-    if (!entry.files.length) {
-      log.trace(`Remove entry ${entryToString(entry)} due empty file list`)
-      delete id2Entry[entry.id]
-    } else {
-      changedEntries.push(entry)
-    }
-    return changedEntries
-  }, [])
-
-  const validChangedEntries = changedEntries.filter(entry => id2Entry[entry.id])
-
-  return validChangedEntries
+    removeFileFromEntry(file, entry)
+  })
 }
 
-const isSameFile = (a, b) => a.id == b.id && a.index == b.index && a.filename == b.filename
+const hasFiles = entry => entry.files && entry.files.length
 
-const entryHasSameFiles = (a, b, aOffset = 0) => {
-  if (a.files.length - aOffset != b.files.length) {
-    return false
-  }
-  for (let i = 0; i < b.files.length; i++) {
-    if (!isSameFile(a.files[i + aOffset], b.files[i])) {
-      return false
-    }
-  }
-  return true
-}
+const removeFiles = entry => entry.files = []
 
-const mainFileWasRemoved = (changeEntry, mainFile, id2Entry) => changeEntry.id != mainFile.id && id2Entry[changeEntry.id]
+const mapEntry2newEntry = (newEntries, file2Entry) => {
+  return newEntries.reduce((result, newEntry) => {
+    for (const file of newEntry.files) {
+      const fileKey = getFileKey(file)
+      const entry = file2Entry[fileKey]
+      if (entry) {
+        result.push([entry, newEntry])
+	      break
+      }
+    }
 
-const handleRemovedMainFile = (id2Entry, changedEntries, newEntries) => {
-  return changedEntries.reduce((result, changeEntry) => {
-    const mainFile = changeEntry.files[0]
-    if (!mainFileWasRemoved(changeEntry, mainFile, id2Entry)) {
-      result.push(changeEntry)
-      return result
-    }
-    const entry = id2Entry[changeEntry.id]
-    const newEntry = newEntries.find(entry => entry.id == mainFile.id)
-    if (entryHasSameFiles(entry, newEntry)) {
-      log.debug(`Replace entry ${entryToString(entry)} by ${entryToString(newEntry)} due removed main file`)
-      delete id2Entry[changeEntry.id]
-    }
     return result
   }, [])
 }
 
-const hasNewMainFile = (file, fileOffset, id2Entry) => fileOffset != 0 && id2Entry[file.id]
+const toEntry = ([entry]) => entry
 
-const handleNewMainFile = (id2Entry, newEntries) => {
-  newEntries.forEach(newEntry => {
-    if (newEntry.files.length == 1) {
-      return
-    }
-    newEntry.files.forEach((file, fileOffset) => {
-      if (!hasNewMainFile(file, fileOffset, id2Entry)) {
-        return
-      }
-      const entry = id2Entry[file.id]
-      if (entryHasSameFiles(newEntry, entry, fileOffset)) {
-        log.debug(`Replace entry ${entryToString(entry)} by ${entryToString(newEntry)} due new main file`)
-        delete id2Entry[file.id]
-      }
-    })
-  })
-}
+const invalidateDatabaseEntries = entry2newEntry => entry2newEntry.map(toEntry).forEach(removeFiles)
 
 const mergeEntries = (dbEntries, newEntries, removedFiles) => {
-  const id2Entry = toMap(dbEntries, e => e.id)
+  const file2Entry = toMap(dbEntries, getEntryFileKeys)
 
-  let changedEntries = handleRemovedFiles(dbEntries, id2Entry, removedFiles || [])
-  changedEntries = handleRemovedMainFile(id2Entry, changedEntries, newEntries)
-  handleNewMainFile(id2Entry, newEntries)
+  removeFilesFromEntries(removedFiles || [], file2Entry)
 
-  changedEntries = newEntries.reduce((changedEntries, entry) => {
-    if (id2Entry[entry.id]) {
-      id2Entry[entry.id] = mergeEntry(entry, id2Entry[entry.id])
-      changedEntries.push(id2Entry[entry.id])
-    } else {
-      id2Entry[entry.id] = entry
-    }
-    return changedEntries
-  }, changedEntries)
+  const entry2newEntry = mapEntry2newEntry(newEntries, file2Entry)
+  invalidateDatabaseEntries(entry2newEntry)
 
-  const mergedEntries = Object.values(id2Entry)
-  mergedEntries.sort((a, b) => a.date < b.date ? 1 : -1)
-  return [mergedEntries, changedEntries]
+  const validEntries = dbEntries.filter(hasFiles)
+
+  const result = validEntries.concat(newEntries)
+  result.sort((a, b) => a.date < b.date ? 1 : -1)
+  return result
 }
 
 module.exports = {
   mergeEntry,
-  matchFile,
   mergeEntries
 }
