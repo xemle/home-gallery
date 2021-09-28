@@ -19,6 +19,7 @@ import { SearchView } from './list/Search';
 import { SimilarView } from './list/Similar';
 import { FacesView } from './list/Faces';
 import { Years, YearView } from './year/Years';
+import { Tags } from './tags/Tags';
 import { MediaView } from './single/MediaView';
 
 export const Root = () => {
@@ -73,6 +74,7 @@ export const Main = () => {
                 <Route path="/similar/:id" children={<SimilarView />} />
                 <Route path="/search/:term" children={<SearchView />} />
                 <Route path="/faces/:id/:faceIndex" children={<FacesView />} />
+                <Route exact path="/tags" children={<Tags />} />
                 <Redirect to='/' />
             </Switch>
           </LastLocationProvider>
