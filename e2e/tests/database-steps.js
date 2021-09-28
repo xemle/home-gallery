@@ -25,9 +25,15 @@ step("Database has <amount> entries", async (amount) => {
   assert(data.data.length == amount, `Expecting ${amount} entries but have ${data.data.length} entries`)
 })
 
-const getEntry = async id => {
+const getAllEntries = async id => {
   const data = await readDatabase()
-  const entry = data.data.find(entry => entry.id.startsWith(id))
+  const entries = data.data.filter(entry => entry.id.startsWith(id))
+  return entries
+}
+
+const getEntry = async id => {
+  const entries = await getAllEntries(id)
+  const entry = entries.shift()
   assert(!!entry, `Could not find entry with id ${id}`)
   return entry
 }
@@ -44,8 +50,38 @@ step("Database entry <id> has <amount> files", async (id, amount) => {
 
 step("Database entry <id> has file <filename>", async (id, filename) => {
   const entry = await getEntry(id)
-  const file = entry.files.find(entry => entry.filename == filename)
+  const file = entry.files.find(file => file.filename == filename)
   assert(!!file, `Could not find filename ${filename} of entry ${id}`)
+})
+
+step("Database has <amount> groups", async (amount) => {
+  const data = await readDatabase()
+  const groupIds = data.data
+    .filter(entry => entry.groupIds && entry.groupIds.length)
+    .reduce((groupIds, entry) => {
+      entry.groupIds.forEach(groupId => !groupIds.includes(groupId) && groupIds.push(groupId))
+      return groupIds
+    }, [])
+
+  assert(groupIds.length == amount, `Expecting ${amount} groups but have ${groupIds.length} groups`)
+})
+
+const getGroupEntries = async (id) => {
+  const data = await readDatabase()
+  return data.data.filter(entry => entry.id.startsWith(id) || (entry.groupIds && entry.groupIds.find(groupId => groupId.includes(id))))
+}
+
+step("Database group <id> has <amount> entries", async (id, amount) => {
+  const entries = await getGroupEntries(id)
+  assert(entries.length == amount, `Expecting ${amount} entries of groups ${id} but have ${entries.length} entries`)
+})
+
+step("Database group <id> has file <filename>", async (id, filename) => {
+  const entries = await getGroupEntries(id)
+
+  const groupFiles = entries.reduce((result, entry) => result.concat(entry.files), [])
+  const found = groupFiles.find(file => file.filename == filename)
+  assert(!!found, `Could not find filename ${filename} of group ${id}`)
 })
 
 const getDatabaseStat = async () => stat(getDatabaseFilename())

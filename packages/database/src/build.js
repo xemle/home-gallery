@@ -10,14 +10,8 @@ const groupByDir = require('./group-by-dir');
 const groupSidecarFiles = require('./group-sidecar-files');
 const mapToMedia = require('./map-media');
 const { writeDatabase } = require('./write-database');
-const { mergeEntry } = require('./merge-entry')
-const { mergeFromJournal } = require('./merge-journal')
-
-const uniq = (list, keyFn, mergeFn) => Object.values(list.reduce((id2Entry, entry) => {
-  const key = keyFn(entry)
-  id2Entry[key] = id2Entry[key] ? mergeFn(id2Entry[key], entry) : entry
-  return id2Entry
-}, {}))
+const { mergeFromJournal } = require('./merge-journal');
+const { groupEntriesById } = require('./entry-group')
 
 const createEntries = (entryStream, storageDir, options, cb) => {
   const { fileFilterFn, supportedTypes, updated } = options;
@@ -44,7 +38,7 @@ const createEntries = (entryStream, storageDir, options, cb) => {
 }
 
 function build(indexFilenames, storageDir, databaseFilename, options, cb) {
-  const { journal } = options;
+  const { journal, updated } = options;
   readStreams(indexFilenames, journal, (err, entryStream) => {
     if (err) {
       return cb(err);
@@ -55,14 +49,14 @@ function build(indexFilenames, storageDir, databaseFilename, options, cb) {
         return cb(err);
       }
       if (journal) {
-        mergeFromJournal(indexFilenames, journal, databaseFilename, entries, cb)
+        mergeFromJournal(indexFilenames, journal, databaseFilename, entries, updated, cb)
       } else {
         const t0 = Date.now()
-        const uniqueEntries = uniq(entries, entry => entry.id, mergeEntry);
-        log.info(t0, `Merged ${entries.length} entries to ${uniqueEntries.length} unique entries`);
+        const changedEntriesByGroup = groupEntriesById(entries)
+        log.info(t0, `Assign id groups to ${changedEntriesByGroup.length} entries of ${entries.length} total entries`);
 
         const t1 = Date.now()
-        writeDatabase(databaseFilename, uniqueEntries, (err, database) => {
+        writeDatabase(databaseFilename, entries, (err, database) => {
           if (err) {
             return cb(err)
           }

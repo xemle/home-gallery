@@ -1,67 +1,6 @@
 const log = require('@home-gallery/logger')('database.merge')
-
-const hasFirstShorterFilename = (a, b) => a.files[0].filename <= b.files[0].filename
-
-const uniqFilter = valueFn => (v, i, a) => {
-  if (i == 0) {
-    return true
-  }
-  const value = valueFn(v)
-  const firstEntry = a.find(e => valueFn(e) == value)
-  return i === a.indexOf(firstEntry)
-}
-
-const getUniqFileSizeSum = a => a.files.filter(uniqFilter(e => e.id)).map(e => e.size).reduce((r, v) => r + v, 0)
-
-const compareUniqFileSizeSum = (a, b) => getUniqFileSizeSum(b) - getUniqFileSizeSum(a)
-
-const isFirstPrimary = (a, b) => {
-  if (a.updated && a.updated > b.updated) {
-    return true
-  }
-  const sizeSumCmp = compareUniqFileSizeSum(a, b)
-  if (sizeSumCmp == 0) {
-    return hasFirstShorterFilename(a, b)
-  }
-  return sizeSumCmp < 0
-}
-
-const matchFile = (a, b) => a.id == b.id && a.index == b.index && a.filename == b.filename
-
-const entryToString = entry => `${entry.id.slice(0, 7)}`
-
-const fileToString = file => `${file.id.slice(0, 7)}:${file.index}:${file.filename}`
-
-const addMissingFilesFrom = (target, other) => {
-  other.files.forEach(file => {
-    const found = target.files.find(targetFile => matchFile(targetFile, file))
-    if (!found) {
-      log.trace(`Add ${fileToString(file)} to entry ${fileToString(target)}`)
-      target.files.push(file)
-    }
-  })
-  return target
-}
-
-const mergeEntry = (a, b) => {
-  if (!isFirstPrimary(a, b)) {
-    return mergeEntry(b, a)
-  }
-
-  return addMissingFilesFrom(a, b)
-}
-
-const toMap = (values, keysFn) => values.reduce((result, value) => {
-  const keys = keysFn(value)
-  if (Array.isArray(keys)) {
-    keys.forEach(key => {
-      result[key] = value
-    })
-  } else {
-    result[keys] = value
-  }
-  return result
-}, {})
+const { mergeGroups, groupEntriesById } = require('./entry-group')
+const { toMultiKeyMap, fileToString, entryToString, uniqBy } = require('./utils')
 
 const getFileKey = file => `${file.index}:${file.filename}`
 
@@ -98,17 +37,23 @@ const hasFiles = entry => entry.files && entry.files.length
 
 const removeFiles = entry => entry.files = []
 
+const findEntryByFile = (entry, file2Entry) => {
+  for (const file of entry.files) {
+    const fileKey = getFileKey(file)
+    const entry = file2Entry[fileKey]
+    if (entry) {
+      return entry
+    }
+  }
+  return
+}
+
 const mapEntry2newEntry = (newEntries, file2Entry) => {
   return newEntries.reduce((result, newEntry) => {
-    for (const file of newEntry.files) {
-      const fileKey = getFileKey(file)
-      const entry = file2Entry[fileKey]
-      if (entry) {
-        result.push([entry, newEntry])
-	      break
-      }
+    const entry = findEntryByFile(newEntry, file2Entry)
+    if (entry) {
+      result.push([entry, newEntry])
     }
-
     return result
   }, [])
 }
@@ -117,22 +62,45 @@ const toEntry = ([entry]) => entry
 
 const invalidateDatabaseEntries = entry2newEntry => entry2newEntry.map(toEntry).forEach(removeFiles)
 
-const mergeEntries = (dbEntries, newEntries, removedFiles) => {
-  const file2Entry = toMap(dbEntries, getEntryFileKeys)
+const isNewer = (entry, newEntry) => !entry.updated || !newEntry.updated || entry.updated < newEntry.updated
+
+const getValidNewEntries = (newEntries, file2Entry) => {
+  return newEntries.filter(newEntry => {
+    const entry = findEntryByFile(newEntry, file2Entry)
+    return !entry || isNewer(entry, newEntry)
+  })
+}
+
+const setUpdatedTimestamp = (entries, updated) => {
+  const uniqValidEntries = entries
+    .filter(uniqBy(entry => getFileKey(entry.files[0])))
+    .filter(entry => !entry.update || entry.updated != updated)
+
+  uniqValidEntries.forEach(entry => entry.update = updated)
+
+  return uniqValidEntries
+}
+
+const mergeEntries = (entries, newEntries, removedFiles, updated) => {
+  const file2Entry = toMultiKeyMap(entries, getEntryFileKeys)
+  const validNewEntries = getValidNewEntries(newEntries, file2Entry)
 
   removeFilesFromEntries(removedFiles || [], file2Entry)
 
-  const entry2newEntry = mapEntry2newEntry(newEntries, file2Entry)
+  const entry2newEntry = mapEntry2newEntry(validNewEntries, file2Entry)
+  const changedEntriesByGroup = mergeGroups(entry2newEntry, entries)
   invalidateDatabaseEntries(entry2newEntry)
 
-  const validEntries = dbEntries.filter(hasFiles)
+  const validEntries = entries.filter(hasFiles)
+  changedEntriesByGroup.push(...groupEntriesById(validNewEntries, validEntries))
 
-  const result = validEntries.concat(newEntries)
-  result.sort((a, b) => a.date < b.date ? 1 : -1)
-  return result
+  const changedEntriesByTimestamp = setUpdatedTimestamp(changedEntriesByGroup, updated)
+
+  const mergedEntries = validEntries.concat(validNewEntries)
+  mergedEntries.sort((a, b) => a.date > b.date ? -1 : 1)
+  return [mergedEntries, validNewEntries, changedEntriesByTimestamp]
 }
 
 module.exports = {
-  mergeEntry,
   mergeEntries
 }

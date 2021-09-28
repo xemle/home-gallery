@@ -17,17 +17,11 @@ const readDatabase = async (databaseFile) => {
 }
 
 const mergeDatabase = async (remoteDatabase, localDatabase, databaseFile) => {
+  const updated = new Date().toISOString()
   const t0 = Date.now()
-  const id2local = localDatabase.data.reduce((ids, entry) => { ids[entry.id] = entry; return ids }, {})
-  const remoteEntries = remoteDatabase.data.filter(entry => !id2local[entry.id] || entry.updated > id2local[entry.id].updated)
-  if (!remoteEntries.length) {
-    log.info(`No new entries found. Skip database merge`)
-    return
-  }
-
-  const mergedEntries = mergeEntries(localDatabase.data, remoteEntries, [])
+  const [mergedEntries, newEntries] = mergeEntries(localDatabase.data, remoteDatabase.data, [], updated)
   return writeDatabaseAsync(databaseFile, mergedEntries)
-    .then(() => log.info(t0, `Updated database with ${remoteEntries.length} new entries from remote`))
+    .then(() => log.info(t0, `Updated database with ${newEntries.length} new entries from remote`))
 }
 
 const filterDatabaseByQuery = async (database, query) => {

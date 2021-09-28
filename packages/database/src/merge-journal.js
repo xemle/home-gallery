@@ -45,7 +45,7 @@ const diffCount = (newData, oldData) => {
   return `${sign}${diff}`
 }
 
-const mergeFromJournal = (indexFilenames, journal, databaseFilename, entries, cb) => {
+const mergeFromJournal = (indexFilenames, journal, databaseFilename, entries, updated, cb) => {
   readJournals(indexFilenames, journal, (err, journals) => {
     if (err) {
       return cb(err)
@@ -68,7 +68,7 @@ const mergeFromJournal = (indexFilenames, journal, databaseFilename, entries, cb
       }
 
       const t1 = Date.now()
-      const mergedEntries = mergeEntries(database.data, entries, removedFiles)
+      const [mergedEntries] = mergeEntries(database.data, entries, removedFiles, updated)
       log.info(t1, `Merged ${entries.length} new and ${removedFiles.length} removed entries from journals to ${mergedEntries.length} entries (${diffCount(mergedEntries, database.data)}) to the database`)
 
       const t2 = Date.now()
