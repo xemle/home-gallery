@@ -25,7 +25,7 @@ const events = (eventbus, eventsFilename) => {
 
   const emit = (event) => {
     clients.forEach(c => {
-      console.log(`Send data to client ${c.id}`);
+      log.debug(`Send data to client ${c.id}`);
       c.res.write(`data: ${JSON.stringify(event)}\n\n`);
     });
   }
