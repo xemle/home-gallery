@@ -43,7 +43,7 @@ export const Tags = () => {
       <ul className="menu">
         {tags.map(tag => {
           return <li key={tag.tag}>
-            <Link style={{width: '100%'}} to={`/search/${tag.tag}`}><i className="fas fa-tag"></i> {tag.tag} - {tag.count}</Link>
+            <Link to={`/search/${tag.tag}`}><i className="fas fa-tag"></i> {tag.tag} - {tag.count}</Link>
           </li>
         })}
       </ul>
