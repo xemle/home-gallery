@@ -34,8 +34,12 @@
     }
 
     > a {
-      display: inline-block;
+      display: block;
       padding: $unit 2*$unit;
+
+      &:hover {
+        background-color: $background-color-04dp;
+      }
     }
 
     &:last-child {
