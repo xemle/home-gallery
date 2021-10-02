@@ -20,6 +20,27 @@
 
   Styleguide 2.6
 */
+/*
+  Menu List items
+
+  Markup:
+  <ul class="menu">
+    <li>
+      <a>Item 1</a>
+    </li>
+    <li class="-list">
+      <a>Item 2</a>
+      <a>Item 2.1</a>
+      <a>Item 2.3</a>
+    </li>
+    <li class="-list">
+      <a>Item 3</a>
+      <a>Item 3.1</a>
+    </li>
+  </ul>
+
+  Styleguide 2.6.1
+*/
 
 .menu {
   list-style: none;
@@ -55,5 +76,8 @@
       }
     }
 
+    &.-list > a {
+      display: inline-block;
+    }
   }
 }

@@ -36,7 +36,7 @@ export const Years = () => {
       <h2 style={{marginTop: '40px'}}>Years</h2>
       <ul className="menu">
         {years.map(year => {
-          return <li key={year}>
+          return <li className="-list" key={year}>
             <Link to={`/years/${year}`}>{year}</Link>
             <a onClick={() => history.push(`/years/${year}?q=image`)}><i className="fas fa-image"></i> <span className="hide-sm">Images</span></a>
             <a onClick={() => history.push(`/years/${year}?q=video`)}><i className="fas fa-play"></i> <span className="hide-sm">Videos</span></a>
