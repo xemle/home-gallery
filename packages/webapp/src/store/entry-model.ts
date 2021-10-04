@@ -37,7 +37,6 @@ export const entryModel : EntryModel = {
   }),
 
   setEntries: action((state, payload) => {
-    console.log('set entries', payload);
     state.entries = payload;
   }),
 };

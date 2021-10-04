@@ -24,13 +24,16 @@ const stringifyEntry = entry => {
   .toLowerCase();
 }
 
+const ignoreUnknownExpressions = v => true
+
 const options = {
   textFn: (entry) => {
     if (!entry.textCache) {
       entry.textCache = stringifyEntry(entry);
     }
     return entry.textCache;
-  }
+  },
+  unknownExpressionHandler: () => ignoreUnknownExpressions
 }
 
 const filterEntriesByQuery = (entries, query, cb) => {

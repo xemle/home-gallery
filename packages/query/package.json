@@ -5,9 +5,13 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "compile": "nearleyc -o src/query.js src/query-simple.ne",
-    "build": "cpx \"src/**\" dist",
-    "watch": "onchange \"src/**\" -- npm run build"
+    "compile": "nearleyc -o src/query.js src/query.ne",
+    "build": "cpx \"src/**/!(*.test.js|*.ne)\" dist",
+    "watch": "npm-run-all -p watch:js watch:nearley",
+    "watch:js": "onchange \"src/*.js\" -- npm run build",
+    "watch:nearley": "onchange \"src/*.ne\" -- npm run compile",
+    "test": "tap --no-check-coverage --no-coverage-report src/*.test.js",
+    "watch:test": "tap --no-check-coverage --no-coverage-report -w src/*.test.js"
   },
   "keywords": [
     "HomeGallery",

@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- query: Fix query expressions with parenthesis
 - database: Unify city geo information from hamlet, village, town
 - fetch: Improve error handling for events
 
