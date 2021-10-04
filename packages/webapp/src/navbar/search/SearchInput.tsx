@@ -1,8 +1,12 @@
 import * as React from "react";
 import { useState } from 'react';
 
+import { useStoreState } from '../../store/hooks';
+
 export const SearchInput = ({focus, onSearch}) => {
-  const [ query, setQuery ] = useState('');
+  const searchQuery = useStoreState(state => state.search.query);
+
+  const [ query, setQuery ] = useState(searchQuery.type == 'query' ? searchQuery.value : searchQuery.query || '');
 
   return (
     <>
