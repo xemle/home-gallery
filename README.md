@@ -109,15 +109,20 @@ See [docs.home-gallery.org](https://docs.home-gallery.org) for general documenta
 
 ## Features
 
+- Endless photo stream via virtual scrolling
+- Video transcoding
 - Reverse image lookup (similar image search). If you have one sunset image, you can easily find other sunset photos in your archive without manual tagging
 - Face detection and search by similar faces
+- Expressive query language with and, or, not operands
 - GEO location reverse lookups
 - Simple mobile app through [PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps) support
 - Tagging, single and multi selection
 - Support of read only and offline media sources. Once the preview files are generated and their meta data are extraced, the original sources are not touched and required any more. So media from offline disk need to be extracted only once and the disk can stay offline on next runs
 - Media are identified by their content. Duplicated media (identical files byte-by-byte) are only processed once. Renaming is supported without recalulating previews etc.
 - Fast file changes detection such as add, removes, renames or moves
-- Static side export such as the [demo gallery](https://demo.home-gallery.org)
+- Static web gallery site export such as the [demo gallery](https://demo.home-gallery.org)
+- Stream photos and videos to Chromcast enabled TV devices
+- Runs on SoC such Raspberry PI
 
 ## Limits
 
