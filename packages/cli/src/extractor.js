@@ -63,6 +63,12 @@ const command = {
       'journal': {
         describe: 'File index journal suffix',
         string: true
+      },
+      'use-native': {
+        array: true,
+        describe: 'Use native system executables. Possible values are exitool, vipsthumbnail, convert, ffprobe or ffmpeg',
+        string: true,
+        default: []
       }
     })
     .demandOption(['index', 'storage'])
@@ -71,12 +77,14 @@ const command = {
     const extract = require('@home-gallery/extractor');
     const { fileFilter } = require('@home-gallery/common');
 
+    const splitArrayValues = values => values.map(v => v.split(',')).reduce((r, v) => r.concat(v), [])
+
     const t0 = Date.now();
     fileFilter(argv.exclude, argv['exclude-from-file'], (err, fileFilterFn) => {
       if (err) {
-        log.error(err);
+        log.error(err, `Could not create exclude filter`);
       } else {
-        const config = {
+        const options = {
           indexFilenames: argv.index,
           storageDir: argv.storage,
           fileFilterFn,
@@ -88,11 +96,12 @@ const command = {
           printEntry: argv['print-entry'],
           geoAddressLanguage: argv['geo-address-language'],
           geoServerUrl: argv['geo-server'],
-          journal: argv.journal
+          journal: argv.journal,
+          useNative: splitArrayValues(argv.useNative)
         }
-        extract(config, (err, count) => {
+        extract(options, (err, count) => {
           if (err) {
-            log.error(`Could not extract all meta data and preview files: ${err}`);
+            log.error(err, `Could not extract all meta data and preview files: ${err}`);
           } else {
             log.info(t0, `Extract all meta data and calculated all preview files from ${count} entries`);
           }

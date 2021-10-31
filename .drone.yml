@@ -34,7 +34,7 @@ steps:
 - name: test:e2e
   image: node:16-alpine
   commands:
-  - apk add --no-cache git git-lfs perl
+  - apk add --no-cache git git-lfs perl vips-tools imagemagick
   - git clone $E2E_DATA_REPO ./data
   - npm run test:e2e
   environment:
@@ -104,7 +104,7 @@ steps:
 - name: test:e2e
   image: node:14-alpine
   commands:
-  - apk add --no-cache git git-lfs perl
+  - apk add --no-cache git git-lfs perl vips-tools imagemagick
   - git clone $E2E_DATA_REPO ./data
   - npm run test:e2e
   environment:

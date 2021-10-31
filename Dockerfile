@@ -8,8 +8,7 @@ COPY scripts /build/scripts/
 WORKDIR /build
 
 RUN node scripts/disable-dependency.js api-server styleguide && \
-  npm install && \
-  find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
+  npm install
 
 RUN npm run build --loglevel verbose
 RUN node scripts/bundle.js --bundle-file=bundle-docker.yml && \
@@ -24,6 +23,7 @@ LABEL org.opencontainers.image.documentation="https://docs.home-gallery.org"
 LABEL org.opencontainers.image.source="https://github.com/xemle/home-gallery"
 
 RUN apk add --no-cache \
+  ffmpeg \
   perl
 
 COPY --from=builder /build/app /app
@@ -38,6 +38,7 @@ ENV GALLERY_CONFIG_DIR=/data/config
 ENV GALLERY_CACHE_DIR=/data
 ENV GALLERY_CONFIG=/data/config/gallery.config.yml
 ENV GALLERY_OPEN_BROWSER=false
+ENV GALLERY_USE_NATIVE=ffprobe,ffmpeg
 
 EXPOSE 3000
 

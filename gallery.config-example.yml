@@ -74,6 +74,14 @@ sources:
   #geoAddressLanguage: en
   # excludes are using gitignore patterns
   #excludes: []
+  # Use native system commands. It is recoomended on armv6 and arm7 platform
+  # since the npm packages do not provide binaries for these platforms
+  #useNative:
+  #  - exiftool
+  #  - vipsthumbnail # use libvips to resize images
+  #  - convert # use ImageMagick to resize images
+  #  - ffprobe
+  #  - ffmpeg
 
 #
 # Storage and files configuration

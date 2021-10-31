@@ -3,14 +3,25 @@ const ExifTool = require('exiftool-vendored').ExifTool;
 const log = require('@home-gallery/logger')('extractor.image.exif');
 
 const { toPipe, conditionalTask } = require('./task');
+const { getNativeCommand } = require('./utils')
 
 const exifSuffix = 'exif.json';
 
 const exifTypes = ['image', 'rawImage', 'video', 'meta']
 
-function exif(storage) {
-  const exiftool = new ExifTool({ taskTimeoutMillis: 5000 });
+const initExiftool = options => {
+  const exiftoolOptions = {
+    taskTimeoutMillis: 5000
+  }
+  if (options.useNative.includes('exiftool')) {
+    log.debug(`Use native system command exiftool`)
+    exiftoolOptions.exiftoolPath = getNativeCommand('exiftool')
+  }
 
+  return new ExifTool(exiftoolOptions)
+}
+
+function exif(storage, {exiftool}) {
   const test = entry => exifTypes.includes(entry.type) && !storage.hasEntryFile(entry, exifSuffix)
 
   const task = (entry, cb) => {
@@ -34,15 +45,23 @@ function exif(storage) {
       })
   }
 
-  return toPipe(conditionalTask(test, task), cb => {
-    exiftool.end()
-      .then(cb)
-      .catch(err => {
-        log.warn(`Could not close exiftool: ${err}`);
-        cb();
-      })
-  })
-
+  return toPipe(conditionalTask(test, task))
 }
 
-module.exports = exif;
+const endExiftool = (exiftool, cb) => {
+  exiftool.end()
+    .then(() => {
+      log.debug(`Close exiftool`)
+      cb()
+    })
+    .catch(err => {
+      log.warn(err, `Could not close exiftool: ${err}`);
+      cb();
+    })
+}
+
+module.exports = {
+  initExiftool,
+  exif,
+  endExiftool
+};

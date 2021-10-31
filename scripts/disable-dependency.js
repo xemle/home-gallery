@@ -3,7 +3,15 @@ const path = require('path')
 
 const args = process.argv.slice(2)
 
-const argsToNames = args => args.map(arg => arg.split(',')).reduce((r, v) => r.concat(v), [])
+const [options, names] = args.reduce(([options, names], value) => {
+  const match = value.match(/^--?([^=]+)(=(.+))?$/)
+  if (match) {
+    options[match[1]] = match[3] || true
+  } else {
+    names.push(...value.split(','))
+  }
+  return [options, names]
+}, [{prefix: '.'}, []])
 
 const disableDependencies = (pkg, names) => {
   pkg.disabledDependencies = pkg.disabledDependencies || {}
@@ -32,6 +40,6 @@ const run = async (pkgFilename, names) => {
   return disabled
 }
 
-run('package.json', argsToNames(args))
-  .then(disabled => console.log(disabled.length ? `Disabled ${disabled.join(', ')} dependencies` : `No match found for args: ${args.join(' ')}`))
+run(path.join(options.prefix, 'package.json'), names)
+  .then(disabled => console.log(disabled.length ? `Disabled dependencies ${disabled.join(', ')} in ${options.prefix}` : `No match found for args: ${args.join(' ')}`))
   .catch(console.log)

@@ -53,16 +53,22 @@ export interface BundleOptions {
     filter?: string
     noBefore?: boolean
     noRun?: boolean
+    hostPlattform?: string
+    hostArch?: string
 }
 
 export const bundle = async (options: BundleOptions): Promise<void> => {
     const { bundleFile, version } = options;
-    const config = await readConfig(bundleFile || 'bundle.yml')
+    const host = {
+        platform: options.hostPlattform || os.platform(),
+        arch: options.hostArch || os.arch()
+    }
+    const config = await readConfig(bundleFile || 'bundle.yml', host.platform, host.arch)
     const dir = process.cwd()
     const { output, targets, before, run, entries, includes, excludes, map } = config;
 
     if (!options.noBefore) {
-        await runSteps(before, os.platform(), os.arch())
+        await runSteps(before, host.platform, host.arch)
     }
 
     const outputDir = path.join(output.dir, version)

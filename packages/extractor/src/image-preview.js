@@ -2,13 +2,6 @@ const log = require('@home-gallery/logger')('extractor.image.preview');
 
 const rawPreviewSuffix = 'raw-preview.jpg'
 
-let sharp;
-try {
-  sharp = require('sharp');
-} catch (e) {
-  log.error(`Could not load sharp: ${e}`)
-}
-
 const { toPipe, conditionalTask } = require('./task');
 
 const fileExtension = filename => {
@@ -18,60 +11,45 @@ const fileExtension = filename => {
 
 const isSupportedImage = entry => ['jpg', 'jpeg', 'png'].includes(fileExtension(entry.filename))
 
-function resize(src, size, cb) {
-  if (!sharp) {
-    return cb(new Error(`Sharp is not loaded`))
-  }
-
-  sharp(src, {failOnError: false})
-    .rotate()
-    .resize({width: size})
-    .jpeg({quality: 80, chromaSubsampling: '4:4:4'})
-    .toBuffer(cb);
-}
-
-function resizeImage(storage, entry, src, sizes, cb) {
+function resizeImage(storage, imageResizer, entry, src, imageSizes, cb) {
   let calculatedSizes = [];
 
   let index = 0;
   const next = () => {
-    if (index === sizes.length) {
+    if (index === imageSizes.length) {
       return cb(null, calculatedSizes);
     }
 
-    const size = sizes[index++];
+    const size = imageSizes[index++];
     const suffix = `image-preview-${size}.jpg`;
 
+    const dst = storage.getEntryFilename(entry, suffix);
     if (storage.hasEntryFile(entry, suffix)) {
-      src = storage.getEntryFilename(entry, suffix);
+      src = dst;
       return next();
     }
 
-    resize(src, size, (err, buf) => {
+    imageResizer(src, dst, size, err => {
       if (err) {
         return cb(new Error(`Could not calculate image preview from ${src} with size ${size}: ${err}`));
       }
-      storage.writeEntryFile(entry, suffix, buf, (err) => {
-        if (err) {
-          return cb(new Error(`Could write image preview ${suffix} of ${entry}: ${err}`));
-        }
-        calculatedSizes.push(size);
-        src = storage.getEntryFilename(entry, suffix);
-        return next();
-      });
+      storage.addEntryFilename(entry, suffix)
+      calculatedSizes.push(size);
+      src = dst;
+      return next();
     });
   }
 
   next();
 }
 
-function imagePreview(storage, sizes) {
+function imagePreview(storage, { imageResizer, imagePreviewSizes }) {
   const test = entry => (entry.type === 'image' && isSupportedImage(entry)) || storage.hasEntryFile(entry, rawPreviewSuffix);
 
   const task = (entry, cb) => {
     const t0 = Date.now();
     const src = storage.hasEntryFile(entry, rawPreviewSuffix) ? storage.getEntryFilename(entry, rawPreviewSuffix) : entry.src
-    resizeImage(storage, entry, src, sizes, (err, calculatedSizes) => {
+    resizeImage(storage, imageResizer, entry, src, imagePreviewSizes, (err, calculatedSizes) => {
       if (err) {
         log.error(`Could not calculate image preview of ${entry}: ${err}`);
       } else if (calculatedSizes.length) {

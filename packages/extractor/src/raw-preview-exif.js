@@ -7,14 +7,7 @@ const { toPipe, conditionalTask } = require('./task')
 const rawPreviewSuffix = 'raw-preview.jpg'
 const rawPreviewExifSuffix = 'raw-preview-exif.json'
 
-const fileExtension = filename => {
-  const pos = filename.lastIndexOf('.')
-  return pos > 0 ? filename.slice(pos + 1).toLowerCase() : ''
-}
-
-const rawPreviewExif = storage => {
-  const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
-
+const rawPreviewExif = (storage, {exiftool}) => {
   const test = entry => storage.hasEntryFile(entry, rawPreviewSuffix) && !storage.hasEntryFile(entry, rawPreviewExifSuffix)
 
   const task = (entry, cb) => {
@@ -36,15 +29,7 @@ const rawPreviewExif = storage => {
       })
   }
 
-  return toPipe(conditionalTask(test, task), cb => {
-    exiftool.end()
-      .then(cb)
-      .catch(err => {
-        log.warn(err, `Could not close exiftool: ${err}`)
-        cb()
-      })
-  })
-
+  return toPipe(conditionalTask(test, task))
 }
 
 module.exports = rawPreviewExif

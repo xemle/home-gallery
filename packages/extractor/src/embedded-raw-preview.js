@@ -22,9 +22,7 @@ const hasEmbeddedPreview = entry => {
   return !!exif.PreviewImage
 }
 
-const embeddedRawPreview = storage => {
-  const exiftool = new ExifTool({ taskTimeoutMillis: 5000 })
-
+const embeddedRawPreview = (storage, {exiftool}) => {
   const test = entry => { 
     if (!rawImageTypes.includes(entry.type) || storage.hasEntryFile(entry, rawPreviewSuffix) || hasJpg(entry)) {
       return false
@@ -53,15 +51,7 @@ const embeddedRawPreview = storage => {
       })
   }
 
-  return toPipe(conditionalTask(test, task), cb => {
-    exiftool.end()
-      .then(cb)
-      .catch(err => {
-        log.warn(err, `Could not close exiftool: ${err}`)
-        cb()
-      })
-  })
-
+  return toPipe(conditionalTask(test, task))
 }
 
 module.exports = embeddedRawPreview

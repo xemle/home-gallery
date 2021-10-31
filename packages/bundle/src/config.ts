@@ -44,11 +44,11 @@ export interface BundleConfig {
   }
 }
 
-export const readConfig = async (file: string): Promise<BundleConfig> => {
+export const readConfig = async (file: string, platform: string, arch: string): Promise<BundleConfig> => {
   const data = await fs.readFile(file, 'utf8')
   try {
     const config = yaml.parse(data)
-    config.targets = config.targets || [{ platform: os.platform(), arch: os.arch(), command: ['echo', 'App in {{caxa}}'] }]
+    config.targets = config.targets || [{ platform, arch, command: ['echo', 'App in {{caxa}}'] }]
     config.before = toList(config.before).map(toRunStep)
     config.run = toList(config.run).map(toRunStep)
     config.entries = config.entries || []

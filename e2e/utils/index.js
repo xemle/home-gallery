@@ -33,12 +33,16 @@ const isPortAvailable = async port => {
 
 const portStart = port => {
   let lastPort = port
-  const check = async () => isPortAvailable(lastPort++).catch(() => check())
+  const check = async () => isPortAvailable(lastPort++).catch(check)
 
-  return check
+  return check()
 }
 
-const nextPort = portStart(38000)
+const nextPort = async () => {
+  const port = await portStart(38000)
+  gauge.dataStore.scenarioStore.put('port', port)
+  return port
+}
 
 const getTestDataDir = () => path.resolve(testDataDir)
 
@@ -110,6 +114,15 @@ const runCommand = (command, args, options, cb) => {
   return child;
 }
 
+const dropServerPortArgOnDocker = args => {
+  if (galleryBin == 'docker') {
+    const portPos = args.indexOf('--port')
+    if (portPos >= 0) {
+      args.splice(portPos, 2)
+    }
+  }
+}
+
 const runCliAsync = (args, options, cb) => {
   if (!cb) {
     cb = options
@@ -121,13 +134,14 @@ const runCliAsync = (args, options, cb) => {
   const vars = {
     projectRoot,
     baseDir: getBaseDir(),
-    port: gauge.dataStore.scenarioStore.get('port'),
+    port: gauge.dataStore.scenarioStore.get('port') || 3000,
     uid: userInfo.uid,
     gid: userInfo.gid
   }
   const galleryArgsResolved = resolveArgs(galleryBinArgs, vars)
 
   const logOptions = ['--log-file', getPath('e2e.log'), '--log-file-level', 'debug']
+  dropServerPortArgOnDocker(args)
   const commandArgs = [...galleryArgsResolved, ...logOptions, ...args]
 
   return runCommand(galleryBin, commandArgs, {TZ: 'Europe/Berlin', ...options}, cb)

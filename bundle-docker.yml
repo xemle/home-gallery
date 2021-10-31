@@ -1,5 +1,7 @@
 entries:
   - ./bundle-entry.js
+  - name: sharp
+  - name: sharp:dependencies
 includes:
   - package.json
   - CHANGELOG.md
@@ -11,6 +13,8 @@ includes:
 excludes:
   - node_modules/@home-gallery/bundle
   - node_modules/@home-gallery/webapp
+  - node_modules/@ffmpeg-installer
+  - node_modules/@ffprobe-installer
 output:
   dir: dist
   name: home-gallery

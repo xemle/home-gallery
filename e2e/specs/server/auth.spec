@@ -1,6 +1,6 @@
 # Server Basic Auth
 
-Tags: server,docker,auth
+Tags: server,auth
 
 * Init dir from "database/basic"
 * Create database

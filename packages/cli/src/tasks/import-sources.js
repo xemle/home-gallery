@@ -53,6 +53,10 @@ const extract = async (config, sources, options) => {
   const excludes = extractor.excludes || [];
   excludes.forEach(exclude => args.push('--exclude', exclude))
 
+  if (Array.isArray(extractor.useNative)) {
+    args.push('--use-native', ...extractor.useNative)
+  }
+
   options.checksumFrom && args.push('--checksum-from', options.checksumFrom)
   options.journal && args.push('--journal', options.journal)
   if (options.concurrent) {

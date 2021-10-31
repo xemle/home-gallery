@@ -8,7 +8,14 @@ const os = require('os')
 const fs = require('fs').promises;
 const path = require('path');
 const { spawn } = require('child_process');
-const libc = require('detect-libc')
+let libc
+
+try {
+  libc = require('detect-libc')
+} catch (e) {
+  console.log(`Could not find package detect-lib. Skip further sharp validation. Error: ${e}`)
+  process.exit(0)
+}
 
 const FALLBACK_HOST = 'https://dl.home-gallery.org/npm/libvips'
 const platform = process.env.npm_config_platform || process.platform

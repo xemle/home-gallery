@@ -1,6 +1,4 @@
 const fs = require('fs');
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-const ffprobePath = require('@ffprobe-installer/ffprobe').path;
 const ffmpeg = require('fluent-ffmpeg');
 
 const log = require('@home-gallery/logger')('extractor.video');
@@ -9,16 +7,16 @@ const { toPipe, conditionalTask } = require('./task');
 
 const videoSuffix = 'video-preview-720.mp4';
 
-function convertVideo(storage, entry, cb) {
+function convertVideo(storage, entry, ffprobePath, ffmpegPath, cb) {
   log.info(`Start video conversion of ${entry}`);
 
   const t0 = Date.now();
   const input = entry.src;
   const file = storage.getEntryFilename(entry, videoSuffix);
   const tmpFile = `${file}.tmp`;
-  const command = ffmpeg(input);
   const intervalMs = 30*1000;
   let last = Date.now();
+  const command = ffmpeg(input);
   command.setFfmpegPath(ffmpegPath);
   command.setFfprobePath(ffprobePath);
   command
@@ -61,11 +59,12 @@ function convertVideo(storage, entry, cb) {
     .run();
 }
 
-function video(storage) {
+function video(storage, ffmpegPath, ffprobePath) {
+
   const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, videoSuffix);
 
   const task = (entry, cb) => {
-    convertVideo(storage, entry, (err) => {
+    convertVideo(storage, entry, ffprobePath, ffmpegPath, (err) => {
       if (err) {
         log.error(err, `Video preview conversion of ${entry} failed: ${err}`);
       }

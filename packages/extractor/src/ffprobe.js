@@ -1,14 +1,25 @@
 const ffprobe = require('ffprobe');
-const ffprobePath = require('@ffprobe-installer/ffprobe').path;
 
 const log = require('@home-gallery/logger')('extractor.video.ffprobe');
 
+const { getNativeCommand } = require('./utils')
 const { toPipe, conditionalTask } = require('./task');
 
 const ffprobeSuffix = 'ffprobe.json';
 
-function videoMeta(storage) {
+const getFfprobePath = useNative => {
+  if (useNative.includes('ffprobe')) {
+    log.debug('Use native system command ffprobe')
+    return getNativeCommand('ffprobe')
+  } else {
+    return require('@ffprobe-installer/ffprobe').path
+  }
+}
+
+function videoMeta(storage, options) {
   const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, ffprobeSuffix);
+
+  const ffprobePath = getFfprobePath(options.useNative)
 
   const task = (entry, cb) => {
     const t0 = Date.now();
