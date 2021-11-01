@@ -4,8 +4,9 @@ const log = require('@home-gallery/logger')('extractor.apiEntry');
 const { parallel } = require('@home-gallery/stream');
 const { conditionalTask } = require('./task');
 
+const ERROR_THRESHOLD = 5;
+
 const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imageSuffix, entrySuffix, concurrent, timeout}) => {
-  const ERROR_THRESHOLD = 5;
   let currentErrors = 0;
 
   const test = entry => {
@@ -72,4 +73,45 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imageSuffix, entr
   return parallel({task: conditionalTask(test, task), concurrent});
 }
 
-module.exports = apiServerEntry;
+const similarEmbeddings = (storage, apiServerUrl, similarityEmbeddingsPreviewSize) => {
+  return apiServerEntry(storage, {
+    name: 'similarity embeddings',
+    apiServerUrl,
+    apiPath: '/embeddings',
+    imageSuffix: `image-preview-${similarityEmbeddingsPreviewSize}.jpg`,
+    entrySuffix: 'similarity-embeddings.json',
+    concurrent: 5,
+    timeout: 30000,
+  })
+}
+
+const objectDetection = (storage, apiServerUrl, imagePreviewSize) => {
+  return apiServerEntry(storage, {
+    name: 'object detection',
+    apiServerUrl,
+    apiPath: '/objects',
+    imageSuffix: `image-preview-${imagePreviewSize}.jpg`,
+    entrySuffix: 'objects.json',
+    concurrent: 5,
+    timeout: 30000,
+  })
+}
+
+const faceDetection = (storage, apiServerUrl, imagePreviewSize) => {
+  return apiServerEntry(storage, {
+    name: 'face detection',
+    apiServerUrl,
+    apiPath: '/faces',
+    imageSuffix: `image-preview-${imagePreviewSize}.jpg`,
+    entrySuffix: 'faces.json',
+    concurrent: 2,
+    timeout: 30000,
+  })
+}
+
+module.exports = {
+  apiServerEntry,
+  similarEmbeddings,
+  objectDetection,
+  faceDetection
+}

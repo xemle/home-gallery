@@ -18,7 +18,7 @@ const { imagePreview } = require('./image-preview');
 const { createImageResizer } = require('./image-resizer')
 const vibrant = require('./vibrant');
 const geoReverse = require('./geo-reverse');
-const apiServerEntry = require('./api-server-entry');
+const { similarEmbeddings, objectDetection, faceDetection } = require('./api-server');
 const { getFfmpegPaths } = require('./ffmpeg-path')
 const video = require('./video');
 const videoPoster = require('./video-poster');
@@ -44,7 +44,7 @@ const extractData = async (options) => {
 
   const imagePreviewSizes = [1920, 1280, 800, 320, 128];
   const videoFrameCount = 10;
-  const similarityEmbeddingsPreviewSize = imagePreviewSizes[2];
+  const apiServerImagePreviewSize = imagePreviewSizes[2];
 
   const stats = {
     queued: 0,
@@ -86,33 +86,9 @@ const extractData = async (options) => {
       videoPoster(storage, {imageResizer, videoFrameExtractor, imagePreviewSizes}),
       vibrant(storage),
       geoReverse(storage, {geoAddressLanguage, geoServerUrl}),
-      apiServerEntry(storage, {
-        name: 'similarity embeddings',
-        apiServerUrl,
-        apiPath: '/embeddings',
-        imageSuffix: `image-preview-${similarityEmbeddingsPreviewSize}.jpg`,
-        entrySuffix: 'similarity-embeddings.json',
-        concurrent: 5,
-        timeout: 30000,
-      }),
-      apiServerEntry(storage, {
-        name: 'object detection',
-        apiServerUrl,
-        apiPath: '/objects',
-        imageSuffix: `image-preview-${similarityEmbeddingsPreviewSize}.jpg`,
-        entrySuffix: 'objects.json',
-        concurrent: 5,
-        timeout: 30000,
-      }),
-      apiServerEntry(storage, {
-        name: 'face detection',
-        apiServerUrl,
-        apiPath: '/faces',
-        imageSuffix: `image-preview-${similarityEmbeddingsPreviewSize}.jpg`,
-        entrySuffix: 'faces.json',
-        concurrent: 2,
-        timeout: 30000,
-      }),
+      similarEmbeddings(storage, apiServerUrl, apiServerImagePreviewSize),
+      objectDetection(storage, apiServerUrl, apiServerImagePreviewSize),
+      faceDetection(storage, apiServerUrl, apiServerImagePreviewSize),
       video(storage, ffmpegPath, ffprobePath),
       //.pipe(videoFrames(storageDir, videoFrameCount))
 
