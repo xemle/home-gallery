@@ -14,7 +14,7 @@ function resize(src, size, cb) {
     return cb(new Error(`Sharp is not loaded`))
   }
 
-  sharp(src)
+  sharp(src, {failOnError: false})
     .rotate()
     .resize({width: size})
     .jpeg({quality: 80, chromaSubsampling: '4:4:4'})
