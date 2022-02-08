@@ -30,17 +30,29 @@ const stringifyAst = ast => {
     return `(${ast.value.map(stringifyAst).join(', ')})`
   } else if (ast.type == 'range') {
     return `[${stringifyAst(ast.from)} : ${stringifyAst(ast.to)}]`
+  } else {
+    return `!unknown type ${ast.type}: ${JSON.stringify(ast)}!`
   }
 }
 
 const simpleAst = query => parse(query).then(stringifyAst)
 
 t.test('Keywords', async t => {
-  t.test('or', async t => t.rejects(parse('or')))
-  t.test('and', async t => t.rejects(parse('and')))
-  t.test('not', async t => t.rejects(parse('not')))
-  t.test('in', async t => t.rejects(parse('in')))
-  t.test('sort by', async t => t.rejects(parse('sort by')))
+  t.test('Without space are values', async t => {
+    t.equal(await simpleAst('or'), 'or')
+    t.equal(await simpleAst('and'), 'and')
+    t.equal(await simpleAst('not'), 'not')
+    t.equal(await simpleAst('in'), 'in')
+    t.equal(await simpleAst('sort by'), 'terms(sort, by)')
+  })
+
+  t.test('With space are keywords', async t => {
+    t.test('or ', async t => t.rejects(parse('or ')))
+    t.test('and ', async t => t.rejects(parse('and ')))
+    t.test('not ', async t => t.rejects(parse('not ')))
+    t.test('in ', async t => t.rejects(parse('in ')))
+    t.test('sort by ', async t => t.rejects(parse('sort by ')))
+  })
 
   t.test('escaped or', async t => t.resolves(parse('"or"')))
   t.test('escaped and', async t => t.resolves(parse('"and"')))
@@ -68,6 +80,22 @@ t.test('Simple term', async t => {
 
   t.test('Single quoted term', async t => {
     t.equal(await simpleAst("'foo bar'"), '"foo bar"')
+  })
+
+  t.test('Term with and keyword prefix', async t => {
+    t.equal(await simpleAst("andrea"), 'andrea')
+  })
+
+  t.test('Term with or keyword prefix', async t => {
+    t.equal(await simpleAst("organic"), 'organic')
+  })
+
+  t.test('Term with not keyword prefix', async t => {
+    t.equal(await simpleAst("nottingham"), 'nottingham')
+  })
+
+  t.test('Term with in keyword prefix', async t => {
+    t.equal(await simpleAst("india"), 'india')
   })
 
 })
