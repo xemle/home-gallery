@@ -2,8 +2,7 @@ import { Thunk, thunk } from 'easy-peasy';
 import { StoreModel } from './store';
 import { Entry } from './entry-model';
 
-import { filterEntriesByQuery } from '@home-gallery/query';
-import { ENGINE_METHOD_RAND } from 'constants';
+import { filterEntriesByQuery, stringifyAst } from '@home-gallery/query';
 
 export interface Search {
   type: 'none' | 'year' | 'query' | 'similar' | 'faces';
@@ -19,18 +18,16 @@ export interface SearchModel {
 }
 
 const execQuery = async (entries: Entry[], query: String) => {
-  const promise = new Promise<Entry[]>((resolve) => {
-    const t0 = Date.now();
-    filterEntriesByQuery(entries, query, (err, filtered) => {
-      if (err) {
-        console.log(`Could not build query of ${query}: ${err}`);
-        return resolve(entries);
-      }
-      console.log(`Found ${filtered.length} of ${entries.length} entries by query '${query}' in ${Date.now() - t0}ms`);
-      resolve(filtered);
+  const t0 = Date.now();
+  return filterEntriesByQuery(entries, query)
+    .then(({entries: filtered, ast}) => {
+      console.log(`Found ${filtered.length} of ${entries.length} entries by query '${query}' (resolved to '${stringifyAst(ast)}') in ${Date.now() - t0}ms`);
+      return filtered;
     })
-  })
-  return promise;
+    .catch(err => {
+      console.log(`Could not build query of ${query}: ${err}`, err);
+      return entries;
+    })
 }
 
 const cosineSimilarity = (a, b) => {
@@ -119,38 +116,30 @@ const execFaces = (entries: Entry[], descriptor) => {
   return result;
 }
 
-const byDate = (a, b) => a.date < b.date ? 1 : -1;
-const byDateRev = (a, b) => a.date < b.date ? -1 : 1;
+const byDateDesc = (a, b) => a.date < b.date ? 1 : -1;
 
 const doSearch = async (allEntries: Map<String, Entry>, query) => {
   let entries = Array.from(allEntries.values())
-  let defaultSortOrder = true;
-  let reverse = false;
+  entries.sort(byDateDesc)
 
   if (query.type == 'query') {
     entries = await execQuery(entries, query.value);
   } else if (query.type == 'year') {
-    entries = entries.filter(entry => entry.year == query.value)
-    reverse = true
+    entries = await execQuery(entries, `year:${query.value} order by date asc`);
   } else if (query.type == 'similar') {
     const id = query.value;
     const seedEntry = allEntries.get(id);
     entries = execSimilar(entries, seedEntry.similarityHash);
-    defaultSortOrder = false;
   } else if (query.type == 'faces') {
     const { id, faceIndex } = query.value;
     const seedEntry = allEntries.get(id);
     const descriptor = seedEntry?.faces[faceIndex]?.descriptor;
     entries = execFaces(entries, descriptor);
-    defaultSortOrder = false;
   }
   if (query.query) {
     entries = await execQuery(entries, query.query);
   }
 
-  if (defaultSortOrder) {
-    entries.sort(reverse ? byDateRev : byDate);
-  }
   return entries;
 }
 

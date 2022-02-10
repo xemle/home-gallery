@@ -10,7 +10,9 @@ const { applyEvents } = require('./apply-events')
 
 const { sendError } = require('../error')
 
-const filterDatabase = (entries, query, cb) => query ? filterEntriesByQuery(entries, query, cb) : cb(null, entries)
+const filterEntriesByQueryCb = (entries, query, cb) => filterEntriesByQuery(entries, query).then(({entries}) => cb(null, entries)).catch(cb)
+
+const filterDatabase = (entries, query, cb) => query ? filterEntriesByQueryCb(entries, query, cb) : cb(null, entries)
 
 /**
  * @param {EventBus} eventbus

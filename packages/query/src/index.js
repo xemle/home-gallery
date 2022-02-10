@@ -1,5 +1,6 @@
-const { parse } = require('./parse');
-const { createFilter } = require('./ast');
+const { parse } = require('./parser');
+const { transformAst, orAst, andAst, cmpAst, valueAst, aliasKey, stringifyAst } = require('./ast')
+const { execQuery, numericKeys, textKeys, aliases } = require('./query');
 
 const uniq = (v, i, a) => a.indexOf(v) === i;
 const flatten = (r, v) => r.concat(v);
@@ -8,13 +9,14 @@ const stringifyEntry = entry => {
   return [
     entry.id.substring(0, 10),
     entry.type,
-    entry.date && entry.date.substring(0, 10),
+    entry.date ? entry.date.substring(0, 10) : '',
     entry.make,
     entry.model,
-    entry.files[0].filename,
+    entry.files ? entry.files[0].filename : '',
     entry.country,
     entry.state,
-    entry.city
+    entry.city,
+    entry.road
   ]
   .concat(entry.tags || [])
   .concat((entry.objects || []).map(object => object.class).filter(uniq))
@@ -24,9 +26,13 @@ const stringifyEntry = entry => {
   .toLowerCase();
 }
 
-const ignoreUnknownExpressions = v => true
+const ignoreUnknownExpressions = () => true
 
-const options = {
+const throwUnknownExpressions = ast => {
+  throw new Error(`Unknown expression ${ast.type} with key ${ast.key || 'none'} at ${ast.col}`)
+}
+
+const defaultOptions = {
   textFn: (entry) => {
     if (!entry.textCache) {
       entry.textCache = stringifyEntry(entry);
@@ -36,22 +42,75 @@ const options = {
   unknownExpressionHandler: () => ignoreUnknownExpressions
 }
 
-const filterEntriesByQuery = (entries, query, cb) => {
+const transformRules = [
+  {
+    // map inRange to 'value >= low and value <= high'
+    types: ['inRange'],
+    keys: numericKeys,
+    map: ast => andAst(cmpAst(ast.key, '>=', ast.value[0], ast.col), cmpAst(ast.key, '<=', ast.value[1]), ast.col)
+  },
+  {
+    // map ratio shortcuts
+    types: ['keyValue'],
+    keys: ['ratio'],
+    matchValue: v => ['panorama', 'landscape', 'square', 'portrait'].includes(v),
+    map: ast => {
+      switch (ast.value.value) {
+        case 'panorama': return cmpAst(ast.key, '>', valueAst('2', ast.value.col), ast.col)
+        case 'landscape': return cmpAst(ast.key, '>', valueAst('1', ast.value.col), ast.col)
+        case 'square': return cmpAst(ast.key, '=', valueAst('1', ast.value.col), ast.col)
+        default: return cmpAst(ast.key, '<', valueAst('1', ast.value.col), ast.col)
+      }
+    }
+  },
+  {
+    // map keyValue to 'key = value'
+    types: ['keyValue'],
+    keys: [...numericKeys, ...textKeys],
+    map: ast => cmpAst(ast.key, '=', ast.value, ast.col)
+  },
+  {
+    // map location alias to 'country or state or city or road'
+    keys: ['location'],
+    map: ast => orAst(orAst({...ast, key: 'country'}, {...ast, key: 'state'}), orAst({...ast, key: 'city'}, {...ast, key: 'road'}))
+  },
+  {
+    // map geo alias to 'latitude and longitude'
+    keys: ['geo'],
+    map: ast => andAst({...ast, key: 'latitude'}, {...ast, key: 'longitude'})
+  },
+  {
+    // map aliases to common keys
+    keys: Object.keys(aliases),
+    map: aliasKey(aliases)
+  },
+]
+
+const filterEntriesByQuery = async (entries, query, options = {}) => {
   if (!entries || !entries.length || !query) {
-    return cb(null, entries);
+    return { entries };
   }
 
-  parse(query, (err, ast) => {
-    if (err) {
-      return cb(err);
-    }
-
-    createFilter(ast, options, (err, filter) => {
+  return new Promise((resolve, reject) => {
+    parse(query, (err, parseAst) => {
       if (err) {
-        return cb(err);
+        return reject(err)
       }
-      cb(null, entries.filter(filter));
+
+      // We transform some ast nodes to save some implementation rules
+      const ast = transformAst(parseAst, transformRules)
+      execQuery(entries, ast, {...defaultOptions, ...options}, (err, result) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve({
+          entries: result,
+          parseAst,
+          ast
+        });
+      })
     })
+
   })
 }
 
@@ -59,4 +118,14 @@ const clearEntriesTextCache = entries => entries.forEach(entry => entry.textCach
 
 const buildEntriesTextCache = entries => entries.forEach(entry => entry.textCache = stringifyEntry(entry))
 
-module.exports = { filterEntriesByQuery, stringifyEntry, parse, createFilter, clearEntriesTextCache, buildEntriesTextCache };
+module.exports = {
+  filterEntriesByQuery,
+  ignoreUnknownExpressions,
+  throwUnknownExpressions,
+  stringifyEntry,
+  parse,
+  execQuery,
+  stringifyAst,
+  clearEntriesTextCache,
+  buildEntriesTextCache
+};

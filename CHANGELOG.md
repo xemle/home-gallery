@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- query: Add cmp, (all) in list and range to common properties
+- query: Allow capitalized keywords
 - database: Add entry groups
 - database: Add updated timestamp
 - database: Support IPTC keywords as tags

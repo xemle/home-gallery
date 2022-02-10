@@ -30,19 +30,17 @@ const filterDatabaseByQuery = async (database, query) => {
     return database
   }
 
-  return new Promise((resolve, reject) => {
-    const t1 = Date.now()
-    filterEntriesByQuery(database.data, query, (err, entries) => {
-      if (err) {
-        log.error(err, `Could not fitler ${database.data.length} database entries with query ${query}`)
-        reject(err)
-      } else {
-        const filteredDatabase = Object.assign({}, database, {data: entries})
-        log.info(t1, `Filtered database with ${database.data.length} entries by query '${query}' to ${filteredDatabase.data.length} entries`)
-        resolve(filteredDatabase)
-      }
+  const t1 = Date.now()
+  return filterEntriesByQuery(database.data, query)
+    .then(({entries}) => {
+      const filteredDatabase = Object.assign({}, database, {data: entries})
+      log.info(t1, `Filtered database with ${database.data.length} entries by query '${query}' to ${filteredDatabase.data.length} entries`)
+      return filteredDatabase
     })
-  })
+    .catch(err => {
+      log.error(err, `Could not fitler ${database.data.length} database entries with query ${query}`)
+      return Promise.reject(err)
+    })
 }
 
 module.exports = {

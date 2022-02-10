@@ -7,15 +7,16 @@ const applyQuery = (database, query, cb) => {
   }
 
   const t0 = Date.now();
-  filterEntriesByQuery(database.data, query, (err, entries) => {
-    if (err) {
-      log.error(`Failed to filter entries by query '${query}: ${err}`);
+  filterEntriesByQuery(database.data, query)
+    .then(({entries}) => {
+      log.info(t0, `Found ${entries.length} of ${database.data.length} entries by query '${query}'`);
+      database.data = entries;
+      cb(null, database);
+    })
+    .catch(err => {
+      log.error(err, `Failed to filter entries by query '${query}: ${err}`);
       return cb(err);
-    }
-    log.info(t0, `Found ${entries.length} of ${database.data.length} entries by query '${query}'`);
-    database.data = entries;
-    cb(null, database);
-  })
+    })
 }
 
 module.exports = applyQuery;
