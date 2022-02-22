@@ -27,6 +27,7 @@ const mergeAndFilterDatabase = async (database, events, query) => {
 }
 
 const fetch = async ({ serverUrl, databaseFile, storageDir, eventFile, insecure, query, requireEvents } = {}) => {
+  log.warn(`Fetch local and remote database`)
   const [remoteDatabase, remoteEvents, localDatabase] = await Promise.all([
     fetchDatabase(serverUrl, { query, insecure }),
     fetchEvents(serverUrl, { insecure }).catch(handleEventError(requireEvents)),

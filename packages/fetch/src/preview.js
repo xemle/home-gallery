@@ -44,7 +44,7 @@ const downloadMissingFiles = async (serverUrl, missingFiles, storageDir, { insec
 
   const task = (file, cb) => fetchFile(serverUrl, file, storageDir, { insecure }).then(() => cb()).catch(err => cb(err))
 
-  log.debug(`Starting downloading ${missingFiles.length} from ${serverUrl}`)
+  log.info(`Fetch ${missingFiles.length} files from ${serverUrl}`)
   const t0 = Date.now()
   return new Promise((resolve, reject) => {
     pipeline(
