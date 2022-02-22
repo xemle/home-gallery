@@ -63,7 +63,7 @@ const collectTags = entry => {
     return tags
   }
 
-  return reduceMeta(entry, 'exif', reduceFn, []).sort()
+  return reduceMeta(entry, 'exif', reduceFn, []).map(value => '' + value).sort()
 }
 
 function useExif(entry) {
