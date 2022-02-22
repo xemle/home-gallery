@@ -10,6 +10,7 @@ describe('applyEvents()', () => {
       {
         type: 'userAction',
         id: '5',
+        date: '2022-02-22',
         targetIds: ['1'],
         actions: [
           {
@@ -20,16 +21,17 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result).to.eql([{tags: ['foo'], appliedEventIds: ['5']}]);
+    expect(result).to.eql([{updated: '2022-02-22', tags: ['foo'], appliedEventIds: ['5']}]);
     expect(entries.get('1')).to.eql(result[0]);
   });
 
   it('should add two tags', () => {
-    const entries: Map<String, Taggable> = new Map().set('1', {});
+    const entries: Map<String, Taggable> = new Map().set('1', {updated: '2022-03-06'});
     const events: Event[] = [
       {
         type: 'userAction',
         id: '6',
+        date: '2022-02-22',
         targetIds: ['1'],
         actions: [
           {
@@ -44,12 +46,12 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result).to.eql([{tags: ['foo', 'bar'], appliedEventIds: ['6']}]);
+    expect(result).to.eql([{updated: '2022-03-06', tags: ['foo', 'bar'], appliedEventIds: ['6']}]);
     expect(entries.get('1')).to.eql(result[0]);
   });
 
   it('should remove one tag', () => {
-    const entries: Map<String, Taggable> = new Map().set('1', {tags: ['foo', 'bar']});
+    const entries: Map<String, Taggable> = new Map().set('1', {updated: '2022-02-22', tags: ['foo', 'bar']});
     const events: Event[] = [
       {
         type: 'userAction',
@@ -64,16 +66,17 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result).to.eql([{tags: ['bar'], appliedEventIds: ['7']}]);
+    expect(result).to.eql([{updated: '2022-02-22', tags: ['bar'], appliedEventIds: ['7']}]);
     expect(entries.get('1')).to.eql(result[0]);
   });
 
   it('should remove two tags', () => {
-    const entries: Map<String, Taggable> = new Map().set('1', {tags: ['foo', 'bar']});
+    const entries: Map<String, Taggable> = new Map().set('1', {updated: '2022-01-01', tags: ['foo', 'bar']});
     const events: Event[] = [
       {
         type: 'userAction',
         id: '8',
+        date: '2022-02-22',
         targetIds: ['1'],
         actions: [
           {
@@ -88,16 +91,17 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result).to.eql([{tags: [], appliedEventIds: ['8']}]);
+    expect(result).to.eql([{updated: '2022-02-22', tags: [], appliedEventIds: ['8']}]);
     expect(entries.get('1')).to.eql(result[0]);
   });
 
   it('should not apply event', () => {
-    const entries: Map<String, Taggable> = new Map().set('1', {tags: ['foo'], appliedEventIds: ['9']});
+    const entries: Map<String, Taggable> = new Map().set('1', {updated: '2022-01-01', tags: ['foo'], appliedEventIds: ['9']});
     const events: Event[] = [
       {
         type: 'userAction',
         id: '9',
+        date: '2022-02-22',
         targetIds: ['1'],
         actions: [
           {
@@ -109,14 +113,15 @@ describe('applyEvents()', () => {
     ]
     const result = applyEvents(entries, events);
     expect(result).to.eql([]);
-    expect(entries.get('1')).to.eql({tags: ['foo'], appliedEventIds: ['9']});
+    expect(entries.get('1')).to.eql({updated: '2022-01-01', tags: ['foo'], appliedEventIds: ['9']});
   });
 
   it('should not add existing tag', () => {
-    const entries: Map<String, Taggable> = new Map().set('1', {tags: ['foo']});
+    const entries: Map<String, Taggable> = new Map().set('1', {updated: '2022-01-01', tags: ['foo']});
     const events: Event[] = [
       {
         type: 'userAction',
+        date: '2022-02-22',
         id: '10',
         targetIds: ['1'],
         actions: [
@@ -129,7 +134,7 @@ describe('applyEvents()', () => {
     ]
     const result = applyEvents(entries, events);
     expect(result).to.eql([]);
-    expect(entries.get('1')).to.eql({tags: ['foo'], appliedEventIds: ['10']});
+    expect(entries.get('1')).to.eql({updated: '2022-01-01', tags: ['foo'], appliedEventIds: ['10']});
   });
 
   it('should add and remove tag', () => {

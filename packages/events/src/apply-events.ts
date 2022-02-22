@@ -1,6 +1,7 @@
 import { Event, EventAction } from './models';
 
 export interface Taggable {
+  updated?: string;
   tags?: string[];
   appliedEventIds?: string[];
 }
@@ -37,6 +38,14 @@ const isValidEvent = (event: Event) => {
   return event.type == 'userAction' && event.targetIds?.length && event.actions?.length  
 }
 
+const applyEventDate = (entry: Taggable, event: Event) => {
+  if (!event.date) {
+    return
+  } else if (!entry.updated || entry.updated < event.date) {
+    entry.updated = event.date
+  }
+}
+
 export const applyEvents = (entries: Map<String, Taggable>, events: Event[]): Taggable[] => {
   const changedEntries: Taggable[] = [];
   events.filter(isValidEvent).forEach(event => {
@@ -58,6 +67,7 @@ export const applyEvents = (entries: Map<String, Taggable>, events: Event[]): Ta
       entry.appliedEventIds.push(event.id);
       if (changed) {
         changedEntries.push(entry);
+        applyEventDate(entry, event);
       }
     })
   })
