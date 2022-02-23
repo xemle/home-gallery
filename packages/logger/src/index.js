@@ -1,6 +1,5 @@
 "use strict";
 const pino = require('pino')
-const pinoms = require('pino-multi-stream')
 
 const prettyStream = require('./pretty-stream')
 const fileStream = require('./file-stream')
@@ -11,7 +10,7 @@ const hasFirstArgNumber = inputArgs => inputArgs.length >= 2 && typeof inputArgs
 
 const createInstance = options => {
   options = options || {}
-  const ms = pinoms.multistream([])
+  const ms = pino.multistream([])
   const logger = pino({
     level: 'trace',
     hooks: {

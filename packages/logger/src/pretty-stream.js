@@ -1,5 +1,4 @@
 const pretty = require('pino-pretty')
-const pinoms = require('pino-multi-stream')
 
 const { colorFns } = require('./colors')
 
@@ -46,24 +45,21 @@ const humanizeDuration = duration => {
 }
 
 const createStream = () => {
-  return pinoms.prettyStream({
-    prettyPrint: {
-      colorize: false,
-      ignore: 'hostname,pid,level,time',
-      hideObject: true,
-      messageFormat: (log, messageKey) => {
-        const msg = log[messageKey]
-        const level = levels[log.level] || levels['30']
+  return pretty({
+    colorize: false,
+    ignore: 'hostname,pid,level,time',
+    hideObject: true,
+    messageFormat: (log, messageKey) => {
+      const msg = log[messageKey]
+      const level = levels[log.level] || levels['30']
 
-        return [
-          log.module ? colorFns.moduleColorFn(log.module)(log.module) + ' ' : '',
-          level != 'info' ? colorFns[level].levelColorFn(level) + ' ' : '',
-          colorFns[level].msgColorFn(msg),
-          isNumber(log.duration) ? colorFns.durationColorFn(' ' + humanizeDuration(log.duration)) : ''
-        ].join('')
-      }
-    },
-    prettifier: pretty
+      return [
+        log.module ? colorFns.moduleColorFn(log.module)(log.module) + ' ' : '',
+        level != 'info' ? colorFns[level].levelColorFn(level) + ' ' : '',
+        colorFns[level].msgColorFn(msg),
+        isNumber(log.duration) ? colorFns.durationColorFn(' ' + humanizeDuration(log.duration)) : ''
+      ].join('')
+    }
   })
 }
 
