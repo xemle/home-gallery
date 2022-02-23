@@ -17,9 +17,9 @@
     "directory": "e2e"
   },
   "dependencies": {
-    "express": "^4.17.1",
-    "node-fetch": "^2.6.1",
-    "shelljs": "^0.8.4",
-    "shx": "^0.3.3"
+    "express": "^4.17.3",
+    "node-fetch": "^2.6.7",
+    "shelljs": "^0.8.5",
+    "shx": "^0.3.4"
   }
 }

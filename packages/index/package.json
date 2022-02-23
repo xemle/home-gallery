@@ -24,6 +24,6 @@
   "dependencies": {
     "@home-gallery/common": "file:../common",
     "@home-gallery/logger": "file:../logger",
-    "split2": "^3.2.2"
+    "split2": "^4.1.0"
   }
 }

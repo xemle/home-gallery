@@ -27,6 +27,6 @@
     "@home-gallery/logger": "file:../logger",
     "@home-gallery/query": "file:../query",
     "@home-gallery/storage": "file:../storage",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.7"
   }
 }
