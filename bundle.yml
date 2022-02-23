@@ -57,6 +57,8 @@ includes:
 excludes:
   - node_modules/.bin/*
   - '*/node_modules/.bin/*'
+  - node_modules/.cache/*
+  - '*/node_modules/.cache/*'
   - packages/*/src
   - pattern: node_modules/exiftool-vendored.pl
     platform: win
