@@ -2,6 +2,7 @@
 "use strict"
 
 const { Buffer } = require('buffer')
+const fs = require('fs/promises')
 const https = require('https')
 const assert = require('assert')
 const fetch = require('node-fetch')
@@ -211,7 +212,7 @@ const stopServer = async serverId => {
 }
 
 step("Stop server", async () => {
-  const serverIds = gauge.dataStore.scenarioStore.get('serverIds')
+  const serverIds = gauge.dataStore.scenarioStore.get('serverIds') || []
   await Promise.all(serverIds.map(id => stopServer(id)))
 })
 
@@ -238,6 +239,28 @@ step("Server has file <file>", async (file) => {
     .then(res => {
       assert(res.ok, `Could not fetch file ${file}`)
     })
+})
+
+const mapValuesByKey = key => {
+  const parts = key.split('.')
+  return entry => {
+    let result = entry
+    let i = 0
+    while (i < parts.length && result !== undefined) {
+      result = result[parts[i++]]
+    }
+    return result
+  }
+}
+
+step("Log has entry with key <key> and value <value>", async (key, value) => {
+  const logFile = getPath('e2e.log')
+  const data = await fs.readFile(logFile, 'utf-8')
+  const entries = data.split(/\n/g).filter(v => !!v).map(line => JSON.parse(line))
+
+  const values = entries.map(mapValuesByKey(key)).filter(v => !!v)
+  const matches = values.filter(v => v == value)
+  assert(matches.length, `Could not find any log entry with key ${key} and value '${value}' but found ${values.map(v => `'${v}'`).join(', ')}`)
 })
 
 step("Database with query <query> has <amount> entries", async (query, amount) => {

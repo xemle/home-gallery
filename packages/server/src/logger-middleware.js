@@ -6,6 +6,10 @@ const loggerMiddleware = () => {
 
   return pinoHttp({
     logger: logger('server.request'),
+    redact: {
+      paths: ['req.headers.authorization'],
+      censor: '*** (masked value)'
+    },
     customLogLevel: (res, err) => {
       if (res.statusCode >= 400 && res.statusCode < 500) {
         return 'warn'

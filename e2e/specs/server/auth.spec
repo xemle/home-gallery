@@ -18,6 +18,7 @@ Tags: server,docker,auth
 * Set user "admin" with password "admin"
 * Request file "/api/database.json"
 * Response status is "200"
+* Log has entry with key "req.headers.authorization" and value "*** (masked value)"
 
 ## SHA password format
 
