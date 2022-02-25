@@ -9,6 +9,7 @@ glob('./src/**/*.ts', (_, files) => {
       entryPoints: files,
       sourcemap: true,
       platform: 'node',
+      target: 'es2015',
       format: 'cjs',
       outdir: 'dist',
       watch: watch
