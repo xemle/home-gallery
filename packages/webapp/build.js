@@ -15,4 +15,9 @@ const targets = [
   }
 ]
 
-Promise.all(targets.map(target => esbuild.build(target))).catch(e => console.error(e))
+const catchError = e => {
+  console.error(`Build faild due ${e}`, e)
+  process.exit(1)
+}
+
+Promise.all(targets.map(target => esbuild.build(target))).catch(catchError)

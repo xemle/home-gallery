@@ -16,5 +16,10 @@ glob('./src/**/*.ts', (_, files) => {
     }
   ]
 
-  Promise.all(targets.map(target => esbuild.build(target))).catch(console.error)
+  const catchError = e => {
+    console.error(`Build faild due ${e}`, e)
+    process.exit(1)
+  }
+
+  Promise.all(targets.map(target => esbuild.build(target))).catch(catchError)
 })
