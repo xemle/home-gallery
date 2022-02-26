@@ -41,7 +41,7 @@ const createBasicAuthMiddleware = (users, rules) => {
     } else if (matchesUser(userMap, login, password)) {
       return next()
     } else {
-      log.debug(`Invalid credentials for user '${login}'. Block client with ip ${clientIp}. Request authentication`)
+      log.info(`Invalid credentials for user '${login}'. Block client with ip ${clientIp}. Request authentication`)
     }
 
     res.set('WWW-Authenticate', 'Basic realm="HomeGallery"')
