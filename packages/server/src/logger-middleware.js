@@ -6,6 +6,9 @@ const loggerMiddleware = () => {
 
   return pinoHttp({
     logger: logger('server.request'),
+    serializers: {
+      req: req => req.raw.user ? ({...req, user: req.raw.user}) : req
+    },
     redact: {
       paths: ['req.headers.authorization'],
       censor: '*** (masked value)'

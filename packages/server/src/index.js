@@ -12,7 +12,7 @@ const { EventBus } = require('./eventbus');
 const databaseApi = require('./api/database');
 const eventsApi = require('./api/events');
 const webapp = require('./webapp');
-const { createBasicAuthMiddleware } = require('./auth')
+const { augmentReqByUserMiddleware, createBasicAuthMiddleware } = require('./auth')
 const { isIndex, skipIf } = require('./utils')
 
 const log = require('@home-gallery/logger')('server')
@@ -58,6 +58,7 @@ function startServer(options, cb) {
   app.disable('x-powered-by')
   app.enable('trust proxy')
 
+  app.use(augmentReqByUserMiddleware())
   app.use(loggerMiddleware())
   app.use(cors());
   app.use(compression({ filter: shouldCompress }))
@@ -80,7 +81,10 @@ function startServer(options, cb) {
   app.get('/api/database', readDatabase);
   app.get('/api/events', readEvents);
 
-  app.use(webapp(webappDir, getFirstEntries, 50));
+  app.use(webapp(webappDir, req => ({
+    disablePwa: !!req.user,
+    entries: getFirstEntries(50)
+  })));
 
   const server = createServer(key, cert, app);
   server.listen(port, host)

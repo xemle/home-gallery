@@ -4,8 +4,22 @@ const { users2UserMap, matchesUser } = require('./user')
 const log = require('@home-gallery/logger')('server.auth');
 
 const getCredentials = req => {
-  const b64auth = (req.headers.authorization || '').split(' ')[1] || ''
-  return Buffer.from(b64auth, 'base64').toString().split(':')
+  if (!req.headers.authorization) {
+    return []
+  }
+  const [schema, b64auth] = req.headers.authorization.split(' ')
+  if (schema == 'Basic') {
+    return Buffer.from(b64auth, 'base64').toString().split(':')
+  }
+  return []
+}
+
+const augmentReqByUserMiddleware = () => (req, _, next) => {
+  const [login] = getCredentials(req)
+  if (login) {
+    req.user = login
+  }
+  next()
 }
 
 const createBasicAuthMiddleware = (users, rules) => {
@@ -36,6 +50,7 @@ const createBasicAuthMiddleware = (users, rules) => {
 }
 
 module.exports = {
+  augmentReqByUserMiddleware,
   createBasicAuthMiddleware,
   defaultIpWhitelistRules
 }

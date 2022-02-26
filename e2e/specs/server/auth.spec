@@ -18,6 +18,13 @@ Tags: server,docker,auth
 * Set user "admin" with password "admin"
 * Request file "/api/database.json"
 * Response status is "200"
+
+## User is logged, auth header is masked
+
+* Start server with args "--user admin:admin --rule deny:all"
+* Set user "admin" with password "admin"
+* Request file "/api/database.json"
+* Log has entry with key "req.user" and value "admin"
 * Log has entry with key "req.headers.authorization" and value "*** (masked value)"
 
 ## SHA password format

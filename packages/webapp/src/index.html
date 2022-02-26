@@ -23,8 +23,9 @@
     <script>window.__homeGallery={}</script>
     <script src="App.js" type="text/javascript"></script>
     <script>
-      const isLocal = ['127.0.0.1', 'localhost'].indexOf(location.hostname) >= 0;
-      if ('serviceWorker' in navigator && !isLocal) {
+      const isLocal = ['127.0.0.1', 'localhost'].indexOf(location.hostname) >= 0
+      const disablePwa = (window.__homeGallery || {}).disablePwa
+      if ('serviceWorker' in navigator && !isLocal && !disablePwa) {
         const worker = './service-worker.js';
         window.addEventListener('load', () => {
           navigator.serviceWorker.register(worker).then(registration => {
