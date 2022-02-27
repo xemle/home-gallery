@@ -9,12 +9,15 @@ module.exports = {
   runtimeCaching: [
     {
       urlPattern: /\.(html|js|css|webmanifest)$/,
-      handler: 'CacheFirst',
+      handler: 'NetworkFirst',
       options: {
         cacheName: 'assets',
         expiration: {
           maxEntries: 10,
-          maxAgeSeconds: 24 * 60 * 60 // 1 days
+          maxAgeSeconds: 24 * 60 * 60 // 1 day
+        },
+        fetchOptions: {
+          credentials: 'same-origin'
         },
       },
     },
@@ -27,6 +30,9 @@ module.exports = {
           maxEntries: 15,
           maxAgeSeconds: 7 * 24 * 60 * 60 // 1 week
         },
+        fetchOptions: {
+          credentials: 'same-origin'
+        },
       },
     },
     {
@@ -36,7 +42,10 @@ module.exports = {
         cacheName: 'images',
         expiration: {
           maxEntries: 50,
-          maxAgeSeconds: 14 * 24 * 60 * 60 // 2 week
+          maxAgeSeconds: 14 * 24 * 60 * 60 // 2 weeks
+        },
+        fetchOptions: {
+          credentials: 'same-origin'
         },
       },
     }],
