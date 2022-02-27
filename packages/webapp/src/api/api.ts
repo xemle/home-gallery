@@ -113,7 +113,6 @@ export const pushEvent = async (event: Event) => {
   const response = await fetch(`api/events`, {
     method: 'POST',
     mode: 'cors',
-    credentials: 'same-origin',
     headers: {
       'Content-Type': 'application/json'
     },
