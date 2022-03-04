@@ -43,7 +43,6 @@ const orderRules = [
 
 const matchRule = (rule, ast) => (!rule.type || rule.type == ast.type) && (!rule.keys || rule.keys.includes(ast.value))
 
-
 const orderBy = (entries, ast) => {
   const orderByAst = ast.orderBy
   if (!orderByAst) {
