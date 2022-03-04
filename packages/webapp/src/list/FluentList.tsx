@@ -10,6 +10,7 @@ import { fluent } from "./fluent";
 import { VirtualScroll } from "./VirtualScroll";
 import { ViewMode } from "../store/edit-mode-model";
 import { useDeviceType, DeviceType } from "../utils/useDeviceType";
+import { humanizeDuration } from "../utils/format";
 
 const Cell = ({height, width, index, item, items}) => {
   const ref = useRef();
@@ -77,23 +78,6 @@ const Cell = ({height, width, index, item, items}) => {
       hammer.destroy();
     }
   });
-
-  const pad = (s, len = 2, char = '0') => {
-    while (s.length < len) {
-      s = char + s
-    }
-    return s
-  }
-
-  const humanizeDuration = duration => {
-    const hours = duration / 3600
-    const min = ((duration % 3600) / 60).toFixed()
-    const sec = (duration % 60).toFixed()
-    if (hours > 1) {
-      return `${hours.toFixed()}:${pad(min)}:${pad(sec)}`
-    }
-    return `${pad(min)}:${pad(sec)}`
-  }
 
   const previewUrl = `files/${preview}`;
   return (
