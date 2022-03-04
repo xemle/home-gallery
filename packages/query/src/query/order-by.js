@@ -10,7 +10,7 @@ const sortBy = valueFn => (a, b) => {
   } else if (aValue) {
     result = 1
   } else if (bValue) {
-    result = -1 
+    result = -1
   }
   return result
 }
@@ -55,7 +55,7 @@ const orderBy = (entries, ast) => {
     return entries
   }
 
-  const sortFn = match.sort(orderByAst) 
+  const sortFn = match.sort(orderByAst)
   const direction = orderByAst.direction === false ? match.defaultDirection || 1 : (orderByAst.direction == 'asc' ? 1 : -1)
   entries.sort((a, b) => sortFn(a, b) * direction)
 

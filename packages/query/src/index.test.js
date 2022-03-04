@@ -16,7 +16,7 @@ const data = [
     road: 'Plöck',
     latitude: 49.40937,
     longitude: 8.70042,
-    tags: ['foo', 'bar', 'baz']
+    tags: ['foo', 'bar', 'baz', 3354]
   },
   {
     id: '0987654321',
@@ -198,13 +198,14 @@ t.test('keyValue', async t => {
   t.same(await execQuery('ratio:portrait'), ['0987'], 'portrait')
 
   t.same(await execQuery('tag:alps'), ['1223'], 'tag with alps')
+  t.same(await execQuery('tag:3354'), ['1234'], 'number tag')
 
   t.same(await execQuery('object:couch'), ['6718'], 'object')
 })
 
 t.test('function cmp', async t => {
   t.same(await execQuery('count(files) > 0'), ['0987', '1223'], 'count files')
-  t.same(await execQuery('count(tags) = 4'), ['1223'], 'count tags')
+  t.same(await execQuery('count(tags) = 4'), ['1234', '1223'], 'count tags')
   t.same(await execQuery('count(faces) = 2'), ['6718'], 'count faces')
   t.same(await execQuery('count(objects) = 1'), ['6718'], 'count objects')
 })
@@ -220,6 +221,7 @@ t.test('in list', async t => {
   t.same(await execQuery('tags in (sea)'), ['0987'], 'single tag')
   t.same(await execQuery('tags in (sea, alps)'), ['0987', '1223'], 'multiple tags')
   t.same(await execQuery('tags in (sea, Alps)'), ['0987', '1223'], 'multiple tags case insensitive')
+  t.same(await execQuery('tags in (3354)'), ['1234'], 'non string tags')
 })
 
 t.test('all in list', async t => {
@@ -252,8 +254,8 @@ t.test('order by', async t => {
   t.same(await execQuery('order by updated asc'), ['6718', '0987', '1223', '1234'], 'by updated asc')
   t.same(await execQuery('order by updated desc'), ['1234', '1223', '0987', '6718'], 'by updated desc')
 
-  t.same(await execQuery('order by count(files)'), ['0987', '1223', '1234', '6718'], 'by updated')
-  t.same(await execQuery('order by count(tags)'), ['1223', '0987', '1234', '6718'], 'by updated')
+  t.same(await execQuery('order by count(files)'), ['0987', '1223', '1234', '6718'], 'by count files')
+  t.same(await execQuery('order by count(tags)'), ['1223', '1234', '0987', '6718'], 'by count tags')
 
 })
 

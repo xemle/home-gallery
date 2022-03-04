@@ -1,11 +1,11 @@
 const { dateKeys } = require('./keys')
-const { matchNumber, matchFloat, getDateByKey, dirname, basename, ext } = require('./utils')
+const { toLower, matchNumber, matchFloat, getDateByKey, dirname, basename, ext } = require('./utils')
 
 const cmpFilters = [
   {
     keys: ['id', 'model', 'make', 'country', 'state', 'city', 'road'],
     ops: ['=', '!=', '~'],
-    filter: ast => compare(v => v[ast.key]?.toLowerCase(), ast.op, ast.value.value.toLowerCase())
+    filter: ast => compare(v => toLower(v[ast.key]), ast.op, toLower(ast.value.value))
   },
   {
     keys: ['type'],
@@ -36,7 +36,7 @@ const cmpFilters = [
   {
     keys: ['ext'],
     ops: ['=', '!=', '~'],
-    filter: ast => listCompare(v => v.files, ast.op, ast.value.value.toLowerCase(), v => ext(v.filename).toLowerCase())
+    filter: ast => listCompare(v => v.files, ast.op, toLower(ast.value.value), v => toLower(ext(v.filename)))
   },
   {
     keys: ['filesize'],
@@ -77,12 +77,12 @@ const cmpFilters = [
   {
     keys: ['tag'],
     ops: ['=', '!=', '~'],
-    filter: ast => listCompare(v => v.tags, ast.op, ast.value.value.toLowerCase())
+    filter: ast => listCompare(v => v.tags, ast.op, toLower(ast.value.value))
   },
   {
     keys: ['object'],
     ops: ['=', '!=', '~'],
-    filter: ast => listCompare(v => v.objects, ast.op, ast.value.value.toLowerCase(), o => o.class?.toLowerCase())
+    filter: ast => listCompare(v => v.objects, ast.op, toLower(ast.value.value), o => toLower(o.class))
   },
 ]
 
@@ -119,7 +119,7 @@ const compare = (valueFn, op, right) => v => {
   }
 }
 
-const listCompare = (valuesFn, op, right, valueMapFn = v => ('' + v).toLowerCase()) => {
+const listCompare = (valuesFn, op, right, valueMapFn = v => toLower(v)) => {
   return v => {
     const values = valuesFn(v)
     if (!values) {
@@ -137,7 +137,7 @@ const listCompare = (valuesFn, op, right, valueMapFn = v => ('' + v).toLowerCase
     } else if (op == '!=') {
       return !values.find(value => valueMapFn(value) == right)
     } else if (op == '~') {
-      return values.find(value => valueMapFn(value)?.toLowerCase().includes(right.toLowerCase()))
+      return values.find(value => toLower(valueMapFn(value)).includes(toLower(right)))
     } else {
       return false
     }

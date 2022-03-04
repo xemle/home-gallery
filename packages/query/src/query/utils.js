@@ -1,3 +1,5 @@
+const toLower = v => typeof v == 'string' ? v.toLowerCase() : '' + v
+
 const getDateByKey = (date, key) => {
   switch (key) {
     case 'year':
@@ -38,6 +40,7 @@ const ext = file => {
 }
 
 module.exports = {
+  toLower,
   getDateByKey,
   matchNumber,
   matchFloat,
