@@ -118,6 +118,7 @@ t.test('List', async t => {
   t.equal(await simpleAst('foo in (bar,baz,cat)'), 'foo in (bar, baz, cat)', 'More')
   t.equal(await simpleAst('foo in (bar,baz cat)'), 'foo in (bar, baz, cat)', 'More with mixed syntax')
   t.equal(await simpleAst('not foo in (bar,baz,cat)'), 'not(foo in (bar, baz, cat))', 'With Not')
+  t.equal(await simpleAst('foo in (bär,fuß ché)'), 'foo in (bär, fuß, ché)', 'With umlaut')
 })
 
 t.test('Range', async t => {

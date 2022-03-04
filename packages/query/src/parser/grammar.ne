@@ -30,7 +30,7 @@ const lexer = moo.compile({
     {match: /"(?:\\["\\rn]|[^"\\])*?"/, lineBreaks: true, value: x => x.slice(1, -1)},
     {match: /'(?:\\['\\rn]|[^'\\])*?'/, lineBreaks: true, value: x => x.slice(1, -1)},
   ],
-  identifier: {match: /[A-Za-z.]+/, value: x => x, type: moo.keywords(token2Keyword)},
+  identifier: {match: /[\u00c0-\u017fA-Za-z.]+/, value: x => x, type: moo.keywords(token2Keyword)},
   value: {match: /[^ \t\n\r:=<>!()[\],]+/, value: x => x},
 })
 
