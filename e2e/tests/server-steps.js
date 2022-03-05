@@ -46,7 +46,7 @@ const waitFor = async (testFn, timeout) => {
 
   const next = async () => {
     if (Date.now() - startTime > timeout) {
-      throw new Error(`Wait timeout exceeded for path: ${path}`)
+      throw new Error(`Wait timeout exceeded`)
     }
     return testFn().catch(() => {
       delay = Math.min(500, delay * 2)
@@ -78,7 +78,7 @@ const startServer = async (args = []) => {
   }
   gauge.dataStore.scenarioStore.put('serverUrl', url)
 
-  return waitFor(() => fetchFacade(''), 10 * 1000)
+  return waitFor(() => fetchFacade(''), 10 * 1000).catch(e => {throw new Error(`Could not start server with args: ${args}. Error ${e}`)})
 }
 
 step("Start server", startServer)
@@ -172,17 +172,18 @@ step("Start mock server", async () => {
   })
 })
 
-step("Wait for database", async () => await waitFor(() => fetchDatabase(), 10 * 1000))
+step("Wait for database", () => waitFor(() => fetchDatabase(), 10 * 1000).catch(e => {throw new Error(`Waiting for database failed. Error ${e}`)}))
 
 step("Wait for current database", async () => {
   const fileDatabase = await readDatabase()
   return waitFor(() => fetchDatabase()
     .then(database => {
       if (database.created != fileDatabase.created) {
-        throw new Error(`Database created missmatch`)
+        throw new Error(`Database created timestamp missmatch: Expexted ${fileDatabase.created} but was ${database.created}`)
       }
       return database
     }), 5 * 1000)
+    .catch(e => {throw new Error(`Failed to fetch current database. Error ${e}`)})
 })
 
 const killChildProcess = async child => {
