@@ -12,6 +12,7 @@ const ffprobe = require('./ffprobe');
 const { groupByDir } = require('./group-by-dir');
 const { groupSidecars, ungroupSidecars } = require('./group-sidecars');
 const embeddedRawPreview = require('./embedded-raw-preview')
+const heicPreview = require('./heic-preview')
 const rawPreviewExif = require('./raw-preview-exif.js')
 const { imagePreview } = require('./image-preview');
 const vibrant = require('./vibrant');
@@ -65,6 +66,7 @@ function extractData(config, cb) {
       groupSidecars(),
       flatten(),
       // images grouped by sidecars in a dir ordered by file size
+      heicPreview(storage),
       embeddedRawPreview(storage),
       ungroupSidecars(),
       rawPreviewExif(storage),
