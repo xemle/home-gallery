@@ -3,7 +3,8 @@ const path = require('path')
 
 const log = require('@home-gallery/logger')('index.journal');
 
-const { mkdir, readJsonGzip, writeJsonGzip, promisify } = require('@home-gallery/common')
+const { mkdir, readJsonGzip, writeJsonGzip, promisify, sidecars } = require('@home-gallery/common')
+const { mapName2Sidecars, getSidecarsByFilename } = sidecars
 
 const mkdirAsync = promisify(mkdir)
 const writeJsonGzipAsync = promisify(writeJsonGzip)
@@ -30,33 +31,6 @@ const toDirReducer = (result, entry) => {
     result[dir] = [entry]
   }
   return result
-}
-
-const mapName2Sidecars = entries => {
-  const result = {}
-  entries.forEach(entry => {
-    const { name, ext } = path.parse(entry.filename)
-    const { name: name2, ext: ext2 } = path.parse(name)
-    if (ext && result[name]) {
-      result[name].push(entry)
-    } else if (ext2 && result[name2]) {
-      result[name2].push(entry)
-    } else if (ext) {
-      result[name] = [entry]
-    }
-  })
-  return result
-}
-
-const getSidecarsByFilename = (name2sidecars, filename) => {
-  const { name, ext } = path.parse(filename)
-  const { name: name2, ext: ext2 } = path.parse(name)
-  if (ext && name2sidecars[name]) {
-    return name2sidecars[name]
-  } else if (ext2 && name2sidecars[name2]) {
-    return name2sidecars[name2]
-  }
-  return false
 }
 
 const getChangeType = (journal, filename) => {

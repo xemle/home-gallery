@@ -2,13 +2,15 @@ const { pipeline } = require('stream');
 
 const log = require('@home-gallery/logger')('extractor');
 const { readStreams } = require('@home-gallery/index');
-const { concurrent, each, filter, limit, purge, memoryIndicator, processIndicator, skip } = require('@home-gallery/stream');
+const { concurrent, each, filter, limit, purge, memoryIndicator, processIndicator, skip, flatten } = require('@home-gallery/stream');
 const mapToStorageEntry = require('./map-storage-entry');
 const { createStorage } = require('./storage');
 
 const readAllEntryFiles = require('./read-all-entry-files');
 const exiftool = require('./exiftool');
 const ffprobe = require('./ffprobe');
+const { groupByDir } = require('./group-by-dir');
+const { groupSidecars, ungroupSidecars } = require('./group-sidecars');
 const { imagePreview } = require('./image-preview');
 const vibrant = require('./vibrant');
 const geoReverse = require('./geo-reverse');
@@ -56,6 +58,14 @@ function extractData(config, cb) {
 
       exiftool(storage),
       ffprobe(storage),
+
+      groupByDir(),
+      groupSidecars(),
+      flatten(),
+      // images grouped by sidecars in a dir ordered by file size
+      ungroupSidecars(),
+
+      // single ungrouped entries
       imagePreview(storage, imagePreviewSizes),
       videoPoster(storage, imagePreviewSizes),
       vibrant(storage),

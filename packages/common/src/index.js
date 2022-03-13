@@ -2,6 +2,7 @@ const callbackify = require('./callbackify');
 const forEach = require('./for-each');
 const fileFilter = require('./file-filter');
 const { fileTypes, getFileTypeByExtension } = require('./file-types');
+const sidecars = require('./sidecars');
 const humanize = require('./humanize');
 const lruCache = require('./lru-cache');
 const mkdir = require('./mkdir');
@@ -26,6 +27,7 @@ module.exports = {
   readDirCreate,
   readJsonGzip,
   sha1Hex,
+  sidecars,
   writeJsonGzip,
   writeSafe
 }
