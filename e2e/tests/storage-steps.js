@@ -25,3 +25,9 @@ step("Storage has no entry for <id>", async (id) => {
   const files = getEntryFiles(id)
   assert(!files.length, `Expect storage files to be empty but was ${files} for id ${id}`)
 })
+
+step("Storage has no entry <name> for <id>", async (name, id) => {
+  const files = getEntryFiles(id)
+  const hasFile = files.indexOf(name) < 0
+  assert(hasFile, `Expected no ${name} storage file, but found: ${files.join(', ')} for id ${id}`)
+})

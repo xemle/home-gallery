@@ -11,6 +11,8 @@ const exiftool = require('./exiftool');
 const ffprobe = require('./ffprobe');
 const { groupByDir } = require('./group-by-dir');
 const { groupSidecars, ungroupSidecars } = require('./group-sidecars');
+const embeddedRawPreview = require('./embedded-raw-preview')
+const rawPreviewExif = require('./raw-preview-exif.js')
 const { imagePreview } = require('./image-preview');
 const vibrant = require('./vibrant');
 const geoReverse = require('./geo-reverse');
@@ -63,7 +65,9 @@ function extractData(config, cb) {
       groupSidecars(),
       flatten(),
       // images grouped by sidecars in a dir ordered by file size
+      embeddedRawPreview(storage),
       ungroupSidecars(),
+      rawPreviewExif(storage),
 
       // single ungrouped entries
       imagePreview(storage, imagePreviewSizes),

@@ -1,5 +1,7 @@
 const log = require('@home-gallery/logger')('extractor.image.preview');
 
+const rawPreviewSuffix = 'raw-preview.jpg'
+
 let sharp;
 try {
   sharp = require('sharp');
@@ -8,6 +10,13 @@ try {
 }
 
 const { toPipe, conditionalTask } = require('./task');
+
+const fileExtension = filename => {
+  const pos = filename.lastIndexOf('.')
+  return pos > 0 ? filename.slice(pos + 1).toLowerCase() : ''
+}
+
+const isSupportedImage = entry => ['jpg', 'jpeg', 'png'].includes(fileExtension(entry.filename))
 
 function resize(src, size, cb) {
   if (!sharp) {
@@ -57,11 +66,12 @@ function resizeImage(storage, entry, src, sizes, cb) {
 }
 
 function imagePreview(storage, sizes) {
-  const test = entry => entry.type === 'image';
+  const test = entry => (entry.type === 'image' && isSupportedImage(entry)) || storage.hasEntryFile(entry, rawPreviewSuffix);
 
   const task = (entry, cb) => {
     const t0 = Date.now();
-    resizeImage(storage, entry, entry.src, sizes, (err, calculatedSizes) => {
+    const src = storage.hasEntryFile(entry, rawPreviewSuffix) ? storage.getEntryFilename(entry, rawPreviewSuffix) : entry.src
+    resizeImage(storage, entry, src, sizes, (err, calculatedSizes) => {
       if (err) {
         log.error(`Could not calculate image preview of ${entry}: ${err}`);
       } else if (calculatedSizes.length) {

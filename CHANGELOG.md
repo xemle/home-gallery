@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- extractor: Extract embedded previews from raw files
 - query: Add cmp, (all) in list and range to common properties
 - query: Allow capitalized keywords
 - database: Add entry groups
