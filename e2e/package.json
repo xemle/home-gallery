@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "express": "^4.17.3",
+    "image-size": "^1.0.1",
     "node-fetch": "^2.6.7",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4"

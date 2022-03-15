@@ -5,6 +5,8 @@ const log = require('@home-gallery/logger')('extractor.image.resize')
 
 const { getNativeCommand } = require('./utils')
 
+const jpgOptions = {quality: 80, chromaSubsampling: '4:2:0'}
+
 const getSharpResizer = cb => {
   let sharp
   try {
@@ -16,8 +18,8 @@ const getSharpResizer = cb => {
   cb(null, (src, dst, size, cb) => {
     sharp(src, {failOnError: false})
       .rotate()
-      .resize({width: size})
-      .jpeg({quality: 80, chromaSubsampling: '4:4:4'})
+      .resize({width: size, height: size, fit: 'inside'})
+      .jpeg(jpgOptions)
       .toFile(dst, cb)
   })
 }
@@ -68,11 +70,11 @@ const getVipsResize = (cb) => {
     const [major, minor] = version.split('.')
     if (major == 8 && minor >= 10) {
       cb(null, (src, dst, size, cb) => {
-        run(vipsthumbnail, ['-s', `${size}x`, '-o', `${dst}[Q=80]`, src], cb)
+        run(vipsthumbnail, ['-s', `${size}x${size}`, '-o', `${dst}[Q=80]`, src], cb)
       })
     }
     return cb(null, (src, dst, size, cb) => {
-      run(vipsthumbnail, ['-s', `${size}x`, '--rotate', '--delete', '-f', `${dst}[Q=80]`, src], cb)
+      run(vipsthumbnail, ['-s', `${size}x${size}`, '--rotate', '--delete', '-f', `${dst}[Q=80]`, src], cb)
     })
   })
 }
@@ -91,7 +93,7 @@ const createImageResizer = (options, cb) => {
     log.debug('Use native system command convert')
     const convert = getNativeCommand('convert')
     return cb(null, (src, dst, size, cb) => {
-      run(convert, [src, '-auto-orient', '-resize', `${size}x`, '-strip', '-quality', '80', dst], cb)
+      run(convert, [src, '-auto-orient', '-resize', `${size}x${size}`, '-strip', '-quality', '80', dst], cb)
     })
   } else {
     return getSharpResizer((err, sharpResizer) => {
@@ -108,5 +110,6 @@ const useExternalImageResizer = options => options.useNative.includes('vipsthumb
 
 module.exports = {
   createImageResizer,
-  useExternalImageResizer
+  useExternalImageResizer,
+  jpgOptions
 }

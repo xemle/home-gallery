@@ -3,7 +3,7 @@ const fs = require('fs').promises
 const heicDecode = require('heic-decode')
 
 const { promisify } = require('@home-gallery/common')
-const { useExternalImageResizer } = require('./image-resizer')
+const { useExternalImageResizer, jpgOptions } = require('./image-resizer')
 
 let sharp
 let jpegJs
@@ -17,8 +17,6 @@ const imageTypes = ['rawImage']
 const rawPreviewSuffix = 'raw-preview.jpg'
 
 const maxSize = 1920
-
-const jpgOptions = {quality: 80, chromaSubsampling: '4:4:4'}
 
 const fileExtension = filename => {
   const pos = filename.lastIndexOf('.')

@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- extractor: Fix resizing to squared boundary size
 - query: Fix query expression with keyword prefix like india or andrea
 - extractor: Except buggy Samsung images (by psdimon)
 - query: Fix query expressions with parenthesis
