@@ -50,6 +50,9 @@ const readEventsCb = (filename: fs.PathLike, cb: (...args: any[]) => void) => {
   });
 
   reader.on('error', (err) => {
+    if (isClosed) {
+      return;
+    }
     isClosed = true;
     cb(err);
     reader.close();
@@ -60,8 +63,10 @@ const readEventsCb = (filename: fs.PathLike, cb: (...args: any[]) => void) => {
       return
     } else if (header) {
       header.data = events;
+      cb(null, header);
+    } else {
+      cb(new Error(`No event header found`));
     }
-    cb(null, header);
   });
 }
 
