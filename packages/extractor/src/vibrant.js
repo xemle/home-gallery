@@ -4,19 +4,11 @@ const log = require('@home-gallery/logger')('extractor.vibrant');
 
 const { toPipe, conditionalTask } = require('./task');
 
-const vibrantSuffix = 'vibrant.json';
 const imageSuffix = 'image-preview-128.jpg';
+const vibrantSuffix = 'vibrant.json';
 
 function vibrantColors(storage) {
-  const test = entry => {
-    if (['image', 'video'].indexOf(entry.type) < 0 || storage.hasEntryFile(entry, vibrantSuffix)) {
-      return false;
-    } else if (!storage.hasEntryFile(entry, imageSuffix)) {
-      log.warn(`Image preview ${imageSuffix} is missing from ${entry}`);
-      return false;
-    }
-    return true;
-  }
+  const test = entry => storage.hasEntryFile(entry, imageSuffix) && !storage.hasEntryFile(entry, vibrantSuffix)
 
   const task = (entry, cb) => {
     const t0 = Date.now();
