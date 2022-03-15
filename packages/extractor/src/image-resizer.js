@@ -104,6 +104,9 @@ const createImageResizer = (options, cb) => {
   }
 }
 
+const useExternalImageResizer = options => options.useNative.includes('vipsthumbnail') || options.useNative.includes('convert')
+
 module.exports = {
-  createImageResizer
+  createImageResizer,
+  useExternalImageResizer
 }

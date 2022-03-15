@@ -76,7 +76,7 @@ const extractData = async (options) => {
       groupSidecars(),
       flatten(),
       // images grouped by sidecars in a dir ordered by file size
-      heicPreview(storage),
+      heicPreview(storage, {options, imageResizer}),
       embeddedRawPreview(storage, {exiftool}),
       ungroupSidecars(),
       rawPreviewExif(storage, {exiftool}),

@@ -6,3 +6,6 @@ require('@home-gallery/server')
 require('@home-gallery/export')
 require('@home-gallery/fetch')
 require('@home-gallery/cast')
+
+// jpeg-js is used as fallback for heic image importer
+require('jpeg-js')
