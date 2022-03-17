@@ -2,10 +2,11 @@
 
 Tags: extractor
 
+* Start mock server
+
 ## Create previews
 
 * Init index from "index/basic"
-* Start mock server
 * Extract files
 * Storage has entry "image-preview-128.jpg" for "25d7b73"
 * Storage has entry "image-preview-128.jpg" for "96419bb"

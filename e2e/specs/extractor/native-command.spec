@@ -2,12 +2,13 @@
 
 Tags: extractor, native
 
+* Start mock server
+
 ## Create image previews by imagemagick
 
 * Add file "index/images/DJI_0035.JPG"
 * Add file "index/images/IMG_20190807_105328.jpg"
 * Create index
-* Start mock server
 * Extract files with args "--use-native convert"
 * Storage has entry "image-preview-128.jpg" for "e928ea5b"
 * Storage has entry "image-preview-128.jpg" for "2e17e23"
@@ -23,7 +24,6 @@ Tags: extractor, native
 * Add file "index/images/DJI_0035.JPG"
 * Add file "index/images/IMG_20190807_105328.jpg"
 * Create index
-* Start mock server
 * Extract files with args "--use-native vipsthumbnail"
 * Storage has entry "image-preview-128.jpg" for "e928ea5b"
 * Storage has entry "image-preview-128.jpg" for "2e17e23"
