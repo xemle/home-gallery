@@ -12,6 +12,8 @@ const galleryBinArgs = process.env.gallery_bin_args ? process.env.gallery_bin_ar
 const projectRoot = path.resolve(process.cwd(), '..')
 const testDataDir = path.join(projectRoot, process.env.gallery_data_dir || 'data')
 
+const logLevel = process.env.gallery_log_level || 'debug'
+
 const generateId = (size) => {
   let id = '';
   while (id.length < size) {
@@ -140,7 +142,7 @@ const runCliAsync = (args, options, cb) => {
   }
   const galleryArgsResolved = resolveArgs(galleryBinArgs, vars)
 
-  const logOptions = ['--log-file', getPath('e2e.log'), '--log-file-level', 'debug']
+  const logOptions = ['--log-file', getPath('e2e.log'), '--log-file-level', logLevel]
   dropServerPortArgOnDocker(args)
   const commandArgs = [...galleryArgsResolved, ...logOptions, ...args]
 
