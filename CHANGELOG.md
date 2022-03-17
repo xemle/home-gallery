@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- extractor: Create only smaller preview images than the source
 - extractor: Option to use native system executables like vipsthumbnail or ffmpeg
 - extractor: Add support for heic/heif image format
 - extractor: Extract embedded previews from raw files

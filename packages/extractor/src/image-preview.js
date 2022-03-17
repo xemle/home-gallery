@@ -43,13 +43,27 @@ function resizeImage(storage, imageResizer, entry, src, imageSizes, cb) {
   next();
 }
 
+const getMaxImageSizeBy = exif => {
+  if (exif && exif.ImageWidth && exif.ImageHeight) {
+    return Math.max(exif.ImageWidth, exif.ImageHeight)
+  }
+  return 0
+}
+
 function imagePreview(storage, { imageResizer, imagePreviewSizes }) {
+
+  const defaultMaxSize = Math.max(...imagePreviewSizes)
+
   const test = entry => (entry.type === 'image' && isSupportedImage(entry)) || storage.hasEntryFile(entry, rawPreviewSuffix);
 
   const task = (entry, cb) => {
     const t0 = Date.now();
+
     const src = storage.hasEntryFile(entry, rawPreviewSuffix) ? storage.getEntryFilename(entry, rawPreviewSuffix) : entry.src
-    resizeImage(storage, imageResizer, entry, src, imagePreviewSizes, (err, calculatedSizes) => {
+    const size = getMaxImageSizeBy(entry.meta.rawPreviewExif) || getMaxImageSizeBy(entry.meta.exif) || defaultMaxSize
+    const previewSizes = imagePreviewSizes.filter(s => s <= size)
+
+    resizeImage(storage, imageResizer, entry, src, previewSizes, (err, calculatedSizes) => {
       if (err) {
         log.error(`Could not calculate image preview of ${entry}: ${err}`);
       } else if (calculatedSizes.length) {
