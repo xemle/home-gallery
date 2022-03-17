@@ -5,7 +5,20 @@ const log = require('@home-gallery/logger')('extractor.image.resize')
 
 const { getNativeCommand } = require('./utils')
 
-const jpgOptions = {quality: 80, chromaSubsampling: '4:2:0'}
+const jpgOptions = {
+  quality: 80,
+  progressive: true,
+  optimiseCoding: true,
+  mozjpeg: true // same as {trellisQuantisation: true, overshootDeringing: true, optimiseScans: true, quantisationTable: 3}
+}
+
+const vipsthumbnailJpgOptions = [
+  'Q=80', // jpg quality
+  'interlace',
+  'optimize-coding',
+  'trellis-quant', 'overshoot-deringing', 'optimize-scans', 'quant-table=3', // mozjpeg defaults
+  'strip', // no meta data
+].join(',')
 
 const getSharpResizer = cb => {
   let sharp
@@ -70,11 +83,11 @@ const getVipsResize = (cb) => {
     const [major, minor] = version.split('.')
     if (major == 8 && minor >= 10) {
       cb(null, (src, dst, size, cb) => {
-        run(vipsthumbnail, ['-s', `${size}x${size}`, '-o', `${dst}[Q=80]`, src], cb)
+        run(vipsthumbnail, ['-s', `${size}x${size}`, '-o', `${dst}[${vipsthumbnailJpgOptions}]`, src], cb)
       })
     }
     return cb(null, (src, dst, size, cb) => {
-      run(vipsthumbnail, ['-s', `${size}x${size}`, '--rotate', '--delete', '-f', `${dst}[Q=80]`, src], cb)
+      run(vipsthumbnail, ['-s', `${size}x${size}`, '--rotate', '--delete', '-f', `${dst}[${vipsthumbnailJpgOptions}]`, src], cb)
     })
   })
 }
