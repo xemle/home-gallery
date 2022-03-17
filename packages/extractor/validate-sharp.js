@@ -23,6 +23,9 @@ const log = (...args) => {
   }
 }
 
+// version format is v14.19.0
+const getNodeMajorVersion = () => +process.version.substring(1).split('.')[0]
+
 const run = async (command, args, options) => {
   const defaults = { shell: true }
   const optionsEnv = (options || {}).env || {}
@@ -93,7 +96,13 @@ const requiresFallback = async () => {
 const removeVendorDir = async (sharpDir) => {
   const vendorDir = path.join(sharpDir, 'vendor')
   log(`Remove old vendor directory ${vendorDir}`)
-  await fs.rmdir(vendorDir, {recursive: true})
+  const majorVersion = getNodeMajorVersion()
+  if (majorVersion >= 16) {
+    await fs.rm(vendorDir, {recursive: true})
+  } else {
+    // deprecated since v16
+    await fs.rmdir(vendorDir, {recursive: true})
+  }
 }
 
 const installLibvips = async (sharpDir) => {
