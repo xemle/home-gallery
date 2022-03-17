@@ -9,7 +9,7 @@ const fileExtension = filename => {
   return pos > 0 ? filename.slice(pos + 1).toLowerCase() : ''
 }
 
-const isSupportedImage = entry => ['jpg', 'jpeg', 'png'].includes(fileExtension(entry.filename))
+const isSupportedImage = entry => fileExtension(entry.filename).match(/(jpe?g|png|tiff?)/)
 
 function resizeImage(storage, imageResizer, entry, src, imageSizes, cb) {
   let calculatedSizes = [];
