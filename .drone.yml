@@ -1,14 +1,17 @@
+---
+# node env with current LTS: v16
 kind: pipeline
 type: docker
-name: default
+name: node LTS
 
 platform:
   arch: arm64
 
 steps:
 - name: install
-  image: node:14-alpine
+  image: node:16-alpine
   commands:
+  - rm -rf packages/api-server
   - npm set registry $NPM_REGISTRY
   - npm config set unsafe-perm true
   - node scripts/disable-dependency.js api-server
@@ -19,17 +22,17 @@ steps:
       from_secret: npm_registry
 
 - name: build
-  image: node:14-alpine
+  image: node:16-alpine
   commands:
   - npm run build -- --ignore @home-gallery/api-server
 
 - name: test
-  image: node:14-alpine
+  image: node:16-alpine
   commands:
   - npm run test -- --ignore @home-gallery/api-server
 
 - name: test:e2e
-  image: node:14-alpine
+  image: node:16-alpine
   commands:
   - apk add --no-cache git git-lfs perl
   - git clone $E2E_DATA_REPO ./data
@@ -60,3 +63,71 @@ steps:
   when:
     status:
     - failure
+
+---
+# node env with pre-LTS: v14
+# triggers only on merges
+kind: pipeline
+type: docker
+name: node pre LTS
+
+platform:
+  arch: arm64
+
+steps:
+- name: install
+  image: node:14-alpine
+  commands:
+  - rm -rf packages/api-server
+  - npm set registry $NPM_REGISTRY
+  - npm config set unsafe-perm true
+  - node scripts/disable-dependency.js api-server
+  - npm install
+  - find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
+  environment:
+    NPM_REGISTRY:
+      from_secret: npm_registry
+
+- name: build
+  image: node:14-alpine
+  commands:
+  - npm run build -- --ignore @home-gallery/api-server
+
+- name: test
+  image: node:14-alpine
+  commands:
+  - npm run test -- --ignore @home-gallery/api-server
+
+- name: test:e2e
+  image: node:14-alpine
+  commands:
+  - apk add --no-cache git git-lfs perl
+  - git clone $E2E_DATA_REPO ./data
+  - npm run test:e2e
+  environment:
+    TZ: Europe/Berlin
+    E2E_DATA_REPO:
+      from_secret: e2e_data_repo
+
+- name: notify
+  image: sfelis/drone-email
+  settings:
+    from:
+      from_secret: mail_from
+    host:
+      from_secret: mail_host
+    port:
+      from_secret: mail_port
+    username:
+      from_secret: mail_username
+    password:
+      from_secret: mail_password
+  when:
+    status:
+    - failure
+
+trigger:
+  branch:
+  - master
+  event:
+  - push

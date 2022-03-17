@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Default node version is v16 (Gallium)
 - extractor: Reduce log levels. Use debug log level for details
 - cast: Set default order is by date oldest first
 

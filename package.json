@@ -33,6 +33,9 @@
     "type": "git",
     "url": "https://github.com/xemle/home-gallery.git"
   },
+  "workspaces": [
+    "./packages/*"
+  ],
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^6.0.0",
     "@getgauge/cli": "^1.4.3",

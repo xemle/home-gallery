@@ -13,7 +13,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
 
       - name: Prepare
         id: prepare
@@ -44,7 +44,8 @@ jobs:
       - name: Install packages
         id: install
         run: |
-          node scripts/disable-dependency.js api-server styleguide e2e
+          rm -rf packages/api-server packages/styleguide
+          node scripts/disable-dependency.js api-server styleguide
           npm install
 
       - name: Build packages

@@ -7,7 +7,7 @@ COPY packages /build/packages/
 COPY scripts /build/scripts/
 WORKDIR /build
 
-RUN node scripts/disable-dependency.js api-server styleguide e2e && \
+RUN node scripts/disable-dependency.js api-server styleguide && \
   npm install && \
   find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
 
