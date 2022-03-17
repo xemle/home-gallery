@@ -44,6 +44,9 @@ steps:
   when:
     branch:
     - master
+    # execute also on tagged feature/fix branches
+    - feature/*e2e*
+    - fix/*e2e*
     event:
     - push
 
@@ -66,7 +69,7 @@ steps:
 
 ---
 # node env with pre-LTS: v14
-# triggers only on merges
+# triggers only on merges or tagged branches
 kind: pipeline
 type: docker
 name: node pre LTS
@@ -129,5 +132,8 @@ steps:
 trigger:
   branch:
   - master
+  # execute also on tagged feature/fix branches
+  - feature/*e2e*
+  - fix/*e2e*
   event:
   - push
