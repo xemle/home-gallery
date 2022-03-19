@@ -78,7 +78,10 @@ const buildDatabase = async (config, options) => {
   excludes.forEach(exclude => args.push('--exclude', exclude))
 
   options.journal && args.push('--journal', options.journal)
-  await runCli(args, {}, ['--max-old-space-size=4096'])
+
+  const maxMemory = config.database?.maxMemory || 2048;
+  const nodeArgs = maxMemory ? [`--max-old-space-size=${maxMemory}`] : [];
+  await runCli(args, {}, nodeArgs);
 }
 
 const catchIndexLimitExceeded = exitCode => {

@@ -90,6 +90,11 @@ sources:
   #dir: '{cacheDir}/storage'
 #database:
   #file: '{configDir}/{configPrefix}database.db'
+  # The full database creation is memory consuming. The default value is 2048 MB.
+  # On memory errors or for larger photo collections (>50000 images) 4096 MB is recommended
+  # Use less memory for smaller devices (e.g. Raspberry Pi Zero), e.g. 512 MB.
+  # Node's default memory limit is 512 MB (changeable via --max-old-space-size node arg)
+  #maxMemory: 2048
 #events:
   #file: '{configDir}/{configPrefix}events.db'
 
