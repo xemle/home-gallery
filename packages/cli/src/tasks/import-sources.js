@@ -68,16 +68,20 @@ const extract = async (config, sources, options) => {
   await runCli(args)
 }
 
-const buildDatabase = async (config, options) => {
+const buildDatabase = async (config, sources, options) => {
   const args = [...loggerArgs(config), 'database'];
-  const storage = config.storage || {}
-  config.sources.forEach(source => args.push('--index', source.index));
-  args.push('--storage', storage.dir, '--database', config.database.file);
 
+  if (options.journal) {
+    sources.forEach(source => args.push('--index', source.index));
+    args.push('--journal', options.journal)
+  } else {
+    config.sources.forEach(source => args.push('--index', source.index));
+  }
+
+  const storage = config.storage || {}
+  args.push('--storage', storage.dir, '--database', config.database.file);
   const excludes = storage.excludes || [];
   excludes.forEach(exclude => args.push('--exclude', exclude))
-
-  options.journal && args.push('--journal', options.journal)
 
   const maxMemory = config.database?.maxMemory || 2048;
   const nodeArgs = maxMemory ? [`--max-old-space-size=${maxMemory}`] : [];
@@ -124,7 +128,7 @@ const importSources = async (config, sources, initialImport, incrementalUpdate) 
 
     await updateIndices(config, sources, { initialImport, journal }).then(() => processing = false).catch(catchIndexLimitExceeded)
     await extract(config, sources, { journal })
-    await buildDatabase(config, { journal })
+    await buildDatabase(config, sources, { journal })
     await deleteJournals(config, sources, journal)
 
     if (processing) {
