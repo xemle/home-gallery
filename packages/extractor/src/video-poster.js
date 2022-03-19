@@ -5,7 +5,16 @@ const { toPipe, conditionalTask } = require('./task');
 
 const videoPosterSuffix = 'video-poster.jpg';
 
+const getMaxVideoSize = (entry, defaultSize) => {
+  return entry.meta.ffprobe?.streams
+    .filter(stream => stream.codec_type == 'video' && stream.width && stream.height)
+    .reduce((size, stream) => Math.max(size, stream.width, stream.height), 0)
+    || defaultSize
+}
+
 function videoPoster(storage, { imageResizer, videoFrameExtractor, imagePreviewSizes }) {
+
+  const maxPreviewSize = Math.max(...imagePreviewSizes)
 
   const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, videoPosterSuffix);
 
@@ -20,7 +29,9 @@ function videoPoster(storage, { imageResizer, videoFrameExtractor, imagePreviewS
       }
 
       const posterSrc = storage.getEntryFilename(entry, videoPosterSuffix);
-      resizeImage(storage, imageResizer, entry, posterSrc, imagePreviewSizes, (err, calculatedSizes) => {
+      const size = getMaxVideoSize(entry, maxPreviewSize)
+      const previewSizes = imagePreviewSizes.filter(previewSize => previewSize <= size)
+      resizeImage(storage, imageResizer, entry, posterSrc, previewSizes, (err, calculatedSizes) => {
         if (err) {
           log.warn(err, `Could not resize video frame from ${entry}: ${err}`)
           return cb();
