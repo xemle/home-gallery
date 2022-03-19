@@ -1,4 +1,7 @@
 targets:
+  - platform: all
+    arch: generic
+    command: false
   - platform: linux
     arch: x64
     command: ['{{caxa}}/home-gallery/node/bin/node', '{{caxa}}/home-gallery/gallery.js']
@@ -30,8 +33,11 @@ run:
     platformArch: win-x64
 entries:
   - ./bundle-entry.js
-  - sharp
-  - sharp:dependencies
+  - name: sharp
+    arch: '!generic'
+  - name: sharp:dependencies
+    arch: '!generic'
+  - jpeg-js
 includes:
   - package.json
   - CHANGELOG.md
@@ -86,6 +92,8 @@ excludes:
   - node_modules/@ffprobe-installer/linux-arm
   - node_modules/@ffprobe-installer/linux-ia32
   - node_modules/@ffprobe-installer/win32-ia32
+  - pattern: node_modules/sharp
+    arch: generic
 map:
   - packages/: node_modules/@home-gallery/
   - from: node/linux-x64/

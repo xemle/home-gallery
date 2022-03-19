@@ -2,7 +2,7 @@ import os from 'os'
 import path from 'path'
 
 import { logger } from './log'
-import { RunStep, Mapping, readConfig, Target } from './config'
+import { RunStep, Mapping, readConfig, Entry, Target } from './config'
 import { runSimple } from './run'
 import { resolvePackages } from './dependency-tree'
 import { matchPlatformArch, getFilter } from './filter'
@@ -46,6 +46,10 @@ const filterTargets = (targets: Target[], filter: string | undefined) => {
     })
 }
 
+const filterEntries = (entries: Entry[], platform: string, arch: string): string[] => {
+    return entries.filter(entry => matchPlatformArch(entry, platform, arch)).map(entry => entry.name)
+}
+
 export interface BundleOptions {
     version: string
     snapshot?: string
@@ -81,6 +85,7 @@ export const bundle = async (options: BundleOptions): Promise<void> => {
     for (const target of filteredTargets) {
         log.info(`Bundling target ${target.platform}-${target.arch}`)
         const isWin = target.platform.startsWith('win')
+        const hasBin = !Array.isArray(target.command)
 
         const fileBase = `${output.name}-${version}${snapshot}-${target.platform}-${target.arch}`;
         const archiveFile = path.join(outputDir, `${fileBase}.tar.gz`);
@@ -94,23 +99,26 @@ export const bundle = async (options: BundleOptions): Promise<void> => {
             await runSteps(run, target.platform, target.arch)
         }
 
-        const packages = await resolvePackages(dir, entries)
-        log.info(`Require ${packages.length} packages for ${entries.length} entries`)
+        const targetEntries = filterEntries(entries, target.platform, target.arch)
+        const packages = await resolvePackages(dir, targetEntries)
+        log.info(`Require ${packages.length} packages for ${targetEntries.length} entries`)
 
         const filter = getFilter(packages, includes, excludes, target.platform, target.arch)
         const mapping = toMapping(map, target.platform, target.arch)
 
         await writeArchive(dir, filter, mapping, archivePrefix, archiveFile)
+        await updateHash(archiveFile, hashAlgorithm, `${archiveFile}.${hashAlgorithm}sum`)
+        await updateHash(archiveFile, hashAlgorithm, hashFile)
+        await symlink(archiveFile, archiveLatestLink)
         log.info(`Created archive ${archiveFile}`)
 
-        await pack(archiveFile, archivePrefix, `${output.name}/${version}`, target.platform, target.command, binFile)
-        log.info(`Created binary ${binFile}`)
+        if (Array.isArray(target.command)) {
+            await pack(archiveFile, archivePrefix, `${output.name}/${version}`, target.platform, target.command, binFile)
+            await updateHash(binFile, hashAlgorithm, `${binFile}.${hashAlgorithm}sum`)
+            await updateHash(binFile, hashAlgorithm, hashFile)
+            await symlink(binFile, binLatestLink)
+            log.info(`Created binary ${binFile}`)
+        }
 
-        await updateHash([archiveFile], hashAlgorithm, `${archiveFile}.${hashAlgorithm}sum`)
-        await updateHash([binFile], hashAlgorithm, `${binFile}.${hashAlgorithm}sum`)
-        await updateHash([archiveFile, binFile], hashAlgorithm, hashFile)
-        await symlink(archiveFile, archiveLatestLink)
-        await symlink(binFile, binLatestLink)
-        log.debug(`Updated checksum file and latest links`)
     }
 }

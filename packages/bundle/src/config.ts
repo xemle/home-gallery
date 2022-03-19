@@ -7,7 +7,7 @@ import { isString, isArray, toList, isObject } from './utils'
 export interface Target {
   platform: string,
   arch: string,
-  command: string[]
+  command: string[] | boolean
 }
 
 export interface PlatformArch {
@@ -18,6 +18,10 @@ export interface PlatformArch {
 
 export interface RunStep extends PlatformArch {
   command: string[]
+}
+
+export interface Entry extends PlatformArch {
+  name: string
 }
 
 export interface Pattern extends PlatformArch {
@@ -33,7 +37,7 @@ export interface BundleConfig {
   targets: Target[]
   before: RunStep[]
   run: RunStep[]
-  entries: string[]
+  entries: Entry[]
   includes: Pattern[]
   excludes: Pattern[]
   map: Mapping[]
@@ -48,10 +52,10 @@ export const readConfig = async (file: string, platform: string, arch: string): 
   const data = await fs.readFile(file, 'utf8')
   try {
     const config = yaml.parse(data)
-    config.targets = config.targets || [{ platform, arch, command: ['echo', 'App in {{caxa}}'] }]
+    config.targets = config.targets || [{ platform, arch, command: false }]
     config.before = toList(config.before).map(toRunStep)
     config.run = toList(config.run).map(toRunStep)
-    config.entries = config.entries || []
+    config.entries = toList(config.entries).map(toEntry)
     config.includes = toList(config.includes).map(toPattern)
     config.excludes = toList(config.excludes).map(toPattern)
     config.map = toList(config.map).map(toMappping)
@@ -78,6 +82,18 @@ const toRunStep = (a: any): RunStep => {
     a.command = a.command.split(/\s+/)
   }
   return a
+}
+
+const toEntry = (a: any): Entry => {
+  if (isString(a)) {
+    return {
+      name: a,
+    }
+  }
+  if (isString(a?.name)) {
+    return a
+  }
+  throw new Error(`Invalid entry: ${a}`)
 }
 
 const toPattern = (a: any): Pattern => {

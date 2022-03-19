@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- bundle: Add all-generic bundle
 - cli: Configuration for max memory value for database creation
 - extractor: Create only smaller preview images than the source
 - extractor: Option to use native system executables like vipsthumbnail or ffmpeg

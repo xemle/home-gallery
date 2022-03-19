@@ -24,16 +24,14 @@ const write = async (hashes: any, hashFile: string) => {
   return fs.writeFile(hashFile, content, 'utf8')
 }
 
-export const updateHash = async (files: string[], algorithm: string, hashFile: string) => {
-  const hashes = await Promise.all(files.map(file => hash(file, algorithm)))
-  const newHases = files.reduce((result: any, file, i) => {
-    const filename = path.relative(path.dirname(hashFile), file)
-    result[filename] = hashes[i]
-    log.info(`Calculated ${algorithm} hash for '${file}': ${hashes[i]}`)
-    return result
-  }, {})
+export const updateHash = async (file: string, algorithm: string, hashFile: string) => {
+  const fileHash = await hash(file, algorithm)
+  log.info(`Calculated ${algorithm} hash for '${file}': ${fileHash}`)
+  const filename = path.relative(path.dirname(hashFile), file)
+  const newHashes : {[key: string]: string}= {}
+  newHashes[filename] = fileHash
 
   const oldHashes = await read(hashFile)
-  const updatedHashes = Object.assign(oldHashes, newHases)
+  const updatedHashes = Object.assign(oldHashes, newHashes)
   return write(updatedHashes, hashFile)
 }
