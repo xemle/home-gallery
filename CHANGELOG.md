@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- docker: Support arm docker images
 - bundle: Add all-generic bundle
 - cli: Configuration for max memory value for database creation
 - extractor: Create only smaller preview images than the source

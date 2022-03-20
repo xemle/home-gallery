@@ -1,5 +1,6 @@
 # Image builder
 FROM node:14-alpine AS builder
+ARG NO_SHARP
 
 COPY package.json *.js lerna.json *.md *.yml LICENSE /build/
 COPY e2e /build/e2e/
@@ -8,6 +9,7 @@ COPY scripts /build/scripts/
 WORKDIR /build
 
 RUN node scripts/disable-dependency.js api-server styleguide && \
+  if [[ -n "$NO_SHARP" ]]; then node scripts/disable-dependency.js --prefix=packages/extractor sharp ; fi && \
   npm install
 
 RUN npm run build --loglevel verbose
@@ -24,6 +26,7 @@ LABEL org.opencontainers.image.source="https://github.com/xemle/home-gallery"
 
 RUN apk add --no-cache \
   ffmpeg \
+  vips-tools \
   perl
 
 COPY --from=builder /build/app /app

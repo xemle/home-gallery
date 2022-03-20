@@ -1,7 +1,9 @@
 entries:
   - ./bundle-entry.js
   - name: sharp
+    arch: '!arm'
   - name: sharp:dependencies
+    arch: '!arm'
 includes:
   - package.json
   - CHANGELOG.md
