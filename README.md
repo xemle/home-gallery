@@ -160,7 +160,7 @@ low powered devices such as the SoC Raspberry PI and all preview images are
 send to this public API by default. No images or privacy data are kept.
 
 The API can be configured and ran also locally or as Docker container.
-See [installation](https://docs.home-gallery.org/api-) section for usage.
+See [installation](https://docs.home-gallery.org/api-server) section for usage.
 
 ## Customized Environments
 
@@ -169,7 +169,7 @@ is supported by various platforms such as Linux (also Raspberry PIs), Mac and Wi
 
 For most cases a customized environment should be sufficient with
 
-* [node](https://nodejs.org) version 14 LTS
+* [node](https://nodejs.org) version 16 LTS (or 14 old LTS)
 * perl (Linux)
 
 ### Setup
@@ -191,7 +191,9 @@ bindings.
 * g++
 * python
 
-## Development
+## Development recipes
+
+### Build
 
 HomeGallery uses [lerna](https://github.com/lerna/lerna) with multi
 packages. Common npm scripts are `clean`, `build`, `watch`.
@@ -200,5 +202,50 @@ To run only a subset of packages you can use lerna's
 scope feature, e.g build only module `export` and `database`:
 
 ```
-npm run build -- --scope '@home-gallery/{export,database}'
+npm run build -- --scope '*/{export,database}'
+```
+
+### Unit Test
+
+Run unit tests from specific packages (via lerna). Some packages have also a `watch:test` npm script.
+
+```
+npm run test -- --scope '*/{query,event}'
+```
+
+### End-To-End Test
+
+Run specific e2e tests (via [Gauge](https://gauge.org))
+
+
+```
+git clone https://github.com/xemle/home-gallery-e2e-data.git data
+npm run test:e2e -- --tags dev
+```
+
+`home-gallery-e2e-data` contains test files using [Git LFS](https://git-lfs.github.com).
+
+The e2e test output data are stored in `/tmp/gallery-e2e` directory. The latest test run is symlinked into the directory `latest-e2e-test` within the HomeGallery working directory. Check the `cli.log` and `e2e.log` ([ndjson](http://ndjson.org) format) in each test directory.
+
+### Bundle
+
+Create local binary bundle from a feature branch
+
+```
+node scripts/bundle.js --version=1.3 --snapshot=-feature-test --filter=linux-x64 --no-before --no-run
+```
+
+Create local native bundle which excludes binaries via npm like sharp, ffmpeg and ffprobe. It should contain only js code which should run everywhere. It requires external binaries vipsthumbnail, ffmpeg and ffprobe in the `PATH` environment to work properly.
+
+```
+node scripts/bundle.js --version=1.3 --snapshot=-feature-test --filter=linux-native --no-before --no-run
+```
+
+### Development Reset
+
+To reset the current development state and start fresh on any very strange error behavior, you might run:
+
+```
+rm -rf package-lock.json node_modules e2e/node_modules packages/*/node_modules
+npm install && npm run clean && npm run build
 ```
