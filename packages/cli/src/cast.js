@@ -34,7 +34,7 @@ const command = {
         describe: 'Do not verify HTTPS certificates. Disable it by --no-insecure if you know what you do'
       },
       random: {
-        alias: ['shuffel', 's'],
+        alias: ['shuffle', 's'],
         boolean: true,
         describe: 'Randomize playback. Use --no-random for linear order'
       },
