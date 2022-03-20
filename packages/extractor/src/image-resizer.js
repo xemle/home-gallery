@@ -20,23 +20,6 @@ const vipsthumbnailJpgOptions = [
   'strip', // no meta data
 ].join(',')
 
-const getSharpResizer = cb => {
-  let sharp
-  try {
-    sharp = require('sharp')
-  } catch (e) {
-    return cb(e)
-  }
-
-  cb(null, (src, dst, size, cb) => {
-    sharp(src, {failOnError: false})
-      .rotate()
-      .resize({width: size, height: size, fit: 'inside'})
-      .jpeg(jpgOptions)
-      .toFile(dst, cb)
-  })
-}
-
 const run = (command, args, cb) => {
   const t0 = Date.now()
   const defaults = {
@@ -71,52 +54,98 @@ const run = (command, args, cb) => {
 
 const errorResizer = (src, dst, size, cb) => cb(new Error(`Image resizer could not be initialized`))
 
-const getVipsResize = (cb) => {
+const getSharpResize = async () => {
+  let sharp
+  try {
+    sharp = require('sharp')
+  } catch (e) {
+    throw new Error(`Could not load sharp`)
+  }
+
+  return (src, dst, size, cb) => {
+    sharp(src, {failOnError: false})
+      .rotate()
+      .resize({width: size, height: size, fit: 'inside'})
+      .jpeg(jpgOptions)
+      .toFile(dst, cb)
+  }
+}
+
+const getVipsResize = async () => {
   const vipsthumbnail = getNativeCommand('vipsthumbnail')
 
-  run(vipsthumbnail, ['--vips-version'], (err, result) => {
-    if (err) {
-      return cb(err)
-    }
-    const { stdout } = result
-    const version = stdout.toString().split(' ')[1] || '8.9.0'
-    const [major, minor] = version.split('.')
-    if (major == 8 && minor >= 10) {
-      cb(null, (src, dst, size, cb) => {
-        run(vipsthumbnail, ['-s', `${size}x${size}`, '-o', `${dst}[${vipsthumbnailJpgOptions}]`, src], cb)
+  return new Promise((resolve, reject) => {
+    run(vipsthumbnail, ['--vips-version'], (err, {code, stderr, stdout}) => {
+      if (err) {
+        const e = new Error(`Could not get vipsthumbnail version`)
+        Object.assign(e, {code, stderr, stdout})
+        return reject(e)
+      }
+      const version = stdout.split(' ')[1] || '8.9.0'
+      const [major, minor] = version.split('.')
+      if (major == 8 && minor >= 10) {
+        return resolve((src, dst, size, cb) => {
+          run(vipsthumbnail, ['-s', `${size}x${size}`, '-o', `${dst}[${vipsthumbnailJpgOptions}]`, src], cb)
+        })
+      }
+      return resolve((src, dst, size, cb) => {
+        run(vipsthumbnail, ['-s', `${size}x${size}`, '--rotate', '--delete', '-f', `${dst}[${vipsthumbnailJpgOptions}]`, src], cb)
       })
-    }
-    return cb(null, (src, dst, size, cb) => {
-      run(vipsthumbnail, ['-s', `${size}x${size}`, '--rotate', '--delete', '-f', `${dst}[${vipsthumbnailJpgOptions}]`, src], cb)
+    })
+  })
+}
+
+const getConvertResize = async () => {
+  const convert = getNativeCommand('convert')
+  return new Promise((resolve, reject) => {
+    run(convert, ['--version'], (err, {code, stderr, stdout}) => {
+      if (err) {
+        const e = new Error(`Could not get convert version`)
+        Object.assign(e, {code, stderr, stdout})
+        return reject(e)
+      }
+      const firstLine = stdout.split('\n').shift() || ''
+      if (!firstLine.match(/ImageMagick/i)) {
+        return reject(new Error(`Unexpected version output: ${firstLine}`))
+      }
+
+      resolve((src, dst, size, cb) => {
+        run(convert, [src, '-auto-orient', '-resize', `${size}x${size}`, '-strip', '-quality', '80', dst], cb)
+      })
     })
   })
 }
 
 const createImageResizer = (options, cb) => {
-  if (options.useNative.includes('vipsthumbnail')) {
-    log.debug('Use native system command vipsthumbnail')
-    return getVipsResize((err, vipsResizer) => {
-      if (err) {
-        log.err(err, `Failed to initialize vipsthumbnail`)
-        return cb(null, errorResizer)
-      }
-      return cb(null, vipsResizer)
-    })
-  } else if (options.useNative.includes('convert')) {
-    log.debug('Use native system command convert')
-    const convert = getNativeCommand('convert')
-    return cb(null, (src, dst, size, cb) => {
-      run(convert, [src, '-auto-orient', '-resize', `${size}x${size}`, '-strip', '-quality', '80', dst], cb)
-    })
-  } else {
-    return getSharpResizer((err, sharpResizer) => {
-      if (err) {
-        log.err(err, `Failed to initialize sharp`)
-        return cb(null, errorResizer)
-      }
-      cb(null, sharpResizer)
-    })
+  const useNative = options.useNative || []
+
+  const resizer = [
+    { active: useNative.includes('vipsthumbnail'), factory: getVipsResize, name: 'vipthumbnail' },
+    { active: useNative.includes('convert'), factory: getConvertResize,    name: 'convert' },
+    { active: true, factory: getSharpResize,   name: 'sharp' },
+    { active: true, factory: getVipsResize,    name: 'vipthumbnail fallback' },
+    { active: true, factory: getConvertResize, name: 'convert fallback' },
+  ].filter(item => item.active)
+
+  let index = 0
+  const next = () => {
+    if (index == resizer.length) {
+      log.err(`Could not load an image resizser`)
+      cb(null, errorResizer)
+    }
+    const item = resizer[index++]
+    item.factory()
+      .then(fn => {
+        log.info(`Use ${item.name} to resize images`)
+        cb(null, fn)
+      })
+      .catch(err => {
+        log.warn(err, `Could not load ${item.name} image resizer`)
+        next()
+      })
   }
+
+  next()
 }
 
 const useExternalImageResizer = options => options.useNative.includes('vipsthumbnail') || options.useNative.includes('convert')
