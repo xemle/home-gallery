@@ -5,9 +5,11 @@ package-lock.json
 node_modules
 **/node_modules
 **/dist
+**/.nyc_output
 /build
 /data
 /dist
+/e2e/reports
 /examples
 /node
 
