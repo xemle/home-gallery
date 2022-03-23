@@ -38,9 +38,47 @@ const getEntry = async id => {
   return entry
 }
 
+const resolveProperty = (value, path) => {
+  const parts = path.split('.')
+  let i = 0
+  while (i < parts.length && value) {
+    const part = parts[i++]
+    const [orig, name, _, index] = part.match(/^([a-zA-Z]+)(\[(\d+)\])?$/)
+    if (index) {
+      return Array.isArray(value[name]) ? value[name][+index] : undefined
+    } else {
+      return value[name]
+    }
+  }
+  return value
+}
+
 step("Database entry <id> has property <property> with value <value>", async (id, property, value) => {
   const entry = await getEntry(id)
-  assert(entry[property] == value, `Expected property ${property} of entry ${id} to be ${value} but it is ${entry[property]}`)
+  const resolvedProperty = resolveProperty(entry, property)
+  assert(resolvedProperty == value, `Expected property ${property} of entry ${id} to be ${value} but it is ${resolvedProperty}`)
+})
+
+const toRegExp = pattern => {
+  const firstSlash = pattern.indexOf('/')
+  const lastSlash = pattern.lastIndexOf('/')
+  if (firstSlash != 0 || lastSlash == firstSlash) {
+    return new RegExp('invalid')
+  } else {
+    return new RegExp(pattern.substring(firstSlash + 1, lastSlash), pattern.substring(lastSlash + 1))
+  }
+}
+
+step("Database entry <id> has property <property> which matches <pattern>", async (id, property, pattern) => {
+  const entry = await getEntry(id)
+  const resolvedProperty = resolveProperty(entry, property)
+  assert(resolvedProperty && `${resolvedProperty}`.match(toRegExp(pattern)), `Expected property ${property} of entry ${id} to match ${pattern}. It is ${resolvedProperty}`)
+})
+
+step("Database entry <id> has no property <property>", async (id, property) => {
+  const entry = await getEntry(id)
+  const resolvedProperty = resolveProperty(entry, property)
+  assert(!resolvedProperty, `Expected property ${property} of entry ${id} to be empty but was ${resolvedProperty}`)
 })
 
 step("Database entry <id> has <amount> files", async (id, amount) => {

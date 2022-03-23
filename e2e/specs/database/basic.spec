@@ -2,6 +2,8 @@
 
 Tags: database
 
+* Start mock server
+
 ## Create
 
 * Init dir from "database/basic"
@@ -26,3 +28,15 @@ Tags: group
 * Database group "96419bb" has "2" entries
 * Database group "96419bb" has file "IMG_2915.JPG"
 * Database group "96419bb" has file "other/IMG_2915.JPG"
+
+## Small Image Should Have Preview Files
+
+* Add file "index/images/DJI_0035.640.JPG"
+* Build database
+* Database has "1" entries
+* Database entry "e3e4ce1" has property "previews[0]" with value "e3/e4/ce154ada1e399396726630d9706d8fff1fd8-image-preview-320.jpg"
+* Database entry "e3e4ce1" has property "previews[1]" which matches "/image-preview-128.jpg/"
+* Database entry "e3e4ce1" has no property "previews[2]"
+
+___
+* Stop server

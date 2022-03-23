@@ -111,3 +111,6 @@ Tags: group
 * Database has "2" entries
 * Database entry "25d7b73" has "1" files
 * Database entry "25d7b73" has file "IMG_20180110_113953.jpg"
+
+___
+* Stop server
