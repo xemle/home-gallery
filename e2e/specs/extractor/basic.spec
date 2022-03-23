@@ -25,5 +25,15 @@ Tags: extractor
 * Storage image "image-preview-128.jpg" for "2e17e23" has size "72x128"
 * Storage image "image-preview-1920.jpg" for "2e17e23" has size "1080x1920"
 
+## API Server Calls On Smaller Preview Images
+
+* Add file "index/images/DJI_0035.640.JPG"
+* Create index
+* Extract files
+* Storage has entry "image-preview-128.jpg" for "e3e4ce1"
+* Storage has entry "image-preview-320.jpg" for "e3e4ce1"
+* Storage has no entry "image-preview-800.jpg" for "e3e4ce1"
+* Storage has entry "objects.json" for "e3e4ce1"
+
 ___
 * Stop server

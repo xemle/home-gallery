@@ -44,7 +44,7 @@ const extractData = async (options) => {
 
   const imagePreviewSizes = [1920, 1280, 800, 320, 128];
   const videoFrameCount = 10;
-  const apiServerImagePreviewSize = imagePreviewSizes[2];
+  const apiServerImagePreviewSizes = [800, 320];
 
   const stats = {
     queued: 0,
@@ -86,9 +86,9 @@ const extractData = async (options) => {
       videoPoster(storage, {imageResizer, videoFrameExtractor, imagePreviewSizes}),
       vibrant(storage),
       geoReverse(storage, {geoAddressLanguage, geoServerUrl}),
-      similarEmbeddings(storage, apiServerUrl, apiServerImagePreviewSize),
-      objectDetection(storage, apiServerUrl, apiServerImagePreviewSize),
-      faceDetection(storage, apiServerUrl, apiServerImagePreviewSize),
+      similarEmbeddings(storage, apiServerUrl, apiServerImagePreviewSizes),
+      objectDetection(storage, apiServerUrl, apiServerImagePreviewSizes),
+      faceDetection(storage, apiServerUrl, apiServerImagePreviewSizes),
       video(storage, ffmpegPath, ffprobePath),
       //.pipe(videoFrames(storageDir, videoFrameCount))
 

@@ -3,16 +3,19 @@ const request = require('request');
 const log = require('@home-gallery/logger')('extractor.apiEntry');
 const { parallel } = require('@home-gallery/stream');
 const { conditionalTask } = require('./task');
+const { sizeToImagePreviewSuffix } = require('./image-preview')
 
 const ERROR_THRESHOLD = 5;
 
-const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imageSuffix, entrySuffix, concurrent, timeout}) => {
+const getEntryFileBySuffixes = (storage, entry, suffixes) => suffixes.find(suffix => storage.hasEntryFile(entry, suffix));
+
+const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imagePreviewSuffixes, entrySuffix, concurrent, timeout}) => {
   let currentErrors = 0;
 
   const test = entry => {
     if (currentErrors > ERROR_THRESHOLD) {
       return false;
-    } else if (!storage.hasEntryFile(entry, imageSuffix) || storage.hasEntryFile(entry, entrySuffix)) {
+    } else if (!getEntryFileBySuffixes(storage, entry, imagePreviewSuffixes) || storage.hasEntryFile(entry, entrySuffix)) {
       return false;
     } else if (entry.type === 'image' || entry.type === 'rawImage') {
       return true;
@@ -30,9 +33,10 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imageSuffix, entr
 
   const task = (entry, cb) =>{
     const t0 = Date.now();
-    storage.readEntryFile(entry, imageSuffix, (err, buffer) => {
+    const imagePreviewSuffix = getEntryFileBySuffixes(storage, entry, imagePreviewSuffixes);
+    storage.readEntryFile(entry, imagePreviewSuffix, (err, buffer) => {
       if (err) {
-        log.warn(`Could not read image entry file ${imageSuffix} from ${entry}: ${err}. Skip ${name} for this entry`);
+        log.warn(`Could not read image entry file ${imagePreviewSuffix} from ${entry}: ${err}. Skip ${name} for this entry`);
         return cb();
       }
 
@@ -73,36 +77,36 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imageSuffix, entr
   return parallel({task: conditionalTask(test, task), concurrent});
 }
 
-const similarEmbeddings = (storage, apiServerUrl, similarityEmbeddingsPreviewSize) => {
+const similarEmbeddings = (storage, apiServerUrl, imagePreviewSizes) => {
   return apiServerEntry(storage, {
     name: 'similarity embeddings',
     apiServerUrl,
     apiPath: '/embeddings',
-    imageSuffix: `image-preview-${similarityEmbeddingsPreviewSize}.jpg`,
+    imagePreviewSuffixes: imagePreviewSizes.map(sizeToImagePreviewSuffix),
     entrySuffix: 'similarity-embeddings.json',
     concurrent: 5,
     timeout: 30000,
   })
 }
 
-const objectDetection = (storage, apiServerUrl, imagePreviewSize) => {
+const objectDetection = (storage, apiServerUrl, imagePreviewSizes) => {
   return apiServerEntry(storage, {
     name: 'object detection',
     apiServerUrl,
     apiPath: '/objects',
-    imageSuffix: `image-preview-${imagePreviewSize}.jpg`,
+    imagePreviewSuffixes: imagePreviewSizes.map(sizeToImagePreviewSuffix),
     entrySuffix: 'objects.json',
     concurrent: 5,
     timeout: 30000,
   })
 }
 
-const faceDetection = (storage, apiServerUrl, imagePreviewSize) => {
+const faceDetection = (storage, apiServerUrl, imagePreviewSizes) => {
   return apiServerEntry(storage, {
     name: 'face detection',
     apiServerUrl,
     apiPath: '/faces',
-    imageSuffix: `image-preview-${imagePreviewSize}.jpg`,
+    imagePreviewSuffixes: imagePreviewSizes.map(sizeToImagePreviewSuffix),
     entrySuffix: 'faces.json',
     concurrent: 2,
     timeout: 30000,

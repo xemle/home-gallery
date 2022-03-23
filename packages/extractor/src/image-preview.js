@@ -11,6 +11,8 @@ const fileExtension = filename => {
 
 const isSupportedImage = entry => fileExtension(entry.filename).match(/(jpe?g|png|tiff?)/)
 
+const sizeToImagePreviewSuffix = size => `image-preview-${size}.jpg`
+
 function resizeImage(storage, imageResizer, entry, src, imageSizes, cb) {
   let calculatedSizes = [];
 
@@ -21,7 +23,7 @@ function resizeImage(storage, imageResizer, entry, src, imageSizes, cb) {
     }
 
     const size = imageSizes[index++];
-    const suffix = `image-preview-${size}.jpg`;
+    const suffix = sizeToImagePreviewSuffix(size);
 
     const dst = storage.getEntryFilename(entry, suffix);
     if (storage.hasEntryFile(entry, suffix)) {
@@ -76,4 +78,8 @@ function imagePreview(storage, { imageResizer, imagePreviewSizes }) {
   return toPipe(conditionalTask(test, task));
 }
 
-module.exports = { imagePreview, resizeImage };
+module.exports = {
+  sizeToImagePreviewSuffix,
+  imagePreview,
+  resizeImage
+};
