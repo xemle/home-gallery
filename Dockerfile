@@ -1,5 +1,6 @@
 # Image builder
 FROM node:14-alpine AS builder
+ARG TARGETPLATFORM
 ARG NO_SHARP
 
 COPY package.json *.js lerna.json *.md *.yml LICENSE /build/
@@ -9,7 +10,7 @@ COPY scripts /build/scripts/
 WORKDIR /build
 
 RUN node scripts/disable-dependency.js api-server styleguide && \
-  if [[ -n "$NO_SHARP" ]]; then node scripts/disable-dependency.js --prefix=packages/extractor sharp ; fi && \
+  if [[ -n "$NO_SHARP" || "$TARGETPLATFORM" == "linux/arm/v6" || "$TARGETPLATFORM" == "linux/arm/v7" ]]; then node scripts/disable-dependency.js --prefix=packages/extractor sharp ; fi && \
   npm install
 
 RUN npm run build --loglevel verbose
