@@ -1,4 +1,5 @@
 import { Event, EventListener } from '@home-gallery/events'
+import { fetchJsonWorker } from '../utils/fetch-json-worker'
 
 const decodeBase64 = base64 => atob(base64);
 
@@ -23,8 +24,7 @@ export const fetchAll = async (limits, onChunk) => {
     if (limitIndex < limits.length - 1) {
       limitIndex++;
     }
-    return await fetch(url)
-      .then(res => res.json())
+    return await fetchJsonWorker(url)
       .then(database => {
         if (!database.data || !database.data.length) {
           return;
@@ -41,28 +41,7 @@ export const fetchAll = async (limits, onChunk) => {
   return next();
 }
 
-const isSuccessfullResponse = res => res.status >= 200 && res.status < 300;
-
-class EventError extends Error {
-  constructor(message: string) {
-    super(message);
-  }
-
-  res: any;
-}
-
-export const getEvents = async () => {
-  return await fetch(`api/events.json`)
-      .then(res => {
-        if (isSuccessfullResponse(res)) {
-          return res.json()
-        } else {
-          const err = new EventError(`Failed to fetch events. Reponse status code is ${res.status}`);
-          err.res = res;
-          throw err;
-        }
-      })
-}
+export const getEvents = () => fetchJsonWorker(`api/events.json`)
 
 let eventSourceReconnectTimeout = 1000;
 const eventSourceReconnectTimeoutMax = 2 * 60 * 1000;
