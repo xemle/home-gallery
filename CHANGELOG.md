@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - webapp: Improve UI by fetching data in separate web worker
 
+### Fixed
+
+- docker: Fix docker-compose setup
+
 ## [1.4.1] - 2022-03-26
 
 ### Fixed
