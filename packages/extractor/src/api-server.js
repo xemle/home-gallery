@@ -47,7 +47,7 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imagePreviewSuffi
         headers: { 'Content-Type': 'image/jpeg' },
         body: buffer,
         encoding: null,
-        timeout,
+        timeout: timeout * 1000,
       }
       request(options, (err, res, body) => {
         if (err) {
@@ -77,39 +77,39 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imagePreviewSuffi
   return parallel({task: conditionalTask(test, task), concurrent});
 }
 
-const similarEmbeddings = (storage, apiServerUrl, imagePreviewSizes) => {
+const similarEmbeddings = (storage, apiServerUrl, imagePreviewSizes, timeout = 30, concurrent = 5) => {
   return apiServerEntry(storage, {
     name: 'similarity embeddings',
     apiServerUrl,
     apiPath: '/embeddings',
     imagePreviewSuffixes: imagePreviewSizes.map(sizeToImagePreviewSuffix),
     entrySuffix: 'similarity-embeddings.json',
-    concurrent: 5,
-    timeout: 30000,
+    concurrent,
+    timeout,
   })
 }
 
-const objectDetection = (storage, apiServerUrl, imagePreviewSizes) => {
+const objectDetection = (storage, apiServerUrl, imagePreviewSizes, timeout = 30, concurrent = 5) => {
   return apiServerEntry(storage, {
     name: 'object detection',
     apiServerUrl,
     apiPath: '/objects',
     imagePreviewSuffixes: imagePreviewSizes.map(sizeToImagePreviewSuffix),
     entrySuffix: 'objects.json',
-    concurrent: 5,
-    timeout: 30000,
+    concurrent,
+    timeout,
   })
 }
 
-const faceDetection = (storage, apiServerUrl, imagePreviewSizes) => {
+const faceDetection = (storage, apiServerUrl, imagePreviewSizes, timeout = 30, concurrent = 2) => {
   return apiServerEntry(storage, {
     name: 'face detection',
     apiServerUrl,
     apiPath: '/faces',
     imagePreviewSuffixes: imagePreviewSizes.map(sizeToImagePreviewSuffix),
     entrySuffix: 'faces.json',
-    concurrent: 2,
-    timeout: 30000,
+    concurrent,
+    timeout,
   })
 }
 

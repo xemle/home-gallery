@@ -28,11 +28,21 @@ const command = {
         describe: 'Only entries with newer sha1 checksum date in ISO 8601 format'
       },
       'api-server': {
-        describe: 'API server url',
+        describe: 'API server url for image similarity, face and object detection',
         default: 'https://api.home-gallery.org'
       },
+      'api-server-timeout': {
+        describe: 'Timeout for api server calls in seconds',
+        number: true,
+        default: '30'
+      },
+      'api-server-concurrent': {
+        describe: 'Concurrent calls to api server',
+        number: true,
+        default: '5'
+      },
       'concurrent': {
-        describe: 'Count of concurrent entry processing. 0 for auto',
+        describe: 'Count of concurrent entry processing. 0 for auto. Set it to 1 on extrator issues',
         default: 0,
         number: true
       },
@@ -79,6 +89,8 @@ const command = {
 
     const splitArrayValues = values => values.map(v => v.split(',')).reduce((r, v) => r.concat(v), [])
 
+    const minMaxRange = (min, value, max) => Math.max(min, Math.min(max, value))
+
     const t0 = Date.now();
     fileFilter(argv.exclude, argv['exclude-from-file'], (err, fileFilterFn) => {
       if (err) {
@@ -88,14 +100,18 @@ const command = {
           indexFilenames: argv.index,
           storageDir: argv.storage,
           fileFilterFn,
-          minChecksumDate: argv['checksum-from'],
-          apiServerUrl: argv['api-server'],
-          concurrent: argv['concurrent'],
-          skip: argv['skip'],
-          limit: argv['limit'],
-          printEntry: argv['print-entry'],
-          geoAddressLanguage: argv['geo-address-language'],
-          geoServerUrl: argv['geo-server'],
+          minChecksumDate: argv.checksumFrom,
+          apiServer: {
+            url: argv.apiServer,
+            timeout: minMaxRange(1, argv.apiServerTimeout, 300),
+            concurrent: minMaxRange(1, argv.apiServerConcurrent, 20),
+          },
+          concurrent: argv.concurrent,
+          skip: argv.skip,
+          limit: argv.limit,
+          printEntry: argv.printEntry,
+          geoAddressLanguage: argv.geoAddressLanguage,
+          geoServerUrl: argv.geoServer,
           journal: argv.journal,
           useNative: splitArrayValues(argv.useNative)
         }

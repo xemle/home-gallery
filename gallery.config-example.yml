@@ -68,7 +68,11 @@ sources:
 # Extractor settings
 #
 #extractor:
-  #apiServer: https://api.home-gallery.org
+  # Api Server is used for image similarity, object and face detection
+  #apiServer:
+  #  url: https://api.home-gallery.org
+  #  timeout: 30
+  #  concurrent: 5
   # Preffered address language of geo code reverse lookups
   # geoAddressLanguage: [de, en-US] # for multiple languages
   #geoAddressLanguage: en

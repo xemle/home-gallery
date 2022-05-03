@@ -33,7 +33,8 @@ const createImageResizerAsync = promisify(createImageResizer)
 const extractData = async (options) => {
   const {indexFilenames, journal} = options
   const entryStream = await readStreamsAsync(indexFilenames, journal)
-  const {storageDir, fileFilterFn, minChecksumDate, apiServerUrl, geoAddressLanguage, geoServerUrl} = options;
+  const {storageDir, fileFilterFn, minChecksumDate, apiServer, geoAddressLanguage, geoServerUrl} = options;
+  const { url: apiServerUrl, timeout: apiServerTimeout, concurrent: apiServerConcurrent } = apiServer
   const { queueEntry, releaseEntry } = concurrent(options.concurrent, options.skip)
 
   const exiftool = initExiftool(options)
@@ -86,9 +87,9 @@ const extractData = async (options) => {
       videoPoster(storage, {imageResizer, videoFrameExtractor, imagePreviewSizes}),
       vibrant(storage),
       geoReverse(storage, {geoAddressLanguage, geoServerUrl}),
-      similarEmbeddings(storage, apiServerUrl, apiServerImagePreviewSizes),
-      objectDetection(storage, apiServerUrl, apiServerImagePreviewSizes),
-      faceDetection(storage, apiServerUrl, apiServerImagePreviewSizes),
+      similarEmbeddings(storage, apiServerUrl, apiServerImagePreviewSizes, apiServerTimeout, apiServerConcurrent),
+      objectDetection(storage, apiServerUrl, apiServerImagePreviewSizes, apiServerTimeout, apiServerConcurrent),
+      faceDetection(storage, apiServerUrl, apiServerImagePreviewSizes, apiServerTimeout, apiServerConcurrent),
       video(storage, ffmpegPath, ffprobePath),
       //.pipe(videoFrames(storageDir, videoFrameCount))
 

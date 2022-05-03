@@ -47,7 +47,15 @@ const extract = async (config, sources, options) => {
   sources.forEach(source => args.push('--index', source.index));
 
   args.push('--storage', config.storage.dir)
-  extractor.apiServer && args.push('--api-server', extractor.apiServer)
+
+  if (extractor.apiServer) {
+    // for version <= v1.4.1 apiServer was a string for api server url
+    const apiServer = typeof extractor.apiServer == 'object' ? extractor.apiServer : { url: `${extractor.apiServer}` }
+    apiServer.url && args.push('--api-server', apiServer.url)
+    apiServer.timeout && args.push('--api-server-timeout', apiServer.timeout)
+    apiServer.concurrent && args.push('--api-server-concurrent', apiServer.concurrent)
+  }
+
   extractor.geoAddressLanguage && ['--geo-address-language'].concat(extractor.geoAddressLanguage).forEach(v => args.push(v))
 
   const excludes = extractor.excludes || [];
