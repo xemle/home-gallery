@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- webapp: Add image and video amount to year list
 - webapp: Improve UI by fetching data in separate web worker
 - extractor: Improve low powered api server with timout and concurrent parameter
 
