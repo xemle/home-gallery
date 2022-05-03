@@ -7,6 +7,8 @@ import {
 import useBodyDimensions from "../utils/useBodyDimensions";
 import { useStoreState } from '../store/hooks';
 
+import { getPreviewUrl } from './image-utils'
+
 export const MediaNav = ({current, index, prev, next, listLocation, showNavigation, onClick}) => {
   const { width } = useBodyDimensions();
   const query = useStoreState(state => state.search.query);
@@ -21,13 +23,11 @@ export const MediaNav = ({current, index, prev, next, listLocation, showNavigati
     });
   }
 
-  const getPreviewUrl = (entry, size) => '/files/' + entry.previews.filter(p => p.indexOf(`image-preview-${size}.`) >= 0).shift();
-
   useEffect(() => {
     let abort = false;
     const large = width <= 1280 ? 1280 : 1920;
 
-    setTimeout(async () => {
+    const timerId = setTimeout(async () => {
       prev && await loadImage(getPreviewUrl(prev, 320))
       next && await loadImage(getPreviewUrl(next, 320))
       !abort && prev && await loadImage(getPreviewUrl(prev, large))
@@ -35,6 +35,7 @@ export const MediaNav = ({current, index, prev, next, listLocation, showNavigati
     }, 100);
 
     return () => {
+      clearTimeout(timerId)
       abort = true;
     }
   }, [prev, next]);
