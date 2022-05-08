@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <base href="/">
-    <link rel="shortcut icon" href="/public/favicon.ico" />
-    <link rel="apple-touch-icon" href="/public/logo192.png" />
+    <link rel="shortcut icon" href="public/favicon.ico" />
+    <link rel="apple-touch-icon" href="public/logo192.png" />
     <meta name="theme-color" content="#909090" />
     <link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials">
-    <link rel="stylesheet" href="/app.css">
+    <link rel="stylesheet" href="app.css">
     <title>Home Gallery</title>
 </head>
 
@@ -93,7 +93,7 @@
       const isLocal = ['127.0.0.1', 'localhost'].indexOf(location.hostname) >= 0
       const disablePwa = (window.__homeGallery || {}).disablePwa
       if ('serviceWorker' in navigator && !isLocal && !disablePwa) {
-        const worker = './service-worker.js';
+        const worker = new URL('service-worker.js', document.baseURI || '/').href;
         window.addEventListener('load', () => {
           navigator.serviceWorker.register(worker).then(registration => {
             registration.onupdatefound = () => {

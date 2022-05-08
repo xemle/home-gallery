@@ -5,4 +5,4 @@ export const getPreviewSize = preview => {
 
 export const byPreviewSize = (a, b) => getPreviewSize(b) - getPreviewSize(a)
 
-export const getPreviewUrl = (previews, size) => '/files/' + previews.filter(p => getPreviewSize(p) <= size).sort(byPreviewSize)[0]
+export const getPreviewUrl = (previews, size) => 'files/' + previews.filter(p => getPreviewSize(p) <= size).sort(byPreviewSize)[0]
