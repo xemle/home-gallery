@@ -68,6 +68,22 @@ const getEventsFilename = () => getPath('config', 'events.db')
 
 const getExportOutputDir = () => getPath('export-output')
 
+const tree = async dir => {
+  const files = await fs.promises.readdir(dir)
+  files.sort()
+  let result = []
+  for (let file of files) {
+    const stat = await fs.promises.stat(path.join(dir, file))
+    if (stat.isDirectory()) {
+      const subFiles = await tree(path.join(dir, file))
+      subFiles.forEach(subFile => result.push(path.join(file, subFile)))
+    } else {
+      result.push(file)
+    }
+  }
+  return result
+}
+
 const resolveArgs = (args, vars) => [].concat(args).map(arg => arg.replace(/\{([^}]+)\}/g, (_, name) => vars[name.trim()] || ''))
 
 const appendLog = (file, data, cb) => {
@@ -220,6 +236,7 @@ module.exports = {
   getDatabaseFilename,
   getEventsFilename,
   getExportOutputDir,
+  tree,
   runCli,
   runCliAsync,
   readIndex,
