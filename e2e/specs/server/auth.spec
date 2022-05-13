@@ -8,7 +8,7 @@ Tags: server,auth
 ## Deny database
 
 * Start server with args "--user admin:admin --rule deny:all"
-* Server has file "/app.css"
+* Server has file "/favicon.ico"
 * Request file "/api/database.json"
 * Response status is "401"
 
