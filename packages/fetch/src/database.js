@@ -3,7 +3,7 @@ const log = require('@home-gallery/logger')('fetch.database')
 
 const { promisify } = require('@home-gallery/common')
 const { readOrCreateDatabase, writeDatabase, mergeEntries } = require('@home-gallery/database')
-const { filterEntriesByQuery } = require('@home-gallery/query')
+const { filterEntriesByQuery, createStringifyEntryCache } = require('@home-gallery/query')
 
 const readOrCreateDatabaseAsync = promisify(readOrCreateDatabase)
 const writeDatabaseAsync = promisify(writeDatabase)
@@ -31,7 +31,8 @@ const filterDatabaseByQuery = async (database, query) => {
   }
 
   const t1 = Date.now()
-  return filterEntriesByQuery(database.data, query)
+  const stringifyEntryCache = createStringifyEntryCache()
+  return filterEntriesByQuery(database.data, query, {textFn: stringifyEntryCache.stringifyEntry})
     .then(({entries}) => {
       const filteredDatabase = Object.assign({}, database, {data: entries})
       log.info(t1, `Filtered database with ${database.data.length} entries by query '${query}' to ${filteredDatabase.data.length} entries`)

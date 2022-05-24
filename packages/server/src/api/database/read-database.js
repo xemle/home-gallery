@@ -3,7 +3,6 @@ const log = require('@home-gallery/logger')('server.api.database.read');
 
 const { readDatabase } = require('@home-gallery/database');
 const { applyEvents } = require('./apply-events')
-const { buildEntriesTextCache } = require('@home-gallery/query')
 
 function read(filename, cb) {
   const t0 = Date.now();
@@ -41,7 +40,7 @@ const wait = (filename, delay, cb) => {
   })
 }
 
-const mergeEvents = (database, getEvents, cb) => {
+const mergeEvents = (database, getEvents, stringifyEntryCache, cb) => {
   getEvents((err, events) => {
     if ((err && err.code == 'ENOENT')) {
       cb(null, database)
@@ -51,13 +50,14 @@ const mergeEvents = (database, getEvents, cb) => {
     } else {
       const t0 = Date.now()
       const changedEntries = applyEvents(database.data, events.data)
+      stringifyEntryCache.evictEntries(changedEntries)
       log.debug(t0, `Applied ${events.data.length} events to ${changedEntries.length} of ${database.data.length} database entries`)
       cb(null, database)
     }
   })
 }
 
-function waitReadWatch(filename, getEvents, cb) {
+function waitReadWatch(filename, getEvents, stringifyEntryCache, cb) {
   let changeTimer
 
   const onChange = (cur, prev) => {
@@ -77,11 +77,10 @@ function waitReadWatch(filename, getEvents, cb) {
       if (err) {
         return cb(err);
       }
-      mergeEvents(database, getEvents, (err, database) => {
+      mergeEvents(database, getEvents, stringifyEntryCache, (err, database) => {
         if (err) {
           return cb(err)
         }
-        buildEntriesTextCache(database.data)
         cb(null, database);
       })
     });

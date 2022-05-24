@@ -1,5 +1,5 @@
 const log = require('@home-gallery/logger')('export.query');
-const { filterEntriesByQuery } = require('@home-gallery/query');
+const { filterEntriesByQuery, createStringifyEntryCache } = require('@home-gallery/query');
 
 const applyQuery = (database, query, cb) => {
   if (!query) {
@@ -7,7 +7,8 @@ const applyQuery = (database, query, cb) => {
   }
 
   const t0 = Date.now();
-  filterEntriesByQuery(database.data, query)
+  const stringifyEntryCache = createStringifyEntryCache();
+  filterEntriesByQuery(database.data, query, {textFn: stringifyEntryCache.stringifyEntry})
     .then(({entries}) => {
       log.info(t0, `Found ${entries.length} of ${database.data.length} entries by query '${query}'`);
       database.data = entries;

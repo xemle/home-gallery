@@ -15,7 +15,8 @@ Tags: server,docker
 * Init dir from "database/basic"
 * Create database
 * Start server
-* Database with query "?q=2018-01-10" has "1" entries
+* Fetch database with query "?q=2018-01-10"
+* Fetched database has "1" entries
 
 ## Database event query
 
@@ -23,6 +24,8 @@ Tags: server,docker
 * Create database
 * Append tag event with "hello" for media "96419bb03fb2a041ff265e27cfccc4be8b04346d"
 * Start server
-* Database with query "?q=hello" has "1" entries
+* Fetch database with query "?q=hello"
+* Fetched database has "1" entries
+* Fetched database with entry "0" has no property "textCache"
 ___
 * Stop server

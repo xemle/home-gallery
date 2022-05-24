@@ -36,6 +36,12 @@ step("Add file <file> as <target>", async (file, target) => {
   cp(path.join(getTestDataDir(), file), dst)
 })
 
+step("Add file <file> as <target> to root", async (file, target) => {
+  const dst = path.join(getBaseDir(), target)
+  mkdir('-p', path.dirname(dst))
+  cp(path.join(getTestDataDir(), file), dst)
+})
+
 step("Add file <file> with content <content>", async (file, content) => {
   const target = path.join(getFilesDir(), file)
   mkdir('-p', path.dirname(target))

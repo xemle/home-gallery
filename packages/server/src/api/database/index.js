@@ -1,7 +1,6 @@
 const log = require('@home-gallery/logger')('server.api.database');
 
-const { filterEntriesByQuery } = require('@home-gallery/query')
-const { buildEntriesTextCache } = require('@home-gallery/query')
+const { filterEntriesByQuery, createStringifyEntryCache } = require('@home-gallery/query')
 
 const { waitReadWatch } = require('./read-database');
 const { cache } = require('./cache-middleware');
@@ -10,9 +9,9 @@ const { applyEvents } = require('./apply-events')
 
 const { sendError } = require('../error')
 
-const filterEntriesByQueryCb = (entries, query, cb) => filterEntriesByQuery(entries, query).then(({entries}) => cb(null, entries)).catch(cb)
+const filterEntriesByQueryCb = (entries, query, stringifyEntryCache, cb) => filterEntriesByQuery(entries, query, {textFn: stringifyEntryCache.stringifyEntry}).then(({entries}) => cb(null, entries)).catch(cb)
 
-const filterDatabase = (entries, query, cb) => query ? filterEntriesByQueryCb(entries, query, cb) : cb(null, entries)
+const filterDatabase = (entries, query, stringifyEntryCache, cb) => query ? filterEntriesByQueryCb(entries, query, stringifyEntryCache, cb) : cb(null, entries)
 
 /**
  * @param {EventBus} eventbus
@@ -21,13 +20,14 @@ function databaseApi(eventbus, databaseFilename, getEvents) {
   let database = false;
   const databaseCache = cache(3600);
   let entryCache = {};
+  const stringifyEntryCache = createStringifyEntryCache()
 
   function send(req, res) {
     if (!database) {
       log.info(`Database file is not loaded yet.`);
       return sendError(res, 404, 'Database file is not loaded yet.')
     } else if (req.query && (req.query.offset || req.query.limit || req.query.q)) {
-      filterDatabase(database.data, req.query.q, (err, entries) => {
+      filterDatabase(database.data, req.query.q, stringifyEntryCache, (err, entries) => {
         if (err) {
           log.error(err, `Failed to filter database with query '${req.query.q}': ${err}`)
           return sendError(res, 400, `Failed to filter database with query '${req.query.q}': ${err}`)
@@ -46,6 +46,7 @@ function databaseApi(eventbus, databaseFilename, getEvents) {
   const clearCaches = () => {
     databaseCache.clear();
     entryCache = {};
+    stringifyEntryCache.evictAll();
     log.trace(`Cleared caches`);
   }
 
@@ -59,7 +60,6 @@ function databaseApi(eventbus, databaseFilename, getEvents) {
       log.debug(`Event did not change current database`);
       return
     }
-    buildEntriesTextCache(changedEntries)
     log.debug(`Applied user action event to ${changedEntries.length} database entries`);
     clearCaches()
     eventbus.emit('server', {
@@ -73,7 +73,7 @@ function databaseApi(eventbus, databaseFilename, getEvents) {
      * @param {string} databaseFilename
      */
     init: () => {
-      waitReadWatch(databaseFilename, getEvents, (err, newDatabase) => {
+      waitReadWatch(databaseFilename, getEvents, stringifyEntryCache, (err, newDatabase) => {
         if (err) {
           log.error(`Could not read database file ${databaseFilename}: ${err}`);
         } else {

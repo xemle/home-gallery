@@ -2,29 +2,8 @@ const { parse } = require('./parser');
 const { transformAst, orAst, andAst, cmpAst, valueAst, aliasKey, stringifyAst } = require('./ast')
 const { execQuery, numericKeys, textKeys, aliases } = require('./query');
 
-const uniq = (v, i, a) => a.indexOf(v) === i;
-const flatten = (r, v) => r.concat(v);
-
-const stringifyEntry = entry => {
-  return [
-    entry.id.substring(0, 10),
-    entry.type,
-    entry.date ? entry.date.substring(0, 10) : '',
-    entry.make,
-    entry.model,
-    entry.files ? entry.files[0].filename : '',
-    entry.country,
-    entry.state,
-    entry.city,
-    entry.road
-  ]
-  .concat(entry.tags || [])
-  .concat((entry.objects || []).map(object => object.class).filter(uniq))
-  .concat((entry.faces || []).map(face => face.expressions).reduce(flatten, []).filter(uniq))
-  .concat((entry.faces || []).map(face => `${Math.trunc(face.age / 10) * 10}s`).reduce(flatten, []).filter(uniq))
-  .join(' ')
-  .toLowerCase();
-}
+const { stringifyEntry } = require('./stringify-entry')
+const { createStringifyEntryCache } = require('./stringify-entry-cache')
 
 const ignoreUnknownExpressions = () => true
 
@@ -33,12 +12,7 @@ const throwUnknownExpressions = ast => {
 }
 
 const defaultOptions = {
-  textFn: (entry) => {
-    if (!entry.textCache) {
-      entry.textCache = stringifyEntry(entry);
-    }
-    return entry.textCache;
-  },
+  textFn: stringifyEntry,
   unknownExpressionHandler: () => ignoreUnknownExpressions
 }
 
@@ -114,18 +88,13 @@ const filterEntriesByQuery = async (entries, query, options = {}) => {
   })
 }
 
-const clearEntriesTextCache = entries => entries.forEach(entry => entry.textCache = false)
-
-const buildEntriesTextCache = entries => entries.forEach(entry => entry.textCache = stringifyEntry(entry))
-
 module.exports = {
   filterEntriesByQuery,
   ignoreUnknownExpressions,
   throwUnknownExpressions,
   stringifyEntry,
+  createStringifyEntryCache,
   parse,
   execQuery,
   stringifyAst,
-  clearEntriesTextCache,
-  buildEntriesTextCache
 };

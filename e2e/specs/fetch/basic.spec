@@ -43,6 +43,7 @@ Tags: fetch
 * Use file space "local"
 * Fetch with args "-q hello"
 * Database has "1" entries
+* Database entry "96419bb" has no property "textCache"
 * Storage has no entry for "25d7b73"
 * Storage has entry "image-preview-1920.jpg" for "96419bb"
 

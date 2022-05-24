@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- fetch: Fix query with polluted text cache
+- export: Fix query with polluted text cache
 - webapp: Fix relative resources from base URI
 - webapp: Fix previews of smaller images
 - docker: Fix docker-compose setup

@@ -2,7 +2,7 @@ import { Thunk, thunk } from 'easy-peasy';
 import { StoreModel } from './store';
 import { Entry } from './entry-model';
 
-import { filterEntriesByQuery, stringifyAst } from '@home-gallery/query';
+import { filterEntriesByQuery, stringifyAst, stringifyEntry } from '@home-gallery/query';
 
 export interface Search {
   type: 'none' | 'year' | 'query' | 'similar' | 'faces';
@@ -17,9 +17,16 @@ export interface SearchModel {
   refresh: Thunk<SearchModel, any, any, StoreModel>;
 }
 
+const stringifyEntryTextCache = entry => {
+  if (!entry.textCache) {
+    entry.textCache = stringifyEntry(entry)
+  }
+  return entry.textCache
+}
+
 const execQuery = async (entries: Entry[], query: String) => {
   const t0 = Date.now();
-  return filterEntriesByQuery(entries, query)
+  return filterEntriesByQuery(entries, query, {textFn: stringifyEntryTextCache})
     .then(({entries: filtered, ast}) => {
       console.log(`Found ${filtered.length} of ${entries.length} entries by query '${query}' (resolved to '${stringifyAst(ast)}') in ${Date.now() - t0}ms`);
       return filtered;

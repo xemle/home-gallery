@@ -264,13 +264,24 @@ step("Log has entry with key <key> and value <value>", async (key, value) => {
   assert(matches.length, `Could not find any log entry with key ${key} and value '${value}' but found ${values.map(v => `'${v}'`).join(', ')}`)
 })
 
-step("Database with query <query> has <amount> entries", async (query, amount) => {
-  return fetchFacade(`/api/database${query}`)
+step("Fetch database with query <query>", async (query) => {
+  return fetchFacade(`/api/database.json${query}`)
     .then(res => {
-      assert(res.ok, `Could not fetch file ${fetch}`)
+      assert(res.ok, `Could not fetch database`)
       return res.json()
     })
-    .then(data => {
-      assert(data.data.length == amount, `Expected ${amount} entries but got ${data.data.length}`)
-    })
+    .then(data => gauge.dataStore.scenarioStore.put('fetched.database', data))
+})
+
+step("Fetched database has <amount> entries", async (amount) => {
+  const database = gauge.dataStore.scenarioStore.get('fetched.database')
+  assert(database && database.data, `Expected to have a database`)
+  assert(database.data.length == amount, `Expected ${amount} entries but got ${database.data.length}`)
+})
+
+step("Fetched database with entry <index> has no property <property>", async (index, property) => {
+  const database = gauge.dataStore.scenarioStore.get('fetched.database')
+  assert(database && database.data && database.data.length >= +index, `Expected to have a database`)
+  const entry = database.data[+index]
+  assert(entry && !entry[property], `Expected emptry property ${property} but was ${entry[property]}`)
 })
