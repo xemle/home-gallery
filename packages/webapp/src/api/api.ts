@@ -18,6 +18,8 @@ const mapEntriesForBrowser = entry => {
 export const fetchAll = async (limits, onChunk) => {
   let limitIndex = 0;
   let offset = 0;
+  let chunkStart = Date.now()
+  const MAX_CHUNK_DURATION = 5 * 1000
 
   const next = async () => {
     let url = `api/database.json?offset=${offset}`;
@@ -25,9 +27,11 @@ export const fetchAll = async (limits, onChunk) => {
     if (limit > 0) {
       url += `&limit=${limit}`
     }
-    if (limitIndex < limits.length - 1) {
+    const chunkDuration = Date.now() - chunkStart
+    if (limitIndex < limits.length - 1 && chunkDuration < MAX_CHUNK_DURATION) {
       limitIndex++;
     }
+    chunkStart = Date.now()
     return await fetchJsonWorker(url)
       .then(database => {
         if (!database.data || !database.data.length) {
