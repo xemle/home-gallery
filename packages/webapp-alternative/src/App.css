@@ -39,15 +39,31 @@
 main {
   height: 60vh;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
 }
 
 main h1 {
   display: block;
-  font-size: 10vw;
+  width: 100%;
+  font-size: min(80px, 10vw);
   color: #282c34;
   animation: pulse 2s ease 0s infinite normal forwards;
+}
+
+.functional-component,
+.es6-class-component {
+  padding: 20px 30px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.functional-component {
+  background-color: navajowhite;
+}
+.es6-class-component {
+  background-color: indianred;
 }
 
 @keyframes pulse {

@@ -1,5 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
+import EsClassComponent from './components/EsClassComponent'
+import FunctionalComponent from './components/FunctionalComponent'
 
 function App() {
   return (
@@ -9,6 +11,8 @@ function App() {
       </header>
       <main>
         <h1>Hello World!</h1>
+        <EsClassComponent />
+        <FunctionalComponent />
       </main>
     </div>
   );
