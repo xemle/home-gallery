@@ -1,11 +1,11 @@
 const log = require('@home-gallery/logger')('server.api.database');
 
 const { filterEntriesByQuery, createStringifyEntryCache } = require('@home-gallery/query')
+const { applyEvents } = require('@home-gallery/events')
 
 const { waitReadWatch } = require('./read-database');
 const { cache } = require('./cache-middleware');
 const { sanitizeInt } = require('./sanitize');
-const { applyEvents } = require('./apply-events')
 
 const { sendError } = require('../error')
 

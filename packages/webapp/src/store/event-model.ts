@@ -51,7 +51,7 @@ export const eventModel : EventModel = {
     const allEntries = storeState.entries.allEntries;
     const t0 = Date.now();
     getEventTags(events).forEach(tag => lruAdd(storeState.events.recentTags, tag));
-    const changedEntries = applyEvents(allEntries as Map<String, Entry>, events);
+    const changedEntries = applyEvents([...allEntries.values()], events);
     changedEntries.forEach((entry: any) => entry.textCache = false)
     console.log(`Applied ${events.length} events and updated ${changedEntries.length} entries in ${Date.now() - t0}ms`);
     getStoreActions().search.refresh();

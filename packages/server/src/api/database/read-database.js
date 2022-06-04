@@ -2,7 +2,7 @@ const fs = require('fs');
 const log = require('@home-gallery/logger')('server.api.database.read');
 
 const { readDatabase } = require('@home-gallery/database');
-const { applyEvents } = require('./apply-events')
+const { applyEvents } = require('@home-gallery/events')
 
 function read(filename, cb) {
   const t0 = Date.now();

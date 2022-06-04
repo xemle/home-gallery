@@ -7,11 +7,7 @@ const applyEventsFacade = (database, events) => {
     log.debug(`Events are empty. Skip apply events`)
   }
   const t0 = Date.now()
-  const entries = database.data.reduce((result, entry) => {
-    result.set(entry.id, entry)
-    return result
-  }, new Map())
-  const changedEntries = applyEvents(entries, events.data)
+  const changedEntries = applyEvents(database.data, events.data)
   log.debug(t0, `Applied ${events.data.length} events to ${database.data.length} database entries and updated ${changedEntries.length} entries`)
   return database
 }
