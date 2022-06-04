@@ -20,7 +20,7 @@ const Cell = ({height, width, index, item, items}) => {
   const selectedIdMap = useStoreState(state => state.editMode.selectedIdMap);
   const toggleId = useStoreActions(store => store.editMode.toggleId);
   const toggleRange = useStoreActions(store => store.editMode.toggleRange);
-  const {id, previews, vibrantColors, type, duration } = item;
+  const {id, shortId, previews, vibrantColors, type, duration } = item;
   const style = { height, width, backgroundColor: (vibrantColors && vibrantColors[1]) || 'inherited' }
   const history = useHistory();
 
@@ -30,7 +30,7 @@ const Cell = ({height, width, index, item, items}) => {
   const preview = previews.filter(preview => preview && preview.indexOf(previewName) >= 0).shift();
 
   const showImage = () => {
-    history.push(`/view/${id}`, {listPathname: location.pathname, index});
+    history.push(`/view/${shortId}`, {listPathname: location.pathname, index});
   }
 
   const onClick = (selectRange) => {
@@ -116,7 +116,7 @@ export const FluentList = (props) => {
 
   const virtualScrollRef = useRef(null);
   const lastLocation = useLastLocation();
-  const idMatch = lastLocation ? lastLocation.pathname.match(/\/([a-z0-9]{40})\b/) : false;
+  const idMatch = lastLocation ? lastLocation.pathname.match(/\/([a-z0-9]{7,})\b/) : false;
 
   useLayoutEffect(() => {
     console.log(`MediaFluent:useLayoutEffect idMatch=${idMatch}`)
@@ -125,7 +125,7 @@ export const FluentList = (props) => {
     }
     const id = idMatch[1];
     for (let i = 0; i < rows.length; i++) {
-      const cell = rows[i].columns && rows[i].columns.find(cell => cell.item.id == id);
+      const cell = rows[i].columns && rows[i].columns.find(cell => cell.item.id.startsWith(id));
       if (cell) {
         virtualScrollRef.current.scrollToRow({rowIndex: i});
         break;

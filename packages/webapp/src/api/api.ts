@@ -8,6 +8,7 @@ const mapEntriesForBrowser = entry => {
     const ascii = decodeBase64(entry.similarityHash);
     entry.similarityHash = ascii;
   }
+  entry.shortId = entry.id.substring(0, 12)
   // reset textCache from polluted fetch command <= 1.4.1
   if (entry.textCache) {
     entry.textCache = false

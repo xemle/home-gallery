@@ -31,7 +31,7 @@ export const entryModel : EntryModel = {
     const state = getState();
     const allEntries = state.allEntries;
     payload.forEach(entry => {
-      allEntries.set(entry.id, entry);
+      allEntries.set(entry.shortId, entry);
     })
     getStoreActions().search.refresh();
   }),

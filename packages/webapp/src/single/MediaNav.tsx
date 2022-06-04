@@ -46,14 +46,14 @@ export const MediaNav = ({current, index, prev, next, listLocation, showNavigati
     <>
       { prev &&
         <div className="mediaNav -left">
-          <Link className={buttonClass} to={{pathname:`/view/${prev.id}`, state: {listLocation, index: index - 1} }}>
+          <Link className={buttonClass} to={{pathname:`/view/${prev.shortId}`, state: {listLocation, index: index - 1} }}>
             <i className="fas fa-chevron-left fa-2x"></i>
           </Link>
         </div>
       }
       { next &&
         <div className="mediaNav -right">
-          <Link className={buttonClass} to={{pathname:`/view/${next.id}`, state: {listLocation, index: index + 1} }}>
+          <Link className={buttonClass} to={{pathname:`/view/${next.shortId}`, state: {listLocation, index: index + 1} }}>
             <i className="fas fa-chevron-right fa-2x"></i>
           </Link>
         </div>

@@ -10,7 +10,7 @@ export const MediaViewImage = (props) => {
   const [faceRects, setFaceRects] = useState([]);
   const [objectRects, setObjectRects] = useState([]);
   const { showDetails } = props;
-  const { id, previews, faces, objects } = props.media;
+  const { id, shortId, previews, faces, objects } = props.media;
   const { width } = useBodyDimensions();
   const history = useHistory();
 
@@ -28,9 +28,9 @@ export const MediaViewImage = (props) => {
     img.src = largeUrl;
   }, []);
 
-  const selectFace = (id, faceNo) => {
-    console.log(`Search for face ${faceNo} of ${id}`);
-    history.push(`/faces/${id}/${faceNo}`);
+  const selectFace = (shortId, faceNo) => {
+    console.log(`Search for face ${faceNo} of ${shortId}`);
+    history.push(`/faces/${shortId}/${faceNo}`);
   }
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export const MediaViewImage = (props) => {
         height: `${(face.height * height).toFixed()}px`,
       }
       return (
-        <div key={i} className='annotation -face' style={style} onClick={() => selectFace(id, i)}>
+        <div key={i} className='annotation -face' style={style} onClick={() => selectFace(shortId, i)}>
           <span>{face.gender} ~{face.age}y</span>
         </div>
       );

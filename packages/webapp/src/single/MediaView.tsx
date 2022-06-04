@@ -20,11 +20,11 @@ import { Zoomable } from "./Zoomable";
 import useBodyDimensions from "../utils/useBodyDimensions";
 
 const findEntryIndex = (location, entries, id) => {
-  if (location.state?.index && entries[location.state.index]?.id === id) {
+  if (location.state?.index && entries[location.state.index]?.id.startsWith(id)) {
     return location.state.index;
   }
   for (let i = 0; i < entries.length; i++) {
-    if (entries[i].id === id) {
+    if (entries[i].id.startsWith(id)) {
       return i;
     }
   }
@@ -81,17 +81,17 @@ export const MediaView = () => {
       const offset = prevNextMatch[3] ? +prevNextMatch[3] : 1
       const negate = prevNextMatch[1] == 'prev' ? -1 : 1
       const i = Math.min(entries.length - 1, Math.max(0, index + (negate * offset)))
-      history.push(`/view/${entries[i].id}`, {listPathname: location.pathname, index: i});
+      history.push(`/view/${entries[i].shortId}`, {listPathname: location.pathname, index: i});
     } else if (type === 'similar' && current?.similarityHash) {
-      history.push(`/similar/${current.id}`);
+      history.push(`/similar/${current.shortId}`);
     } else if (type === 'toggleDetails') {
       setShowDetails(!showDetails);
     } else if (type === 'toggleNavigation') {
       setShowNavigation(!showNavigation);
     } else if (type == 'first' && entries.length) {
-      history.push(`/view/${entries[0].id}`, {listPathname: location.pathname, index: 0});
+      history.push(`/view/${entries[0].shortId}`, {listPathname: location.pathname, index: 0});
     } else if (type == 'last' && entries.length) {
-      history.push(`/view/${entries[entries.length - 1].id}`, {listPathname: location.pathname, index: entries.length - 1});
+      history.push(`/view/${entries[entries.length - 1].shortId}`, {listPathname: location.pathname, index: entries.length - 1});
     } else if (type == 'list') {
       history.push(listLocation);
     } else if (type == 'chronology') {

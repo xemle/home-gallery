@@ -62,6 +62,9 @@ const cosineSimilarity = (a, b) => {
 }
 
 const execSimilar = (entries: Entry[], similarityHash) => {
+  if (!similarityHash) {
+    return entries
+  }
   const t0 = Date.now();
   const comparableEntries = entries.filter(entry => !!entry.similarityHash);
   const t1 = Date.now()
@@ -103,6 +106,9 @@ const uniqBy = (keyFn) => {
 }
 
 const execFaces = (entries: Entry[], descriptor) => {
+  if (!descriptor) {
+    return entries
+  }
   const t0 = Date.now();
   const comparableEntries = entries.filter(entry => entry.faces.length > 0);
   const t1 = Date.now()
@@ -135,11 +141,11 @@ const doSearch = async (allEntries: Map<String, Entry>, query) => {
     entries = await execQuery(entries, `year:${query.value} order by date asc`);
   } else if (query.type == 'similar') {
     const id = query.value;
-    const seedEntry = allEntries.get(id);
-    entries = execSimilar(entries, seedEntry.similarityHash);
+    const seedEntry = entries.find(entry => entry.id.startsWith(id));
+    entries = execSimilar(entries, seedEntry?.similarityHash);
   } else if (query.type == 'faces') {
     const { id, faceIndex } = query.value;
-    const seedEntry = allEntries.get(id);
+    const seedEntry = entries.find(entry => entry.id.startsWith(id));
     const descriptor = seedEntry?.faces[faceIndex]?.descriptor;
     entries = execFaces(entries, descriptor);
   }
