@@ -109,6 +109,9 @@ export const FluentList = (props) => {
   const { width } = useBodyDimensions();
   const [ deviceType ] = useDeviceType();
 
+  const viewMode = useStoreState(state => state.editMode.viewMode);
+  const lastSelectedId = useStoreState(state => state.editMode.lastSelectedId);
+
   const rows = useMemo(() => {
     const rowHeights = deviceType === DeviceType.MOBILE ? {minHeight: 61, maxHeight: 110} : {minHeight: 120, maxHeight: 200 }
     return fluent(props.entries, Object.assign({padding: 8, width}, rowHeights));
@@ -123,7 +126,7 @@ export const FluentList = (props) => {
     if (!idMatch || !rows.length) {
       return;
     }
-    const id = idMatch[1];
+    const id = viewMode == ViewMode.EDIT && lastSelectedId ? lastSelectedId : idMatch && idMatch[1];
     for (let i = 0; i < rows.length; i++) {
       const cell = rows[i].columns && rows[i].columns.find(cell => cell.item.id.startsWith(id));
       if (cell) {
