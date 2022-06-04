@@ -29,15 +29,15 @@ const toMultiValueMap = (entries, initialValue = {}, keyFn = e => e.id) => {
 }
 
 const uniqBy = fn => {
-  const keys = []
+  const keys = {}
 
   return value => {
     const key = fn(value)
-    if (keys.includes(key)) {
-      return false
+    if (!keys[key]) {
+      keys[key] = true
+      return true
     }
-    keys.push(key)
-    return true
+    return false
   }
 }
 

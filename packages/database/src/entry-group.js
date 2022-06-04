@@ -116,8 +116,8 @@ const groupEntriesById = (newEntries, entries = []) => {
   toMultiValueMap(newEntries, id2entries)
 
   newEntries
-    .filter(uniqBy(entry => entry.id))
     .filter(entry => id2entries[entry.id].length > 1)
+    .filter(uniqBy(entry => entry.id))
     .forEach(entry => {
       const list = id2entries[entry.id]
       list.sort((a, b) => isFirstPrimary(a, b) ? -1 : 1)

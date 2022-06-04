@@ -43,24 +43,28 @@ function build(indexFilenames, storageDir, databaseFilename, options, cb) {
     if (err) {
       return cb(err);
     }
+    const t0 = Date.now()
     createEntries(entryStream, storageDir, options, (err, entries) => {
       if (err) {
         log.error(`Could not build database: ${err}`);
         return cb(err);
       }
+      log.info(t0, `Created ${entries.length} database entries`)
+
       if (journal) {
         mergeFromJournal(indexFilenames, journal, databaseFilename, entries, updated, cb)
       } else {
-        const t0 = Date.now()
-        const changedEntriesByGroup = groupEntriesById(entries)
-        log.info(t0, `Assign id groups to ${changedEntriesByGroup.length} entries of ${entries.length} total entries`);
-
+        log.debug(`Grouping entries with same ids`);
         const t1 = Date.now()
+        const changedEntriesByGroup = groupEntriesById(entries)
+        log.info(t1, `Assign id groups to ${changedEntriesByGroup.length} entries of ${entries.length} total entries`);
+
+        const t2 = Date.now()
         writeDatabase(databaseFilename, entries, (err, database) => {
           if (err) {
             return cb(err)
           }
-          log.info(t1, `Wrote database with ${database.data.length} entries to ${databaseFilename}`)
+          log.info(t2, `Wrote database with ${database.data.length} entries to ${databaseFilename}`)
           cb(null, database)
         });
       }

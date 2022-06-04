@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- database: Speedup id grouping
 - fetch: Fix query with polluted text cache
 - export: Fix query with polluted text cache
 - webapp: Fix relative resources from base URI
