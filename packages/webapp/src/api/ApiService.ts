@@ -4,7 +4,7 @@ import { Event, EventAction, EventListener } from '@home-gallery/events'
 import { pushEvent as pushEventApi, eventStream as eventStreamApi, ServerEventListener } from './api';
 import { ActionEventListener } from './ActionEventListner';
 import { UnsavedEventHandler } from './UnsavedEventHanlder';
-export { fetchAll, getEvents } from './api'
+export { fetchAll, getEvents, mapEntriesForBrowser } from './api'
 
 const tagToAction = (tag: string): EventAction => {
   if (tag.substr(0, 1) === '-') {

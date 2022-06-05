@@ -3,7 +3,7 @@ import { fetchJsonWorker } from '../utils/fetch-json-worker'
 
 const decodeBase64 = base64 => atob(base64);
 
-const mapEntriesForBrowser = entry => {
+export const mapEntriesForBrowser = entry => {
   if (entry.similarityHash) {
     const ascii = decodeBase64(entry.similarityHash);
     entry.similarityHash = ascii;

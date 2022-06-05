@@ -12,7 +12,7 @@ import { StoreProvider } from 'easy-peasy';
 import { useStoreActions } from './store/hooks';
 import { store } from './store/store';
 
-import { fetchAll, getEvents, eventStream } from './api/ApiService';
+import { fetchAll, getEvents, eventStream, mapEntriesForBrowser } from './api/ApiService';
 
 import { AllView } from "./list/All";
 import { SearchView } from './list/Search';
@@ -36,7 +36,7 @@ export const Main = () => {
     const addEvent = useStoreActions(actions => actions.events.addEvent);
 
     const stateEntries = window['__homeGallery']?.entries || [];
-    addEntries(stateEntries);
+    addEntries(stateEntries.map(mapEntriesForBrowser));
 
     useEffect(() => {
       const fetchEvents = () => getEvents()
