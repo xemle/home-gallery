@@ -5,6 +5,9 @@
   "main": "index.js",
   "author": "Pavel Buramensky",
   "license": "ISC",
+  "scripts": {
+    "build": "webpack --mode none"
+  },
   "dependencies": {
     "react": "^18.1.0",
     "react-dom": "^18.1.0"
