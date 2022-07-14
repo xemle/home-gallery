@@ -11,6 +11,7 @@ import { VirtualScroll } from "./VirtualScroll";
 import { ViewMode } from "../store/edit-mode-model";
 import { useDeviceType, DeviceType } from "../utils/useDeviceType";
 import { humanizeDuration } from "../utils/format";
+import { getHigherPreviewUrl, getWidthFactor } from '../utils/preview';
 
 const Cell = ({height, width, index, item, items}) => {
   const ref = useRef();
@@ -24,10 +25,8 @@ const Cell = ({height, width, index, item, items}) => {
   const style = { height, width, backgroundColor: (vibrantColors && vibrantColors[1]) || 'inherited' }
   const history = useHistory();
 
-  const previewSizes = [1920, 1280, 800, 320, 128];
-  const minPreviewSize = previewSizes.filter((size, i) => i == 0 || size >= width).pop();
-  const previewName = `-image-preview-${minPreviewSize}.`;
-  const preview = previews.filter(preview => preview && preview.indexOf(previewName) >= 0).shift();
+  const widthFactor = getWidthFactor(width, height);
+  const previewUrl = getHigherPreviewUrl(previews, width * widthFactor);
 
   const showImage = () => {
     history.push(`/view/${shortId}`, {listPathname: location.pathname, index});
@@ -79,7 +78,6 @@ const Cell = ({height, width, index, item, items}) => {
     }
   });
 
-  const previewUrl = `files/${preview}`;
   return (
     <div ref={ref} key={id} className={`fluent__cell ${isSelected() ? '-selected' : ''}`} style={style}>
       <img style={style} src={previewUrl} />

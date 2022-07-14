@@ -1,5 +1,6 @@
 import { Event, EventListener } from '@home-gallery/events'
 import { fetchJsonWorker } from '../utils/fetch-json-worker'
+import { byPreviewSize } from '../utils/preview'
 
 const decodeBase64 = base64 => atob(base64);
 
@@ -9,6 +10,9 @@ export const mapEntriesForBrowser = entry => {
     entry.similarityHash = ascii;
   }
   entry.shortId = entry.id.substring(0, 12)
+  if (entry.previews?.length) {
+    entry.previews.sort(byPreviewSize)
+  }
   // reset textCache from polluted fetch command <= 1.4.1
   if (entry.textCache) {
     entry.textCache = false

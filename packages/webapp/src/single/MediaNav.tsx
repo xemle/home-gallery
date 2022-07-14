@@ -7,7 +7,7 @@ import {
 import useBodyDimensions from "../utils/useBodyDimensions";
 import { useStoreState } from '../store/hooks';
 
-import { getPreviewUrl } from './image-utils'
+import { getLowerPreviewUrl } from '../utils/preview'
 
 export const MediaNav = ({current, index, prev, next, listLocation, showNavigation, onClick}) => {
   const { width } = useBodyDimensions();
@@ -28,10 +28,10 @@ export const MediaNav = ({current, index, prev, next, listLocation, showNavigati
     const large = width <= 1280 ? 1280 : 1920;
 
     const timerId = setTimeout(async () => {
-      prev && await loadImage(getPreviewUrl(prev, 320))
-      next && await loadImage(getPreviewUrl(next, 320))
-      !abort && prev && await loadImage(getPreviewUrl(prev, large))
-      !abort && next && await loadImage(getPreviewUrl(next, large))
+      prev && await loadImage(getLowerPreviewUrl(prev, 320))
+      next && await loadImage(getLowerPreviewUrl(next, 320))
+      !abort && prev && await loadImage(getLowerPreviewUrl(prev, large))
+      !abort && next && await loadImage(getLowerPreviewUrl(next, large))
     }, 100);
 
     return () => {

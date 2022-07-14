@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- webapp: Fix preview sizes in stream
 - bin: Raise node version to v16.16.0 to general fix security issues
 - webapp: Fix data mapping for initial state
 - database: Speedup id grouping

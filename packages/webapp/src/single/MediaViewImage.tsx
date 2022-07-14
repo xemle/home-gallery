@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
 
 import useBodyDimensions from "../utils/useBodyDimensions";
-import { getPreviewUrl } from './image-utils'
+import { getLowerPreviewUrl } from '../utils/preview'
 
 export const MediaViewImage = (props) => {
   const imgRef = useRef<HTMLElement>();
@@ -16,8 +16,8 @@ export const MediaViewImage = (props) => {
 
   const largeSize = width <= 1280 ? 1280 : 1920;
 
-  const smallUrl = getPreviewUrl(previews, 320)
-  const largeUrl = getPreviewUrl(previews, largeSize)
+  const smallUrl = getLowerPreviewUrl(previews, 320)
+  const largeUrl = getLowerPreviewUrl(previews, largeSize)
   const [src, setSrc] = useState('');
 
   useEffect(() => {
