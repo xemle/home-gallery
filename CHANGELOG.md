@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- database: Honor date from meta sidecars
 - webapp: Use shorten id in links against history attacks
 - webapp: Improve database chunk size adjustment based on response times
 - webapp: Improve caching with hashed asset filenames

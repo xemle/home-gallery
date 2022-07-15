@@ -42,6 +42,96 @@ const reduceMeta = (entry, key, reduceFn, initValue) => {
   return allMeta.reduce(reduceFn, initValue)
 }
 
+const getBasename = filename => filename.substring(0, filename.lastIndexOf('.'))
+
+// Entry and sidecars are ordered by size:
+//   [img_1234.dng, img_1234.jpg, img_1234.jpg.xmp, img_1234.xmp, img_1234.dng.xmp]
+// Get meta sidecars by basename than by filesize of its main file:
+//   [img_1234.xmp, img_1234.dng.xmp, img_1234.jpg.xmp]
+function getMetaEntries(entry) {
+  if (!entry.sidecars?.length) {
+    return []
+  }
+
+  const basename2meta = entry.sidecars.reduce((r, sidecar) => {
+    if (sidecar.type != 'meta') {
+      return r
+    }
+    const basename = getBasename(sidecar.filename)
+    if (!r[basename]) {
+      r[basename] = []
+    }
+    r[basename].push(sidecar)
+    return r
+  }, {})
+
+  return [entry, ...entry.sidecars].reduce((r, {filename}) => {
+    const basename = getBasename(filename)
+    if (basename2meta[basename]) {
+      r.push(...basename2meta[basename])
+      basename2meta[basename] = []
+    }
+    if (basename2meta[filename]) {
+      r.push(...basename2meta[filename])
+      basename2meta[filename] = []
+    }
+    return r
+  }, [])
+}
+
+// '0000:00:00 00:00:00' => false
+// {tzoffsetMinutes: 120, rawValue: '2004:10:19 10:34:17'} => '2004-10-19T10:34:17+02:00'
+function parseExiftoolDate(date) {
+  let value = date?.rawValue ? date.rawValue : date;
+  if (typeof value !== 'string' || value.length < 10 || value.startsWith('0000')) {
+    return false;
+  }
+
+  const match = value.match(/(\d{4}).(\d{2}).(\d{2}).(\d{2}).(\d{2}).(\d{2})(\.\d+)?(([-+](\d{2}:\d{2}|\d{4}))|Z)?\s*$/);
+  if (!match) {
+    log.warn(`Unknown time format ${value} of ${JSON.stringify(date)} of entry ${entry}`);
+    return false;
+  }
+
+  let iso8601 = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}${match[7] ? match[7] : ''}`;
+  if (date.tzoffsetMinutes && !match[8]) {
+    const offset = Math.abs(date.tzoffsetMinutes);
+    const negative = date.tzoffsetMinutes < 0;
+    const hour = '' + (offset / 60).toFixed();
+    const minute = '' + (offset % 60);
+    const offsetText = (negative ? '-' : '+') + hour.padStart(2, '0') + ':' + minute.padStart(2, '0');
+    iso8601 += offsetText;
+  } else if (match[8]) {
+    iso8601 += match[8];
+  }
+
+  try {
+    return new Date(iso8601).toISOString();
+  } catch(e) {
+    log.error(`Could not create valid ISO8601 date '${iso8601}' from '${JSON.stringify(date)}' of entry ${entry}: ${e}`);
+    return false;
+  }
+}
+
+function getExifDate(exif) {
+  if (!exif) {
+    return false
+  }
+  const dateKeys = ['GPSDateTime', 'SubSecDateTimeOriginal', 'DateTimeOriginal', 'CreateDate']
+  return dateKeys.reduce((date, key) => date || parseExiftoolDate(exif[key]), false)
+}
+
+function getEntryDate(entry) {
+  const metaEntries = getMetaEntries(entry)
+  const metaDate = metaEntries.reduce((date, entry) => date || getExifDate(entry.meta?.exif), false)
+  if (metaDate) {
+    return metaDate
+  }
+
+  const allEntries = [entry, ...(entry.sidecars || [])]
+  return allEntries.reduce((date, entry) => date || getExifDate(entry.meta?.exif), false)
+}
+
 const toArray = value => {
   if (Array.isArray(value)) {
     return value
@@ -72,54 +162,6 @@ function useExif(entry) {
     return {};
   }
 
-  // '0000:00:00 00:00:00' => false
-  // {tzoffsetMinutes: 120, rawValue: '2004:10:19 10:34:17'} => '2004-10-19T10:34:17+02:00'
-  function parseExiftoolDate(date) {
-    let value = date.rawValue ? date.rawValue : date;
-    if (typeof value !== 'string' || value.length < 10 || value.startsWith('0000')) {
-      return false;
-    }
-
-    const match = value.match(/(\d{4}).(\d{2}).(\d{2}).(\d{2}).(\d{2}).(\d{2})(\.\d+)?(([-+](\d{2}:\d{2}|\d{4}))|Z)?\s*$/);
-    if (!match) {
-      log.warn(`Unknown time format ${value} of ${JSON.stringify(date)} of entry ${entry}`);
-      return false;
-    }
-
-    let iso8601 = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}${match[7] ? match[7] : ''}`;
-    if (date.tzoffsetMinutes && !match[8]) {
-      const offset = Math.abs(date.tzoffsetMinutes);
-      const negative = date.tzoffsetMinutes < 0;
-      const hour = '' + (offset / 60).toFixed();
-      const minute = '' + (offset % 60);
-      const offsetText = (negative ? '-' : '+') + hour.padStart(2, '0') + ':' + minute.padStart(2, '0');
-      iso8601 += offsetText;
-    } else if (match[8]) {
-      iso8601 += match[8];
-    }
-
-    try {
-      return new Date(iso8601).toISOString();
-    } catch(e) {
-      log.error(`Could not create valid ISO8601 date '${iso8601}' from '${JSON.stringify(date)}' of entry ${entry}: ${e}`);
-      return false;
-    }
-  }
-
-  function getExifDate(exifMeta) {
-    let date = false;
-    if (exifMeta.GPSDateTime) {
-      date = parseExiftoolDate(exifMeta.GPSDateTime);
-    }
-    if (!date && exifMeta.SubSecDateTimeOriginal) {
-      date = parseExiftoolDate(exifMeta.SubSecDateTimeOriginal);
-    }
-    if (!date && exifMeta.CreateDate) {
-      date = parseExiftoolDate(exifMeta.CreateDate);
-    }
-    return date;
-  }
-
   function getFractionNumber(prop) {
     let result = {};
     if (!exifMeta[prop]) {
@@ -145,12 +187,12 @@ function useExif(entry) {
     return getFractionNumber('ShutterSpeed');
   }
 
-  function widthHeight(exifMeta) {
-    let width = exifMeta.ImageWidth;
-    let height = exifMeta.ImageHeight;
-    if (exifMeta.Orientation >= 5) {
-      width = exifMeta.ImageHeight;
-      height = exifMeta.ImageWidth;
+  function widthHeight(exif) {
+    let width = exif.ImageWidth;
+    let height = exif.ImageHeight;
+    if (exif.Orientation >= 5) {
+      width = exif.ImageHeight;
+      height = exif.ImageWidth;
     }
 
     if (!width || !height) {
@@ -171,8 +213,7 @@ function useExif(entry) {
     return [width, height]
   }
 
-  const exifDate = getExifDate(exifMeta);
-  const date = exifDate ? exifDate : entry.date;
+  const date = getEntryDate(entry) || entry.date;
   const [width, height] = widthHeight(exifMeta);
 
   return Object.assign({
