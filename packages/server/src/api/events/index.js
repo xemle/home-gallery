@@ -99,7 +99,7 @@ const events = (eventbus, eventsFilename) => {
   const push = (req, res, next) => {
     const event = req.body;
     if (!isValidEvent(event)) {
-      log.warn(`Received invalid event: ${JSON.stringify(event)}`);
+      log.warn(`Received invalid event: ${JSON.stringify(event).substring(0, 120)}...`);
       return sendError(res, 400, `Invalid event data`)
     }
     if (!event.id) {
@@ -115,10 +115,10 @@ const events = (eventbus, eventsFilename) => {
           events.data.push(event);
         }
         bridgeClientEvents(event)
-        res.status(201).end();
+        res.sendStatus(201)
       })
       .catch(err => {
-        log.error(err, `Could not save event to ${eventsFilename}. Error: ${err}. Event ${JSON.stringify(event).substr(0, 50)}...`);
+        log.error(err, `Could not save event to ${eventsFilename}. Error: ${err}. Event ${JSON.stringify(event).substring(0, 50)}...`);
         return sendError(res, 500, 'Failed to save event. See server logs for details.')
       })
   }

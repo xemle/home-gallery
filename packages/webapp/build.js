@@ -12,6 +12,16 @@ const targets = [
     target: 'es2015',
     outdir: 'dist',
     watch: watch
+  },
+  {
+    entryPoints: ['./src/remote-console.js'],
+    bundle: true,
+    minify: !watch,
+    sourcemap: true,
+    platform: 'browser',
+    target: 'es2015',
+    outdir: 'dist',
+    watch: watch
   }
 ]
 

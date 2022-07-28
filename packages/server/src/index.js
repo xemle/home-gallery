@@ -53,7 +53,7 @@ const getAuthMiddleware = options => {
 }
 
 function startServer(options, cb) {
-  const {host, port, storageDir, databaseFilename, eventsFilename, webappDir, key, cert, openBrowser} = options
+  const {host, port, storageDir, databaseFilename, eventsFilename, webappDir, key, cert, openBrowser, remoteConsoleToken} = options
   const app = express();
   app.disable('x-powered-by')
   app.enable('trust proxy')
@@ -77,6 +77,11 @@ function startServer(options, cb) {
   app.post('/api/events', pushEvent);
   app.get('/api/database.json', readDatabase);
 
+  if (remoteConsoleToken) {
+    const debugApi = require('./api/debug')({remoteConsoleToken})
+    app.post('/api/debug/console', debugApi.console);
+  }
+
   // deprecated
   app.get('/api/database', readDatabase);
   app.get('/api/events', readEvents);
@@ -84,7 +89,7 @@ function startServer(options, cb) {
   app.use(webapp(webappDir, req => ({
     disablePwa: !!req.user,
     entries: getFirstEntries(50)
-  })));
+  }), !!remoteConsoleToken));
 
   const server = createServer(key, cert, app);
   server.listen(port, host)

@@ -70,6 +70,10 @@ const command = {
         boolean: true,
         default: true,
         describe: 'Open browser on server start'
+      },
+      'remote-console-token': {
+        string: true,
+        describe: 'Enable remote console with given debug auth token'
       }
     })
     .demandOption(['storage', 'database', 'events'])
@@ -90,6 +94,7 @@ const command = {
       users: argv.user ? argv.user.map(mapUsers) : false,
       ipWhitelistRules: argv.ipWhitelistRule ? argv.ipWhitelistRule.map(mapRules) : [],
       openBrowser: argv.openBrowser,
+      remoteConsoleToken: argv.remoteConsoleToken
     }
     startServer(config, (err) => {
       if (err) {
