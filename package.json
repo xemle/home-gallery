@@ -53,7 +53,7 @@
     "esbuild": "^0.14.23",
     "esbuild-register": "^3.3.2",
     "express": "^4.17.3",
-    "http-proxy-middleware": "^2.0.3",
+    "http-proxy-middleware": "^2.0.6",
     "kss": "^3.0.1",
     "lerna": "^4.0.0",
     "link-parent-bin": "^2.0.0",

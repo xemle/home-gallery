@@ -165,7 +165,7 @@ export const VirtualScroll = forwardRef((props, ref) => {
       const index = Math.min(rowIndex, rowHeights.length);
       const row = rowHeights[index];
       const scrollToY = row.top + (row.height / 2) - (height / 2);
-      console.log(`scrollToRow() to row ${rowIndex} (${index}) with scrollToY ${scrollToY}`, rowHeights);
+      console.log(`scrollToRow() to row ${rowIndex} (${index}) with scrollToY ${scrollToY}`);
       window.scrollTo(0, Math.max(0, scrollToY));
       setScrollTop(scrollToY);
     }

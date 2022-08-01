@@ -1,33 +1,37 @@
-const proxy = require('http-proxy-middleware');
-const Bundler = require('parcel-bundler');
-const express = require('express');
+const path = require('path')
+const express = require('express')
+const compression = require('compression')
+const { createProxyMiddleware } = require('http-proxy-middleware')
 
-const bundler = new Bundler('src/index.html', {
-  // Don't cache anything in development 
-  cache: false,
-});
 
-const app = express();
-const PORT = process.env.PORT || 1234;
-const API_PROXY = process.env.API_PROXY || 'http://localhost:3000';
+const PORT = process.env.PORT || 1234
+const API_PROXY = process.env.API_PROXY || 'http://localhost:3000'
 
+const baseDir = 'dist'
+
+const app = express()
+
+app.use(compression())
 app.use(
   '/api/',
-  proxy({
+  createProxyMiddleware({
     target: API_PROXY,
     secure: false
   })
 );
 app.use(
   '/files/',
-  proxy({
+  createProxyMiddleware({
     target: API_PROXY,
     secure: false
   })
 );
 
-// Pass the Parcel bundler into Express as middleware
-app.use(bundler.middleware());
+app.set('etag', 'weak')
+app.use(express.static(baseDir))
+app.get('*', (_, response) => {
+  response.sendFile(path.resolve(baseDir, 'index.html'));
+});
 
 // Run your Express server
 app.listen(PORT);

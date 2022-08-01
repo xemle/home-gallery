@@ -1,0 +1,280 @@
+/*
+Scrollbar
+
+Markup:
+<div class="scrollbar">
+  <div class="scrollbar_view" style="height: 200px">
+  </div>
+  <div class="scrollbar_overview">
+    <div class="scrollbar_overview-item -current" style="top: 117px"><span></span></div>
+    <div class="scrollbar_overview-item -text" style="top: 10px"><span>2019</span></div>
+    <div class="scrollbar_overview-item -text" style="top: 30px"><span>2018</span></div>
+    <div class="scrollbar_overview-item -text" style="top: 55px"><span>2016</span></div>
+    <div class="scrollbar_overview-item -circle" style="top: 65px"><span></span></div>
+    <div class="scrollbar_overview-item -text" style="top: 80px"><span>2013</span></div>
+    <div class="scrollbar_overview-item -text" style="top: 110px"><span>2010</span></div>
+    <div class="scrollbar_overview-item -text" style="top: 150px"><span>2009</span></div>
+    <div class="scrollbar_overview-item -circle -full" style="top: 165px"><span></span></div>
+    <div class="scrollbar_overview-item -circle" style="top: 185px"><span></span></div>
+  </div>
+  <div class="scrollbar_handle" style="top: 90px">
+    <div class="scrollbar_detail">2008</div>
+    <div class="scrollbar_thumb">
+      <i class="fas fa-chevron-up"></i>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+  </div>
+</div>
+
+Styleguide 3.4
+*/
+/*
+Scrollbar without overview
+
+Markup:
+<div class="scrollbar">
+  <div class="scrollbar_view" style="height: 200px">
+  </div>
+  <div class="scrollbar_handle" style="top: 90px">
+    <div class="scrollbar_detail">2008</div>
+    <div class="scrollbar_thumb">
+      <i class="fas fa-chevron-up"></i>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+  </div>
+</div>
+
+Styleguide 3.4.1
+*/
+/*
+Scrollbar with active thumb
+
+Markup:
+<div class="scrollbar">
+  <div class="scrollbar_view" style="height: 200px">
+  </div>
+  <div class="scrollbar_handle" style="top: 90px">
+    <div class="scrollbar_detail">2008</div>
+    <div class="scrollbar_thumb --active">
+      <i class="fas fa-chevron-up"></i>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+  </div>
+</div>
+
+Styleguide 3.4.2
+*/
+/*
+Scrollbar without detail text
+
+Markup:
+<div class="scrollbar">
+  <div class="scrollbar_view" style="height: 200px">
+  </div>
+  <div class="scrollbar_overview">
+    <div class="scrollbar_overview-item -current" style="top: 117px"><span></span></div>
+    <div class="scrollbar_overview-item -text" style="top: 10px"><span>13.11.19</span></div>
+    <div class="scrollbar_overview-item -text" style="top: 30px"><span>2018</span></div>
+    <div class="scrollbar_overview-item -text" style="top: 55px"><span>2016</span></div>
+    <div class="scrollbar_overview-item -circle" style="top: 65px"><span></span></div>
+    <div class="scrollbar_overview-item -text" style="top: 80px"><span>2013</span></div>
+    <div class="scrollbar_overview-item -text" style="top: 110px"><span>2010</span></div>
+    <div class="scrollbar_overview-item -text" style="top: 150px"><span>Jun 09</span></div>
+    <div class="scrollbar_overview-item -circle -full" style="top: 165px"><span></span></div>
+    <div class="scrollbar_overview-item -circle" style="top: 185px"><span></span></div>
+  </div>
+  <div class="scrollbar_handle" style="top: 90px">
+    <div class="scrollbar_thumb">
+      <i class="fas fa-chevron-up"></i>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+  </div>
+</div>
+
+Styleguide 3.4.3
+*/
+/*
+Small scrollbar
+
+Markup:
+<div class="scrollbar">
+  <div class="scrollbar_view" style="height: 200px">
+  </div>
+  <div class="scrollbar_handle --small" style="top: 90px">
+    <div class="scrollbar_thumb">
+      <i class="fas fa-chevron-up"></i>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+  </div>
+</div>
+
+Styleguide 3.4.4
+*/
+$scrollbar-thumb-color: $background-color-04dp;
+$scrollbar-thumb-hover-color: $background-color-08dp;
+$scrollbar-thumb-active-color: $background-color-06dp;
+
+$scrollbar-overview-color: $background-color-01dp;
+$scrollbar-overview-current-color: $primary-color;
+$scrollbar-overview-line-color: $text-low-color;
+$scrollbar-overview-line-width: 1px;
+$scrollbar-overview-circle-width: 8px;
+
+.scrollbar-hidden {
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 0;
+  display: none;
+  background: transparent;
+}
+
+.scrollbar {
+  position: relative;
+  right: 0;
+  z-index: 2;
+
+  &.-fixed {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+  }
+}
+
+.scrollbar_overview {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 140px;
+  z-index: 1;
+  background-color: rgba($scrollbar-overview-color, .7);
+  overflow: hidden;
+
+  &.-hidden {
+    display: none;
+  }
+}
+
+.scrollbar_overview-item {
+  position: absolute;
+  display: inline-flex;
+  justify-content: center;
+  left: 8px;
+  right: 8px;
+  padding-right: 32px;
+
+  span {
+    position: relative;
+    //padding: 0 4px;
+    padding: 4px 8px;
+    transform: translate(0, -50%);
+  }
+
+  &.-current {
+    border-top: 2*$scrollbar-overview-line-width solid $scrollbar-overview-current-color;
+    z-index: 2;
+  }
+
+  &.-text {
+    //border-top: $scrollbar-overview-line-width solid $scrollbar-overview-line-color;
+    span {
+      margin-top: -$scrollbar-overview-line-width;
+      line-height: 1em;
+      background-color: $scrollbar-overview-color;
+      border-radius: $border-radius;
+    }
+  }
+
+  &.-circle span {
+    display: inline-block;
+    box-sizing: border-box;
+    width: $scrollbar-overview-circle-width;
+    height: $scrollbar-overview-circle-width;
+    padding: 0;
+    border: $scrollbar-overview-line-width solid $scrollbar-overview-line-color;
+    border-radius: 100%;
+  }
+
+  &.-full span {
+    background-color: $scrollbar-overview-line-color;
+  }
+
+}
+
+.scrollbar_handle {
+  position: absolute;
+  right: 0;
+  margin-right: 8px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  z-index: 3;
+  opacity: 1;
+
+  &.-partial {
+    opacity: .5;
+  }
+
+  &.-hidden {
+    opacity: 0;
+    display: none;
+  }
+
+  &.-small {
+    margin-right: 0;
+
+    .scrollbar_thumb {
+      height: 50px;
+      width: 8px;
+
+      &:hover {
+        background-color: $scrollbar-thumb-hover-color;
+      }
+      &.--active {
+        background-color: $scrollbar-thumb-active-color;
+      }
+
+      .fas {
+        visibility: hidden;
+      }
+    }
+  }
+}
+
+.scrollbar_detail {
+  height: auto;
+  margin-right: 16px;
+  padding: 4px 8px;
+  background-color: $scrollbar-thumb-color;
+  border-radius: $border-radius;
+
+  &.-hidden {
+    display: none;
+  }
+}
+
+.scrollbar_thumb {
+  display: flex;
+  flex-direction: column;
+  background-color: $scrollbar-thumb-color;
+  border-radius: $border-radius;
+
+  .fas {
+    padding: 8px;
+
+    &:hover {
+      color: $text-high-color;
+      background-color: $scrollbar-thumb-hover-color;
+    }
+  }
+
+  &.--active .fas {
+    color: $text-high-color;
+    background-color: $scrollbar-thumb-active-color;
+  }
+}

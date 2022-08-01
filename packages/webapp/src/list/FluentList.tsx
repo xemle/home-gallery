@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { useLocation, useHistory } from "react-router-dom";
 import { useLastLocation } from 'react-router-last-location';
 import { useStoreActions, useStoreState } from '../store/hooks';
@@ -9,7 +9,6 @@ import useBodyDimensions from '../utils/useBodyDimensions';
 import { fluent } from "./fluent";
 import { VirtualScroll } from "./VirtualScroll";
 import { ViewMode } from "../store/edit-mode-model";
-import { useDeviceType, DeviceType } from "../utils/useDeviceType";
 import { humanizeDuration } from "../utils/format";
 import { getHigherPreviewUrl, getWidthFactor } from '../utils/preview';
 
@@ -80,7 +79,7 @@ const Cell = ({height, width, index, item, items}) => {
 
   return (
     <div ref={ref} key={id} className={`fluent__cell ${isSelected() ? '-selected' : ''}`} style={style}>
-      <img style={style} src={previewUrl} />
+      <img style={style} src={previewUrl} loading="lazy" />
       {type == 'video' &&
         <span className="_detail">
           <i className="fas fa-play pr-4"></i>
@@ -103,17 +102,11 @@ const Row = (props) => {
   )
 }
 
-export const FluentList = (props) => {
+export const FluentList = ({rows, padding}) => {
   const { width } = useBodyDimensions();
-  const [ deviceType ] = useDeviceType();
 
   const viewMode = useStoreState(state => state.editMode.viewMode);
   const lastSelectedId = useStoreState(state => state.editMode.lastSelectedId);
-
-  const rows = useMemo(() => {
-    const rowHeights = deviceType === DeviceType.MOBILE ? {minHeight: 61, maxHeight: 110} : {minHeight: 120, maxHeight: 200 }
-    return fluent(props.entries, Object.assign({padding: 8, width}, rowHeights));
-  }, [width, props.entries])
 
   const virtualScrollRef = useRef(null);
   const lastLocation = useLastLocation();
@@ -136,7 +129,7 @@ export const FluentList = (props) => {
 
   return (
     <div className="fluent" style={{width}}>
-      <VirtualScroll ref={virtualScrollRef} items={rows} padding={8} >
+      <VirtualScroll ref={virtualScrollRef} items={rows} padding={padding} >
         {({row}) => <Row height={row.height} columns={row.columns}></Row>}
       </VirtualScroll>
     </div>

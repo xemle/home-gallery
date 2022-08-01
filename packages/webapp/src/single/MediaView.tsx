@@ -73,7 +73,6 @@ export const MediaView = () => {
   const key = current ? current.id : (Math.random() * 100000).toFixed(0);
   const scaleSize = scaleDimensions(current, dimensions);
   console.log(scaleSize, dimensions, current);
-  console.log('debug entries', entries)
 
   const dispatchAction = ({type}) => {
     let prevNextMatch = type.match(/(prev|next)(-(\d+))?/)

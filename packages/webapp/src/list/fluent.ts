@@ -22,12 +22,13 @@ export interface IFluentCell {
 
 export interface IFluentRow {
 	height: number;
+	top: number;
 	columns: IFluentCell[];
 }
 
 export const fluent = (items, options) : IFluentRow[] => {
 	const { minHeight, maxHeight, width, padding } = Object.assign({}, defaultOptions, options);
-	
+
 	const resize = (item, index, items) : IFluentCell => {
 		const scale = maxHeight / item.height;
 		return {height: maxHeight, width: +(item.width * scale).toFixed(), item, index, items}
@@ -52,11 +53,11 @@ export const fluent = (items, options) : IFluentRow[] => {
 				v.height = rowHeight;
 				v.width = +(v.width * shinkScale).toFixed();
 			});
-			result.push({height:rowHeight, columns});
+			result.push({height: rowHeight, top: 0, columns});
 			columns = [];
 			continue;
 		}
-		
+
 		// single image row
 		if (columns.length === 1) {
 			columns[0].height = minHeight;
@@ -77,21 +78,27 @@ export const fluent = (items, options) : IFluentRow[] => {
 			columns.forEach(v => {
 				v.width = +(v.width * maxHeightScale).toFixed();
 			});
-			result.push({height: maxHeight, columns});
+			result.push({height: maxHeight, top: 0, columns});
 			columns = [resize(items[i], i, items)];
 		} else {
 			columns.forEach(v => {
 				v.width = +(v.width * shinkScale).toFixed();
 				v.height = minHeight;
 			});
-			result.push({height: minHeight, columns});
+			result.push({height: minHeight, top: 0, columns});
 			columns = [];
 		}
 	}
 
 	if (columns.length) {
-		result.push({height: maxHeight, columns});
+		result.push({height: maxHeight, top: 0, columns});
 	}
+
+	let lastTop = 0
+	result.forEach(row => {
+		row.top = lastTop
+		lastTop += row.height + padding
+	})
 
 	return result;
 }
