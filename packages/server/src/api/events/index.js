@@ -143,8 +143,8 @@ const events = (eventbus, eventsFilename) => {
     const t0 = Date.now();
     getEvents((err, events) => {
       if (err && err.code === 'ENOENT') {
-        log.info(`Events file ${eventsFilename} does not exist yet. Create an event to initialize it`);
-        return sendError(res, 404, 'Events file does not exist yet. Create an event to initialize it')
+        log.info(`Events file ${eventsFilename} does not exist yet. It will be created on the first manual tag`);
+        return sendError(res, 404, 'Events file does not exist yet. It will be created on the first manual tag')
       } else if (err) {
         log.error(err, `Failed to read events file ${eventsFilename}: ${err}`);
         return sendError(res, 500, 'Loading event file failed. See server logs')
