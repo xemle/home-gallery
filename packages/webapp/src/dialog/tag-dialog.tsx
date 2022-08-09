@@ -56,7 +56,7 @@ export const TagDialog = ({onCancel, onSubmit, visible}: TagDialogProps) => {
                 <div className="field">
                   <label htmlFor="tags">Input</label>
                   <input id="tags" className="input" ref={input => input && input.focus()} value={tags} onChange={e => setTags(e.target.value)} />
-                  {recentTags.length &&
+                  {recentTags.length > 0 &&
                     <div>
                       Recent tags: <Tags tags={recentTags.slice(0, 5)} addTag={addTag} />
                     </div>}
