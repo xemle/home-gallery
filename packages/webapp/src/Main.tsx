@@ -40,7 +40,7 @@ export const Main = () => {
 
     useEffect(() => {
       const fetchEvents = () => getEvents()
-        .then(events => initEvents(events.data))
+        .then(events => initEvents(events?.data || []))
         .catch(e => {
           console.log(`Could not fetch intitial events: ${e}`);
         })

@@ -5,7 +5,7 @@ const toAbsoluteUrl = (url: string) : string => (new URL(url, document?.baseURI 
 const fetchWorker = toWorker((url, init) => {
   return fetch(url, init || {})
     .then(res => {
-      if (res.status < 200 && res.status >= 300) {
+      if (res.status < 200 || res.status >= 300) {
         throw new Error(`Unexpected status code of ${res.status} for url ${url}`)
       }
       return res.json()
