@@ -9,7 +9,7 @@ import { useStoreActions } from '../store/hooks';
 
 export const SearchView = () => {
   const params = useParams();
-  const term = params.term;
+  const term = decodeURIComponent(params.term);
   const search = useStoreActions(actions => actions.search.search);
   search({type: 'query', value: term});
 
