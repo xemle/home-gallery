@@ -9,7 +9,7 @@ import { useStoreState } from '../store/hooks';
 
 import { getLowerPreviewUrl } from '../utils/preview'
 
-export const MediaNav = ({current, index, prev, next, listLocation, showNavigation, onClick}) => {
+export const MediaNav = ({current, index, prev, next, listLocation, showNavigation, dispatch}) => {
   const { width } = useBodyDimensions();
   const query = useStoreState(state => state.search.query);
   const loadImage = async url => {
@@ -60,21 +60,26 @@ export const MediaNav = ({current, index, prev, next, listLocation, showNavigati
       }
       { <div className="mediaNav -bottom">
         { listLocation &&
-          <Link className={buttonClass}to={listLocation} title="Show media stream (ESC)">
+          <Link className={buttonClass} to={listLocation} title="Show media stream (ESC)">
             <i className="fas fa-th fa-2x"></i>
           </Link>
         }
+        { current.latitude != 0 && current.longitude != 0 &&
+          <a onClick={() => dispatch({type: 'map'})} className={buttonClass} title="Show map of entry (m)">
+            <i className="fas fa-map fa-2x"></i>
+          </a>
+        }
         { current?.similarityHash &&
-          <a onClick={event => onClick({event, type: 'similar'})} className={buttonClass} title="Show similar images (s)">
+          <a onClick={() => dispatch({type: 'similar'})} className={buttonClass} title="Show similar images (s)">
             <i className="fas fa-seedling fa-2x"></i>
           </a>
         }
         { query.type != 'none' &&
-          <a onClick={event => onClick({event, type: 'chronology'})} className={buttonClass} title="Show chronology">
+          <a onClick={() => dispatch({type: 'chronology'})} className={buttonClass} title="Show chronology">
             <i className="fas fa-clock fa-2x"></i>
           </a>
         }
-        <a onClick={event => onClick({event, type: 'toggleDetails'})} className={buttonClass} title="Show info">
+        <a onClick={() => dispatch({type: 'toggleDetails'})} className={buttonClass} title="Show info">
           <i className="fas fa-info fa-2x"></i>
         </a>
         </div>

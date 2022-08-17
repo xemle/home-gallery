@@ -17,6 +17,13 @@ export const mapEntriesForBrowser = entry => {
   if (entry.textCache) {
     entry.textCache = false
   }
+  // latitude and longitude are only set for main files <= 1.6
+  // lat and lon are values from geo reverse lookup (also from side cars)
+  if (entry.lat && !entry.latitude && entry.lon && !entry.longitude) {
+    entry.latitude = +entry.lat
+    entry.longitude = +entry.lon
+  }
+
   return entry;
 }
 

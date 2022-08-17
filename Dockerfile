@@ -9,9 +9,10 @@ COPY packages /build/packages/
 COPY scripts /build/scripts/
 WORKDIR /build
 
+# Use npm install --force due react-leaflet dep to react 18
 RUN node scripts/disable-dependency.js api-server styleguide && \
   if [[ -n "$NO_SHARP" || "$TARGETPLATFORM" == "linux/arm/v6" || "$TARGETPLATFORM" == "linux/arm/v7" ]]; then node scripts/disable-dependency.js --prefix=packages/extractor sharp ; fi && \
-  npm install
+  npm install --force
 
 RUN npm run build --loglevel verbose
 RUN node scripts/bundle.js --bundle-file=bundle-docker.yml && \

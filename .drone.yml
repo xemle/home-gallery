@@ -15,7 +15,7 @@ steps:
   - npm set registry $NPM_REGISTRY
   - npm config set unsafe-perm true
   - node scripts/disable-dependency.js api-server
-  - npm install
+  - npm install --force # due react-leaflet dep to react 18
   - find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
   environment:
     NPM_REGISTRY:
@@ -85,7 +85,7 @@ steps:
   - npm set registry $NPM_REGISTRY
   - npm config set unsafe-perm true
   - node scripts/disable-dependency.js api-server
-  - npm install
+  - npm install --force # due react-leaflet dep to react 18
   - find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
   environment:
     NPM_REGISTRY:

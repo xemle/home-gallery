@@ -9,7 +9,7 @@ import Hammer from 'hammerjs';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import { useStoreState, useStoreActions } from '../store/hooks';
-import useListLocation from './useListLocation';
+import useListLocation from '../utils/useListLocation';
 
 import { MediaNav } from './MediaNav';
 import { MediaViewUnknownType } from './MediaViewUnknownType';
@@ -74,7 +74,8 @@ export const MediaView = () => {
   const scaleSize = scaleDimensions(current, dimensions);
   console.log(scaleSize, dimensions, current);
 
-  const dispatchAction = ({type}) => {
+  const dispatch = (action) => {
+    const { type } = action
     let prevNextMatch = type.match(/(prev|next)(-(\d+))?/)
     if (prevNextMatch && entries.length) {
       const offset = prevNextMatch[3] ? +prevNextMatch[3] : 1
@@ -96,27 +97,28 @@ export const MediaView = () => {
     } else if (type == 'chronology') {
       search({type: 'none'});
       history.push('/');
+    } else if (type == 'play') {
+      setHideNavigation(true);
+    } else if (type == 'pause') {
+      setHideNavigation(false);
+    } else if (type == 'search') {
+      history.push(`/search/${action.query.replace(/[\/]/g, char => encodeURIComponent(char))}`);
+    } else if (type == 'map') {
+      history.push(`/map?lat=${current.latitude.toFixed(5)}&lng=${current.longitude.toFixed(5)}&zoom=14`, {listLocation})
     }
+
   }
 
   const onSwipe = (ev) => {
     if (ev.direction === Hammer.DIRECTION_LEFT) {
-      dispatchAction({type: 'next'})
+      dispatch({type: 'next'})
     } else if (ev.direction === Hammer.DIRECTION_RIGHT) {
-      dispatchAction({type: 'prev'})
-    }
-  }
-
-  const onVideoDispatch = ({type}) => {
-    if (type == 'play') {
-      setHideNavigation(true);
-    } else if (type == 'pause') {
-      setHideNavigation(false);
+      dispatch({type: 'prev'})
     }
   }
 
   const hotkeysToAction = {
-    'home': 'fist',
+    'home': 'first',
     'left,j,backspace': 'prev',
     'ctrl+left': 'prev-10',
     'ctrl+shift+left': 'prev-100',
@@ -128,7 +130,8 @@ export const MediaView = () => {
     'i': 'toggleDetails',
     's': 'similar',
     'c': 'chronology',
-    't': 'toggleNavigation'
+    't': 'toggleNavigation',
+    'm': 'map'
   }
 
   useHotkeys(Object.keys(hotkeysToAction).join(','), (ev, handler) => {
@@ -137,7 +140,7 @@ export const MediaView = () => {
       const found = keys.find(key => handler.key == key)
       if (found) {
         console.log(`Catch hotkey ${found} for ${hotkeysToAction[hotkey]}`)
-        dispatchAction({type: hotkeysToAction[hotkey]})
+        dispatch({type: hotkeysToAction[hotkey]})
         return true
       }
     })
@@ -154,7 +157,7 @@ export const MediaView = () => {
         <div className="single__media position-fixed-md">
           <div className="MediaViewContainer">
             {!hideNavigation &&
-              <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} onClick={dispatchAction} />
+              <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} dispatch={dispatch} />
             }
             {isImage &&
               <Zoomable key={key} childWidth={scaleSize.width} childHeight={scaleSize.height} onSwipe={onSwipe}>
@@ -162,7 +165,7 @@ export const MediaView = () => {
               </Zoomable>
             }
             {isVideo &&
-              <MediaViewVideo key={key} media={current} next={next} prev={prev} onDispatch={onVideoDispatch}/>
+              <MediaViewVideo key={key} media={current} next={next} prev={prev} dispatch={dispatch}/>
             }
             {isUnknown &&
               <MediaViewUnknownType key={key} media={current} next={next} prev={prev}/>
@@ -171,7 +174,7 @@ export const MediaView = () => {
         </div>
         { showDetails &&
           <div className="single__detail">
-            <Details current={current} />
+            <Details entry={current} dispatch={dispatch} />
           </div>
         }
       </div>

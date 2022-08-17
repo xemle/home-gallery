@@ -24,6 +24,8 @@ const matchNumber = v => v.match(/^\d+$/)
 
 const matchFloat = v => v.match(/^-?\d+(\.\d+)?$/)
 
+const matchDate = v => v.match(/^\d{4}(-\d{2}(-\d{2})?)?$/)
+
 const basename = file => {
   const pos = file.lastIndexOf('/')
   return pos >= 0 ? file.substring(pos + 1) : file
@@ -44,6 +46,7 @@ module.exports = {
   getDateByKey,
   matchNumber,
   matchFloat,
+  matchDate,
   basename,
   dirname,
   ext

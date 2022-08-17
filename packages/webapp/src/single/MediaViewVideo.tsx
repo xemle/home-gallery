@@ -2,7 +2,7 @@ import * as React from "react";
 import { useRef, useEffect } from "react";
 
 export const MediaViewVideo = (props) => {
-  const { media, onDispatch } = props
+  const { media, dispatch } = props
   const { previews } = media;
   const ref = useRef()
 
@@ -12,8 +12,8 @@ export const MediaViewVideo = (props) => {
       return
     }
 
-    const onPause = () => onDispatch({type: 'pause'})
-    const onPlay = () => onDispatch({type: 'play'})
+    const onPause = () => dispatch({type: 'pause'})
+    const onPlay = () => dispatch({type: 'play'})
 
     e.addEventListener('pause', onPause)
     e.addEventListener('play', onPlay)

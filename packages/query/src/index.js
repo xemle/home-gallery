@@ -1,6 +1,6 @@
 const { parse } = require('./parser');
 const { transformAst, orAst, andAst, cmpAst, valueAst, aliasKey, stringifyAst } = require('./ast')
-const { execQuery, numericKeys, textKeys, aliases } = require('./query');
+const { execQuery, numericKeys, rangeKeys, textKeys, aliases } = require('./query');
 
 const { stringifyEntry } = require('./stringify-entry')
 const { createStringifyEntryCache } = require('./stringify-entry-cache')
@@ -20,7 +20,7 @@ const transformRules = [
   {
     // map inRange to 'value >= low and value <= high'
     types: ['inRange'],
-    keys: numericKeys,
+    keys: rangeKeys,
     map: ast => andAst(cmpAst(ast.key, '>=', ast.value[0], ast.col), cmpAst(ast.key, '<=', ast.value[1]), ast.col)
   },
   {

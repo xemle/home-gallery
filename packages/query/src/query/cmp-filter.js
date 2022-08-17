@@ -1,5 +1,5 @@
 const { dateKeys } = require('./keys')
-const { toLower, matchNumber, matchFloat, getDateByKey, dirname, basename, ext } = require('./utils')
+const { toLower, matchNumber, matchFloat, matchDate, getDateByKey, dirname, basename, ext } = require('./utils')
 
 const cmpFilters = [
   {
@@ -49,6 +49,12 @@ const cmpFilters = [
     ops: ['=', '<', '<=', '>', '>=', '!='],
     matchValue: matchNumber,
     filter: ast => compare(v => getDateByKey(v.date, ast.key), ast.op, +ast.value.value)
+  },
+  {
+    keys: ['date'],
+    ops: ['=', '<', '<=', '>', '>=', '!='],
+    matchValue: matchDate,
+    filter: ast => compare(v => v.date.substring(0, 10), ast.op, ast.value.value)
   },
   {
     keys: ['width', 'height', 'iso'],

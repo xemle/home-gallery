@@ -6,7 +6,7 @@ const { inListFilter } = require('./in-list-filter')
 const { allInFilter } = require('./all-in-filter')
 const { valueFilter } = require('./value-filter')
 const { orderBy } = require('./order-by')
-const { numericKeys, textKeys, aliases } = require('./keys')
+const { numericKeys, rangeKeys, textKeys, aliases } = require('./keys')
 
 const defaultOptions = {
   textFn: v => JSON.stringify(v).toLowerCase(),
@@ -53,6 +53,7 @@ const addFilter = (ast, options) => {
 module.exports = {
   execQuery,
   numericKeys,
+  rangeKeys,
   textKeys,
   aliases
 };

@@ -1,19 +1,14 @@
 import * as React from "react";
-import {
-  useHistory
-} from "react-router-dom";
 
 import { humanizeDuration, humanizeBytes, formatDate } from "../utils/format";
 
-export const Details = ({current}) => {
-  const history = useHistory();
-
-  if (!current) {
+export const Details = ({entry, dispatch}) => {
+  if (!entry) {
     return (<></>)
   }
 
   const dispatchSearch = (query) => {
-    history.push(`/search/${encodeURIComponent(query)}`);
+    dispatch({type: 'search', query})
   }
 
   const escapeSearchValue = value => /[\s]/.test(value) ? `"${value}"` : value
@@ -61,22 +56,35 @@ export const Details = ({current}) => {
     return [simpleSearchLink(file.index, `index:${file.index}`), ':', links, ` ${humanizeBytes(file.size)}`]
   }
 
-  const mainFilename = current.files[0].filename.replace(/.*[/\\]/g, '')
+  const mainFilename = entry.files[0].filename.replace(/.*[/\\]/g, '')
+
+  const GeoLink = entry => {
+    const { latitude, longitude } = entry
+    if (!latitude || !longitude) {
+      return null
+    }
+
+    return (
+      <a key={`${entry.shortId}-geo`} onClick={() => dispatch({type: 'map'})}>
+        {latitude.toFixed(4)},{longitude.toFixed(4)} (see map)
+      </a>
+    )
+  }
 
   const rows = [
-    { title: 'Short ID', value: current.id.substring(0, 7) },
-    { title: 'Type', value: simpleSearchLink(current.type, 'type', current.type) },
-    { title: 'Date', value: simpleSearchLink(formatDate('%d.%m.%Y, %H:%M:%S', current.date), current.date.substr(0, 10)) },
-    { title: 'File', value: current.files.map(mapFile).reduce(joinReducer(', '), []) },
-    { title: 'Duration', value: humanizeDuration(current.duration) },
-    { title: 'Dimensions', value: `${current.width}x${current.height}` },
-    { title: 'Camera', value: [current.make, current.model].filter(v => !!v).map<React.ReactNode>(v => simpleSearchLink(v)).reduce(joinReducer('/'), []) },
-    { title: 'Camera Settings', value: `ISO ${current.iso}, Aperture ${current.aperture}` },
-    { title: 'Geo Position', value: [current.latitude, current.longitude].filter(v => !!v).map(v => +v.toFixed(4)).join(',') },
-    { title: 'Address', value: [current.road, current.city, current.country].filter(v => !!v).map<React.ReactNode>(v => simpleSearchLink(v, 'adress', v)).reduce(joinReducer(', '), []) },
-    { title: 'Tags', value: (current.tags || []).map<React.ReactNode>(v => simpleSearchLink(v, 'tag', v)).reduce(joinReducer(', '), []) },
-    { title: 'Objects', value: (current.objects || []).map<React.ReactNode[]>(object => [simpleSearchLink(object.class), ` (${object.score})`]).reduce(joinReducer(', '), []) },
-    { title: 'Faces', value: (current.faces || []).map(face => `${face.gender} (~${face.age.toFixed()}y)`).join(', ') },
+    { title: 'Short ID', value: entry.id.substring(0, 7) },
+    { title: 'Type', value: simpleSearchLink(entry.type, 'type', entry.type) },
+    { title: 'Date', value: simpleSearchLink(formatDate('%d.%m.%Y, %H:%M:%S', entry.date), entry.date.substr(0, 10)) },
+    { title: 'File', value: entry.files.map(mapFile).reduce(joinReducer(', '), []) },
+    { title: 'Duration', value: humanizeDuration(entry.duration) },
+    { title: 'Dimensions', value: `${entry.width}x${entry.height}` },
+    { title: 'Camera', value: [entry.make, entry.model].filter(v => !!v).map<React.ReactNode>(v => simpleSearchLink(v)).reduce(joinReducer('/'), []) },
+    { title: 'Camera Settings', value: `ISO ${entry.iso}, Aperture ${entry.aperture}` },
+    { title: 'Geo Position', value: GeoLink(entry)},
+    { title: 'Address', value: [entry.road, entry.city, entry.country].filter(v => !!v).map<React.ReactNode>(v => simpleSearchLink(v, 'adress', v)).reduce(joinReducer(', '), []) },
+    { title: 'Tags', value: (entry.tags || []).map<React.ReactNode>(v => simpleSearchLink(v, 'tag', v)).reduce(joinReducer(', '), []) },
+    { title: 'Objects', value: (entry.objects || []).map<React.ReactNode[]>(object => [simpleSearchLink(object.class), ` (${object.score})`]).reduce(joinReducer(', '), []) },
+    { title: 'Faces', value: (entry.faces || []).map(face => `${face.gender} (~${face.age.toFixed()}y)`).join(', ') },
   ];
 
   return (

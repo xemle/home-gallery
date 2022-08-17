@@ -46,7 +46,7 @@ jobs:
         run: |
           rm -rf packages/api-server packages/styleguide
           node scripts/disable-dependency.js api-server styleguide
-          npm install
+          npm install --force
 
       - name: Build packages
         id: build

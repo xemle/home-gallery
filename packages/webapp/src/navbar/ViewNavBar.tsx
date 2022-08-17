@@ -36,6 +36,7 @@ export const ViewNavBar = () => {
           <a className="nav__link link" onClick={videoClickHandler}><i className="fas fa-play"></i> <span className="hide-sm">Videos</span></a>
           <a className="nav__link link" onClick={editClickHandler}><i className="fas fa-pen"></i> <span className="hide-sm">Edit</span></a>
           <Link className="nav__link link" to={`/tags`}><i className="fas fa-tags"></i> <span className="hide-sm">Tags</span></Link>
+          <Link className="nav__link link" to={`/map`}><i className="fas fa-map"></i> <span className="hide-sm">Map</span></Link>
         </div>
       </SearchNavBar>
     </>

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- webapp: Add map feature
 - index: Add filter option for maximum file size
 - webapp: Improve search by subfolder
 - webapp: Improve parallel fetch of database
