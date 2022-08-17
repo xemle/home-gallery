@@ -23,20 +23,27 @@ export const mapEntriesForBrowser = entry => {
 export const fetchAll = async (limits, onChunk) => {
   let limitIndex = 0;
   let offset = 0;
-  let chunkStart = Date.now()
-  const MAX_CHUNK_DURATION = 5 * 1000
+  const MAX_CHUNK_DURATION = 3 * 1000
+
+  const increaseLimit = (offset, limit, chunkStart) => {
+    const chunkDuration = Date.now() - chunkStart
+    if (limitIndex >= limits.length - 1            // already the last limitIndex
+        || chunkDuration > MAX_CHUNK_DURATION      // long request
+        || limit != limits[limitIndex]             // non matching current limit
+        || offset % limits[limitIndex + 1] != 0) { // new limit does not match current offset
+      return
+    }
+    limitIndex++;
+  }
 
   const next = async () => {
     let url = `api/database.json?offset=${offset}`;
     let limit = limits[limitIndex];
     if (limit > 0) {
       url += `&limit=${limit}`
+      offset += limit
     }
-    const chunkDuration = Date.now() - chunkStart
-    if (limitIndex < limits.length - 1 && chunkDuration < MAX_CHUNK_DURATION) {
-      limitIndex++;
-    }
-    chunkStart = Date.now()
+    let chunkStart = Date.now()
     return await fetchJsonWorker(url)
       .then(database => {
         if (!database.data || !database.data.length) {
@@ -45,13 +52,13 @@ export const fetchAll = async (limits, onChunk) => {
         let entries = database.data.map(mapEntriesForBrowser);
         onChunk(entries);
         if (entries.length == limit) {
-          offset += entries.length;
+          increaseLimit(offset, limit, chunkStart);
           return next();
         }
       });
   }
 
-  return next();
+  return Promise.all([next(), next()])
 }
 
 export const getEvents = () => fetchJsonWorker(`api/events.json`)

@@ -55,7 +55,7 @@ export const Main = () => {
         }
       );
 
-      const chunkLimits = [5000, 5000, 10000, 20000, 40000];
+      const chunkLimits = [1000, 2000, 4000, 8000, 16000, 32000];
       fetchAll(chunkLimits, addEntries)
         .finally(fetchEvents)
         .then(subscribeEvents);
