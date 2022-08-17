@@ -12,7 +12,7 @@ export const EditNavBar = () => {
   const viewMode = useStoreState(state => state.editMode.viewMode);
 
   const selectedIdMap = useStoreState(state => state.editMode.selectedIdMap);
-  const allEntries = useStoreState(state => state.entries.allEntries)
+  const id2Entries = useStoreState(state => state.entries.id2Entries)
 
   const setViewMode = useStoreActions(actions => actions.editMode.setViewMode);
   const reset = useStoreActions(actions => actions.editMode.reset);
@@ -35,7 +35,7 @@ export const EditNavBar = () => {
 
   const showSelected = () => {
     const entryIds = Object.keys(selectedIdMap);
-    const entries = entryIds.map(id => allEntries.get(id)).filter(e => !!e);
+    const entries = entryIds.map(id => id2Entries.get(id)).filter(e => !!e);
     setEntries(entries);
   }
 

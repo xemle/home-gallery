@@ -131,8 +131,7 @@ const execFaces = (entries: Entry[], descriptor) => {
 
 const byDateDesc = (a, b) => a.date < b.date ? 1 : -1;
 
-const doSearch = async (allEntries: Map<String, Entry>, query) => {
-  let entries = Array.from(allEntries.values())
+const doSearch = async (entries: Entry[], query) => {
   entries.sort(byDateDesc)
 
   if (query.type == 'query') {
@@ -167,7 +166,7 @@ export const searchModel : SearchModel = {
   refresh: thunk(async (action, _, { getState, getStoreState }) => {
     const state = getState();
     const allEntries = getStoreState().entries.allEntries;
-    const entries = await doSearch(allEntries as Map<String, Entry>, state.query);
+    const entries = await doSearch([...allEntries], state.query);
     const storeState = getStoreState();
     storeState.entries.entries = entries;
   })

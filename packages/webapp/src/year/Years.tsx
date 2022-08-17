@@ -12,7 +12,7 @@ import { NavBar } from '../navbar/NavBar';
 import { List } from '../list/List';
 import { useStoreActions } from '../store/hooks';
 import { useStoreState } from "easy-peasy";
-import { Entry } from '../store/entry-model';
+import { StoreModel } from '../store/store';
 
 interface YearInfo {
   year: number,
@@ -22,13 +22,11 @@ interface YearInfo {
 }
 
 export const Years = () => {
-  const allEntries = useStoreState(state => state.entries.allEntries);
+  const allEntries = useStoreState((state: StoreModel) => state.entries.allEntries);
   const history = useHistory();
 
   const yearInfos: YearInfo[] = useMemo(() => {
-    const entries: Entry[] = Array.from(allEntries.values());
-
-    const year2info = entries.reduce((result, {type, date}) => {
+    const year2info = allEntries.reduce((result, {type, date}) => {
       const year = date.substring(0, 4) || '1970'
       if (!result[year]) {
         result[year] = { year: +year, count: 0, images: 0, videos: 0 }

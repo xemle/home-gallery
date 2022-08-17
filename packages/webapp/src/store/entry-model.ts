@@ -16,7 +16,8 @@ export interface Entry {
 }
 
 export interface EntryModel {
-  allEntries: Map<String, Entry>;
+  id2Entries: Map<String, Entry>;
+  allEntries: Entry[];
   entries: Entry[];
 
   addEntries: Thunk<EntryModel, Entry[], any, StoreModel>;
@@ -24,15 +25,17 @@ export interface EntryModel {
 }
 
 export const entryModel : EntryModel = {
-  allEntries: new Map<String, Entry>(),
+  id2Entries: new Map<String, Entry>(),
+  allEntries: [],
   entries: [],
 
   addEntries: thunk((actions, payload, {getState, getStoreActions}) => {
     const state = getState();
-    const allEntries = state.allEntries;
+    const id2Entries = state.id2Entries;
     payload.forEach(entry => {
-      allEntries.set(entry.shortId, entry);
+      id2Entries.set(entry.shortId, entry);
     })
+    state.allEntries = Array.from(id2Entries.values())
     getStoreActions().search.refresh();
   }),
 

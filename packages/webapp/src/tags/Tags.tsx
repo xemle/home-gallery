@@ -3,18 +3,16 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 
 import { NavBar } from '../navbar/NavBar';
-import { List } from '../list/List';
-import { useStoreActions } from '../store/hooks';
 import { useStoreState } from "easy-peasy";
-import { Entry } from '../store/entry-model';
+import { StoreModel } from '../store/store';
+
 
 export const Tags = () => {
-  const allEntries = useStoreState(state => state.entries.allEntries);
+  const allEntries = useStoreState((state: StoreModel) => state.entries.allEntries);
 
   const tags = useMemo(() => {
-    const entries: Entry[] = Array.from(allEntries.values());
     const tagsCount = {};
-    entries.forEach(({tags}) => {
+    allEntries.forEach(({tags}) => {
       if (tags) {
         tags.forEach((tag) => {
           if (tagsCount[tag]) {
