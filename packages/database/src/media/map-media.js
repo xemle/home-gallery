@@ -1,0 +1,58 @@
+const through2 = require('through2')
+
+const log = require('@home-gallery/logger')('database.media')
+
+const { getEntryDate } = require('./date')
+const { getVibrantColors } = require('./vibrant-colors')
+const { getExif } = require('./exif')
+const { getAddress } = require('./address')
+const { getTags } = require('./tags')
+const { getSimilarityHash } = require('./similarity')
+const { getObjects } = require('./objects')
+const { getFaces } = require('./faces')
+const { getFiles } = require('./files')
+const { getPreviews } = require('./previews')
+
+const createMedia = (entry, updated) => {
+  const date = getEntryDate(entry) || entry.date
+  const files = getFiles(entry)
+  const previews = getPreviews(entry)
+  const vibrantColors = getVibrantColors(entry)
+  
+  const exif = getExif(entry)
+  const address = getAddress(entry)
+  
+  const tags = getTags(entry)
+  const similarityHash = getSimilarityHash(entry)
+  const objects = getObjects(entry, 0.6)
+  const faces = getFaces(entry, 0.7)
+
+  const media = Object.assign({
+    id: entry.sha1sum,
+    type: entry.type,
+    updated,
+    date,
+    files,
+    previews,
+    vibrantColors,
+    tags,
+    objects,
+    faces
+  }, exif, address, similarityHash)
+
+  return media
+}
+
+const mapMedia = (updated) => {
+  return through2.obj(function (entry, _, cb) {
+    try {
+      const media = createMedia(entry, updated)
+      this.push(media)
+    } catch (e) {
+      log.warn(e, `Could not create media entry of ${entry}: ${e}. Skip it`)
+    }
+    cb()
+  })
+}
+
+module.exports = mapMedia
