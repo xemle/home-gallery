@@ -1,6 +1,6 @@
 # Dateabase date
 
-Tags: debug
+Tags: database, date
 
 * Start mock server
 
