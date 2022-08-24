@@ -1,4 +1,4 @@
-# Dateabase date
+# Database date
 
 Tags: database, date
 
@@ -23,7 +23,7 @@ DJI_0035.xmp gets priority due its groups all sidecar
 * Add file "database/files/DJI_0035.JPG.xmp"
 * Add file "database/files/DJI_0035.xmp" 
 * Build database
-* Database entry "08557f1" has property "date" with value "2019-04-29T10:48:49.000Z"
+* Database entry "08557f1" has property "date" with value "2019-04-29T02:48:49.000Z"
 
 ## Date by main file sidecar
 

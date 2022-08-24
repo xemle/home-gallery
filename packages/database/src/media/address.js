@@ -1,4 +1,4 @@
-const { getEntryMetaByKey } = require('./utils')
+const { getMetaEntries } = require('./utils')
 
 const log = require('@home-gallery/logger')('database.media.address')
 
@@ -8,17 +8,17 @@ const keyMapping = {
   town: 'city',
 }
 
-const getAddress = (entry) => {
-  let result = {};
-  const geoReverse = getEntryMetaByKey(entry, 'geoReverse');
+const createAddress = (geoReverse) => {
   if (!geoReverse) {
-    return result
+    return false
   } else if (!geoReverse.address) {
     log.warn(`No geo address found for entry ${entry} with geo coordinates ${geoReverse.lat}/${geoReverse.lon}. Skip address`)
-    return result
+    return false
   }
 
-  result.addresstype = geoReverse.addresstype
+  const result = {
+    addresstype: geoReverse.addresstype
+  }
 
   const address = geoReverse.address
   // Unify city information: hamlet < village < town < city. Latest wins
@@ -31,6 +31,18 @@ const getAddress = (entry) => {
   })
 
   return result
+}
+
+const getAddress = (entry) => {
+  const metaEntries = getMetaEntries(entry)
+  const metaAddress = metaEntries.reduce((address, entry) => address || createAddress(entry.meta?.geoReverse), false)
+  if (metaAddress) {
+    return metaAddress
+  }
+
+  const allEntries = [entry, ...(entry.sidecars || [])]
+  const allAddress = allEntries.reduce((address, entry) => address || createAddress(entry.meta?.geoReverse), false)
+  return allAddress ? allAddress : {}
 }
 
 module.exports = {
