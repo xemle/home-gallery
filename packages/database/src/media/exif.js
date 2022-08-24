@@ -75,9 +75,6 @@ const getExif = (entry) => {
     focalLength: exif.FocalLength ? +(exif.FocalLength.replace(' mm', '')) : -1,
     focalLength33mm: exif.FocalLengthIn35mmFormat ? +(exif.FocalLengthIn35mmFormat.replace(' mm', '')) : -1,
     orientation: exif.Orientation || 1,
-    latitude: exif.GPSLatitude || 0,
-    longitude: exif.GPSLongitude || 0,
-    altitude: exif.GPSAltitude || 0,
     whiteBalance: exif.WhiteBalance
   }, getExposerTime(), getShutterSpeed())
 }

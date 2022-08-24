@@ -6,6 +6,7 @@ const { getEntryDate } = require('./date')
 const { getVibrantColors } = require('./vibrant-colors')
 const { getExif } = require('./exif')
 const { getAddress } = require('./address')
+const { getGeo} = require('./geo')
 const { getTags } = require('./tags')
 const { getSimilarityHash } = require('./similarity')
 const { getObjects } = require('./objects')
@@ -21,6 +22,7 @@ const createMedia = (entry, updated) => {
   
   const exif = getExif(entry)
   const address = getAddress(entry)
+  const geo = getGeo(entry)
   
   const tags = getTags(entry)
   const similarityHash = getSimilarityHash(entry)
@@ -38,7 +40,7 @@ const createMedia = (entry, updated) => {
     tags,
     objects,
     faces
-  }, exif, address, similarityHash)
+  }, exif, address, geo, similarityHash)
 
   return media
 }

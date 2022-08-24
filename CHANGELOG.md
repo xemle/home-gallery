@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- database: Use geo locations from sidecars
 - webapp: Fix updates of year view while loading
 
 ## [1.6.1] - 2022-08-13
