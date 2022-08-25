@@ -2,9 +2,9 @@ const through2 = require('through2');
 
 const { readEntryFilesCached } = require('@home-gallery/storage');
 
-const read = (storageDir) => {
+const readStorageData = (storageDir) => {
   const { readEntryFiles, clearCache } = readEntryFilesCached(storageDir);
-  
+
   const task = (entries, cb) => {
     let i = 0;
     const next = () => {
@@ -43,4 +43,4 @@ const read = (storageDir) => {
   }, flush);
 }
 
-module.exports = read;
+module.exports = readStorageData;

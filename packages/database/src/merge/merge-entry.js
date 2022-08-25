@@ -1,4 +1,5 @@
 const log = require('@home-gallery/logger')('database.merge')
+
 const { mergeGroups, groupEntriesById } = require('./entry-group')
 const { toMultiKeyMap, fileToString, entryToString, uniqBy } = require('./utils')
 

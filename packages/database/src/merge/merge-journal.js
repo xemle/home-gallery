@@ -2,8 +2,7 @@ const log = require('@home-gallery/logger')('database.mergeJournal');
 const { getIndexName, getJournalFilename, readJournal } = require('@home-gallery/index');
 
 const { mergeEntries } = require('./merge-entry')
-const { initDatabase, readDatabase } = require('./read-database')
-const { writeDatabase } = require('./write-database')
+const { initDatabase, readDatabase, writeDatabase } = require('../database')
 
 const readJournals = (indexFilenames, journal, cb) => {
   let i = 0;
