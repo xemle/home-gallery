@@ -105,7 +105,7 @@ const extractData = async (options) => {
       err => {
         endExiftool(exiftool, () => {
           if (err) {
-            log.err(err, `Could not process entries: ${err}`)
+            log.error(err, `Could not process entries: ${err}`)
             reject(err)
           } else {
             resolve(stats.processed)

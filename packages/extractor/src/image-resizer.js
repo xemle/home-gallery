@@ -130,7 +130,7 @@ const createImageResizer = (options, cb) => {
   let index = 0
   const next = () => {
     if (index == resizer.length) {
-      log.err(`Could not load an image resizser`)
+      log.error(`Could not load an image resizser`)
       cb(null, errorResizer)
     }
     const item = resizer[index++]

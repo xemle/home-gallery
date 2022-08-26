@@ -82,7 +82,7 @@ function geoReverse(storage, {geoAddressLanguage, geoServerUrl}) {
       }
       storage.writeEntryFile(entry, geoReverseSuffix, body, (err) => {
         if (err) {
-          log.err(err, `Could write geo reverse of ${entry} for ${geo}: ${err}`);
+          log.error(err, `Could write geo reverse of ${entry} for ${geo}: ${err}`);
           return cb();
         } else {
           let info = '';
