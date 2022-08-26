@@ -1,7 +1,7 @@
-const through2 = require('through2');
+const through = require('./through');
 const log = require('@home-gallery/logger')('stream.concurrent');
 
-const noop = () => through2.obj((entry, _, cb) => cb(null, entry))
+const noop = () => through((entry, _, cb) => cb(null, entry))
 
 const concurrent = (concurrent, countOffset) => {
   concurrent = typeof concurrent == 'undefined' ? 0 : +concurrent
@@ -32,7 +32,7 @@ const concurrent = (concurrent, countOffset) => {
     head.done();
   }
 
-  const queueEntry = through2.obj((entry, _, cb) => {
+  const queueEntry = through((entry, _, cb) => {
     const done = () => cb(null, entry);
     queue.push({entry, done, count: countOffset + count++});
     next();
@@ -41,7 +41,7 @@ const concurrent = (concurrent, countOffset) => {
     next();
   });
 
-  const releaseEntry = through2.obj((entry, _, cb) => {
+  const releaseEntry = through((entry, _, cb) => {
     runningTasks--
     //log.info(`End processing entry ${entry}`)
     cb(null, entry);

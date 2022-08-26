@@ -1,4 +1,4 @@
-const through2 = require('through2');
+const through = require('./through');
 const log = require('@home-gallery/logger')('stream.memory');
 
 function memoryIndicator({name, intervalMs}) {
@@ -6,7 +6,7 @@ function memoryIndicator({name, intervalMs}) {
 
   let lastOutput = false;
 
-  return through2.obj(function (data, enc, cb) {
+  return through(function (data, _, cb) {
     const now = Date.now();
     if (!lastOutput || now - lastOutput > intervalMs) {
       const usage = process.memoryUsage();

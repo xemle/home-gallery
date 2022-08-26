@@ -1,10 +1,10 @@
-const through2 = require('through2');
+const through = require('./through');
 
 function group({keyFn, eager}) {
   let groups = {};
   let lastKey = false;
 
-  return through2.obj(function (entry, enc, cb) {
+  return through(function (entry, _, cb) {
     const key = keyFn(entry);
     if (lastKey === false) {
       groups[key] = [entry];

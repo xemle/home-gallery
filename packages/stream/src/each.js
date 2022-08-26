@@ -1,7 +1,7 @@
-const through2 = require('through2');
+const through = require('./through');
 
 function each(fn) {
-  return through2.obj(function (entry, enc, cb) {
+  return through(function (entry, _, cb) {
     fn(entry);
     this.push(entry);
     cb();

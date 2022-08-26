@@ -1,7 +1,7 @@
-const through2 = require('through2');
+const through = require('./through');
 
 function map(mapFunction) {
-  return through2.obj(function (entry, enc, cb) {
+  return through(function (entry, _, cb) {
     this.push(mapFunction(entry));
     cb();
   });

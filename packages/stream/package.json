@@ -21,7 +21,6 @@
     "directory": "packages/stream"
   },
   "dependencies": {
-    "@home-gallery/logger": "file:../logger",
-    "through2": "^4.0.2"
+    "@home-gallery/logger": "file:../logger"
   }
 }

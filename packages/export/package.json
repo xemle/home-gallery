@@ -31,7 +31,6 @@
     "@home-gallery/webapp": "file:../webapp",
     "archiver": "^5.0.0",
     "async": "^3.2.0",
-    "glob": "^7.1.6",
-    "through2": "^4.0.2"
+    "glob": "^7.1.6"
   }
 }

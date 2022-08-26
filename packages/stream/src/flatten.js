@@ -1,7 +1,7 @@
-const through2 = require('through2');
+const through = require('./through');
 
 const flatten = () => {
-  return through2.obj(function (entry, enc, cb) {
+  return through(function (entry, _, cb) {
     if (Array.isArray(entry)) {
       for (let i = 0; i < entry.length; i++) {
         this.push(entry[i]);

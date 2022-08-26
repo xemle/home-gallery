@@ -1,4 +1,4 @@
-const through2 = require('through2');
+const through = require('./through');
 
 function throttleAsync({passThrough, task, rateLimitMs, startLimitAfterTask}) {
   let last = 0;
@@ -38,7 +38,7 @@ function throttleAsync({passThrough, task, rateLimitMs, startLimitAfterTask}) {
     }
   }
 
-  return through2.obj(function (entry, enc, cb) {
+  return through(function (entry, _, cb) {
     queue.push({that: this, entry, callback: cb});
 
     next();

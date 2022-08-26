@@ -1,8 +1,8 @@
-const through2 = require('through2');
+const through = require('./through');
 
 const sort = (valueFn, reverse) => {
   const sortValue = reverse ? -1 : 1;
-  return through2.obj(function (entry, enc, cb) {
+  return through(function (entry, _, cb) {
     if (Array.isArray(entry)) {
       entry.sort((a, b) => valueFn(a) < valueFn(b) ? -sortValue : sortValue);
     }

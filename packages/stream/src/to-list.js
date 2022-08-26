@@ -1,8 +1,8 @@
-const through2 = require('through2');
+const through = require('./through');
 
 const toList = () => {
   const list = [];
-  return through2.obj(function (entry, enc, cb) {
+  return through(function (entry, _, cb) {
     list.push(entry);
     cb();
   }, function (cb) {

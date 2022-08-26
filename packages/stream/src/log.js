@@ -1,4 +1,4 @@
-const through2 = require('through2');
+const through = require('./through');
 const log = require('@home-gallery/logger')('stream.log');
 
 const fn = (data, index) => true;
@@ -8,7 +8,7 @@ function pipeLog(name, condition) {
   condition = condition || fn;
   let index = 0;
 
-  return through2.obj(function (data, enc, cb) {
+  return through(function (data, _, cb) {
     if (condition(data, index++)) {
       log.info((name ? name + ': ' : '') + JSON.stringify(data));
     }

@@ -1,4 +1,4 @@
-const through2 = require('through2');
+const through = require('./through');
 const log = require('@home-gallery/logger')('stream.pipe');
 
 function processIndicator({name, intervalMs, totalFn, onTick, logLevel}) {
@@ -21,7 +21,7 @@ function processIndicator({name, intervalMs, totalFn, onTick, logLevel}) {
 
   onTick = onTick || defaultTickFn
 
-  return through2.obj(function (data, enc, cb) {
+  return through(function (data, _, cb) {
     count++;
     const now = Date.now();
     if (now - lastTime > intervalMs) {

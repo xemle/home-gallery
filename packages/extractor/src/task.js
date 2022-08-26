@@ -1,7 +1,7 @@
-const through2 = require('through2');
+const { through } = require('@home-gallery/stream');
 
 const toPipe = (task, flush) => {
-  return through2.obj(function (entry, _, cb) {
+  return through(function (entry, _, cb) {
     const that = this;
     task(entry, () => {
       that.push(entry);

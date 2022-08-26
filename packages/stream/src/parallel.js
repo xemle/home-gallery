@@ -1,4 +1,4 @@
-const through2 = require('through2');
+const through = require('./through');
 
 const parallel = ({testSync, test, task, concurrent}) => {
   let runningTasks = 0;
@@ -50,7 +50,7 @@ const parallel = ({testSync, test, task, concurrent}) => {
     next()
   }
 
-  return through2.obj(function(entry, _, cb) {
+  return through(function(entry, _, cb) {
     const that = this
     const isMaxRunning = runningTasks >= concurrent
 
