@@ -7,6 +7,7 @@ const createVideoFrameExtractor = (ffmpegPath, ffprobePath) => {
     const t0 = Date.now();
 
     let files = [];
+    const timemarks = new Array(frameCount).fill(0).map((_, i) => `${(100*i/frameCount).toFixed(1)}%`)
     const command = ffmpeg(src);
     command.setFfmpegPath(ffmpegPath);
     command.setFfprobePath(ffprobePath);
@@ -20,7 +21,7 @@ const createVideoFrameExtractor = (ffmpegPath, ffprobePath) => {
         cb(null, files);
       })
       .screenshot({
-        count: frameCount,
+        timemarks,
         folder: dir,
         filename: filenamePattern
       });

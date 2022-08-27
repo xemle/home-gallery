@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- extractor: Fix video poster to first frame
 - database: Use geo locations from sidecars
 - webapp: Fix updates of year view while loading
 
