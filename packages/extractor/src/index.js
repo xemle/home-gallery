@@ -1,31 +1,37 @@
 const { pipeline } = require('stream');
 
 const log = require('@home-gallery/logger')('extractor');
+
+const { promisify, callbackify } = require('@home-gallery/common');
 const { readStreams } = require('@home-gallery/index');
+
 const { concurrent, each, filter, limit, purge, memoryIndicator, processIndicator, skip, flatten } = require('@home-gallery/stream');
-const mapToStorageEntry = require('./map-storage-entry');
+const mapToStorageEntry = require('./stream/map-storage-entry');
+const readAllEntryFiles = require('./stream/read-all-entry-files');
+const { groupByDir } = require('./stream/group-by-dir');
+const { groupSidecars, ungroupSidecars } = require('./stream/group-sidecars');
+const groupByEntryFilesCacheKey = require('./stream/group-entry-files-cache');
+const { updateEntryFilesCache } = require('./stream/update-entry-files-cache');
+
 const { createStorage } = require('./storage');
 
-const readAllEntryFiles = require('./read-all-entry-files');
-const {initExiftool, exif, endExiftool} = require('./exiftool');
-const ffprobe = require('./ffprobe');
-const { groupByDir } = require('./group-by-dir');
-const { groupSidecars, ungroupSidecars } = require('./group-sidecars');
-const embeddedRawPreview = require('./embedded-raw-preview')
-const heicPreview = require('./heic-preview')
-const rawPreviewExif = require('./raw-preview-exif.js')
-const { imagePreview } = require('./image-preview');
-const { createImageResizer } = require('./image-resizer')
-const vibrant = require('./vibrant');
-const geoReverse = require('./geo-reverse');
-const { similarEmbeddings, objectDetection, faceDetection } = require('./api-server');
-const { getFfmpegPaths } = require('./ffmpeg-path')
-const video = require('./video');
-const videoPoster = require('./video-poster');
-const { createVideoFrameExtractor } = require('./video-frame-extractor');
-const groupByEntryFilesCacheKey = require('./group-entry-files-cache');
-const { updateEntryFilesCache } = require('./update-entry-files-cache');
-const { promisify, callbackify } = require('@home-gallery/common');
+const {initExiftool, exif, endExiftool} = require('./extract/meta/exiftool');
+const ffprobe = require('./extract/meta/ffprobe');
+const geoReverse = require('./extract/meta/geo-reverse');
+
+const embeddedRawPreview = require('./extract/image/embedded-raw-preview')
+const heicPreview = require('./extract/image/heic-preview')
+const rawPreviewExif = require('./extract/image/raw-preview-exif.js')
+const { imagePreview } = require('./extract/image/image-preview');
+const { createImageResizer } = require('./extract/image/image-resizer')
+const vibrant = require('./extract/image/vibrant');
+const { similarEmbeddings, objectDetection, faceDetection } = require('./extract/image/api-server');
+
+const { getFfmpegPaths } = require('./extract/utils/ffmpeg-path')
+
+const video = require('./extract/video/video');
+const videoPoster = require('./extract/video/video-poster');
+const { createVideoFrameExtractor } = require('./extract/video/video-frame-extractor');
 
 const readStreamsAsync = promisify(readStreams)
 const createImageResizerAsync = promisify(createImageResizer)

@@ -3,7 +3,7 @@ const { spawn } = require('child_process')
 
 const log = require('@home-gallery/logger')('extractor.image.resize')
 
-const { getNativeCommand } = require('./utils')
+const { getNativeCommand } = require('../utils/native-command')
 
 const jpgOptions = {
   quality: 80,

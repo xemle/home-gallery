@@ -2,7 +2,7 @@ const ExifTool = require('exiftool-vendored').ExifTool
 
 const log = require('@home-gallery/logger')('extractor.image.rawPreviewExif')
 
-const { toPipe, conditionalTask } = require('./task')
+const { toPipe, conditionalTask } = require('../../stream/task')
 
 const rawPreviewSuffix = 'raw-preview.jpg'
 const rawPreviewExifSuffix = 'raw-preview-exif.json'

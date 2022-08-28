@@ -1,7 +1,7 @@
 
 const log = require('@home-gallery/logger')('extractor.ffmpeg');
 
-const { getNativeCommand } = require('./utils')
+const { getNativeCommand } = require('./native-command')
 
 const getFfmpegPaths = options => {
   let ffmpegPath

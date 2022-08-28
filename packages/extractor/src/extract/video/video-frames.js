@@ -1,6 +1,6 @@
 const log = require('@home-gallery/logger')('extractor.video.frames');
 
-const { toPipe, conditionalTask } = require('./task');
+const { toPipe, conditionalTask } = require('../../stream/task');
 
 const videoPreviewSuffix = 'video-preview-720.mp4';
 const firstFrameSuffix = 'video-frame-001.jpg';

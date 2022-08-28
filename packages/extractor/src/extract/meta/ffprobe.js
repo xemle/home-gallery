@@ -2,8 +2,8 @@ const ffprobe = require('ffprobe');
 
 const log = require('@home-gallery/logger')('extractor.video.ffprobe');
 
-const { getNativeCommand } = require('./utils')
-const { toPipe, conditionalTask } = require('./task');
+const { getNativeCommand } = require('../utils/native-command')
+const { toPipe, conditionalTask } = require('../../stream/task');
 
 const ffprobeSuffix = 'ffprobe.json';
 

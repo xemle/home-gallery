@@ -2,8 +2,8 @@ const ExifTool = require('exiftool-vendored').ExifTool;
 
 const log = require('@home-gallery/logger')('extractor.image.exif');
 
-const { toPipe, conditionalTask } = require('./task');
-const { getNativeCommand } = require('./utils')
+const { toPipe, conditionalTask } = require('../../stream/task');
+const { getNativeCommand } = require('../utils/native-command')
 
 const exifSuffix = 'exif.json';
 

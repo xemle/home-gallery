@@ -1,7 +1,7 @@
 const log = require('@home-gallery/logger')('extractor.video.poster');
 
-const { resizeImage } = require('./image-preview');
-const { toPipe, conditionalTask } = require('./task');
+const { resizeImage } = require('../image/image-preview');
+const { toPipe, conditionalTask } = require('../../stream/task');
 
 const videoPosterSuffix = 'video-poster.jpg';
 

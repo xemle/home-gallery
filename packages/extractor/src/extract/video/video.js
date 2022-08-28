@@ -3,7 +3,7 @@ const ffmpeg = require('fluent-ffmpeg');
 
 const log = require('@home-gallery/logger')('extractor.video');
 
-const { toPipe, conditionalTask } = require('./task');
+const { toPipe, conditionalTask } = require('../../stream/task');
 
 const videoSuffix = 'video-preview-720.mp4';
 

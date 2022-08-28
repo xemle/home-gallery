@@ -2,7 +2,7 @@ const Vibrant = require('node-vibrant');
 
 const log = require('@home-gallery/logger')('extractor.vibrant');
 
-const { toPipe, conditionalTask } = require('./task');
+const { toPipe, conditionalTask } = require('../../stream/task');
 
 const imageSuffix = 'image-preview-128.jpg';
 const vibrantSuffix = 'vibrant.json';

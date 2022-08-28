@@ -2,7 +2,7 @@ const log = require('@home-gallery/logger')('extractor.image.preview');
 
 const rawPreviewSuffix = 'raw-preview.jpg'
 
-const { toPipe, conditionalTask } = require('./task');
+const { toPipe, conditionalTask } = require('../../stream/task');
 
 const fileExtension = filename => {
   const pos = filename.lastIndexOf('.')

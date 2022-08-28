@@ -3,14 +3,13 @@ const fs = require('fs').promises
 const heicDecode = require('heic-decode')
 
 const { promisify } = require('@home-gallery/common')
+const log = require('@home-gallery/logger')('extractor.image.heic')
+const { toPipe, conditionalTask } = require('../../stream/task')
+
 const { useExternalImageResizer, jpgOptions } = require('./image-resizer')
 
 let sharp
 let jpegJs
-
-const log = require('@home-gallery/logger')('extractor.image.heic')
-
-const { toPipe, conditionalTask } = require('./task')
 
 const imageTypes = ['rawImage']
 
