@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useMemo, useEffect, useRef } from "react";
 
-import { useStoreState } from '../store/hooks';
+import { useEntryStore } from "../store/entry-store";
 
 import { FluentList } from "./FluentList";
 import { NavBar } from "../navbar/NavBar";
@@ -29,7 +29,7 @@ const useViewHeight = (offset) => {
 }
 
 export const List = () => {
-  const entries = useStoreState(state => state.entries.entries);
+  const entries = useEntryStore(state => state.entries)
 
   const containerRef = useRef(window)
 

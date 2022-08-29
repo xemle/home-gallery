@@ -1,11 +1,15 @@
 import * as React from "react";
+import { useEffect } from "react";
 
 import { List } from './List';
-import { useStoreActions } from '../store/hooks';
+import { useSearchStore } from '../store/search-store'
 
 export const AllView = () => {
-  const search = useStoreActions(actions => actions.search.search);
-  search({type: 'none'});
+  const search = useSearchStore(state => state.search);
+
+  useEffect(() => {
+    search({type: 'none'});
+  }, [])
 
   return ( 
     <>

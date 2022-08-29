@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 
 import {
   useParams,
@@ -10,9 +10,8 @@ import {
 
 import { NavBar } from '../navbar/NavBar';
 import { List } from '../list/List';
-import { useStoreActions } from '../store/hooks';
-import { useStoreState } from "easy-peasy";
-import { StoreModel } from '../store/store';
+import { useEntryStore } from '../store/entry-store'
+import { useSearchStore } from '../store/search-store'
 
 interface YearInfo {
   year: number,
@@ -22,7 +21,7 @@ interface YearInfo {
 }
 
 export const Years = () => {
-  const allEntries = useStoreState((state: StoreModel) => state.entries.allEntries);
+  const allEntries = useEntryStore(state => state.allEntries);
   const history = useHistory();
 
   const yearInfos: YearInfo[] = useMemo(() => {
@@ -68,10 +67,13 @@ export const Years = () => {
 export const YearView = () => {
   const params = useParams();
   const location = useLocation();
-  const year = +params.year;
-  const search = useStoreActions(actions => actions.search.search);
-  let locationQuery = new URLSearchParams(location.search && location.search.substring(1) || '');
-  search({type: 'year', value: year, query: locationQuery.get('q')});
+  const search = useSearchStore(state => state.search);
+
+  useEffect(() => {
+    const year = +params.year;
+    let locationQuery = new URLSearchParams(location.search && location.search.substring(1) || '');
+    search({type: 'year', value: year, query: locationQuery.get('q') || ''});
+  }, [params, location])
 
   return (
     <>

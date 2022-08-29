@@ -5,13 +5,13 @@ import {
 } from "react-router-dom";
 
 import useBodyDimensions from "../utils/useBodyDimensions";
-import { useStoreState } from '../store/hooks';
+import { useSearchStore } from "../store/search-store";
 
 import { getLowerPreviewUrl } from '../utils/preview'
 
 export const MediaNav = ({current, index, prev, next, listLocation, showNavigation, dispatch}) => {
   const { width } = useBodyDimensions();
-  const query = useStoreState(state => state.search.query);
+  const query = useSearchStore(state => state.query);
   const loadImage = async url => {
     return new Promise((resolve) => {
       if (!url) {

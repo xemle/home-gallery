@@ -2,15 +2,15 @@ import * as React from "react";
 import {
   Link, useHistory
 } from "react-router-dom";
-import { useStoreActions, useStoreState } from '../store/hooks';
+import { useSearchStore } from "../store/search-store";
+import { useEditModeStore, ViewMode } from "../store/edit-mode-store";
 
-import { ViewMode } from "../store/edit-mode-model";
 import { SearchNavBar } from './search/SearchNavBar';
 
 export const ViewNavBar = () => {
-  const search = useStoreActions(actions => actions.search.search);
-  const viewMode = useStoreState(state => state.editMode.viewMode);
-  const setViewMode = useStoreActions(actions => actions.editMode.setViewMode);
+  const search = useSearchStore(state => state.search);
+  const viewMode = useEditModeStore(state => state.viewMode);
+  const setViewMode = useEditModeStore(actions => actions.setViewMode);
   const history = useHistory();
 
 
@@ -20,7 +20,7 @@ export const ViewNavBar = () => {
   }
 
   const editClickHandler = () => {
-    setViewMode(viewMode === ViewMode.VIEW ? ViewMode.EDIT : ViewMode.VIEW);
+    setViewMode(viewMode === ViewMode.VIEW ? ViewMode.EDIT : ViewMode.VIEW)
   }
 
   const videoClickHandler = () => {

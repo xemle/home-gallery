@@ -8,9 +8,8 @@ import {
   } from "react-router-dom";
 import { LastLocationProvider } from 'react-router-last-location';
 
-import { StoreProvider } from 'easy-peasy';
-import { useStoreActions } from './store/hooks';
-import { store } from './store/store';
+import { useEntryStore } from './store/entry-store'
+import { useEventStore } from './store/event-store'
 
 import { fetchAll, getEvents, eventStream, mapEntriesForBrowser } from './api/ApiService';
 
@@ -25,16 +24,14 @@ import { MediaView } from './single/MediaView';
 
 export const Root = () => {
   return (
-    <StoreProvider store={store}>
-      <Main />
-    </StoreProvider>
+    <Main />
   )
 }
 
 export const Main = () => {
-    const addEntries = useStoreActions(actions => actions.entries.addEntries);
-    const initEvents = useStoreActions(actions => actions.events.initEvents);
-    const addEvent = useStoreActions(actions => actions.events.addEvent);
+    const addEntries = useEntryStore(state => state.addEntries);
+    const initEvents = useEventStore(state => state.initEvents);
+    const addEvent = useEventStore(state => state.addEvent);
 
     const stateEntries = window['__homeGallery']?.entries || [];
     addEntries(stateEntries.map(mapEntriesForBrowser));
@@ -46,18 +43,22 @@ export const Main = () => {
           console.log(`Could not fetch intitial events: ${e}`);
         })
 
+      const onChunk = entries => {
+        addEntries(entries)
+      }
+
       const subscribeEvents = () => eventStream(
         (event) => addEvent(event),
         (serverEvent) => {
           if (serverEvent.action === 'databaseReloaded') {
             console.log(`Reload database due server event`)
-            fetchAll(chunkLimits, addEntries)
+            fetchAll(chunkLimits, onChunk)
           }
         }
       );
 
       const chunkLimits = [1000, 2000, 4000, 8000, 16000, 32000];
-      fetchAll(chunkLimits, addEntries)
+      fetchAll(chunkLimits, onChunk)
         .finally(fetchEvents)
         .then(subscribeEvents);
     }, []);

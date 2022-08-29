@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import {
   useParams,
   useLocation,
@@ -8,8 +8,10 @@ import {
 import Hammer from 'hammerjs';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import { useStoreState, useStoreActions } from '../store/hooks';
-import useListLocation from '../utils/useListLocation';
+import { useEntryStore } from "../store/entry-store";
+import { useSearchStore } from "../store/search-store";
+import { useSingleViewStore } from "../store/single-view-store";
+import useListLocation from './useListLocation';
 
 import { MediaNav } from './MediaNav';
 import { MediaViewUnknownType } from './MediaViewUnknownType';
@@ -51,12 +53,12 @@ export const MediaView = () => {
   const listLocation = useListLocation();
   const dimensions = useBodyDimensions();
 
-  const entries = useStoreState(state => state.entries.entries);
-  const showDetails = useStoreState(state => state.singleViewModel.showDetails);
-  const showNavigation = useStoreState(state => state.singleViewModel.showNavigation);
-  const search = useStoreActions(actions => actions.search.search);
-  const setShowDetails = useStoreActions(actions => actions.singleViewModel.setShowDetails);
-  const setShowNavigation = useStoreActions(actions => actions.singleViewModel.setShowNavigation);
+  const entries = useEntryStore(state => state.entries);
+  const showDetails = useSingleViewStore(state => state.showDetails);
+  const showNavigation = useSingleViewStore(state => state.showNavigation);
+  const search = useSearchStore(state => state.search);
+  const setShowDetails = useSingleViewStore(actions => actions.setShowDetails);
+  const setShowNavigation = useSingleViewStore(actions => actions.setShowNavigation);
 
   const [hideNavigation, setHideNavigation] = useState(false)
 

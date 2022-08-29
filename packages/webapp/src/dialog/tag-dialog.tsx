@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 
-import { useStoreState } from '../store/hooks';
+import { useEventStore } from '../store/event-store'
 
 export interface TagDialogFormData {
   tags: string;
@@ -21,7 +21,7 @@ const Tags = ({tags, addTag}) => {
 
 export const TagDialog = ({onCancel, onSubmit, visible}: TagDialogProps) => {
   const [tags, setTags] = useState("");
-  const recentTags = useStoreState(state => state.events.recentTags);
+  const recentTags = useEventStore(state => state.recentTags);
 
   const submitHandler = (event) => {
     event.preventDefault();

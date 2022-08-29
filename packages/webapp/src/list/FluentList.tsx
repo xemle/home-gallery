@@ -2,24 +2,22 @@ import * as React from "react";
 import { useLayoutEffect, useRef } from "react";
 import { useLocation, useHistory } from "react-router-dom";
 import { useLastLocation } from 'react-router-last-location';
-import { useStoreActions, useStoreState } from '../store/hooks';
+import { useEditModeStore, ViewMode } from '../store/edit-mode-store'
 import Hammer from 'hammerjs';
 
 import useBodyDimensions from '../utils/useBodyDimensions';
-import { fluent } from "./fluent";
 import { VirtualScroll } from "./VirtualScroll";
-import { ViewMode } from "../store/edit-mode-model";
 import { humanizeDuration } from "../utils/format";
 import { getHigherPreviewUrl, getWidthFactor } from '../utils/preview';
 
 const Cell = ({height, width, index, item, items}) => {
   const ref = useRef();
   const location = useLocation();
-  const viewMode = useStoreState(state => state.editMode.viewMode);
+  const viewMode = useEditModeStore(state => state.viewMode);
 
-  const selectedIdMap = useStoreState(state => state.editMode.selectedIdMap);
-  const toggleId = useStoreActions(store => store.editMode.toggleId);
-  const toggleRange = useStoreActions(store => store.editMode.toggleRange);
+  const selectedIdMap = useEditModeStore(state => state.selectedIds);
+  const toggleId = useEditModeStore(store => store.toggleId);
+  const toggleRange = useEditModeStore(store => store.toggleRange);
   const {id, shortId, previews, vibrantColors, type, duration } = item;
   const style = { height, width, backgroundColor: (vibrantColors && vibrantColors[1]) || 'inherited' }
   const history = useHistory();
@@ -105,8 +103,8 @@ const Row = (props) => {
 export const FluentList = ({rows, padding}) => {
   const { width } = useBodyDimensions();
 
-  const viewMode = useStoreState(state => state.editMode.viewMode);
-  const lastSelectedId = useStoreState(state => state.editMode.lastSelectedId);
+  const viewMode = useEditModeStore(state => state.viewMode);
+  const lastSelectedId = useEditModeStore(state => state.lastSelectedId);
 
   const virtualScrollRef = useRef(null);
   const lastLocation = useLastLocation();

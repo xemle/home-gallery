@@ -38,7 +38,6 @@
     "@fortawesome/fontawesome-free": "^6.0.0",
     "@home-gallery/events": "file:../events",
     "@home-gallery/query": "file:../query",
-    "easy-peasy": "^3.2.6",
     "hammerjs": "^2.0.8",
     "leaflet": "^1.8.0",
     "moo": "^0.5.1",
@@ -49,6 +48,7 @@
     "react-use-dimensions": "^1.2.1",
     "react-window": "^1.8.5",
     "use-in-view": "^1.0.15",
-    "uuid": "^8.0.0"
+    "uuid": "^8.0.0",
+    "zustand": "^4.1.1"
   }
 }

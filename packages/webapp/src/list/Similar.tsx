@@ -6,14 +6,14 @@ import {
 } from "react-router-dom";
 
 import { List } from './List';
-import { useStoreState, useStoreActions } from '../store/hooks';
+import { useSearchStore } from '../store/search-store'
 
 export const SimilarView = () => {
   const params = useParams();
   const location = useLocation();
-  const search = useStoreActions(actions => actions.search.search);
+  const search = useSearchStore(state => state.search);
   let locationQuery = new URLSearchParams(location.search && location.search.substring(1) || '');
-  search({type: 'similar', value: params.id, query: locationQuery.get('q')});
+  search({type: 'similar', value: params.id, query: locationQuery.get('q') || ''});
 
   return ( 
     <List />

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useHistory } from "react-router-dom";
-import { useStoreActions, useStoreState } from '../../store/hooks';
+import { useSearchStore } from "../../store/search-store";
 import { useDeviceType, DeviceType } from "../../utils/useDeviceType";
 import { MobileSearch } from "./MobileSearch";
 import { DesktopSearch } from "./DesktopSearch";
@@ -9,7 +9,7 @@ import { DesktopSearch } from "./DesktopSearch";
 export const SearchNavBar = ({children}) => {
   const [ deviceType ] = useDeviceType();
 
-  const query = useStoreState(state => state.search.query);
+  const query = useSearchStore(state => state.query);
   const history = useHistory();
 
   const onSearch = (queryInput) => {

@@ -1,12 +1,11 @@
 import * as React from "react";
-import { useStoreState } from '../store/hooks';
+import { useEditModeStore, ViewMode  } from '../store/edit-mode-store'
 
-import { ViewMode } from "../store/edit-mode-model";
 import { ViewNavBar } from './ViewNavBar';
 import { EditNavBar } from './EditNavBar';
 
 export const NavBar = () => {
-  const viewMode = useStoreState(state => state.editMode.viewMode);
+  const viewMode = useEditModeStore(state => state.viewMode);
 
   return (
     <>

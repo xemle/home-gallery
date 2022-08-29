@@ -1,19 +1,24 @@
 import * as React from "react";
+import { useMemo, useEffect } from 'react'
 
 import {
   useParams,
 } from "react-router-dom";
 
 import { List } from './List';
-import { useStoreActions } from '../store/hooks';
+import { useSearchStore } from '../store/search-store';
 
 export const SearchView = () => {
   const params = useParams();
-  const term = decodeURIComponent(params.term);
-  const search = useStoreActions(actions => actions.search.search);
-  search({type: 'query', value: term});
+  const search = useSearchStore(state => state.search);
 
-  return ( 
+  const term = useMemo(() => params.term, [params])
+  useEffect(() => {
+    const value = decodeURIComponent(term);
+    search({type: 'query', value});
+  }, [term])
+
+  return (
     <>
       <List />
     </>

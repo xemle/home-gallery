@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect } from "react";
 
 import {
   useParams,
@@ -6,15 +7,18 @@ import {
 } from "react-router-dom";
 
 import { List } from './List';
-import { useStoreState, useStoreActions } from '../store/hooks';
+import { useSearchStore } from '../store/search-store';
 
 export const FacesView = () => {
   const params = useParams();
   const location = useLocation();
-  const search = useStoreActions(actions => actions.search.search);
-  let locationQuery = new URLSearchParams(location.search && location.search.substring(1) || '');
-  const value = {id: params.id, faceIndex: params.faceIndex};
-  search({type: 'faces', value, query: locationQuery.get('q')});
+  const search = useSearchStore(state => state.search);
+
+  useEffect(() => {
+    let locationQuery = new URLSearchParams(location.search && location.search.substring(1) || '');
+    const value = {id: params.id, faceIndex: params.faceIndex};
+    search({type: 'faces', value, query: locationQuery.get('q') || ''});
+  }, [params, location])
 
   return (
     <>
