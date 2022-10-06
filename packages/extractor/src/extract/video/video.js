@@ -52,7 +52,8 @@ function convertVideo(storage, entry, ffprobePath, ffmpegPath, cb) {
     .on('progress', progress => {
       const now = Date.now();
       if (now > last + intervalMs) {
-        log.info(`Video conversion of ${entry} at ${progress.timemark} is ${progress.percent.toFixed()}% done`);
+        const optionalPercent = progress.percent ? ` is ${progress.percent?.toFixed()}%` : '';
+        log.info(`Video conversion of ${entry} at ${progress.timemark}${optionalPercent} done`);
         last = now;
       }
     })
