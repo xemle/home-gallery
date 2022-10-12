@@ -49,7 +49,7 @@ const getTouchPos = touch => ({x: touch.clientX, y: touch.clientY})
 export const useTouchDragging = (ref: RefObject<any>): Dragging => {
   const [dragging, setDragging] = useState(createDraggingState())
 
-  const state = useMemo(() => ({isPressing: false, firstTouchId: false}), [])
+  const state = useMemo(() => ({isPressing: false, firstTouchId: false, lastPos: {x: -1, y: -1}}), [])
 
   const handleTouchStart = useCallback(e => {
     if (state.firstTouchId === false) {
@@ -57,6 +57,7 @@ export const useTouchDragging = (ref: RefObject<any>): Dragging => {
       const firstTouch = e.changedTouches[0]
       state.firstTouchId = firstTouch.identifier
       const pos = getTouchPos(firstTouch)
+      state.lastPos = pos
       setDragging(dragging => ({...dragging, start: pos, current: pos}))
     }
   }, [])
@@ -76,11 +77,16 @@ export const useTouchDragging = (ref: RefObject<any>): Dragging => {
       return
     }
 
+    // Sometimes y coordinate jumps on Safari at iOS
+    const dropInvalidIOsTouchMove = (lastPos, pos) => Math.abs(lastPos.y - pos.y) > 50
+
     const delayTouchPos = delayFrame((pos) => {
       if (!state.isPressing) {
         return
       }
-      setDragging(dragging => ({...dragging, isDragging: true, current: pos}))
+      setDragging(dragging => {
+        return {...dragging, isDragging: true, current: pos}
+      })
     })
 
     const handleTouchMove = e => {
@@ -90,7 +96,14 @@ export const useTouchDragging = (ref: RefObject<any>): Dragging => {
       }
       const pos = getTouchPos(touch)
       e.preventDefault()
+      e.stopPropagation()
+
+      if (dropInvalidIOsTouchMove(state.lastPos, pos)) {
+        return false
+      }
+      state.lastPos = pos
       delayTouchPos(pos)
+      return false
     }
 
     const element = ref.current
