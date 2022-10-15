@@ -34,7 +34,8 @@ export const EditNavBar = () => {
   }
 
   const showSelected = () => {
-    const entryIds = Object.keys(selectedIdMap);
+    const toShortId = id => id.substring(0, 12);
+    const entryIds = Object.keys(selectedIdMap).map(toShortId);
     const entries = entryIds.map(id => id2Entries.get(id)).filter(e => !!e);
     setEntries(entries);
   }
