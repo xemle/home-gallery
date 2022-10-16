@@ -43,6 +43,10 @@ const command = {
         default: 'size-ctime-inode',
         describe: `File matcher for index merge by: size, size-ctime, size-ctime-inode`
       },
+      'max-filesize': {
+        string: true,
+        describe: `Limit files up to given filesize. Example values are 2096, 5M or 0.2G`
+      },
       'add-limits': {
         string: true,
         describe: `Limits of new index files for incremental imports. Format is initial,add?,factor?,max? eg. 200,500,1.25,8000`
@@ -65,6 +69,7 @@ const command = {
       excludeIfPresent: argv['exclude-if-present'],
       dryRun: argv['dry-run'],
       matcherFn: matcherFns[argv.m] || matcherFns['size-ctime-inode'],
+      maxFilesize: argv.maxFilesize,
       addLimits: argv.addLimits,
       journal: argv.journal
     }

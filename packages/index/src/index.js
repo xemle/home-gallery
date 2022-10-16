@@ -2,7 +2,7 @@ const path = require('path');
 
 const log = require('@home-gallery/logger')('index');
 
-const { fileFilter, promisify, callbackify } = require('@home-gallery/common');
+const { promisify, callbackify } = require('@home-gallery/common');
 
 const readIndex = require('./read');
 const createIndex = require('./create');
@@ -13,25 +13,25 @@ const { statIndex, prettyPrint } = require('./stat')
 
 const { matcherFns } = require('./merge');
 const { readStream, readStreams } = require('./read-stream');
-const createLimitFilter = require('./limit-filter');
+const { createFilter } = require('./filter');
 const { getJournalFilename, createJournal, readJournal, removeJournal } = require('./journal')
-const { getIndexName } = require('./utils')
+const { getIndexName } = require('./utils');
 
 const asyncReadIndex = promisify(readIndex)
-const asyncFileFilter = promisify(fileFilter)
-const asyncCreateLimitFilter = promisify(createLimitFilter)
 const asyncCreateIndex = promisify(createIndex)
 const asyncUpdateIndex = promisify(updateIndex)
 const asyncWriteIndex = promisify(writeIndex)
 const asyncChecksum = promisify(checksum)
 
+const isLimitExeeded = filter => typeof filter.limitExceeded == 'function' ? filter.limitExceeded() : false
+
 const asyncCreateOrUpdate = async (directory, filename, options) => {
   const now = new Date();
   const fileIndex = await asyncReadIndex(filename)
-  const limitFilter = await asyncCreateLimitFilter(fileIndex.data.length, options.addLimits, options.filter)
-  const fsEntries = await asyncCreateIndex(directory, {...options, filter: limitFilter})
+  const filter = await createFilter(fileIndex.data.length, options)
+  const fsEntries = await asyncCreateIndex(directory, {...options, filter})
   const [entries, changes] = await asyncUpdateIndex(fileIndex.data, fsEntries, options.matcherFn)
-  const limitExceeded = limitFilter.limitExceeded()
+  const limitExceeded = isLimitExeeded(filter)
 
   if (!changes) {
     return [fileIndex, limitExceeded, changes]
@@ -76,8 +76,7 @@ const asyncUpdate = async (directory, filename, options) => {
   const t0 = Date.now();
   log.info(`Updating file index for directory ${directory}`);
 
-  const filter = await asyncFileFilter(options.exclude, options.excludeFromFile)
-  const [index, limitExceeded, changes] = await asyncCreateOrUpdate(directory, filename, {...options, filter})
+  const [index, limitExceeded, changes] = await asyncCreateOrUpdate(directory, filename, options)
   const [updateIndex, checksumChanges] = await asyncUpdateChecksum(filename, index, options.checksum, options.dryRun)
   await createJournal(filename, updateIndex, changes, checksumChanges, options.journal, options.dryRun)
 

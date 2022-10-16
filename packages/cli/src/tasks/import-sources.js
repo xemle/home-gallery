@@ -3,15 +3,18 @@ const { runCli, loggerArgs } = require('./run')
 const log = require('@home-gallery/logger')('cli.task.import')
 
 const updateIndex = async (config, source, options) => {
-  const { initialImport, journal } = options
+  const { initialImport, journal, smallFiles } = options
   const args = [...loggerArgs(config), 'index', '--directory', source.dir, '--index', source.index]
   source.matcher && args.push('--matcher', source.matcher)
   source.excludeFromFile && args.push('--exclude-from-file', source.excludeFromFile)
   source.excludeIfPresent && args.push('--exclude-if-present', source.excludeIfPresent)
 
-  excludes = source.excludes || [];
+  const excludes = source.excludes || [];
   excludes.forEach(exclude => args.push('--exclude', exclude))
 
+  if (source.maxFilesize || smallFiles) {
+    args.push('--max-filesize', source.maxFilesize || '20M')
+  }
   initialImport && args.push('--add-limits', '200,500,1.25,8000')
   journal && args.push('--journal', journal)
   await runCli(args)
@@ -129,12 +132,12 @@ const generateJournal = () => {
 
 const requireJournal = (initialImport, incrementalUpdate) => initialImport || incrementalUpdate
 
-const importSources = async (config, sources, initialImport, incrementalUpdate) => {
+const importSources = async (config, sources, initialImport, incrementalUpdate, smallFiles) => {
   let processing = true;
   while (processing) {
     const journal = requireJournal(initialImport, incrementalUpdate) ? generateJournal() : false
 
-    await updateIndices(config, sources, { initialImport, journal }).then(() => processing = false).catch(catchIndexLimitExceeded)
+    await updateIndices(config, sources, { initialImport, journal, smallFiles }).then(() => processing = false).catch(catchIndexLimitExceeded)
     await extract(config, sources, { journal })
     await buildDatabase(config, sources, { journal })
     await deleteJournals(config, sources, journal)

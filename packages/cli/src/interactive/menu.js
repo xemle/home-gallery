@@ -31,6 +31,7 @@ const menu = {
       message: 'Update files',
       choices: [
         {name: 'increment', message: 'Update and process only new files'},
+        {name: 'initialSmall', message: 'Initial import with small files only (incremental processing)'},
         {name: 'initial', message: 'Initial import (incremental processing)'},
         {name: 'full', message: 'Process all files (one run)'},
         {name: 'main', message: 'Back'}
@@ -46,9 +47,10 @@ const menu = {
         sources = sources.filter(source => indices.indexOf(source.index) >= 0)
       }
 
-      const initialImport = command == 'initial'
+      const initialImport = command == 'initial' || command == 'initialSmall'
       const incrementalUpdate = command == 'increment'
-      await importSources(config, sources, initialImport, incrementalUpdate)
+      const smallFiles = command == 'initialSmall'
+      await importSources(config, sources, initialImport, incrementalUpdate, smallFiles)
       return 'main'
     }
   },

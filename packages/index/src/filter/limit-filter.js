@@ -37,7 +37,7 @@ For add limits of 200,500,1.25,8000 the progress of index entries would be
 56001 (+8000)
 ...
  */
-const log = require('@home-gallery/logger')('index.limitFilter');
+const log = require('@home-gallery/logger')('index.filter.limit');
 
 const getLimitValues = addLimits => {
   const limits = addLimits.split(',')
@@ -58,12 +58,11 @@ const getLimit = (entryCount, addLimits) => {
   }
 }
 
-const createLimitFilter = (entryCount, addLimits, filter, cb) => {
-  filter.limitExceeded = () => false;
-
+const createLimitFilter = (entryCount, addLimits, filter) => {
   if (!addLimits) {
-    return cb(null, filter);
+    return filter;
   }
+
   const limit = getLimit(entryCount, addLimits);
 
   log.info(`Index has ${entryCount} entries. Set index limit to max ${limit} entries with ${limit - entryCount} new entries`)
@@ -82,7 +81,9 @@ const createLimitFilter = (entryCount, addLimits, filter, cb) => {
   }
 
   limitFilter.limitExceeded = () => count >= limit;
-  return cb(null, limitFilter);
+  return limitFilter
 }
 
-module.exports = createLimitFilter;
+module.exports = {
+  createLimitFilter
+}

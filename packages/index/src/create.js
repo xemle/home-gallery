@@ -20,7 +20,7 @@ const createIndex = (dir, options, cb) => {
   const t0 = Date.now();
   walk(dir, createFilesMapper(options.exludeIfPresent), (filename, stat) => {
     const relativeFilename = path.relative(dir, filename);
-    if (!options.filter(relativeFilename)) {
+    if (!options.filter(relativeFilename, stat)) {
       return false;
     }
     entries.push(Object.assign({}, stat, {

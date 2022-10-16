@@ -38,11 +38,11 @@ const runServer = options => {
   return startServer(options.config)
 }
 
-const runImport = (config, initialImport, incrementalUpdate) => {
+const runImport = (config, initialImport, incrementalUpdate, smallFiles) => {
   const sources = config.sources.filter(source => !source.offline)
 
   log.info(`Import online sources from: ${sources.map(source => source.dir)}`)
-  return importSources(config, sources, initialImport, incrementalUpdate)
+  return importSources(config, sources, initialImport, incrementalUpdate, smallFiles)
 }
 
 const command = {
@@ -100,9 +100,14 @@ const command = {
           boolean: true,
           describe: 'Check and import new files'
         },
+        'small-files': {
+          alias: 's',
+          boolean: true,
+          describe: 'Import only small files up to 20MB to exclude big files such as videos to speed up the initial import'
+        },
       }),
       (argv) => config(argv)
-          .then(options => runImport(options.config, argv.initial, argv.update))
+          .then(options => runImport(options.config, argv.initial, argv.update, argv.smallFiles))
           .then(() => log.info(`Have a good day...`))
           .catch(err => log.error(err, `Error: ${err}`))
       )
