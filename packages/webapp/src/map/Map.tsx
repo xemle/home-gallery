@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom'
 import { MapContainer, TileLayer } from 'react-leaflet'
 
 import { NavBar } from '../navbar/NavBar'
-import { useStoreState } from "easy-peasy"
+import { useEntryStore } from "../store/entry-store";
 import { FitBounds } from './FitBounds'
 import { ClusterMarkers } from './ClusterMarker'
 import useBodyDimensions from "../utils/body-dimensions"
@@ -13,7 +13,7 @@ import { QueryParams } from "./queryParams"
 
 
 export const Map = () => {
-  const entries = useStoreState(state => state.entries.entries);
+  const entries = useEntryStore(state => state.entries)
   const {width} = useBodyDimensions()
   const geoEntries = useMemo(() => entries.filter(e => e.latitude && e.longitude), [entries])
 

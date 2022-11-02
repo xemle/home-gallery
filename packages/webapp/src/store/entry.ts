@@ -6,6 +6,8 @@ export interface Entry {
   year: number
   width: number
   height: number
+  latitude: number
+  longitude: number
   tags: string[]
   appliedEventIds?: string[],
   textCache?: string | false

@@ -11,7 +11,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useEntryStore } from "../store/entry-store";
 import { useSearchStore } from "../store/search-store";
 import { useSingleViewStore } from "../store/single-view-store";
-import useListLocation from './useListLocation';
+import useListLocation from '../utils/useListLocation';
 
 import { MediaNav } from './MediaNav';
 import { MediaViewUnknownType } from './MediaViewUnknownType';
