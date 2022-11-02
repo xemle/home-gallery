@@ -11,10 +11,11 @@ export const useClientRect = ref => {
     if (!ref.current) {
       return
     }
+    const element = ref.current
     const observer = new ResizeObserver(handleObserve)
-    observer.observe(ref.current)
+    observer.observe(element)
     return () => {
-      observer.unobserve(ref.current)
+      observer.unobserve(element)
     }
   }, [ref])
 
