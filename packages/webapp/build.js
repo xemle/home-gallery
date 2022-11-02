@@ -9,7 +9,7 @@ const targets = [
     minify: !watch,
     sourcemap: true,
     platform: 'browser',
-    target: 'es2015',
+    target: 'es2020',
     outdir: 'dist',
     watch: watch
   },
