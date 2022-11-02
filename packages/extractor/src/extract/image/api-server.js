@@ -84,7 +84,7 @@ const logPublicApiPrivacyHint = (apiServerUrl, feature) => {
   if (!apiServerUrl.startsWith(PUBLIC_API_SERVER)) {
     return
   }
-  log.warn(`You are using the public api server ${apiServerUrl} for ${feature}. Please read its documentation at ${DOCUMENATION_URL} for privacy conerns`)
+  log.warn(`You are using the public api server ${apiServerUrl} for ${feature}. Please read its documentation at ${DOCUMENATION_URL} for privacy concerns`)
 }
 
 const similarEmbeddings = (storage, apiServerUrl, imagePreviewSizes, timeout = 30, concurrent = 5) => {
