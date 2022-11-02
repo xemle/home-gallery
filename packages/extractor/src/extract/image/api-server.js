@@ -6,7 +6,9 @@ const { parallel } = require('@home-gallery/stream');
 const { conditionalTask } = require('../../stream/task');
 const { sizeToImagePreviewSuffix } = require('./image-preview')
 
-const ERROR_THRESHOLD = 5;
+const ERROR_THRESHOLD = 5
+const PUBLIC_API_SERVER = 'https://api.home-gallery.org'
+const DOCUMENATION_URL = 'https://docs.home-gallery.org'
 
 const getEntryFileBySuffixes = (storage, entry, suffixes) => suffixes.find(suffix => storage.hasEntryFile(entry, suffix));
 
@@ -78,7 +80,15 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imagePreviewSuffi
   return parallel({task: conditionalTask(test, task), concurrent});
 }
 
+const logPublicApiPrivacyHint = (apiServerUrl, feature) => {
+  if (!apiServerUrl.startsWith(PUBLIC_API_SERVER)) {
+    return
+  }
+  log.warn(`You are using the public api server ${apiServerUrl} for ${feature}. Please read its documentation at ${DOCUMENATION_URL} for privacy conerns`)
+}
+
 const similarEmbeddings = (storage, apiServerUrl, imagePreviewSizes, timeout = 30, concurrent = 5) => {
+  logPublicApiPrivacyHint(apiServerUrl, 'similar images')
   return apiServerEntry(storage, {
     name: 'similarity embeddings',
     apiServerUrl,
@@ -91,6 +101,7 @@ const similarEmbeddings = (storage, apiServerUrl, imagePreviewSizes, timeout = 3
 }
 
 const objectDetection = (storage, apiServerUrl, imagePreviewSizes, timeout = 30, concurrent = 5) => {
+  logPublicApiPrivacyHint(apiServerUrl, 'object detection')
   return apiServerEntry(storage, {
     name: 'object detection',
     apiServerUrl,
@@ -103,6 +114,7 @@ const objectDetection = (storage, apiServerUrl, imagePreviewSizes, timeout = 30,
 }
 
 const faceDetection = (storage, apiServerUrl, imagePreviewSizes, timeout = 30, concurrent = 2) => {
+  logPublicApiPrivacyHint(apiServerUrl, 'face detection')
   return apiServerEntry(storage, {
     name: 'face detection',
     apiServerUrl,

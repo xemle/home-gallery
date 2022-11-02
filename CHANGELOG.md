@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- extractor: Log warning if public api server is used
 - webapp: Add map feature
 - index: Add filter option for maximum file size
 - webapp: Improve search by subfolder
