@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpx \"src/**\" dist",
+    "build": "cpy \"src/**\" dist",
     "watch": "onchange \"src/**\" -- npm run build"
   },
   "keywords": [

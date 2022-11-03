@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpx \"src/**\" dist",
-    "postbuild": "cpx \"../webapp/dist/**\" dist/public",
+    "build": "cpy \"src/**\" dist",
+    "postbuild": "cpy \"../webapp/dist/**\" dist/public",
     "watch": "onchange \"src/**\" -- npm run build"
   },
   "keywords": [
