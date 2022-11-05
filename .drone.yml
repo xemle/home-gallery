@@ -1,5 +1,5 @@
 ---
-# node env with current LTS: v16
+# node env with current LTS: v18
 kind: pipeline
 type: docker
 name: node LTS
@@ -9,7 +9,7 @@ platform:
 
 steps:
 - name: install
-  image: node:16-alpine
+  image: node:18-alpine
   commands:
   - rm -rf packages/api-server
   - npm set registry $NPM_REGISTRY
@@ -22,17 +22,17 @@ steps:
       from_secret: npm_registry
 
 - name: build
-  image: node:16-alpine
+  image: node:18-alpine
   commands:
   - npm run build -- --ignore @home-gallery/api-server
 
 - name: test
-  image: node:16-alpine
+  image: node:18-alpine
   commands:
   - npm run test -- --ignore @home-gallery/api-server
 
 - name: test:e2e
-  image: node:16-alpine
+  image: node:18-alpine
   commands:
   - apk add --no-cache git git-lfs perl vips-tools imagemagick
   - git clone $E2E_DATA_REPO ./data
@@ -68,7 +68,7 @@ steps:
     - failure
 
 ---
-# node env with pre-LTS: v14
+# node env with pre-LTS: v16
 # triggers only on merges or tagged branches
 kind: pipeline
 type: docker
@@ -79,7 +79,7 @@ platform:
 
 steps:
 - name: install
-  image: node:14-alpine
+  image: node:16-alpine
   commands:
   - rm -rf packages/api-server
   - npm set registry $NPM_REGISTRY
@@ -92,17 +92,17 @@ steps:
       from_secret: npm_registry
 
 - name: build
-  image: node:14-alpine
+  image: node:16-alpine
   commands:
   - npm run build -- --ignore @home-gallery/api-server
 
 - name: test
-  image: node:14-alpine
+  image: node:16-alpine
   commands:
   - npm run test -- --ignore @home-gallery/api-server
 
 - name: test:e2e
-  image: node:14-alpine
+  image: node:16-alpine
   commands:
   - apk add --no-cache git git-lfs perl vips-tools imagemagick
   - git clone $E2E_DATA_REPO ./data
@@ -111,6 +111,19 @@ steps:
     TZ: Europe/Berlin
     E2E_DATA_REPO:
       from_secret: e2e_data_repo
+
+- name: test node v14
+  image: node:14-alpine
+  commands:
+  - npm run test
+
+- name: test:e2e node v14
+  image: node:14-alpine
+  commands:
+  - apk add --no-cache git git-lfs perl vips-tools imagemagick
+  - npm run test:e2e -- --tags run
+  environment:
+    TZ: Europe/Berlin
 
 - name: notify
   image: sfelis/drone-email
