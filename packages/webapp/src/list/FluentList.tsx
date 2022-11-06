@@ -1,10 +1,10 @@
 import * as React from "react";
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useMemo } from "react";
 import { useLocation, useHistory } from "react-router-dom";
-import { useLastLocation } from 'react-router-last-location';
 import { useEditModeStore, ViewMode } from '../store/edit-mode-store'
 import Hammer from 'hammerjs';
 
+import { useLastLocation } from '../utils/lastLocation/useLastLocation'
 import useBodyDimensions from '../utils/useBodyDimensions';
 import { VirtualScroll } from "./VirtualScroll";
 import { humanizeDuration } from "../utils/format";
@@ -26,7 +26,7 @@ const Cell = ({height, width, index, item, items}) => {
   const previewUrl = getHigherPreviewUrl(previews, width * widthFactor);
 
   const showImage = () => {
-    history.push(`/view/${shortId}`, {listPathname: location.pathname, index});
+    history.push(`/view/${shortId}`, {listLocation: location, index});
   }
 
   const onClick = (selectRange) => {
@@ -108,21 +108,26 @@ export const FluentList = ({rows, padding}) => {
 
   const virtualScrollRef = useRef(null);
   const lastLocation = useLastLocation();
-  const idMatch = lastLocation ? lastLocation.pathname.match(/\/([a-z0-9]{7,})\b/) : false;
+
+  const lastSingleViewId = useMemo(() => {
+    const match = lastLocation?.pathname.match(/\/([a-z0-9]{7,})\b/)
+    return match ? match[1] : false
+  }, [lastLocation])
 
   useLayoutEffect(() => {
-    console.log(`MediaFluent:useLayoutEffect idMatch=${idMatch}`)
-    if (!idMatch || !rows.length) {
-      return;
+    const id = viewMode == ViewMode.EDIT && lastSelectedId ? lastSelectedId : lastSingleViewId;
+    if (!id || !rows.length) {
+      return
     }
-    const id = viewMode == ViewMode.EDIT && lastSelectedId ? lastSelectedId : idMatch && idMatch[1];
     for (let i = 0; i < rows.length; i++) {
       const cell = rows[i].columns && rows[i].columns.find(cell => cell.item.id.startsWith(id));
       if (cell) {
+        console.log(`MediaFluent:useLayoutEffect scroll to ${id}`)
         virtualScrollRef.current.scrollToRow({rowIndex: i});
         break;
       }
     }
+    console.log(`MediaFluent:useLayoutEffect could not find entry with ${id}`)
   }, [virtualScrollRef, rows])
 
   return (

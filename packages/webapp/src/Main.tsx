@@ -6,8 +6,8 @@ import {
     Switch,
     Route,
   } from "react-router-dom";
-import { LastLocationProvider } from 'react-router-last-location';
 
+import { LastLocationProvider } from './utils/lastLocation/LoastLocationProvider'
 import { useEntryStore } from './store/entry-store'
 import { useEventStore } from './store/event-store'
 
@@ -66,21 +66,21 @@ export const Main = () => {
     const base = document.querySelector('base')?.getAttribute('href') || '/';
 
     return (
-        <Router basename={base}>
-          <LastLocationProvider>
-            <Switch>
-                <Route exact path="/" children={<AllView />} />
-                <Route exact path="/years" children={<Years />} />
-                <Route exact path="/years/:year" children={<YearView />} />
-                <Route path="/view/:id" children={<MediaView />} />
-                <Route path="/similar/:id" children={<SimilarView />} />
-                <Route path="/search/:term" children={<SearchView />} />
-                <Route path="/faces/:id/:faceIndex" children={<FacesView />} />
-                <Route exact path="/tags" children={<Tags />} />
-                <Route exact path="/map" children={<Map />} />
-                <Redirect to='/' />
-            </Switch>
-          </LastLocationProvider>
-        </Router>
+      <Router basename={base}>
+        <LastLocationProvider>
+          <Switch>
+            <Route exact path="/" children={<AllView />} />
+            <Route exact path="/years" children={<Years />} />
+            <Route exact path="/years/:year" children={<YearView />} />
+            <Route path="/view/:id" children={<MediaView />} />
+            <Route path="/similar/:id" children={<SimilarView />} />
+            <Route path="/search/:term" children={<SearchView />} />
+            <Route path="/faces/:id/:faceIndex" children={<FacesView />} />
+            <Route exact path="/tags" children={<Tags />} />
+            <Route exact path="/map" children={<Map />} />
+            <Redirect to='/' />
+          </Switch>
+        </LastLocationProvider>
+      </Router>
     );
 }

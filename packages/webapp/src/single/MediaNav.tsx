@@ -1,8 +1,5 @@
 import * as React from "react";
 import { useEffect } from "react";
-import {
-  Link
-} from "react-router-dom";
 
 import useBodyDimensions from "../utils/useBodyDimensions";
 import { useSearchStore } from "../store/search-store";
