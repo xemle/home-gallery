@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
+import { createRoot } from 'react-dom/client';
 import { Root } from "./Main";
 
 const setVerticalHeight = () => {
@@ -10,6 +10,6 @@ const setVerticalHeight = () => {
 window.addEventListener('resize', setVerticalHeight);
 document.addEventListener('DOMContentLoaded', setVerticalHeight);
 
-const app = document.getElementById("app");
-
-ReactDOM.render(React.createElement(Root), app);
+const container = document.getElementById("app");
+const root = createRoot(container!);
+root.render(React.createElement(Root));
