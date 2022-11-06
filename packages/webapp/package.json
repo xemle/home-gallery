@@ -42,11 +42,6 @@
     "leaflet": "^1.8.0",
     "moo": "^0.5.1",
     "nearley": "^2.19.3",
-    "react-hotkeys-hook": "^3.3.2",
-    "react-router-last-location": "^2.0.1",
-    "react-use-dimensions": "^1.2.1",
-    "react-window": "^1.8.5",
-    "use-in-view": "^1.0.15",
     "uuid": "^8.0.0",
     "zustand": "^4.1.1"
   }
