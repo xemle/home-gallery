@@ -5,23 +5,10 @@
   "main": "gallery.js",
   "scripts": {
     "postinstall": "npm --prefix e2e install && link-parent-bin && node packages/extractor/validate-sharp.js",
-    "clean": "lerna run clean",
-    "clean:backend": "lerna run clean --scope \"@home-gallery/{logger,cast,common,stream,cli,index,extractor,fetch,database}\"",
-    "clean:web": "lerna run clean --scope \"@home-gallery/{common,cli,server,webapp,query,events}\"",
-    "build": "lerna run build",
-    "build:backend": "lerna run build --scope \"@home-gallery/{logger,cast,common,stream,cli,index,extractor,fetch,database}\"",
-    "build:web": "lerna run build --scope \"@home-gallery/{common,cli,server,webapp,query,events}\"",
-    "test": "lerna run test",
-    "test:e2e": "gauge -d e2e run specs",
-    "watch": "lerna run watch --concurrency 10 --stream",
-    "watch:backend": "npm-run-all -p watch:backend:logger watch:backend:common watch:backend:db watch:backend:rest",
-    "watch:backend:common": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/common\"",
-    "watch:backend:logger": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/logger\"",
-    "watch:backend:db": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{extractor,database}\"",
-    "watch:backend:rest": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{cast,cli,stream,index,fetch}\"",
-    "watch:web": "npm-run-all -p watch:web:common watch:web:rest",
-    "watch:web:common": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{common,query,events}\"",
-    "watch:web:rest": "lerna run watch --concurrency 10 --stream --scope \"@home-gallery/{server,webapp}\""
+    "clean": "pnpm -r clean",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "test:e2e": "gauge -d e2e run specs"
   },
   "bin": {
     "gallery": "./gallery.js"
@@ -54,7 +41,6 @@
     "express": "^4.17.3",
     "http-proxy-middleware": "^2.0.6",
     "kss": "^3.0.1",
-    "lerna": "^4.0.0",
     "link-parent-bin": "^2.0.0",
     "live-server": "^1.2.2",
     "livereload": "^0.9.3",
@@ -64,6 +50,7 @@
     "node-fetch": "^2.6.7",
     "npm-run-all": "^4.1.5",
     "onchange": "^7.0.2",
+    "pnpm": "7.14.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.0.1",

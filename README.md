@@ -195,28 +195,27 @@ bindings.
 
 ### Build
 
-HomeGallery uses [lerna](https://github.com/lerna/lerna) with multi
-packages. Common npm scripts are `clean`, `build`, `watch`.
+HomeGallery uses npm workspaces with multi
+packages. Common npm scripts are `clean`, `build`, `test`.
 
-To run only a subset of packages you can use lerna's
-scope feature, e.g build only module `export` and `database`:
+To run only a subset of packages you can use pnpm's
+filter feature, e.g build only module `export` and `database`:
 
 ```
-npm run build -- --scope '*/{export,database}'
+npx pnpm -r --filter './*/{export,database}' build
 ```
 
 ### Unit Test
 
-Run unit tests from specific packages (via lerna). Some packages have also a `watch:test` npm script.
+Run unit tests from specific packages (via pnpm)
 
 ```
-npm run test -- --scope '*/{query,event}'
+npx pnpm -r --filter './*/{query,events}' test
 ```
 
 ### End-To-End Test
 
 Run specific e2e tests (via [Gauge](https://gauge.org))
-
 
 ```
 git clone https://github.com/xemle/home-gallery-e2e-data.git data
