@@ -7,7 +7,7 @@
     "clean": "rimraf dist",
     "build": "cpy \"src/**/!(*.test.js|*.ne)\" dist",
     "postbuild": "cpy \"../webapp/dist/**\" dist/public",
-    "run": "node index.js",
+    "serve": "node index.js",
     "watch": "onchange -d 200 \"src/**\" -- npm run build",
     "test": "tap --no-check-coverage --no-coverage-report src/*/*.test.js",
     "watch:test": "tap --no-check-coverage --no-coverage-report -w src/*/*.test.js"
