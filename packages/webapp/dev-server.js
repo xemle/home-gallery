@@ -6,7 +6,7 @@ const livereload = require('livereload')
 const open = require('open')
 
 const PORT = process.env.PORT || 1234
-const API_PROXY = process.env.API_PROXY || 'http://localhost:3000'
+const API_PROXY = process.env.API_PROXY || 'http://127.0.0.1:3000'
 
 const baseDir = 'dist'
 
