@@ -1,9 +1,8 @@
-const through2 = require('through2')
-
+const { through } = require('@home-gallery/stream')
 const { sidecars } = require('@home-gallery/common')
 const { groupSidecarFiles } = sidecars
 
-const sidecarFiles = through2.obj(function (entries, enc, cb) {
+const sidecarFiles = through(function (entries, enc, cb) {
   this.push(groupSidecarFiles(entries))
 
   cb()

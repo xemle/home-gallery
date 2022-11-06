@@ -1,4 +1,4 @@
-const through2 = require('through2')
+const { through } = require('@home-gallery/stream');
 
 const log = require('@home-gallery/logger')('database.media')
 
@@ -46,7 +46,7 @@ const createMedia = (entry, updated) => {
 }
 
 const mapMedia = (updated) => {
-  return through2.obj(function (entry, _, cb) {
+  return through(function (entry, _, cb) {
     try {
       const media = createMedia(entry, updated)
       this.push(media)

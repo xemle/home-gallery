@@ -1,5 +1,4 @@
-const through2 = require('through2');
-
+const { through } = require('@home-gallery/stream');
 const { readEntryFilesCached } = require('@home-gallery/storage');
 
 const readStorageData = (storageDir) => {
@@ -33,7 +32,7 @@ const readStorageData = (storageDir) => {
     cb();
   }
 
-  return through2.obj(function (entry, enc, cb) {
+  return through(function (entry, enc, cb) {
     const that = this;
     const done = () => {
       that.push(entry);
