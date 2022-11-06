@@ -5,17 +5,20 @@ import useBodyDimensions from "../utils/useBodyDimensions";
 import { useSearchStore } from "../store/search-store";
 
 import { getLowerPreviewUrl } from '../utils/preview'
+import { resourceLimits } from "worker_threads";
 
 export const MediaNav = ({current, index, prev, next, listLocation, showNavigation, dispatch}) => {
   const { width } = useBodyDimensions();
   const query = useSearchStore(state => state.query);
-  const loadImage = async url => {
+
+  const loadImage = async (url: string | false) => {
     return new Promise((resolve) => {
       if (!url) {
-        return
+        return resolve(true)
       }
       const img = new Image();
       img.addEventListener('load', resolve);
+      img.addEventListener('error', resolve);
       img.src = url;
     });
   }
@@ -24,12 +27,16 @@ export const MediaNav = ({current, index, prev, next, listLocation, showNavigati
     let abort = false;
     const large = width <= 1280 ? 1280 : 1920;
 
-    const timerId = setTimeout(async () => {
-      prev && await loadImage(getLowerPreviewUrl(prev, 320))
-      next && await loadImage(getLowerPreviewUrl(next, 320))
-      !abort && prev && await loadImage(getLowerPreviewUrl(prev, large))
-      !abort && next && await loadImage(getLowerPreviewUrl(next, large))
-    }, 100);
+    const preloadPrevNext = async () => {
+      if (!abort) {
+        await Promise.all([loadImage(getLowerPreviewUrl(next?.previews, 320)), loadImage(getLowerPreviewUrl(prev?.previews, 320))])
+      }
+      if (!abort) {
+        await Promise.all([loadImage(getLowerPreviewUrl(next?.previews, large)), loadImage(getLowerPreviewUrl(prev?.previews, large))])
+      }
+    }
+
+    const timerId = setTimeout(preloadPrevNext, 100);
 
     return () => {
       clearTimeout(timerId)

@@ -6,12 +6,18 @@ export const getPreviewSize = preview => {
 export const byPreviewSize = (a, b) => getPreviewSize(b) - getPreviewSize(a)
 
 export const getLowerPreviewUrl = (previews, size) => {
-  const preview = previews.filter(preview => { const s = getPreviewSize(preview); return s > 0 && s <= size}).shift()
+  const preview = previews?.filter(preview => { const s = getPreviewSize(preview); return s > 0 && s <= size}).shift()
+  if (!preview) {
+    return false
+  }
   return `files/${preview}`
 }
 
 export const getHigherPreviewUrl = (previews, size) => {
-  const preview = previews.filter(preview => getPreviewSize(preview) >= size).pop() || getLowerPreviewUrl(previews, size)
+  const preview = previews?.filter(preview => getPreviewSize(preview) >= size).pop() || getLowerPreviewUrl(previews, size)
+  if (!preview) {
+    return false
+  }
   return `files/${preview}`
 }
 

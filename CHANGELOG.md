@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - webapp: Upgrade react to 18.x
 - webapp: Replace easy-peasy by zustand
 
+### Fixed
+
+- webapp: Fix pre-loading of previews
+
 ## [1.7.0] - 2022-11-02
 
 ### Added
