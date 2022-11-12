@@ -45,12 +45,36 @@
 
   Styleguide 4.1
 */
+/*
+  Active Nav Item
+
+  Use `-active` class for active nav item
+
+  Markup:
+  <div class="nav -space">
+    <div class="nav_group">
+      <a class="nav_item link"><i class="fas fa-fw fa-folder"></i> <span class="hide-sm">Folders</span></a>
+      <a class="nav_item link -active"><i class="fas fa-fw fa-clock"></i> <span class="hide-sm">Timeline</span></a>
+      <a class="nav_item link"><i class="fas fa-fw fa-pen"></i> <span class="hide-sm">Edit</span></a>
+    </div>
+    <div class="nav-group">
+      <div class="button-group -input">
+        <input class="input">
+        <button class="button -default"><i class="fas fa-search"></i></button>
+      </div>
+    </div>
+  </div>
+
+  Styleguide 4.2
+*/
 $nav-height: 40px !default;
 $nav-color: $background-color-08dp;
 $nav-background-color: $background-color-08dp;
 
 $nav-hover-color: $text-high-color;
 $nav-hover-background-color: $background-color-04dp;
+
+$nav-active-background-color: $background-color-03dp;
 
 $nav-disabled-color: $text-low-color;
 $nav-disabled-background-color: $nav-color;
@@ -104,6 +128,11 @@ $nav-disabled-background-color: $nav-color;
     span {
       color: $nav-hover-color;
     }
+  }
+
+
+  &.-active {
+    background-color: $nav-active-background-color;
   }
 
   &.-disabled,

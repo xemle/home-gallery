@@ -2,6 +2,7 @@ import * as React from "react";
 import { useState, useMemo, useEffect, useRef } from "react";
 
 import { useEntryStore } from "../store/entry-store";
+import { useEditModeStore } from '../store/edit-mode-store';
 
 import { FluentList } from "./FluentList";
 import { NavBar } from "../navbar/NavBar";
@@ -31,6 +32,9 @@ const useViewHeight = (offset) => {
 export const List = () => {
   const entries = useEntryStore(state => state.entries)
 
+  const showSelected = useEditModeStore(state => state.showSelected);
+  const selectedIds = useEditModeStore(state => state.selectedIds);
+
   const containerRef = useRef(window)
 
   const { width, height } = useBodyDimensions();
@@ -39,10 +43,17 @@ export const List = () => {
   const viewHeight = height - NAV_HEIGHT - BOTTOM_MARGIN
   const padding = 8
 
+  const visibleEntries = useMemo(() => {
+    if (!showSelected) {
+      return entries
+    }
+    return entries.filter(entry => selectedIds[entry.id])
+  }, [showSelected, selectedIds, entries])
+
   const rows = useMemo(() => {
     const rowHeights = deviceType === DeviceType.MOBILE ? {minHeight: 61, maxHeight: 110} : {minHeight: 120, maxHeight: 200 }
-    return fluent(entries, {padding, width, ...rowHeights});
-  }, [width, entries, deviceType])
+    return fluent(visibleEntries, {padding, width, ...rowHeights});
+  }, [width, visibleEntries, deviceType])
 
   const topDateItems = useMemo(() => {
     return rows.map(({top, height, columns}) => ({top, height, date: columns[0].item?.date || '1970-01-01T00:00:00', dateValue: '1970'}))

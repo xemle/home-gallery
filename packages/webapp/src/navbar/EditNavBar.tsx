@@ -11,7 +11,8 @@ export const EditNavBar = () => {
   const [dialogVisible, setDialogVisible] = useState(false);
   const viewMode = useEditModeStore(state => state.viewMode)
 
-  const selectedEntries = useEditModeStore(state => state.selectedEntries);
+  const showSelected = useEditModeStore(state => state.showSelected);
+  const toggleShowSelected = useEditModeStore(state => state.toggleShowSelected);
   const selectedIds = useEditModeStore(state => state.selectedIds);
   const count = useEditModeStore(state => state.count);
 
@@ -35,11 +36,6 @@ export const EditNavBar = () => {
     return false;
   }
 
-  const showSelected = () => {
-    const entries = selectedEntries()
-    setEntries(entries);
-  }
-
   const selecedCount = useMemo(count, [selectedIds])
   return (
     <>
@@ -49,7 +45,7 @@ export const EditNavBar = () => {
           <a className="nav_item link" onClick={reset}><i className="fas fa-undo"></i> <span className="hide-sm">Reset all</span></a>
           <a className="nav_item link" onClick={selectAll}><i className="fas fa-folder"></i> <span className="hide-sm">All</span></a>
           <a className="nav_item link" onClick={invert}><i className="fas fa-exchange-alt"></i> <span className="hide-sm">Invert</span></a>
-          <a className="nav_item link" onClick={showSelected}><i className="fas fa-eye"></i> <span className="hide-sm">View selected</span></a>
+          <a className={`nav_item link ${showSelected ? '-active' : ''}`} onClick={toggleShowSelected}><i className="fas fa-eye"></i> <span className="hide-sm">View selected</span></a>
           <a className="nav_item link" onClick={() => setDialogVisible(true)}><i className="fas fa-check"></i> <span className="hide-sm">{`Edit ${selecedCount} media`}</span><span className="hide-md">{selecedCount}</span></a>
         </div>
       </SearchNavBar>

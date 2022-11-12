@@ -17,6 +17,7 @@ export interface EditModeStore {
   viewMode: ViewMode
   selectedIds: IdMap
   lastSelectedId: string
+  showSelected: boolean
 
   setViewMode: (viewMode: ViewMode) => void
   selectAll: () => void
@@ -27,8 +28,9 @@ export interface EditModeStore {
   toggleRange: (id: string) => void
   removeIds: (ids: string[]) => void
   count: () => number
-  reset: () => void,
+  reset: () => void
   selectedEntries: () => Entry[]
+  toggleShowSelected: () => void
 }
 
 const getSelectionRange = (entries, firstId, lastId) => {
@@ -72,6 +74,7 @@ export const useEditModeStore = create<
   viewMode: ViewMode.VIEW,
   selectedIds: {},
   lastSelectedId: '',
+  showSelected: false,
 
   setViewMode: (viewMode: ViewMode) => set((state) => ({...state, viewMode})),
   selectAll: () => set((state) => {
@@ -130,7 +133,8 @@ export const useEditModeStore = create<
       .filter(([id, selected]) => selected && id2Entries[id])
       .map(([id]) => id2Entries[id])
   },
-  reset: () => set((state) => ({...state, selectedIds: {}, lastSelectedId: '', inverted: false}))
+  reset: () => set((state) => ({...state, selectedIds: {}, lastSelectedId: '', inverted: false, showSelected: false})),
+  toggleShowSelected: () => set((state) => ({...state, showSelected: !state.showSelected}))
 }), { name: 'gallery-edit-mode' }))
 
 export const isSelected = (id: string, state: EditModeStore) => state.selectedIds[id]
