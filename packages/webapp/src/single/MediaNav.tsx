@@ -7,7 +7,7 @@ import { useSearchStore } from "../store/search-store";
 import { getLowerPreviewUrl } from '../utils/preview'
 import { resourceLimits } from "worker_threads";
 
-export const MediaNav = ({current, index, prev, next, listLocation, showNavigation, dispatch}) => {
+export const MediaNav = ({current, prev, next, listLocation, showNavigation, dispatch}) => {
   const { width } = useBodyDimensions();
   const query = useSearchStore(state => state.query);
 
@@ -50,23 +50,23 @@ export const MediaNav = ({current, index, prev, next, listLocation, showNavigati
     <>
       { prev &&
         <div className="mediaNav -left">
-          <Link className={buttonClass} to={{pathname:`/view/${prev.shortId}`, state: {listLocation, index: index - 1} }}>
+          <a onClick={() => dispatch({type: 'prev'})} className={buttonClass} title="Show previous media (left arrow)">
             <i className="fas fa-chevron-left fa-2x"></i>
-          </Link>
+          </a>
         </div>
       }
       { next &&
         <div className="mediaNav -right">
-          <Link className={buttonClass} to={{pathname:`/view/${next.shortId}`, state: {listLocation, index: index + 1} }}>
+          <a onClick={() => dispatch({type: 'next'})} className={buttonClass} title="Show next media (right arrow)">
             <i className="fas fa-chevron-right fa-2x"></i>
-          </Link>
+          </a>
         </div>
       }
       <div className="mediaNav -bottom">
         { listLocation &&
-          <Link className={buttonClass} to={listLocation} title="Show media stream (ESC)">
+          <a onClick={() => dispatch({type: 'list'})} className={buttonClass} title="Show media stream (ESC)">
             <i className="fas fa-th fa-2x"></i>
-          </Link>
+          </a>
         }
         { current?.latitude != 0 && current?.longitude != 0 &&
           <a onClick={() => dispatch({type: 'map'})} className={buttonClass} title="Show map of entry (m)">
@@ -79,12 +79,12 @@ export const MediaNav = ({current, index, prev, next, listLocation, showNavigati
           </a>
         }
         { query.type != 'none' &&
-          <a onClick={() => dispatch({type: 'chronology'})} className={buttonClass} title="Show chronology">
+          <a onClick={() => dispatch({type: 'chronology'})} className={buttonClass} title="Show chronology (c)">
             <i className="fas fa-clock fa-2x"></i>
           </a>
         }
         { current &&
-          <a onClick={() => dispatch({type: 'toggleDetails'})} className={buttonClass} title="Show info">
+          <a onClick={() => dispatch({type: 'toggleDetails'})} className={buttonClass} title="Show detail info (i)">
             <i className="fas fa-info fa-2x"></i>
           </a>
         }
