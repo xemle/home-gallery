@@ -62,13 +62,13 @@ export const MediaNav = ({current, index, prev, next, listLocation, showNavigati
           </Link>
         </div>
       }
-      { <div className="mediaNav -bottom">
+      <div className="mediaNav -bottom">
         { listLocation &&
           <Link className={buttonClass} to={listLocation} title="Show media stream (ESC)">
             <i className="fas fa-th fa-2x"></i>
           </Link>
         }
-        { current.latitude != 0 && current.longitude != 0 &&
+        { current?.latitude != 0 && current?.longitude != 0 &&
           <a onClick={() => dispatch({type: 'map'})} className={buttonClass} title="Show map of entry (m)">
             <i className="fas fa-map fa-2x"></i>
           </a>
@@ -83,11 +83,12 @@ export const MediaNav = ({current, index, prev, next, listLocation, showNavigati
             <i className="fas fa-clock fa-2x"></i>
           </a>
         }
-        <a onClick={() => dispatch({type: 'toggleDetails'})} className={buttonClass} title="Show info">
-          <i className="fas fa-info fa-2x"></i>
-        </a>
-        </div>
-      }
+        { current &&
+          <a onClick={() => dispatch({type: 'toggleDetails'})} className={buttonClass} title="Show info">
+            <i className="fas fa-info fa-2x"></i>
+          </a>
+        }
+      </div>
     </>
   )
 }
