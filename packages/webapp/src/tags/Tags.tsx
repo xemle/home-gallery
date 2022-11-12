@@ -35,7 +35,7 @@ export const Tags = () => {
 
   return (
     <>
-      <NavBar />
+      <NavBar disableEdit={true} />
       <h2 style={{marginTop: '40px'}}>Tags</h2>
       <ul className="menu">
         {tags.map(tag => {

@@ -14,8 +14,8 @@
     "postinstall": "cpy \"../../node_modules/@fortawesome/fontawesome-free/webfonts/*.*\" src/fonts",
     "serve": "live-server --host=0.0.0.0 --port=3001 --wait=250 dist",
     "watch": "npm-run-all -p watch:webapp watch:styleguide",
-    "watch:webapp": "onchange --delay 300 \"../webapp/src/**/*.scss\" -- npm run build",
-    "watch:styleguide": "onchange \"src/**/*\" -- npm run build"
+    "watch:webapp": "onchange --delay 300 \"../webapp/src/**/*.scss\" -- npm-run-all -s build:css build:styleguide",
+    "watch:styleguide": "onchange --delay 300 \"src/**/*\" -- npm run build:styleguide"
   },
   "keywords": [
     "HomeGallery",

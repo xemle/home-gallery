@@ -1,19 +1,19 @@
 /*
   Navbar
 
-  Use `.-top` for pinning the navbar to the top
+  Use `-top` class for pinning the navbar to the top
 
   Markup:
   <div class="nav -space">
-    <div>
-      <a class="nav__link link"><i class="fas fa-fw fa-folder"></i> <span class="hide-sm">Folders</span></a>
-      <a class="nav__link link"><i class="fas fa-fw fa-clock"></i> <span class="hide-sm">Timeline</span></a>
-      <a class="nav__link link"><i class="fas fa-fw fa-map"></i> <span class="hide-sm">Map</span></a>
-      <a class="nav__link link"><i class="fas fa-fw fa-heart"></i> <span class="hide-sm">Favorites</span></a>
-      <a class="nav__link link"><i class="fas fa-fw fa-object-group"></i> <span class="hide-sm">Select</span></a>
-      <a class="nav__link link"><i class="fas fa-fw fa-pen"></i> <span class="hide-sm">Edit</span></a>
+    <div class="nav_group">
+      <a class="nav_item link"><i class="fas fa-fw fa-folder"></i> <span class="hide-sm">Folders</span></a>
+      <a class="nav_item link"><i class="fas fa-fw fa-clock"></i> <span class="hide-sm">Timeline</span></a>
+      <a class="nav_item link"><i class="fas fa-fw fa-map"></i> <span class="hide-sm">Map</span></a>
+      <a class="nav_item link"><i class="fas fa-fw fa-heart"></i> <span class="hide-sm">Favorites</span></a>
+      <a class="nav_item link"><i class="fas fa-fw fa-object-group"></i> <span class="hide-sm">Select</span></a>
+      <a class="nav_item link"><i class="fas fa-fw fa-pen"></i> <span class="hide-sm">Edit</span></a>
     </div>
-    <div>
+    <div class="nav_group">
       <div class="button-group -input">
         <input class="input">
         <button class="button -default"><i class="fas fa-search"></i></button>
@@ -23,8 +23,37 @@
 
   Styleguide 4
 */
+/*
+  Disabled Nav Item
+
+  Use `-disabled` class for disabled nav item
+
+  Markup:
+  <div class="nav -space">
+    <div class="nav_group">
+      <a class="nav_item link"><i class="fas fa-fw fa-folder"></i> <span class="hide-sm">Folders</span></a>
+      <a class="nav_item link"><i class="fas fa-fw fa-clock"></i> <span class="hide-sm">Timeline</span></a>
+      <a class="nav_item link -disabled"><i class="fas fa-fw fa-pen"></i> <span class="hide-sm">Edit</span></a>
+    </div>
+    <div class="nav-group">
+      <div class="button-group -input">
+        <input class="input">
+        <button class="button -default"><i class="fas fa-search"></i></button>
+      </div>
+    </div>
+  </div>
+
+  Styleguide 4.1
+*/
 $nav-height: 40px !default;
+$nav-color: $background-color-08dp;
 $nav-background-color: $background-color-08dp;
+
+$nav-hover-color: $text-high-color;
+$nav-hover-background-color: $background-color-04dp;
+
+$nav-disabled-color: $text-low-color;
+$nav-disabled-background-color: $nav-color;
 
 .nav {
   height: $nav-height;
@@ -33,7 +62,7 @@ $nav-background-color: $background-color-08dp;
   align-items: center;
   padding: 0 $unit;
 
-  background-color: #333;
+  background-color: $nav-background-color;
   z-index: 10;
 
   &.-top {
@@ -48,15 +77,44 @@ $nav-background-color: $background-color-08dp;
   }
 }
 
-.nav__link {
-  padding: 13px 2*$unit;
+.nav_group {
+  display: flex;
+  align-items: center;
+}
+
+.nav_item {
+  display: flex;
+  align-items: center;
+  height: $nav-height;
+  padding-left: 8px;
+  padding-right: 8px;
   text-decoration: none;
 
-  &:hover {
-    background-color: #444;
+  .fas {
+    margin-left: 4px;
+    margin-right: 4px;
+    text-shadow: 0 0 1px black;
   }
 
-  .fas {
-    text-shadow: 0 0 1px black;
+  &:hover {
+    color: $nav-hover-color;
+    background-color: $nav-hover-background-color;
+
+    .fas,
+    span {
+      color: $nav-hover-color;
+    }
+  }
+
+  &.-disabled,
+  &.-disabled:hover {
+    cursor: not-allowed;
+    color: $nav-disabled-color;
+
+    .fas,
+    span {
+      color: $nav-disabled-color;
+    }
+    background-color: $nav-disabled-background-color;
   }
 }

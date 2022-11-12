@@ -45,7 +45,7 @@ export const Years = () => {
 
   return (
     <>
-      <NavBar />
+      <NavBar disableEdit={true} />
       <h2 style={{marginTop: '40px'}}>Years</h2>
       <ul className="menu">
         {yearInfos.map(({year, count, images, videos}) => {

@@ -40,7 +40,7 @@ export const Map = () => {
 
   return (
     <>
-      <NavBar />
+      <NavBar disableEdit={true} />
       <div style={{width: '100%', height: 'calc(100vh - 40px)', marginTop: 40}}>
         <MapContainer scrollWheelZoom={true} style={{width: '100%', height: '100%'}}>
           <TileLayer

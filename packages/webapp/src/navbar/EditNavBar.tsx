@@ -44,13 +44,13 @@ export const EditNavBar = () => {
   return (
     <>
       <SearchNavBar>
-        <div>
-          <a className="nav__link link" onClick={toggleViewMode}><i className="fas fa-arrow-left"></i> <span className="hide-sm">Back</span></a>
-          <a className="nav__link link" onClick={reset}><i className="fas fa-undo"></i> <span className="hide-sm">Reset all</span></a>
-          <a className="nav__link link" onClick={selectAll}><i className="fas fa-folder"></i> <span className="hide-sm">All</span></a>
-          <a className="nav__link link" onClick={invert}><i className="fas fa-exchange-alt"></i> <span className="hide-sm">Invert</span></a>
-          <a className="nav__link link" onClick={showSelected}><i className="fas fa-eye"></i> <span className="hide-sm">View selected</span></a>
-          <a className="nav__link link" onClick={() => setDialogVisible(true)}><i className="fas fa-check"></i> <span className="hide-sm">{`Edit ${selecedCount} media`}</span><span className="hide-md">{selecedCount}</span></a>
+        <div className="nav_group">
+          <a className="nav_item link" onClick={toggleViewMode}><i className="fas fa-arrow-left"></i> <span className="hide-sm">Back</span></a>
+          <a className="nav_item link" onClick={reset}><i className="fas fa-undo"></i> <span className="hide-sm">Reset all</span></a>
+          <a className="nav_item link" onClick={selectAll}><i className="fas fa-folder"></i> <span className="hide-sm">All</span></a>
+          <a className="nav_item link" onClick={invert}><i className="fas fa-exchange-alt"></i> <span className="hide-sm">Invert</span></a>
+          <a className="nav_item link" onClick={showSelected}><i className="fas fa-eye"></i> <span className="hide-sm">View selected</span></a>
+          <a className="nav_item link" onClick={() => setDialogVisible(true)}><i className="fas fa-check"></i> <span className="hide-sm">{`Edit ${selecedCount} media`}</span><span className="hide-md">{selecedCount}</span></a>
         </div>
       </SearchNavBar>
       { dialogVisible && 
