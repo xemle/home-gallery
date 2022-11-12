@@ -54,12 +54,12 @@ export const ClusterMarker = ({cluster, dispatch}) => {
 
   return (
     <>
-      <Marker key={entry.id} position={cluster.center} icon={icon}>
+      <Marker position={cluster.center} icon={icon}>
         <Popup closeButton={false}>
           <div className="cluster-grid" onClick={() => dispatch({type: 'clusterClick', cluster})}>
             {cluster.entries.slice(0, 16).map(entry => {
               return (
-                <img src={getHigherPreviewUrl(entry.previews, 48)} width="48" height="48"/>
+                <img key={entry.shortId} src={getHigherPreviewUrl(entry.previews, 48)} width="48" height="48"/>
               )
             })}
           </div>
@@ -131,7 +131,7 @@ export const ClusterMarkers = ({entries, width, dispatch}) => {
       })}
       {viewEntries.map(entry => {
         return (
-          <EntryMarker key={entry.id} entry={entry} dispatch={dispatch}/>
+          <EntryMarker key={`entry-marker-${entry.shortId}`} entry={entry} dispatch={dispatch}/>
         )
       })}
     </>
