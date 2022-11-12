@@ -1,6 +1,6 @@
 import * as React from "react";
 import {
-  Link, useHistory
+  Link, useNavigate
 } from "react-router-dom";
 import { useSearchStore } from "../store/search-store";
 import { useEditModeStore, ViewMode } from "../store/edit-mode-store";
@@ -11,11 +11,11 @@ export const ViewNavBar = ({disableEdit}) => {
   const search = useSearchStore(state => state.search);
   const viewMode = useEditModeStore(state => state.viewMode);
   const setViewMode = useEditModeStore(actions => actions.setViewMode);
-  const history = useHistory();
+  const navigate = useNavigate();
 
 
   const allClickHandler = () => {
-    history.push('/');
+    navigate('/');
     search({type: 'none'});
   }
 
@@ -27,7 +27,7 @@ export const ViewNavBar = ({disableEdit}) => {
   }
 
   const videoClickHandler = () => {
-    history.push(`/search/video`);
+    navigate(`/search/video`);
   }
 
   return (

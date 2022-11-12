@@ -1,9 +1,9 @@
 import * as React from "react";
 import {useEffect} from 'react';
 import {
-    BrowserRouter as Router,
-    Redirect,
-    Switch,
+    BrowserRouter,
+    Navigate,
+    Routes,
     Route,
   } from "react-router-dom";
 
@@ -66,21 +66,21 @@ export const Main = () => {
     const base = document.querySelector('base')?.getAttribute('href') || '/';
 
     return (
-      <Router basename={base}>
+      <BrowserRouter basename={base}>
         <LastLocationProvider>
-          <Switch>
-            <Route exact path="/" children={<AllView />} />
-            <Route exact path="/years" children={<Years />} />
-            <Route exact path="/years/:year" children={<YearView />} />
-            <Route path="/view/:id" children={<MediaView />} />
-            <Route path="/similar/:id" children={<SimilarView />} />
-            <Route path="/search/:term" children={<SearchView />} />
-            <Route path="/faces/:id/:faceIndex" children={<FacesView />} />
-            <Route exact path="/tags" children={<Tags />} />
-            <Route exact path="/map" children={<Map />} />
-            <Redirect to='/' />
-          </Switch>
+          <Routes>
+            <Route path="/" element={<AllView />} />
+            <Route path="/years" element={<Years />} />
+            <Route path="/years/:year" element={<YearView />} />
+            <Route path="/view/:id" element={<MediaView />} />
+            <Route path="/similar/:id" element={<SimilarView />} />
+            <Route path="/search/:term" element={<SearchView />} />
+            <Route path="/faces/:id/:faceIndex" element={<FacesView />} />
+            <Route path="/tags" element={<Tags />} />
+            <Route path="/map" element={<Map />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </LastLocationProvider>
-      </Router>
+      </BrowserRouter>
     );
 }

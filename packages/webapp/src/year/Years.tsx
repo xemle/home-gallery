@@ -4,7 +4,7 @@ import { useMemo, useEffect } from "react";
 import {
   useParams,
   Link,
-  useHistory,
+  useNavigate,
   useLocation
 } from "react-router-dom";
 
@@ -22,7 +22,7 @@ interface YearInfo {
 
 export const Years = () => {
   const allEntries = useEntryStore(state => state.allEntries);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const yearInfos: YearInfo[] = useMemo(() => {
     const year2info = allEntries.reduce((result, {type, date}) => {
@@ -52,10 +52,10 @@ export const Years = () => {
           return <li className="-list" key={year}>
             <Link to={`/years/${year}`}>{year} - {count} media</Link>
             { images > 0 &&
-              <a onClick={() => history.push(`/years/${year}?q=image`)}><i className="fas fa-image"></i> <span className="hide-sm">{images} images</span></a>
+              <a onClick={() => navigate(`/years/${year}?q=image`)}><i className="fas fa-image"></i> <span className="hide-sm">{images} images</span></a>
             }
             { videos > 0 &&
-              <a onClick={() => history.push(`/years/${year}?q=video`)}><i className="fas fa-play"></i> <span className="hide-sm">{videos} videos</span></a>
+              <a onClick={() => navigate(`/years/${year}?q=video`)}><i className="fas fa-play"></i> <span className="hide-sm">{videos} videos</span></a>
             }
           </li>
         })}

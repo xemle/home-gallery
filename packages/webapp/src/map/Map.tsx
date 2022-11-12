@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useCallback, useMemo } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer } from 'react-leaflet'
 
 import { NavBar } from '../navbar/NavBar'
@@ -17,7 +17,7 @@ export const Map = () => {
   const {width} = useBodyDimensions()
   const geoEntries = useMemo(() => entries.filter(e => e.latitude && e.longitude), [entries])
 
-  const history = useHistory()
+  const navigate = useNavigate()
   const listLocation = useListLocation()
 
   const dispatch = useCallback(action => {
@@ -25,15 +25,15 @@ export const Map = () => {
     switch (type) {
       case 'entryClick':
         const entry = action.entry
-        history.push(`/view/${entry.shortId}`, {listLocation})
+        navigate(`/view/${entry.shortId}`, {state: listLocation})
         break;
       case 'clusterClick':
         const cluster = action.cluster
         const {south, west, north, east} = cluster
-        history.push(`/search/latitude in [${south.toFixed(4)}:${north.toFixed(4)}] and longitude in [${west.toFixed(4)}:${east.toFixed(4)}]`)
+        navigate(`/search/latitude in [${south.toFixed(4)}:${north.toFixed(4)}] and longitude in [${west.toFixed(4)}:${east.toFixed(4)}]`)
         break;
       case 'viewDateRange':
-        history.push(`/search/date in ['${action.from.substring(0, 10)}':'${action.to.substring(0, 10)}']`)
+        navigate(`/search/date in ['${action.from.substring(0, 10)}':'${action.to.substring(0, 10)}']`)
         break;
       }
   }, [])

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useLayoutEffect, useRef, useMemo } from "react";
-import { useLocation, useHistory } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEditModeStore, ViewMode } from '../store/edit-mode-store'
 import Hammer from 'hammerjs';
 
@@ -20,13 +20,13 @@ const Cell = ({height, width, index, item, items}) => {
   const toggleRange = useEditModeStore(store => store.toggleRange);
   const {id, shortId, previews, vibrantColors, type, duration } = item;
   const style = { height, width, backgroundColor: (vibrantColors && vibrantColors[1]) || 'inherited' }
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const widthFactor = getWidthFactor(width, height);
   const previewUrl = getHigherPreviewUrl(previews, width * widthFactor);
 
   const showImage = () => {
-    history.push(`/view/${shortId}`, {listLocation: location, index});
+    navigate(`/view/${shortId}`, {state: {listLocation: location, index}});
   }
 
   const onClick = (selectRange) => {

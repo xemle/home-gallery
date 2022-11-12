@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- webapp: Upgrade react router
 - Replace lerna by pnpm to build the project
 - Upgrade to node 18
 - webapp: Upgrade react to 18.x

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import useBodyDimensions from "../utils/useBodyDimensions";
 import { getLowerPreviewUrl } from '../utils/preview'
@@ -12,7 +12,7 @@ export const MediaViewImage = (props) => {
   const { showDetails } = props;
   const { id, shortId, previews, faces, objects } = props.media;
   const { width } = useBodyDimensions();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const largeSize = width <= 1280 ? 1280 : 1920;
 
@@ -30,7 +30,7 @@ export const MediaViewImage = (props) => {
 
   const selectFace = (shortId, faceNo) => {
     console.log(`Search for face ${faceNo} of ${shortId}`);
-    history.push(`/faces/${shortId}/${faceNo}`);
+    navigate(`/faces/${shortId}/${faceNo}`);
   }
 
   useEffect(() => {

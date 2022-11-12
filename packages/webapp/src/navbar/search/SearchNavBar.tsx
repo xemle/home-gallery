@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSearchStore } from "../../store/search-store";
 import { useDeviceType, DeviceType } from "../../utils/useDeviceType";
 import { MobileSearch } from "./MobileSearch";
@@ -10,19 +10,19 @@ export const SearchNavBar = ({children}) => {
   const [ deviceType ] = useDeviceType();
 
   const query = useSearchStore(state => state.query);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const onSearch = (queryInput) => {
     if (!queryInput) {
-      history.push(`/`);
+      navigate(`/`);
     } else if (query.type == 'none' || query.type == 'query') {
-      history.push(`/search/${queryInput}`);
+      navigate(`/search/${queryInput}`);
     } else if (query.type == 'year') {
-      history.push(`/years/${query.value}?q=${queryInput}`);
+      navigate(`/years/${query.value}?q=${queryInput}`);
     } else if (query.type == 'similar') {
-      history.push(`/similar/${query.value}?q=${queryInput}`);
+      navigate(`/similar/${query.value}?q=${queryInput}`);
     } else if (query.type == 'faces') {
-      history.push(`/faces/${query.value.id}/${query.value.faceIndex}?q=${queryInput}`);
+      navigate(`/faces/${query.value.id}/${query.value.faceIndex}?q=${queryInput}`);
     }
   }
 

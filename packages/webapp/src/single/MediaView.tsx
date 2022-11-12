@@ -3,7 +3,7 @@ import { useState } from "react";
 import {
   useParams,
   useLocation,
-  useHistory
+  useNavigate
 } from "react-router-dom";
 import Hammer from 'hammerjs';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -51,7 +51,7 @@ const encodeUrl = (url: string) => url.replace(/[\/]/g, char => encodeURICompone
 export const MediaView = () => {
   let { id } = useParams();
   let location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const listLocation = useListLocation();
   const dimensions = useBodyDimensions();
 
@@ -85,30 +85,30 @@ export const MediaView = () => {
       const offset = prevNextMatch[3] ? +prevNextMatch[3] : 1
       const negate = prevNextMatch[1] == 'prev' ? -1 : 1
       const i = Math.min(entries.length - 1, Math.max(0, index + (negate * offset)))
-      history.push(`/view/${entries[i].shortId}`, {listLocation, index: i});
+      navigate(`/view/${entries[i].shortId}`, {state: {listLocation, index: i}});
     } else if (type === 'similar' && current?.similarityHash) {
-      history.push(`/similar/${current.shortId}`);
+      navigate(`/similar/${current.shortId}`);
     } else if (type === 'toggleDetails') {
       setShowDetails(!showDetails);
     } else if (type === 'toggleNavigation') {
       setShowNavigation(!showNavigation);
     } else if (type == 'first' && entries.length) {
-      history.push(`/view/${entries[0].shortId}`, {listLocation, index: 0});
+      navigate(`/view/${entries[0].shortId}`, {state: {listLocation, index: 0}});
     } else if (type == 'last' && entries.length) {
-      history.push(`/view/${entries[entries.length - 1].shortId}`, {listLocation, index: entries.length - 1});
+      navigate(`/view/${entries[entries.length - 1].shortId}`, {state: {listLocation, index: entries.length - 1}});
     } else if (type == 'list') {
-      history.push(`${listLocation.pathname}${listLocation.search ? encodeUrl(listLocation.search) : ''}`, {id: current.id});
+      navigate(`${listLocation.pathname}${listLocation.search ? encodeUrl(listLocation.search) : ''}`, {state: {id: current.id}});
     } else if (type == 'chronology') {
       search({type: 'none'});
-      history.push('/');
+      navigate('/');
     } else if (type == 'play') {
       setHideNavigation(true);
     } else if (type == 'pause') {
       setHideNavigation(false);
     } else if (type == 'search') {
-      history.push(`/search/${encodeUrl(action.query)}`);
+      navigate(`/search/${encodeUrl(action.query)}`);
     } else if (type == 'map') {
-      history.push(`/map?lat=${current.latitude.toFixed(5)}&lng=${current.longitude.toFixed(5)}&zoom=14`, {listLocation})
+      navigate(`/map?lat=${current.latitude.toFixed(5)}&lng=${current.longitude.toFixed(5)}&zoom=14`, {state: {listLocation}})
     }
   }
 
