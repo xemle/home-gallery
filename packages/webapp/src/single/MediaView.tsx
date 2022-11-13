@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useParams,
   useLocation,
@@ -75,6 +75,7 @@ export const MediaView = () => {
   const entries = useEntryStore(state => state.entries);
   const showDetails = useSingleViewStore(state => state.showDetails);
   const showNavigation = useSingleViewStore(state => state.showNavigation);
+  const setLastId = useSingleViewStore(state => state.setLastId);
   const search = useSearchStore(state => state.search);
   const setShowDetails = useSingleViewStore(actions => actions.setShowDetails);
   const setShowNavigation = useSingleViewStore(actions => actions.setShowNavigation);
@@ -94,6 +95,12 @@ export const MediaView = () => {
   const key = current ? current.id : (Math.random() * 100000).toFixed(0);
   const scaleSize = scaleDimensions(current, dimensions);
   console.log(scaleSize, dimensions, current);
+
+  useEffect(() => {
+    if (id) {
+      setLastId(id)
+    }
+  }, [id])
 
   const viewEntry = (index) => {
     const { shortId } = entries[index]
