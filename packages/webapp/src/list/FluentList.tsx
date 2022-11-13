@@ -1,6 +1,7 @@
 import * as React from "react";
-import { useLayoutEffect, useRef, useMemo } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSingleViewStore } from '../store/single-view-store'
 import { useEditModeStore, ViewMode } from '../store/edit-mode-store'
 import Hammer from 'hammerjs';
 
@@ -100,35 +101,37 @@ const Row = (props) => {
   )
 }
 
+const findCellById = (rows, id) => {
+  for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+    const cell = rows[rowIndex]?.columns?.find(cell => cell.item.id.startsWith(id));
+    if (cell) {
+      return [cell, rowIndex]
+    }
+  }
+  return [null, -1]
+}
+
 export const FluentList = ({rows, padding}) => {
   const { width } = useBodyDimensions();
 
-  const viewMode = useEditModeStore(state => state.viewMode);
-  const lastSelectedId = useEditModeStore(state => state.lastSelectedId);
+  const lastViewId = useSingleViewStore(state => state.lastId);
+  const [lastRowIndex, setLastRowIndex] = useState(-1)
 
   const virtualScrollRef = useRef(null);
-  const lastLocation = useLastLocation();
-
-  const lastSingleViewId = useMemo(() => {
-    const match = lastLocation?.pathname.match(/\/([a-z0-9]{7,})\b/)
-    return match ? match[1] : false
-  }, [lastLocation])
 
   useLayoutEffect(() => {
-    const id = viewMode == ViewMode.EDIT && lastSelectedId ? lastSelectedId : lastSingleViewId;
-    if (!id || !rows.length) {
+    if (!lastViewId) {
       return
     }
-    for (let i = 0; i < rows.length; i++) {
-      const cell = rows[i].columns && rows[i].columns.find(cell => cell.item.id.startsWith(id));
-      if (cell) {
-        console.log(`MediaFluent:useLayoutEffect scroll to ${id}`)
-        virtualScrollRef.current.scrollToRow({rowIndex: i});
-        break;
-      }
+    const [cell, rowIndex] = findCellById(rows, lastViewId)
+    if (cell && lastRowIndex != rowIndex) {
+      console.log(`MediaFluent:useLayoutEffect scroll to ${lastViewId} in row ${rowIndex}`)
+      virtualScrollRef.current.scrollToRow({rowIndex});
+      setLastRowIndex(rowIndex)
+    } else if (!cell) {
+      console.log(`MediaFluent:useLayoutEffect could not find entry with ${lastViewId}`)
     }
-    console.log(`MediaFluent:useLayoutEffect could not find entry with ${id}`)
-  }, [virtualScrollRef, rows])
+  }, [virtualScrollRef, rows, lastViewId])
 
   return (
     <div className="fluent" style={{width}}>
