@@ -48,6 +48,23 @@ const scaleDimensions = (media, device) => {
 
 const encodeUrl = (url: string) => url.replace(/[\/]/g, char => encodeURIComponent(char))
 
+const hotkeysToAction = {
+  'home': 'first',
+  'left,j,backspace': 'prev',
+  'ctrl+left': 'prev-10',
+  'ctrl+shift+left': 'prev-100',
+  'right,k,space': 'next',
+  'ctrl+right': 'next-10',
+  'ctrl+shift+right': 'next-100',
+  'end': 'last',
+  'esc': 'list',
+  'i': 'toggleDetails',
+  's': 'similar',
+  'c': 'chronology',
+  't': 'toggleNavigation',
+  'm': 'map'
+}
+
 export const MediaView = () => {
   let { id } = useParams();
   let location = useLocation();
@@ -118,23 +135,6 @@ export const MediaView = () => {
     } else if (ev.direction === Hammer.DIRECTION_RIGHT) {
       dispatch({type: 'prev'})
     }
-  }
-
-  const hotkeysToAction = {
-    'home': 'first',
-    'left,j,backspace': 'prev',
-    'ctrl+left': 'prev-10',
-    'ctrl+shift+left': 'prev-100',
-    'right,k,space': 'next',
-    'ctrl+right': 'next-10',
-    'ctrl+shift+right': 'next-100',
-    'end': 'last',
-    'esc': 'list',
-    'i': 'toggleDetails',
-    's': 'similar',
-    'c': 'chronology',
-    't': 'toggleNavigation',
-    'm': 'map'
   }
 
   useHotkeys(Object.keys(hotkeysToAction).join(','), (ev, handler) => {
