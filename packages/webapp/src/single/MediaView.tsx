@@ -95,6 +95,11 @@ export const MediaView = () => {
   const scaleSize = scaleDimensions(current, dimensions);
   console.log(scaleSize, dimensions, current);
 
+  const viewEntry = (index) => {
+    const { shortId } = entries[index]
+    navigate(`/view/${shortId}`, {state: {index, listLocation}});
+  }
+
   const dispatch = (action) => {
     const { type } = action
     let prevNextMatch = type.match(/(prev|next)(-(\d+))?/)
@@ -102,7 +107,7 @@ export const MediaView = () => {
       const offset = prevNextMatch[3] ? +prevNextMatch[3] : 1
       const negate = prevNextMatch[1] == 'prev' ? -1 : 1
       const i = Math.min(entries.length - 1, Math.max(0, index + (negate * offset)))
-      navigate(`/view/${entries[i].shortId}`, {state: {listLocation, index: i}});
+      viewEntry(i)
     } else if (type === 'similar' && current?.similarityHash) {
       navigate(`/similar/${current.shortId}`);
     } else if (type === 'toggleDetails') {
@@ -110,9 +115,9 @@ export const MediaView = () => {
     } else if (type === 'toggleNavigation') {
       setShowNavigation(!showNavigation);
     } else if (type == 'first' && entries.length) {
-      navigate(`/view/${entries[0].shortId}`, {state: {listLocation, index: 0}});
+      viewEntry(0)
     } else if (type == 'last' && entries.length) {
-      navigate(`/view/${entries[entries.length - 1].shortId}`, {state: {listLocation, index: entries.length - 1}});
+      viewEntry(entries.length - 1)
     } else if (type == 'list') {
       navigate(`${listLocation.pathname}${listLocation.search ? encodeUrl(listLocation.search) : ''}`, {state: {id: current.id}});
     } else if (type == 'chronology') {
