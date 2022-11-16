@@ -25,7 +25,7 @@ export const Map = () => {
     switch (type) {
       case 'entryClick':
         const entry = action.entry
-        navigate(`/view/${entry.shortId}`, {state: listLocation})
+        navigate(`/view/${entry.shortId}`, {state: { listLocation }})
         break;
       case 'clusterClick':
         const cluster = action.cluster

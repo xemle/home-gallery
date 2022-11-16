@@ -3,6 +3,8 @@ import { useMap } from 'react-leaflet'
 
 import { useNavigate, useLocation } from 'react-router-dom'
 
+import useListLocation from '../utils/useListLocation'
+
 const throttle = (fn, delay): [() => void, () => void] => {
   let id
 
@@ -24,6 +26,7 @@ const throttle = (fn, delay): [() => void, () => void] => {
 export const useQueryParams = () => {
   const map = useMap()
   const location = useLocation()
+  const listLocation = useListLocation()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -31,7 +34,7 @@ export const useQueryParams = () => {
       const {lat, lng} = map.getCenter()
       const zoom = map.getZoom()
       const search = new URLSearchParams({ lat: lat.toFixed(4), lng: lng.toFixed(4), zoom: `${zoom}` });
-      navigate(`${location.pathname}?${search.toString()}`, {replace: true});
+      navigate(`${location.pathname}?${search.toString()}`, {replace: true, state: { listLocation }});
     }, 200)
 
     map.on('zoomend', onChange)

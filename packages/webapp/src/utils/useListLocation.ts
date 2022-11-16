@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from "react-router-dom";
-import { useLastLocation } from './lastLocation/useLastLocation'
 
 const defaultListLocation = {
   pathname: '/',
@@ -8,11 +7,12 @@ const defaultListLocation = {
   hash: ''
 };
 
-const getListLocation = (location, lastLocation) => {
+const getListLocation = (location) => {
   if (location?.state?.listLocation) {
     return location.state.listLocation
-  } else if (lastLocation) {
-    return lastLocation
+  } else if (location.pathname.match(/^\/(search|similar|faces)\//) ||
+    location.pathname.match(/^\/years\/\d+/)) {
+    return location
   } else {
     return defaultListLocation
   }
@@ -20,9 +20,12 @@ const getListLocation = (location, lastLocation) => {
 
 export default () => {
   const location = useLocation();
-  const lastLocation = useLastLocation();
 
-  const [ listLocation ] = useState(getListLocation(location, lastLocation));
+  const [ listLocation, setListLocation ] = useState(getListLocation(location));
+
+  useEffect(() => {
+    setListLocation(getListLocation(location))
+  }, [location])
 
   return listLocation;
 }
