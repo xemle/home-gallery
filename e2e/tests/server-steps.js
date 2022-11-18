@@ -70,7 +70,7 @@ const startServer = async (args = []) => {
   const child = runCliAsync(['server', '-s', getStorageDir(), '-d', getDatabaseFilename(), '-e', getEventsFilename(), '--port', port, '--no-open-browser', ...args])
 
   const protocol = args.includes('-K') ? 'https' : 'http'
-  const url = `${protocol}://localhost:${port}`
+  const url = `${protocol}://127.0.0.1:${port}`
   servers[serverId] = {
     child,
     port,
@@ -97,7 +97,7 @@ step("Start static server", async () => {
   const app = express()
   app.use(express.static(getBaseDir()))
 
-  const url = `http://localhost:${port}`
+  const url = `http://127.0.0.1:${port}`
   servers[serverId] = {
     server: false,
     port,
@@ -151,7 +151,7 @@ step("Start mock server", async () => {
   app.use(mockApiServer)
   app.use(mockGeoServer)
 
-  const url = `http://localhost:${port}`
+  const url = `http://127.0.0.1:${port}`
   servers[serverId] = {
     server: false,
     port,
