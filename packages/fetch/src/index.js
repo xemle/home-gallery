@@ -26,8 +26,8 @@ const mergeAndFilterDatabase = async (database, events, query) => {
   return filterDatabaseByQuery(appliedDatabase, query)
 }
 
-const fetch = async ({ serverUrl, databaseFile, storageDir, eventFile, insecure, query, requireEvents } = {}) => {
-  log.warn(`Fetch local and remote database`)
+const fetch = async ({ serverUrl, databaseFile, storageDir, eventFile, insecure, query, deleteLocal, requireEvents } = {}) => {
+  log.info(`Fetch local and remote database`)
   const [remoteDatabase, remoteEvents, localDatabase] = await Promise.all([
     fetchDatabase(serverUrl, { query, insecure }),
     fetchEvents(serverUrl, { insecure }).catch(handleEventError(requireEvents)),
@@ -39,7 +39,7 @@ const fetch = async ({ serverUrl, databaseFile, storageDir, eventFile, insecure,
   await handleEvents(remoteEvents, eventFile).catch(err => {
     log.warn(`Failed to merge events: ${err}. Skip events`)
   })
-  await mergeDatabase(remoteFilteredDatabase, localDatabase, databaseFile)
+  await mergeDatabase(remoteFilteredDatabase, localDatabase, databaseFile, deleteLocal)
 }
 
 const fetchRemote = async (serverUrl, {query, insecure, requireEvents}) => {

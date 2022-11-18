@@ -16,10 +16,10 @@ const readDatabase = async (databaseFile) => {
   return database
 }
 
-const mergeDatabase = async (remoteDatabase, localDatabase, databaseFile) => {
+const mergeDatabase = async (remoteDatabase, localDatabase, databaseFile, deleteLocal) => {
   const updated = new Date().toISOString()
   const t0 = Date.now()
-  const [mergedEntries, newEntries] = mergeEntries(localDatabase.data, remoteDatabase.data, [], updated)
+  const [mergedEntries, newEntries] = mergeEntries(localDatabase.data, remoteDatabase.data, [], updated, deleteLocal)
   return writeDatabaseAsync(databaseFile, mergedEntries)
     .then(() => log.info(t0, `Updated database with ${newEntries.length} new entries from remote`))
 }

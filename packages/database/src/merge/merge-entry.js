@@ -23,15 +23,33 @@ const removeFilesFromEntries = (files, file2Entry) => {
     return []
   }
 
+  log.debug(`Removing ${files.length} files`)
+
+  const entriesToRemove = []
   files.forEach(file => {
     const fileKey = getFileKey(file)
     const entry = file2Entry[fileKey]
     if (!entry) {
       log.trace(`Database has not entry for file ${fileToString(file)}`)
       return
+    } else if (!entry.files.length) {
+      log.trace(`Entry has already empty file list ${entryToString(entry)}. Skip it`)
+      return
     }
+
     removeFileFromEntry(file, entry)
+    if (!entry.files.length) {
+      log.debug(`Entry ${entryToString(entry)} will be removed due last removed file ${fileToString(file)}`)
+      entriesToRemove.push(entry)
+    }
   })
+
+  if (entriesToRemove.length) {
+    log.info(`Removed ${entriesToRemove.length} entries due empty file list`)
+  } else {
+    log.debug(`No entries found to remove`)
+  }
+  return entriesToRemove
 }
 
 const hasFiles = entry => entry.files && entry.files.length
@@ -82,11 +100,43 @@ const setUpdatedTimestamp = (entries, updated) => {
   return uniqValidEntries
 }
 
-const mergeEntries = (entries, newEntries, removedFiles, updated) => {
+const getIndexNames = (entries) => {
+  const indices = {}
+  entries.forEach(entry => entry.files.forEach(file => indices[file.index] = true))
+  return Object.keys(indices)
+}
+
+const getFilesByIndexNames = (entries, indexNames) => {
+  return entries.reduce((result, entry) => {
+    const files = entry.files.filter(file => indexNames.includes(file.index))
+    if (files.length) {
+      result.push(...files)
+    }
+    return result
+  }, [])
+}
+
+const removeMissingNewEntries = (entries, newEntries, file2Entry) => {
+  const indexNames = getIndexNames(newEntries)
+  log.debug(`Removing non existing entries for indices: ${indexNames.join(', ')}`)
+
+  const newEntryFileKeys = newEntries.reduce((result, entry) => {
+    entry.files.forEach(file => result[getFileKey(file)] = true);
+    return result
+  }, {})
+  const entryFiles = getFilesByIndexNames(entries, indexNames)
+  const entryOnlyFiles = entryFiles.filter(file => !newEntryFileKeys[getFileKey(file)])
+  removeFilesFromEntries(entryOnlyFiles, file2Entry)
+}
+
+const mergeEntries = (entries, newEntries, removedFiles, updated, deleteMissingNewEntries = false) => {
   const file2Entry = toMultiKeyMap(entries, getEntryFileKeys)
   const validNewEntries = getValidNewEntries(newEntries, file2Entry)
 
   removeFilesFromEntries(removedFiles || [], file2Entry)
+  if (deleteMissingNewEntries) {
+    removeMissingNewEntries(entries, newEntries, file2Entry)
+  }
 
   const entry2newEntry = mapEntry2newEntry(validNewEntries, file2Entry)
   const changedEntriesByGroup = mergeGroups(entry2newEntry, entries)

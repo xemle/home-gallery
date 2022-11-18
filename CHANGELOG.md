@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- fetch: Add --delete option to remove non existing local files
 - server: Add base path option
 
 ### Changed

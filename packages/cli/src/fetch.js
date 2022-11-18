@@ -31,6 +31,12 @@ const command = {
         alias: 's',
         describe: 'Storage directory'
       },
+      delete: {
+        alias: 'D',
+        boolean: true,
+        default: false,
+        describe: 'Delete local files which are missing remote for all remote index'
+      },
     })
     .demandOption(['url', 'storage', 'database', 'events'])
   },
@@ -42,7 +48,8 @@ const command = {
       storageDir: argv.storage,
       eventFile: argv.events,
       insecure: argv.insecure,
-      query: argv.query
+      query: argv.query,
+      deleteLocal: argv.delete,
     }
     const t0 = Date.now();
     fetch(options)
