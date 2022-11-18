@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- cli: Add storage purge command
 - export: Add --edit option to enable edit menu
 - fetch: Add --delete option to remove non existing local files
 - server: Add base path option

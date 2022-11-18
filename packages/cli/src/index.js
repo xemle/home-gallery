@@ -7,6 +7,7 @@ const fileIndexCli = require('./file-index');
 const extractCli = require('./extractor');
 const databaseCli = require('./database');
 const serverCli = require('./server');
+const storageCli = require('./storage');
 const exportCli = require('./export');
 const fetchCli = require('./fetch');
 const castCli = require('./cast');
@@ -22,6 +23,7 @@ const cli = () => {
     .command(extractCli)
     .command(databaseCli)
     .command(serverCli)
+    .command(storageCli)
     .command(exportCli)
     .command(fetchCli)
     .command(castCli)
@@ -30,7 +32,7 @@ const cli = () => {
     .demandCommand()
     .help()
     .alias('h', 'help')
-    .epilog('(c) 2021 HomeGallery - https://home-gallery.org')
+    .epilog('(c) 2022 HomeGallery - https://home-gallery.org')
     .argv;
 }
 

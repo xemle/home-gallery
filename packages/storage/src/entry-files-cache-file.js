@@ -8,15 +8,20 @@ const getEntryFilesCacheKey = (entry) => {
   return `${indexName}:${dirname}`;
 }
 
-const getEntryFilesCacheFilename = (entry) => {
+const getEntryFilesCacheId = (entry) => {
   const cacheKey = getEntryFilesCacheKey(entry);
-  const sha1 = sha1Hex(cacheKey);
-  const {dir, prefix} = getStoragePaths(sha1);
+  return sha1Hex(cacheKey);
+}
+
+const getEntryFilesCacheFilename = (entry) => {
+  const cacheId = getEntryFilesCacheId(entry)
+  const {dir, prefix} = getStoragePaths(cacheId);
   return path.join(dir, `${prefix}-meta.cache`);
 }
 
 module.exports = { 
   getEntryFilesCacheKey,
+  getEntryFilesCacheId,
   getEntryFilesCacheFilename 
 };
 

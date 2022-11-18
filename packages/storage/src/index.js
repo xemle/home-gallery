@@ -5,6 +5,7 @@ const { updateEntryFilesCache }= require('./entry-files-cache');
 const readStorageFile = require('./read-storage-file');
 const readEntryFiles = require('./read-entry-files');
 const readEntryFilesCached = require('./read-entry-files-cached');
+const { purgeOrphanFiles } = require('./purge-orphan-files')
 
 module.exports = {
   readEntryFiles,
@@ -14,5 +15,6 @@ module.exports = {
   getEntryFilesCacheKey,
   getEntryFilesCacheFilename,
   updateEntryFilesCache,
-  readStorageFile
+  readStorageFile,
+  purgeOrphanFiles
 }
