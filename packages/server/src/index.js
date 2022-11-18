@@ -87,7 +87,7 @@ function startServer(options, cb) {
   app.get('/api/events', readEvents);
 
   app.use(webapp(webappDir, req => ({
-    disablePwa: !!req.user,
+    disabled: !!req.user ? ['pwa'] : [],
     entries: getFirstEntries(50)
   }), {
     basePath: options.basePath || '/',

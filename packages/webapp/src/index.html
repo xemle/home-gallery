@@ -92,36 +92,35 @@
     <script>window.__homeGallery={}</script>
     <script defer src="App.js" type="text/javascript"></script>
     <script>
-      const isLocal = ['127.0.0.1', 'localhost'].indexOf(location.hostname) >= 0
-      const disablePwa = (window.__homeGallery || {}).disablePwa
-      if ('serviceWorker' in navigator && !isLocal && !disablePwa) {
-        const worker = new URL('service-worker.js', document.baseURI || '/').href;
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register(worker).then(registration => {
-            registration.onupdatefound = () => {
-              const installingWorker = registration.installing;
-              if (installingWorker == null) {
-                return;
-              }
-              installingWorker.onstatechange = () => {
-                if (installingWorker.state === "installed") {
-                  if (navigator.serviceWorker.controller) {
-                    console.log(
-                      "New content is available and will be used when all " +
-                      "tabs for this page are closed."
-                    );
-                  } else {
-                    console.log("Content is cached for offline use.");
-                  }
-                }
-              };
-            };
-          })
-          .catch(error => {
-            console.error("Error during service worker registration:", error);
-          });
-        });
+      const isLocal = ['127.0.0.1', 'localhost'].includes(location.hostname)
+      const disabledFeatures = (window.__homeGallery || {}).disabled || []
+
+      if (!('serviceWorker' in navigator) || isLocal || disabledFeatures.includes('pwa')) {
+        return
       }
+      const worker = new URL('service-worker.js', document.baseURI || '/').href;
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register(worker).then(registration => {
+          registration.onupdatefound = () => {
+            const installingWorker = registration.installing;
+            if (installingWorker == null) {
+              return;
+            }
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed') {
+                if (navigator.serviceWorker.controller) {
+                  console.log(`New content is available and will be used when all tabs for this page are closed.`);
+                } else {
+                  console.log('Content is cached for offline use.');
+                }
+              }
+            };
+          };
+        })
+        .catch(error => {
+          console.error('Error during service worker registration:', error);
+        });
+      });
     </script>
 </body>
 

@@ -27,7 +27,7 @@ const exportBuilder = (databaseFilename, storageDir, options, cb) => {
     (database, callback) => exportStorage(database, storageDir, options.outputDirectory, options.basePath, callback),
     (database, outputDirectory, basePath, callback) => writeDatabase(database, outputDirectory, basePath, callback),
     (database, outputDirectory, basePath, callback) => copyWebapp(database, outputDirectory, basePath, callback),
-    (database, outputDirectory, basePath, callback) => injectState(database, outputDirectory, basePath, callback),
+    (database, outputDirectory, basePath, callback) => injectState(database, outputDirectory, basePath, options.disabledEdit, callback),
     (outputDirectory, basePath, callback) => setBasePath(outputDirectory, basePath, callback),
     (outputDirectory, callback) => createArchive(outputDirectory, options.archiveFilename, callback),
     (outputDirectory, archiveFilename, callback) => deleteDirectory(outputDirectory, options.keep, archiveFilename, callback)

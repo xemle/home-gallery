@@ -41,6 +41,11 @@ const command = {
         type: 'string',
         default: '/',
         describe: 'Base path of static page. e.g. "/gallery"'
+      },
+      'edit': {
+        type: 'boolean',
+        default: false,
+        describe: 'Enable edit menu'
       }
     })
     .demandOption(['storage', 'database'])
@@ -53,7 +58,8 @@ const command = {
       basePath: argv['base-path'],
       archiveFilename: argv.file,
       keep: argv.keep,
-      query: argv.query
+      query: argv.query,
+      disabledEdit: !argv.edit
     }
     const t0 = Date.now();
     exportBuilder(argv.database, argv.storage, options, (err, outputDirectory, archiveFilename) => {

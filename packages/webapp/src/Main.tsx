@@ -21,6 +21,7 @@ import { Years, YearView } from './year/Years';
 import { Tags } from './tags/Tags';
 import { Map } from './map';
 import { MediaView } from './single/MediaView';
+import { useAppConfig } from './utils/useAppConfig'
 
 export const Root = () => {
   return (
@@ -32,9 +33,9 @@ export const Main = () => {
     const addEntries = useEntryStore(state => state.addEntries);
     const initEvents = useEventStore(state => state.initEvents);
     const addEvent = useEventStore(state => state.addEvent);
+    const appConfig = useAppConfig()
 
-    const stateEntries = window['__homeGallery']?.entries || [];
-    addEntries(stateEntries.map(mapEntriesForBrowser));
+    addEntries(appConfig.entries.map(mapEntriesForBrowser));
 
     useEffect(() => {
       const fetchEvents = () => getEvents()
@@ -47,15 +48,20 @@ export const Main = () => {
         addEntries(entries)
       }
 
-      const subscribeEvents = () => eventStream(
-        (event) => addEvent(event),
-        (serverEvent) => {
-          if (serverEvent.action === 'databaseReloaded') {
-            console.log(`Reload database due server event`)
-            fetchAll(chunkLimits, onChunk)
-          }
+      const subscribeEvents = () => {
+        if (appConfig.disabledServerEvents) {
+          return
         }
-      );
+        eventStream(
+          (event) => addEvent(event),
+          (serverEvent) => {
+            if (serverEvent.action === 'databaseReloaded') {
+              console.log(`Reload database due server event`)
+              fetchAll(chunkLimits, onChunk)
+            }
+          }
+        )
+      }
 
       const chunkLimits = [1000, 2000, 4000, 8000, 16000, 32000];
       fetchAll(chunkLimits, onChunk)

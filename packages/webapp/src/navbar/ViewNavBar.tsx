@@ -7,6 +7,7 @@ import { useEditModeStore, ViewMode } from "../store/edit-mode-store";
 
 import { SearchNavBar } from './search/SearchNavBar';
 import useListLocation from '../utils/useListLocation'
+import { useAppConfig } from "../utils/useAppConfig";
 
 export const ViewNavBar = ({disableEdit}) => {
   const search = useSearchStore(state => state.search);
@@ -14,6 +15,7 @@ export const ViewNavBar = ({disableEdit}) => {
   const setViewMode = useEditModeStore(actions => actions.setViewMode);
   const navigate = useNavigate();
   const listLocation = useListLocation()
+  const appConfig = useAppConfig()
 
   const dispatch = (action) => {
     switch (action.type) {
@@ -55,7 +57,9 @@ export const ViewNavBar = ({disableEdit}) => {
           <a className="nav_item link" onClick={() => dispatch({type: 'all'})}><i className="fas fa-globe"></i> <span className="hide-sm">Show all</span></a>
           <a className="nav_item link" onClick={() => dispatch({type: 'years'})}><i className="fas fa-clock"></i> <span className="hide-sm">Years</span></a>
           <a className="nav_item link" onClick={() => dispatch({type: 'video'})}><i className="fas fa-play"></i> <span className="hide-sm">Videos</span></a>
-          <a className={`nav_item link ${disableEdit ? '-disabled' : ''}`} onClick={() => dispatch({type: 'edit'})}><i className="fas fa-pen"></i> <span className="hide-sm">Edit</span></a>
+          {!appConfig.disabledEdit &&
+            <a className={`nav_item link ${disableEdit ? '-disabled' : ''}`} onClick={() => dispatch({type: 'edit'})}><i className="fas fa-pen"></i> <span className="hide-sm">Edit</span></a>
+          }
           <a className="nav_item link" onClick={() => dispatch({type: 'tags'})}><i className="fas fa-tags"></i> <span className="hide-sm">Tags</span></a>
           <a className="nav_item link" onClick={() => dispatch({type: 'map'})}><i className="fas fa-map"></i> <span className="hide-sm">Map</span></a>
         </div>
