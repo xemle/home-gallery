@@ -56,6 +56,12 @@ const command = {
         alias: 'C',
         describe: 'SSL certificate file'
       },
+      'base-path': {
+        alias: 'b',
+        type: 'string',
+        default: '/',
+        describe: 'Base path of static page. e.g. "/gallery"'
+      },
       user: {
         alias: 'U',
         array: true,
@@ -82,6 +88,8 @@ const command = {
     const { startServer, webappDir } = require('@home-gallery/server');
     const path = require('path');
 
+    const ensureLeadingSlash = url => url.startsWith('/') ? url : '/' + url
+
     const config = {
       host: argv.host,
       port: argv.port,
@@ -91,6 +99,7 @@ const command = {
       webappDir,
       key: argv.key,
       cert: argv.cert,
+      basePath: ensureLeadingSlash(argv.basePath),
       users: argv.user ? argv.user.map(mapUsers) : false,
       ipWhitelistRules: argv.ipWhitelistRule ? argv.ipWhitelistRule.map(mapRules) : [],
       openBrowser: argv.openBrowser,

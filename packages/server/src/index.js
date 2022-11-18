@@ -89,7 +89,10 @@ function startServer(options, cb) {
   app.use(webapp(webappDir, req => ({
     disablePwa: !!req.user,
     entries: getFirstEntries(50)
-  }), !!remoteConsoleToken));
+  }), {
+    basePath: options.basePath || '/',
+    injectRemoteConsole: !!remoteConsoleToken
+  }));
 
   const server = createServer(key, cert, app);
   server.listen(port, host)
