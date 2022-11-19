@@ -20,7 +20,7 @@ try {
 const FALLBACK_HOST = 'https://dl.home-gallery.org/npm/libvips'
 const platform = process.env.npm_config_platform || process.platform
 const arch = process.env.npm_config_arch || process.arch
-const hasLibC = libc.family == libc.GLIBC
+const hasLibC = libc.GLIBC == (typeof libc.familySync == 'function' ? libc.familySync() : libc.family)
 const isLinuxX64 = platform.match(/linux/i) && arch == 'x64'
 const requiredCpuFlags = ['sse4_2']
 
