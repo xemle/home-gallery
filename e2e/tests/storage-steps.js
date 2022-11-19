@@ -46,3 +46,7 @@ step("Storage image <name> for <id> has size <size>", async (name, id, size) => 
 step("Purge storage", async () => {
   return runCli(['storage', '-s', getStorageDir(), 'purge', '-d', getDatabaseFilename()])
 })
+
+step("Purge storage with args <args>", async (args) => {
+  return runCli(['storage', '-s', getStorageDir(), 'purge', '-d', getDatabaseFilename(), ...args.split(/\s+/)])
+})
