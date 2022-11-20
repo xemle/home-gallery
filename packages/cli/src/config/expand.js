@@ -12,7 +12,8 @@ const expandConfigDefaults = (config, env) => {
 
   if (config.sources && config.sources.length) {
     for (const i in config.sources) {
-      const source = config.sources[i];
+      const dir = config.sources[i]
+      const source = typeof dir == 'string' ? { dir } : dir
       config.sources[i] = Object.assign({
         index: '{configDir}/{configPrefix}{basename(dir)}.idx',
         offline: false,
