@@ -51,7 +51,7 @@ jobs:
       - name: Build packages
         id: build
         run: |
-          npm run build -- --scope '@home-gallery/bundle'
+          npx pnpm --filter '*bundle' build
           node scripts/bundle.js "--version=${{ steps.prepare.outputs.VERSION }}" "--snapshot=${{ steps.prepare.outputs.SNAPSHOT }}"
 
       - name: Deploy via rsync
