@@ -34,4 +34,6 @@ const validateConfig = async config => {
   await validateSources(config.sources)
 }
 
-module.exports = { validateConfig }
+module.exports = {
+  validateConfig
+}

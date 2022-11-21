@@ -12,16 +12,17 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/xemle/home-gallery.git",
-    "directory": "packages/bundle"
+    "directory": "packages/cli"
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpy \"src/**\" dist",
-    "watch": "onchange \"src/**\" -- npm run build"
+    "build": "cpy \"src/**/!(*.test.js)\" dist",
+    "test": "tap --no-check-coverage --no-coverage-report src/**/*.test.js",
+    "watch": "onchange \"src/**\" -- npm run build",
+    "watch:test": "tap --no-check-coverage --no-coverage-report -w src/**/*.test.js"
   },
   "dependencies": {
     "@home-gallery/logger": "file:../logger",
-    "enquirer": "^2.3.6",
-    "yaml": "^1.10.2"
+    "enquirer": "^2.3.6"
   }
 }

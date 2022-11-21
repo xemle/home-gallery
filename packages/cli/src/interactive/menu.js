@@ -15,13 +15,9 @@ const menu = {
         {name: 'exit', message: 'Exit'}
       ]
     }).run(),
-    action: async (command, config) => {
+    action: async (command, options) => {
       if (command === 'server') {
-        return startServer(config);
-      } else if (command === 'showConfig') {
-        console.log('gallery.config.json:')
-        console.log(JSON.stringify(config, null, 2))
-        return 'main';
+        return startServer(options);
       }
       return command;
     }
@@ -37,10 +33,11 @@ const menu = {
         {name: 'main', message: 'Back'}
       ]
     }).run(),
-    action: async (command, config) => {
+    action: async (command, options) => {
       if (command == 'main') {
         return command
       }
+      const { config } = options
       let sources = config.sources.filter(source => !source.offline)
       if (sources.length > 1) {
         const indices = await runner('selectSources', config)
@@ -63,7 +60,8 @@ const menu = {
         return { value: source.index, message: `${i + 1}. Source dir: ${source.dir} (${path.basename(source.index)})`, disabled: source.offline, hint: `${source.offline ? '(offline)' : ''}`}
       })
     }).run(),
-    action: async (indices, config) => {
+    action: async (indices, options) => {
+      const { config } = options
       if (!indices.length) {
         console.log(`No source directories selected. Continue with all ${config.sources.length} sources`);
         return config.sources.filter(source => !source.offline).map(source => source.index)
@@ -81,7 +79,8 @@ const menu = {
         {name: 'main', message: 'Back'}
       ]
     }).run(),
-    action: async (command, config) => {
+    action: async (command, options) => {
+      const { config } = options
       if (command === 'showConfig') {
         console.log('gallery.config.yml:')
         console.log(YAML.stringify(config, null, 2))

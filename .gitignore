@@ -1,5 +1,8 @@
 .cache
 .vscode
+.nyc_output
+build
+data
 dist
 node_modules
 *.tmp

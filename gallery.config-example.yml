@@ -127,6 +127,7 @@ sources:
   #    - allow: localhost
   #    - allow: '192.168/16'
   #    - deny: all
+  #basePath: /
 
 logger:
   # Currently console and file loggers are available

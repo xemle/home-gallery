@@ -1,41 +1,33 @@
+const os = require('os')
+const process = require('process')
 const fs = require('fs/promises')
 const path = require('path')
 
 const log = require('@home-gallery/logger')('cli.run')
 
-const { loadConfig, initConfig } = require('./config')
+const { initConfig, defaultConfigFile, load } = require('./config')
 const { startServer, importSources } = require('./tasks')
 
 const galleryDir = path.dirname(process.argv[1])
 
-const createOptions = argv => {
-  return {
-    configFile: argv.config,
-    configFallback: path.join(galleryDir, 'gallery.config-example.yml'),
-    sources: argv.source || false
-  }
-}
+const createConfig = async argv => {
+  const sourceConfigFile = path.join(galleryDir, 'gallery.config-example.yml')
+  let { config: configFile, source, force } = argv
 
-const config = async argv => {
-  const options = createOptions(argv)
-  return loadConfig(options)
-}
+  configFile = configFile || defaultConfigFile
 
-const createConfig = argv => {
-  const options = createOptions(argv)
-
-  if (argv.force) {
-    return initConfig(options)
+  const exists = await fs.access(configFile).then(() => true).catch(() => false)
+  if (exists && !force) {
+    log.warn(`Configuration file ${configFile} already exists. Use --force to overwrite`)
+    return
   }
 
-  return fs.access(options.configFile)
-    .then(() => log.info(`Skip configuration initialization. File already exists: ${options.configFile}`))
-    .catch(() => initConfig(options))
+  return initConfig(configFile, sourceConfigFile, source)
 }
 
 const runServer = options => {
   log.info(`Starting server`)
-  return startServer(options.config)
+  return startServer(options)
 }
 
 const runImport = (config, initialImport, incrementalUpdate, smallFiles) => {
@@ -52,7 +44,6 @@ const command = {
     return yargs.option({
       config: {
         alias: 'c',
-        default: 'gallery.config.yml',
         describe: 'Configuration file'
       },
     })
@@ -64,10 +55,9 @@ const command = {
           source: {
             alias: 's',
             array: true,
+            required: true,
             description: 'Initial source directory or directories'
-          }
-        })
-        .option({
+          },
           force: {
             alias: 'f',
             boolean: true,
@@ -81,7 +71,7 @@ const command = {
       'server',
       'Start the webserver',
       (yargs) => yargs,
-      (argv) => config(argv)
+      (argv) => load(argv.config, true)
           .then(runServer)
           .then(() => log.info(`Have a good day...`))
           .catch(err => log.error(err, `Error: ${err}`))
@@ -106,7 +96,7 @@ const command = {
           describe: 'Import only small files up to 20MB to exclude big files such as videos to speed up the initial import'
         },
       }),
-      (argv) => config(argv)
+      (argv) => load(argv.config, true)
           .then(options => runImport(options.config, argv.initial, argv.update, argv.smallFiles))
           .then(() => log.info(`Have a good day...`))
           .catch(err => log.error(err, `Error: ${err}`))

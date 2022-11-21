@@ -12,12 +12,14 @@ const { EventBus } = require('./eventbus');
 const databaseApi = require('./api/database');
 const eventsApi = require('./api/events');
 const webapp = require('./webapp');
-const { augmentReqByUserMiddleware, createBasicAuthMiddleware } = require('./auth')
+const { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } = require('./auth')
 const { isIndex, skipIf } = require('./utils')
 
 const log = require('@home-gallery/logger')('server')
 const openCb = callbackify(open)
 const eventbus = new EventBus()
+
+const webappDir = path.join(__dirname, 'public')
 
 function shouldCompress (req, res) {
   if (req.headers['x-no-compression']) {
@@ -45,15 +47,18 @@ function createServer(key, cert, app) {
 
 const serverUrl = (port, key, cert) =>`${key && cert ? 'https' : 'http'}://localhost:${port}`
 
-const getAuthMiddleware = options => {
-  if (options.users?.length) {
-    return createBasicAuthMiddleware(options.users, options.ipWhitelistRules || defaultIpWhitelistRules)
+const getAuthMiddleware = config => {
+  const users = config.server?.auth?.users || []
+  const rules = config.server?.auth?.rules || defaultIpWhitelistRules
+  if (users.length) {
+    return createBasicAuthMiddleware(users, rules)
   }
   return (req, _, next) => next()
 }
 
 function startServer(options, cb) {
-  const {host, port, storageDir, databaseFilename, eventsFilename, webappDir, key, cert, openBrowser, remoteConsoleToken} = options
+  const { config } = options
+
   const app = express();
   app.disable('x-powered-by')
   app.enable('trust proxy')
@@ -65,20 +70,20 @@ function startServer(options, cb) {
 
   app.use(skipIf(express.static(webappDir), isIndex))
 
-  app.use(getAuthMiddleware(options))
+  app.use(getAuthMiddleware(config))
 
-  app.use('/files', express.static(storageDir, {index: false, maxAge: '2d', immutable: true}));
+  app.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
   app.use(bodyParser.json({limit: '1mb'}))
 
-  const { read: readEvents, push: pushEvent, stream, getEvents } = eventsApi(eventbus, eventsFilename);
-  const { read: readDatabase, init: initDatabase, getFirstEntries } = databaseApi(eventbus, databaseFilename, getEvents);
+  const { read: readEvents, push: pushEvent, stream, getEvents } = eventsApi(eventbus, config.events.file);
+  const { read: readDatabase, init: initDatabase, getFirstEntries } = databaseApi(eventbus, config.database.file, getEvents);
   app.get('/api/events.json', readEvents);
   app.get('/api/events/stream', stream);
   app.post('/api/events', pushEvent);
   app.get('/api/database.json', readDatabase);
 
-  if (remoteConsoleToken) {
-    const debugApi = require('./api/debug')({remoteConsoleToken})
+  if (config.server.remoteConsoleToken) {
+    const debugApi = require('./api/debug')({remoteConsoleToken: config.server?.remoteConsoleToken})
     app.post('/api/debug/console', debugApi.console);
   }
 
@@ -90,12 +95,12 @@ function startServer(options, cb) {
     disabled: !!req.user ? ['pwa'] : [],
     entries: getFirstEntries(50)
   }), {
-    basePath: options.basePath || '/',
-    injectRemoteConsole: !!remoteConsoleToken
+    basePath: config.server.basePath || '/',
+    injectRemoteConsole: !!config.server.remoteConsoleToken
   }));
 
-  const server = createServer(key, cert, app);
-  server.listen(port, host)
+  const server = createServer(config.server.key, config.server.cert, app);
+  server.listen(config.server.port, config.server.host)
     .on('error', (e) => {
       if (e.code === 'EADDRINUSE') {
         log.error(`Address is already in use!`);
@@ -103,10 +108,10 @@ function startServer(options, cb) {
       cb(e);
     })
     .on('listening', () => {
-      const url = serverUrl(port, key, cert)
+      const url = serverUrl(config.server.port, config.server.key, config.server.cert)
       log.info(`Open Home Gallery on ${url}`);
       initDatabase();
-      if (openBrowser) {
+      if (config.server.openBrowser) {
         log.debug(`Open browser with url ${url}`)
         return openCb(url, () => cb(null, app))
       }
@@ -115,4 +120,7 @@ function startServer(options, cb) {
 
 }
 
-module.exports = { startServer, webappDir: path.join(__dirname, 'public') };
+module.exports = {
+  startServer,
+  webappDir
+};

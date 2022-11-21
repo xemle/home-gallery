@@ -1,19 +1,31 @@
+const { load, mapArgs } = require('./config');
+
 const log = require('@home-gallery/logger')('cli.server');
 
-const mapUsers = user => {
-  const pos = user.indexOf(':')
-  return {
-    username: user.slice(0, pos),
-    password: user.slice(pos + 1)
-  }
+const mapUsers = users => {
+  return users.map(user => {
+    const pos = user.indexOf(':')
+    if (pos < 0) {
+      return false
+    }
+    return {
+      username: user.slice(0, pos),
+      password: user.slice(pos + 1)
+    }
+  }).filter(user => user !== false)
 }
 
-const mapRules = rule => {
-  const pos = rule.indexOf(':')
-  return {
-    type: rule.slice(0, pos),
-    value: rule.slice(pos + 1)
-  }
+const mapRules = rules => {
+  return rules.map(rule => {
+    const pos = rule.indexOf(':')
+    if (pos < 0) {
+      return false
+    }
+    return {
+      type: rule.slice(0, pos),
+      value: rule.slice(pos + 1)
+    }
+  }).filter(rule => rule !== false)
 }
 
 const command = {
@@ -21,18 +33,19 @@ const command = {
   describe: 'Start web server',
   builder: (yargs) => {
     return yargs.option({
+      config: {
+        alias: 'c',
+        describe: 'Configuration files'
+      },
       storage: {
-        require: true,
         alias: 's',
         describe: 'Storage directory'
       },
       database: {
-        require: true,
         alias: 'd',
         describe: 'Database filename'
       },
       events: {
-        require: true,
         alias: 'e',
         describe: 'Events filename'
       },
@@ -59,7 +72,6 @@ const command = {
       'base-path': {
         alias: 'b',
         type: 'string',
-        default: '/',
         describe: 'Base path of static page. e.g. "/gallery"'
       },
       user: {
@@ -82,36 +94,45 @@ const command = {
         describe: 'Enable remote console with given debug auth token'
       }
     })
-    .demandOption(['storage', 'database', 'events'])
   },
   handler: (argv) => {
     const { startServer, webappDir } = require('@home-gallery/server');
-    const path = require('path');
 
     const ensureLeadingSlash = url => url.startsWith('/') ? url : '/' + url
 
-    const config = {
-      host: argv.host,
-      port: argv.port,
-      storageDir: argv.storage,
-      databaseFilename: argv.database,
-      eventsFilename: argv.events,
-      webappDir,
-      key: argv.key,
-      cert: argv.cert,
-      basePath: ensureLeadingSlash(argv.basePath),
-      users: argv.user ? argv.user.map(mapUsers) : false,
-      ipWhitelistRules: argv.ipWhitelistRule ? argv.ipWhitelistRule.map(mapRules) : [],
-      openBrowser: argv.openBrowser,
-      remoteConsoleToken: argv.remoteConsoleToken
+    const mapping = {
+      host: 'server.host',
+      port: 'server.port',
+      storage: 'storage.dir',
+      database: 'database.file',
+      events: 'events.file',
+      key: 'server.key',
+      cert: 'server.cert',
+      basePath: {path: 'server.basePath', map: (basePath) => ensureLeadingSlash(basePath)},
+      openBrowser: 'server.openBrowser',
+      remoteConsoleToken: 'server.removeConsoleToken',
+      user: {path: 'server.auth.users', type: 'add', map: mapUsers},
+      ipWhitelistRule: {path: 'server.auth.rules', map: mapRules}
     }
-    startServer(config, (err) => {
-      if (err) {
-        log.error(`Could not start server: ${err}`);
-      } else {
-        log.info(`Server started. Open it at http://${argv.host === '0.0.0.0' ? 'localhost' : argv.host}:${argv.port}`);
-      }
-    })
+
+    const run = async (argv) => {
+      const { config, configFile } = await load(argv.config, false)
+      mapArgs(argv, config, mapping)
+
+      startServer({config, configFile}, (err) => {
+        if (err) {
+          log.error(`Could not start server: ${err}`);
+        } else {
+          log.info(`Server started. Open it at http://${argv.host === '0.0.0.0' ? 'localhost' : argv.host}:${argv.port}`);
+        }
+      })
+    }
+
+    run(argv)
+      .catch(err => {
+        log.error(err, `Error: ${err}`);
+        process.exit(1)
+      })
   }
 }
 
