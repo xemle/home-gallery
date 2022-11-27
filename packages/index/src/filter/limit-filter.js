@@ -67,8 +67,8 @@ const createLimitFilter = (entryCount, addLimits, filter) => {
 
   log.info(`Index has ${entryCount} entries. Set index limit to max ${limit} entries with ${limit - entryCount} new entries`)
   let count = 0;
-  const limitFilter = (path) => {
-    const result = filter(path);
+  const limitFilter = (path, stat) => {
+    const result = filter(path, stat);
     if (!result) {
       return result;
     }
