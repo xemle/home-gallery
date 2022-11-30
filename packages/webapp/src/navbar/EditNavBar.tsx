@@ -20,15 +20,13 @@ export const EditNavBar = () => {
   const reset = useEditModeStore(state => state.reset);
   const selectAll = useEditModeStore(state => state.selectAll);
   const invert = useEditModeStore(state => state.invert);
-  const setEntries = useEntryStore(state => state.setEntries);
 
   const toggleViewMode = () => {
     setViewMode(viewMode === ViewMode.VIEW ? ViewMode.EDIT : ViewMode.VIEW)
   }
 
   const onSubmit = ({tags}) => {
-    const entries = selectedEntries()
-    const entryIds = entries.map(entry => entry.id)
+    const entryIds = Object.entries(selectedIds).filter(([id, selected]) => selected).map(([id]) => id)
     addTags(entryIds, tags).then(() => {
       setDialogVisible(false);
     })
