@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- docker: Fix server webapp files
 - index: Fix small files filter with limit filter
 - config: Allow simple source definition
 
