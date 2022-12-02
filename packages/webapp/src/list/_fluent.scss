@@ -20,16 +20,35 @@
 
   ._detail {
     position: absolute;
-    right: 8px;
-    bottom: 0;
+    right: 4px;
+    bottom: 4px;
+    border-radius: $border-radius;
+    padding-left: 8px;
+    padding-right: 8px;
+    color: $text-high-color;
+    background-color: rgba(0, 0, 0, 0.25);
+
+    .fas {
+      color: $text-high-color;
+    }
   }
 
   &:hover {
     ._detail {
-      color: #eee;
-      .fas {
-        color: #eee;
-      }
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+  }
+}
+
+@include only-sm {
+  .fluent__cell ._detail {
+    padding-left: 4px;
+    padding-right: 4px;
+    color: $text-high-color;
+    background-color: rgba(0, 0, 0, 0.5);
+
+    .fas {
+      color: $text-high-color;
     }
   }
 }
