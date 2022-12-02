@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- webapp: Fix swipe on videos
 - webapp: Fix visibility of video time in media stream
 - extractor: Create previews of JPE and WEBP image files
 
