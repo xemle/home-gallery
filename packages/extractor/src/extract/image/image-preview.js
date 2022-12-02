@@ -9,7 +9,7 @@ const fileExtension = filename => {
   return pos > 0 ? filename.slice(pos + 1).toLowerCase() : ''
 }
 
-const isSupportedImage = entry => fileExtension(entry.filename).match(/(jpe?g|png|tiff?|gif|thm)/)
+const isSupportedImage = entry => fileExtension(entry.filename).match(/(jpe?g|jpe|png|tiff?|gif|thm|webp)/)
 
 const sizeToImagePreviewSuffix = size => `image-preview-${size}.jpg`
 
