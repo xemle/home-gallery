@@ -100,7 +100,7 @@ const menu = {
         });
       } else if (command === 'buildDatabase') {
         console.log('Rebuild database')
-        await buildDatabase(config, {});
+        await buildDatabase(config, config.sources, {});
       } else {
         return 'main'
       }

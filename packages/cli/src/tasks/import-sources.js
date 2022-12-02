@@ -82,11 +82,9 @@ const extract = async (config, sources, options) => {
 const buildDatabase = async (config, sources, options) => {
   const args = [...loggerArgs(config), 'database'];
 
+  sources.forEach(source => args.push('--index', source.index));
   if (options.journal) {
-    sources.forEach(source => args.push('--index', source.index));
     args.push('--journal', options.journal)
-  } else {
-    config.sources.forEach(source => args.push('--index', source.index));
   }
 
   const storage = config.storage || {}
