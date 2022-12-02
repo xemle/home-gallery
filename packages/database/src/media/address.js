@@ -8,7 +8,8 @@ const keyMapping = {
   town: 'city',
 }
 
-const createAddress = (geoReverse) => {
+const createAddress = (entry) => {
+  const geoReverse = entry.meta?.geoReverse
   if (!geoReverse) {
     return false
   } else if (!geoReverse.address) {
@@ -35,13 +36,13 @@ const createAddress = (geoReverse) => {
 
 const getAddress = (entry) => {
   const metaEntries = getMetaEntries(entry)
-  const metaAddress = metaEntries.reduce((address, entry) => address || createAddress(entry.meta?.geoReverse), false)
+  const metaAddress = metaEntries.reduce((address, entry) => address || createAddress(entry), false)
   if (metaAddress) {
     return metaAddress
   }
 
   const allEntries = [entry, ...(entry.sidecars || [])]
-  const allAddress = allEntries.reduce((address, entry) => address || createAddress(entry.meta?.geoReverse), false)
+  const allAddress = allEntries.reduce((address, entry) => address || createAddress(entry), false)
   return allAddress ? allAddress : {}
 }
 

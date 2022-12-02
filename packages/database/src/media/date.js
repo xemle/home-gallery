@@ -4,7 +4,7 @@ const log = require('@home-gallery/logger')('database.media.date')
 
 // '0000:00:00 00:00:00' => false
 // {tzoffsetMinutes: 120, rawValue: '2004:10:19 10:34:17'} => '2004-10-19T10:34:17+02:00'
-function parseExiftoolDate(date) {
+function parseExiftoolDate(entry, date) {
   let value = date?.rawValue ? date.rawValue : date
   if (typeof value !== 'string' || value.length < 10 || value.startsWith('0000')) {
     return false
@@ -36,23 +36,24 @@ function parseExiftoolDate(date) {
   }
 }
 
-function getExifDate(exif) {
+function getExifDate(entry) {
+  const exif = entry.meta?.exif
   if (!exif) {
     return false
   }
   const dateKeys = ['GPSDateTime', 'SubSecDateTimeOriginal', 'DateTimeOriginal', 'CreateDate']
-  return dateKeys.reduce((date, key) => date || parseExiftoolDate(exif[key]), false)
+  return dateKeys.reduce((date, key) => date || parseExiftoolDate(entry, exif[key]), false)
 }
 
 function getEntryDate(entry) {
   const metaEntries = getMetaEntries(entry)
-  const metaDate = metaEntries.reduce((date, entry) => date || getExifDate(entry.meta?.exif), false)
+  const metaDate = metaEntries.reduce((date, entry) => date || getExifDate(entry), false)
   if (metaDate) {
     return metaDate
   }
 
   const allEntries = [entry, ...(entry.sidecars || [])]
-  return allEntries.reduce((date, entry) => date || getExifDate(entry.meta?.exif), false)
+  return allEntries.reduce((date, entry) => date || getExifDate(entry), false)
 }
 
 module.exports = {

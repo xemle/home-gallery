@@ -19,7 +19,7 @@ const getFractionNumber = (exif, prop) => {
   result[`${prop}Value`] = +exif[prop]
 }
 
-const widthHeight = (exif) => {
+const widthHeight = (entry, exif) => {
   let width = exif.ImageWidth
   let height = exif.ImageHeight
   if (exif.Orientation >= 5) {
@@ -59,7 +59,7 @@ const getExif = (entry) => {
     return getFractionNumber(exif, 'ShutterSpeed')
   }
 
-  const [width, height] = widthHeight(exif)
+  const [width, height] = widthHeight(entry, exif)
 
   return Object.assign({
     tz: exif.tz,
