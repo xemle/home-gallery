@@ -40,6 +40,13 @@ step("Index has entry <filename> with checksum <checksum>", async (filename, che
 
 step("Index has entry <filename> with prev checksum <checksum>", async (filename, checksum) => assertChecksum(filename, checksum, 'prevSha1sum'))
 
+step("Index has file order <filenames>", async (filenames) => {
+  const index = await readIndex()
+  const indexFilenames = index.data.map(entry => entry.filename)
+  filenames = filenames.split(/\s*,\s*/)
+  assert(JSON.stringify(filenames) == JSON.stringify(indexFilenames), `Expected filenames to be [${filenames.join(', ')}], but was [${indexFilenames.join(', ')}]`)
+})
+
 step("Journal <id> has entries of <adds> adds, <changes> changes and <removes> removals", async (id, adds, changes, removes) => {
   const journal = await readJournal(id)
   const matchAdds = journal.data.adds.length == adds

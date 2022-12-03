@@ -18,6 +18,15 @@ Tags: index, option, journal
 * Create index with args "--journal abc"
 * Journal "abc" has entries of "1" adds, "0" changes and "0" removals
 
+## Add file keeps the file order
+
+* Add file "d1/f1" with content "File 1"
+* Add file "d2/f2" with content "File 2"
+* Create index
+* Add file "d1/.galleryignore" with content ""
+* Create index with args "--journal abc"
+* Index has file order "d2, d2/f2, d1, d1/.galleryignore, d1/f1, README.md, index.md"
+
 ## Remove file
 
 * Create index

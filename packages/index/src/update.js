@@ -12,7 +12,7 @@ const toMap = (values, keyFn) => values.reduce((result, value) => {
   return result
 }, {})
 
-const hasChanges = (onlyFileKeys, onlyFsKeys, changedKeys) => !onlyFileKeys.length && !onlyFsKeys.length && !changedKeys.length
+const hasNoChanges = (onlyFileKeys, onlyFsKeys, changedKeys) => !onlyFileKeys.length && !onlyFsKeys.length && !changedKeys.length
 
 const setPrevSha1sum = (keys, fileEntryMap, fsEntryMap) => keys.forEach(key => {
   const fsEntry = fsEntryMap[key]
@@ -46,7 +46,7 @@ const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
 
   const { commonEntryMap, changedKeys } = mergeIndex(fileEntryMap, fsEntryMap, commonKeys, matcherFn);
 
-  if (hasChanges(onlyFileKeys, onlyFsKeys, changedKeys)) {
+  if (hasNoChanges(onlyFileKeys, onlyFsKeys, changedKeys)) {
     log.info(t0, `No changes found`);
     return cb(null, fileEntries, false);
   }

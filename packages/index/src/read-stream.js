@@ -9,7 +9,7 @@ const { callbackify } = require('@home-gallery/common')
 const { map } = require('@home-gallery/stream')
 
 const { getJournalFilename, readJournal } = require('./journal')
-const { getIndexName } = require('./utils')
+const { getIndexName, byDirDescFileAsc } = require('./utils')
 
 const readJournalCb = callbackify(readJournal)
 
@@ -48,7 +48,7 @@ const parseJsonChunks = (filename) => {
         }
         this.emit('head', head)
         chunk = entry;
-      } 
+      }
       let entryJson = '{' + stripLastEntry(chunk, '}]}') + '}'
       let entry;
       try {
@@ -94,6 +94,7 @@ const fromJournal = (indexFilename, journal, cb) => {
       return cb(err)
     }
     const entries = journal.data.adds.concat(journal.data.changes)
+      .sort(byDirDescFileAsc)
       .map(e => Object.assign(e, { indexName, url: `file://${path.join(journal.base, e.filename)}` }))
 
     cb(null, Readable.from(entries))
