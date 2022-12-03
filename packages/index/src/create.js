@@ -9,16 +9,18 @@ const createFilesMapper = (excludeIfPresent) => {
     return (files) => files;
   }
 
+  const excludeDirectoryFiles = [excludeIfPresent];
+
   return (files) => {
-    const hasExcludeFile = files.indexOf(excludeIfPresent) < 0;
-    return hasExcludeFile ? files : [];
+    const excludeDirectory = files.indexOf(excludeIfPresent) >= 0;
+    return excludeDirectory ? excludeDirectoryFiles : files;
   }
 }
 
 const createIndex = (dir, options, cb) => {
   const entries = [];
   const t0 = Date.now();
-  walk(dir, createFilesMapper(options.exludeIfPresent), (filename, stat) => {
+  walk(dir, createFilesMapper(options.excludeIfPresent), (filename, stat) => {
     const relativeFilename = path.relative(dir, filename);
     if (!options.filter(relativeFilename, stat)) {
       return false;

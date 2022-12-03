@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- index: Fix exclude-if-present option
 - cli: Fix interactive rebuild database task
 - database: Fix log calls
 - webapp: Fix swipe on videos
