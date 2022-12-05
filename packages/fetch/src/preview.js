@@ -42,7 +42,12 @@ const downloadMissingFiles = async (serverUrl, missingFiles, storageDir, { insec
     })
     .catch(() => cb(true))
 
-  const task = (file, cb) => fetchFile(serverUrl, file, storageDir, { insecure }).then(() => cb()).catch(err => cb(err))
+  const task = (file, cb) => fetchFile(serverUrl, file, storageDir, { insecure })
+    .then(() => cb())
+    .catch(err => {
+      log.error(err, `Could not fetch ${file} from remote: ${err}`)
+      cb(err)
+    })
 
   log.info(`Fetch ${missingFiles.length} files from ${serverUrl}`)
   const t0 = Date.now()
