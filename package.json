@@ -1,6 +1,6 @@
 {
   "name": "@home-gallery/mono-repo",
-  "version": "1.8.3",
+  "version": "1.8.4",
   "description": "",
   "main": "gallery.js",
   "scripts": {
