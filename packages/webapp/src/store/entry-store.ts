@@ -20,6 +20,9 @@ const slice = (set) => ({
   entries: [],
 
   addEntries: (entries: Entry[]) => set((state) => {
+    if (!entries.length) {
+      return state
+    }
     console.log(`Add ${entries.length} entries to the store`)
     const id2Entries: Id2EntryMap = entries.reduce((result, entry) => {
       result[entry.id] = entry

@@ -34,12 +34,15 @@ export interface EventStore {
 }
 
 const _applyEvents = (events: Event[]) => {
+  if (!events.length) {
+    return
+  }
   const entries = [...useEntryStore.getState().allEntries]
   const t0 = Date.now()
-  const changedEntries = applyEvents(entries, events)
+  const changedEntries = applyEvents(entries, events) as Entry[]
   changedEntries.forEach((entry: any) => entry.textCache = false)
   console.log(`Applied ${events.length} events and updated ${changedEntries.length} entries in ${Date.now() - t0}ms`)
-  useEntryStore.getState().setEntries(entries)
+  useEntryStore.getState().addEntries(changedEntries)
 }
 
 const getRecentTags = (events: Event[], recentTags: string[]) => {
@@ -52,6 +55,9 @@ export const useEventStore = create<EventStore>((set) => ({
   recentTags: [],
 
   initEvents: (events: Event[]) => set((state) => {
+    if (!events.length) {
+      return state
+    }
     _applyEvents(events)
     return {...state, events, recentTags: getRecentTags(events, [])}
   }),
