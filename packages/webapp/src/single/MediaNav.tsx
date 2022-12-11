@@ -5,7 +5,6 @@ import useBodyDimensions from "../utils/useBodyDimensions";
 import { useSearchStore } from "../store/search-store";
 
 import { getLowerPreviewUrl } from '../utils/preview'
-import { resourceLimits } from "worker_threads";
 
 export const MediaNav = ({current, prev, next, listLocation, showNavigation, dispatch}) => {
   const { width } = useBodyDimensions();
@@ -46,6 +45,8 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
 
   const buttonClass = `mediaNav__button ${showNavigation ? '' : '-transparent'}`
 
+  const hasGeo = current?.latitude && current?.longitude && current.latitude != 0 && current.longitude != 0
+
   return (
     <>
       { prev &&
@@ -68,7 +69,7 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
             <i className="fas fa-th fa-2x"></i>
           </a>
         }
-        { current?.latitude != 0 && current?.longitude != 0 &&
+        { hasGeo &&
           <a onClick={() => dispatch({type: 'map'})} className={buttonClass} title="Show map of entry (m)">
             <i className="fas fa-map fa-2x"></i>
           </a>
