@@ -5,6 +5,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware')
 const livereload = require('livereload')
 const open = require('open')
 
+const HOST = process.env.HOST || '127.0.0.1'
 const PORT = process.env.PORT || 1234
 const API_PROXY = process.env.API_PROXY || 'http://127.0.0.1:3000'
 
@@ -35,7 +36,7 @@ app.get('*', (_, response) => {
 });
 
 // Run your Express server
-app.listen(PORT, err => {
+app.listen(PORT, HOST, err => {
   if (err) {
     console.log(`Failed to start server: ${err}`)
   } else {
