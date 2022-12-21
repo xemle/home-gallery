@@ -14,9 +14,9 @@ export const getLowerPreviewUrl = (previews, size) => {
 }
 
 export const getHigherPreviewUrl = (previews, size) => {
-  const preview = previews?.filter(preview => getPreviewSize(preview) >= size).pop() || getLowerPreviewUrl(previews, size)
+  const preview = previews?.filter(preview => getPreviewSize(preview) >= size).pop()
   if (!preview) {
-    return false
+    return getLowerPreviewUrl(previews, size)
   }
   return `files/${preview}`
 }

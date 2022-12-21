@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- webapp: Fix previews for smaller images
 - webapp: Show geo nav if coordinate is available
 - webapp: Keep search after initial events
 
