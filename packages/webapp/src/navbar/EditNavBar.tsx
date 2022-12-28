@@ -26,7 +26,7 @@ export const EditNavBar = () => {
   }
 
   const onSubmit = ({tags}) => {
-    const entryIds = Object.entries(selectedIds).filter(([id, selected]) => selected).map(([id]) => id)
+    const entryIds = Object.entries(selectedIds).filter(([_, selected]) => selected).map(([id]) => id)
     addTags(entryIds, tags).then(() => {
       setDialogVisible(false);
     })

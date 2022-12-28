@@ -29,3 +29,27 @@
   margin: 0;
   padding: 0;
 }
+
+.box {
+  border: 1px solid #333;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.gap-4 {
+  gap: 4px;
+}
+
+.gap-16 {
+  gap: 16px;
+}
+
+.mb-8 {
+  margin-bottom: 8px;
+}

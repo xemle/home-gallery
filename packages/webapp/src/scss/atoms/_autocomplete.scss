@@ -1,0 +1,58 @@
+/*
+Autocomplete
+
+Markup:
+<div class="autocomplete">
+  <input class="input"/>
+  <div class="-list">
+    <div>Augsburg</div>
+    <div>Berlin</div>
+    <div class="-active">Chenitz</div>
+    <div>Darmstadt</div>
+    <div>Eberstadt</div>
+    <div>Frankfurt</div>
+  </div>
+<div>
+
+Styleguide 2.9
+*/
+
+$autocomplete-bg-color: $input-bg-color;
+$autocomplete-border-color: $input-border-color;
+$autocomplete-border-focus-color: $input-border-focus-color;
+
+.autocomplete {
+  position: relative;
+  display: inline-block;
+
+  > .-list {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 250px;
+    overflow-y: scroll;    
+    background-color: $autocomplete-bg-color;
+    border: 1px solid $autocomplete-border-color;
+
+    > div {
+      padding: $unit 2*$unit;
+
+
+      &:hover {
+        color: $text-high-color;
+        background-color: mix($white, $autocomplete-bg-color, 7%);
+        cursor: pointer;
+      }
+      &.-active,
+      &:active {
+        color: $text-high-color;
+        background-color: mix($white, $autocomplete-bg-color, 14%);
+        cursor: pointer;
+      }
+    }
+  }
+}

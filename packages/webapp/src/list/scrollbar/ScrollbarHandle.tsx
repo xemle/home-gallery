@@ -1,7 +1,7 @@
 import * as React from "react"
 import { useState, useRef, useEffect, Dispatch } from "react"
 import { ScrollbarActions } from "./state"
-import { useClientHeight } from "./useClientRect"
+import { useClientHeight } from "./useClientHeight"
 
 import { useMouseDragging, useTouchDragging} from './useDragging'
 

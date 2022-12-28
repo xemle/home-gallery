@@ -7,7 +7,7 @@ Markup:
   <div class="modal__backdrop"></div>
   <div class="modal__overlay">
     <div class="dialog text">
-      <div class="dialog__header -closeable">
+      <div class="dialog__header">
         <h3>Headline</h3>
         <button class="button -closeable"><i class="fas fa-times"></i></button>
       </div>
@@ -83,9 +83,13 @@ Styleguide 3.3
 }
 
 .dialog__header {
-  &.-closeable {
-    display: flex;
-    justify-content: space-between;
+  position: relative;
+  padding-right: 6*$unit;
+
+  > .-closeable {
+    position: absolute;
+    top: $unit;
+    right: 2*$unit;
   }
 }
 

@@ -4,21 +4,19 @@ import { Event, EventAction, EventListener } from '@home-gallery/events'
 import { pushEvent as pushEventApi, eventStream as eventStreamApi, ServerEventListener } from './api';
 import { ActionEventListener } from './ActionEventListner';
 import { UnsavedEventHandler } from './UnsavedEventHanlder';
+import { Tag } from './models';
 export { fetchAll, getEvents, mapEntriesForBrowser } from './api'
 
-const tagToAction = (tag: string): EventAction => {
-  if (tag.substr(0, 1) === '-') {
-    return {action: 'removeTag', value: tag.substring(1)}
+const tagToAction = (tag: Tag): EventAction => {
+  if (tag.remove) {
+    return {action: 'removeTag', value: tag.name}
   } else {
-    return {action: 'addTag', value: tag}
+    return {action: 'addTag', value: tag.name}
   }
 }
 
-export const addTags = async (entryIds: string[], tagInput: string) => {
-  const actions = tagInput
-      .replace(/(^\s+|\s+$)/g, '')
-      .split(/\s*,\s*/)
-      .map(tagToAction);
+export const addTags = async (entryIds: string[], tags: Tag[]) => {
+  const actions = tags.map(tagToAction);
   const event: Event = {id: uuidv4(), type: 'userAction', targetIds: entryIds, actions };
   return pushEvent(event);
 }
