@@ -44,6 +44,7 @@ steps:
   when:
     branch:
     - master
+    - develop
     # execute also on tagged feature/fix branches
     - feature/*e2e*
     - fix/*e2e*
@@ -145,6 +146,7 @@ steps:
 trigger:
   branch:
   - master
+  - develop
   # execute also on tagged feature/fix branches
   - feature/*e2e*
   - fix/*e2e*
