@@ -7,9 +7,9 @@ Markup:
   <div class="-list">
     <div>Augsburg</div>
     <div>Berlin</div>
-    <div class="-active">Chenitz</div>
-    <div>Darmstadt</div>
-    <div>Eberstadt</div>
+    <div class="-active">Ch<em>e</em>ni<em>tz</em></div>
+    <div>Darm<em>stadt</em></div>
+    <div>Eber<em>stadt</em></div>
     <div>Frankfurt</div>
   </div>
 <div>
@@ -17,7 +17,7 @@ Markup:
 Styleguide 2.9
 */
 
-$autocomplete-bg-color: $input-bg-color;
+$autocomplete-bg-color: $background-color-01dp;
 $autocomplete-border-color: $input-border-color;
 $autocomplete-border-focus-color: $input-border-focus-color;
 
@@ -41,17 +41,29 @@ $autocomplete-border-focus-color: $input-border-focus-color;
     > div {
       padding: $unit 2*$unit;
 
+      em {
+        font-style: normal;
+        text-decoration: underline;
+      }
 
       &:hover {
         color: $text-high-color;
         background-color: mix($white, $autocomplete-bg-color, 7%);
         cursor: pointer;
+
+        em {
+          color: $text-high-color;
+        }
       }
       &.-active,
       &:active {
         color: $text-high-color;
         background-color: mix($white, $autocomplete-bg-color, 14%);
         cursor: pointer;
+
+        em {
+          color: $text-high-color;
+        }
       }
     }
   }

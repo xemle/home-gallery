@@ -1,10 +1,9 @@
 import * as React from "react";
 import { useState, useMemo } from 'react';
 import { useEditModeStore, ViewMode } from "../store/edit-mode-store";
-import { useEntryStore } from "../store/entry-store";
 
 import { SearchNavBar } from './search/SearchNavBar';
-import { TagDialog } from '../dialog/tag-dialog';
+import { MultiTagDialog } from '../dialog/tag-dialog';
 import { addTags } from '../api/ApiService';
 
 export const EditNavBar = () => {
@@ -47,8 +46,8 @@ export const EditNavBar = () => {
           <a className="nav_item link" onClick={() => setDialogVisible(true)}><i className="fas fa-check"></i> <span className="hide-sm">{`Edit ${selecedCount} media`}</span><span className="hide-md">{selecedCount}</span></a>
         </div>
       </SearchNavBar>
-      { dialogVisible && 
-        <TagDialog visible={dialogVisible} onCancel={() => setDialogVisible(false)} onSubmit={onSubmit} />
+      { dialogVisible &&
+        <MultiTagDialog visible={dialogVisible} onCancel={() => setDialogVisible(false)} onSubmit={onSubmit} />
       }
     </>
   )

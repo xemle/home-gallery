@@ -61,6 +61,18 @@ $tag-border-danger: #B7274F;
   display: inline-flex;
   border: 1px solid $input-border-color;
   border-radius: $border-radius;
+  background-clip: padding-box;
+  overflow: hidden;
+
+  > :first-child {
+    border-top-left-radius: $border-radius;
+    border-bottom-left-radius: $border-radius;
+  }
+
+  > :last-child {
+    border-top-right-radius: $border-radius;
+    border-bottom-right-radius: $border-radius;
+  }
 
   > span,
   > a {
@@ -76,7 +88,7 @@ $tag-border-danger: #B7274F;
     }
   }
 
-  @include tag-color($text-color, $input-bg-color, $input-border-color);
+  @include tag-color($text-color, $background-color-02dp, $text-low-color);
   &:hover {
     @include tag-color($text-color, $input-bg-color, $input-border-color, $input-border-color);
     > a .fas {

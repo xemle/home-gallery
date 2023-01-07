@@ -1,11 +1,19 @@
 import * as React from "react";
+import { useState } from "react";
 
 import { humanizeDuration, humanizeBytes, formatDate } from "../utils/format";
+import { SingleTagDialog } from "../dialog/tag-dialog";
+import { addTags } from '../api/ApiService';
+import { Tag } from "../api/models";
+import { useAppConfig } from "../utils/useAppConfig";
 
 export const Details = ({entry, dispatch}) => {
   if (!entry) {
     return (<></>)
   }
+
+  const [dialogVisible, setDialogVisible] = useState(false)
+  const appConfig = useAppConfig()
 
   const dispatchSearch = (query) => {
     dispatch({type: 'search', query})
@@ -82,10 +90,38 @@ export const Details = ({entry, dispatch}) => {
     { title: 'Camera Settings', value: `ISO ${entry.iso}, Aperture ${entry.aperture}` },
     { title: 'Geo Position', value: GeoLink(entry)},
     { title: 'Address', value: [entry.road, entry.city, entry.country].filter(v => !!v).map<React.ReactNode>(v => simpleSearchLink(v, 'adress', v)).reduce(joinReducer(', '), []) },
-    { title: 'Tags', value: (entry.tags || []).map<React.ReactNode>(v => simpleSearchLink(v, 'tag', v)).reduce(joinReducer(', '), []) },
+    { title: 'Tags', value: <>
+      {(entry.tags || []).map<React.ReactNode>(v => simpleSearchLink(v, 'tag', v)).reduce(joinReducer(', '), [])}
+      {!appConfig.disabledEdit &&
+        <>
+          { entry.tags?.length > 0 && ' ' }
+          (<a onClick={() => setDialogVisible(true)}>edit tags</a>)
+        </>
+      }
+      </>
+    },
     { title: 'Objects', value: (entry.objects || []).map<React.ReactNode[]>(object => [simpleSearchLink(object.class), ` (${object.score})`]).reduce(joinReducer(', '), []) },
     { title: 'Faces', value: (entry.faces || []).map(face => `${face.gender} (~${face.age.toFixed()}y)`).join(', ') },
   ];
+
+  const origTags: Tag[] = (entry.tags || []).map(name => ({name, remove: false}))
+
+  const onSubmit = ({tags}) => {
+    const tagNames = tags.map(({name}) => name)
+    const origTagNames = entry.tags || []
+    const tagActions = origTagNames.filter(name => !tagNames.includes(name)).map(name => ({name, remove: true}))
+    tagActions.push(...tagNames.filter(name => !origTagNames.includes(name)).map(name => ({name, remove: false})))
+    if (tagActions.length) {
+      addTags([entry.id], tagActions).then(() => {
+        setDialogVisible(false);
+      })
+    } else {
+      setDialogVisible(false);
+    }
+
+    return false;
+  }
+
 
   return (
     <>
@@ -104,6 +140,9 @@ export const Details = ({entry, dispatch}) => {
           })}
         </tbody>
       </table>
+      { dialogVisible &&
+        <SingleTagDialog tags={origTags} visible={dialogVisible} onCancel={() => setDialogVisible(false)} onSubmit={onSubmit} />
+      }
     </>
   )
 }
