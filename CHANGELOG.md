@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - server: Use gallery config instead of cli args
 
+### Fixed
+
+- webapp: Fix location links from media detail
+
 ## [1.8.5] - 2022-12-21
 
 ### Fixed

@@ -89,7 +89,7 @@ export const Details = ({entry, dispatch}) => {
     { title: 'Camera', value: [entry.make, entry.model].filter(v => !!v).map<React.ReactNode>(v => simpleSearchLink(v)).reduce(joinReducer('/'), []) },
     { title: 'Camera Settings', value: `ISO ${entry.iso}, Aperture ${entry.aperture}` },
     { title: 'Geo Position', value: GeoLink(entry)},
-    { title: 'Address', value: [entry.road, entry.city, entry.country].filter(v => !!v).map<React.ReactNode>(v => simpleSearchLink(v, 'adress', v)).reduce(joinReducer(', '), []) },
+    { title: 'Address', value: [entry.road, entry.city, entry.country].filter(v => !!v).map<React.ReactNode>(v => simpleSearchLink(v, 'location', v)).reduce(joinReducer(', '), []) },
     { title: 'Tags', value: <>
       {(entry.tags || []).map<React.ReactNode>(v => simpleSearchLink(v, 'tag', v)).reduce(joinReducer(', '), [])}
       {!appConfig.disabledEdit &&
