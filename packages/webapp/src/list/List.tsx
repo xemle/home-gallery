@@ -29,6 +29,9 @@ const useViewHeight = (offset) => {
   return height
 }
 
+const mobileRowHeights = {minHeight: 75, maxHeight: 110, maxPotraitHeight: 185}
+const desktopRowHeights = {minHeight: 120, maxHeight: 200, maxPotraitHeight: 280}
+
 export const List = () => {
   const entries = useEntryStore(state => state.entries)
 
@@ -51,7 +54,7 @@ export const List = () => {
   }, [showSelected, selectedIds, entries])
 
   const rows = useMemo(() => {
-    const rowHeights = deviceType === DeviceType.MOBILE ? {minHeight: 61, maxHeight: 110} : {minHeight: 120, maxHeight: 200 }
+    const rowHeights = deviceType === DeviceType.MOBILE ? mobileRowHeights : desktopRowHeights
     return fluent(visibleEntries, {padding, width, ...rowHeights});
   }, [width, visibleEntries, deviceType])
 
