@@ -25,6 +25,27 @@ describe('applyEvents()', () => {
     expect(entries[0]).to.eql(result[0]);
   });
 
+  it('should add one tag to tow entries with same id', () => {
+    const entries: Taggable[] = [{id: '1'}, {id: '1'}]
+    const events: Event[] = [
+      {
+        type: 'userAction',
+        id: '5',
+        date: '2022-02-22',
+        targetIds: ['1'],
+        actions: [
+          {
+            action: 'addTag',
+            value: 'foo'
+          }
+        ]
+      }
+    ]
+    const result = applyEvents(entries, events);
+    expect(result).to.eql([{id: '1', updated: '2022-02-22', tags: ['foo'], appliedEventIds: ['5']}, {id: '1', updated: '2022-02-22', tags: ['foo'], appliedEventIds: ['5']}]);
+    expect(entries[0]).to.eql(result[0]);
+  });
+
   it('should add two tags', () => {
     const entries: Taggable[] = [{id:'1', updated: '2022-03-06'}];
     const events: Event[] = [

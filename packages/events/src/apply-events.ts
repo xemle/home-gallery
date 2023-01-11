@@ -36,7 +36,7 @@ const applyEventAction = <T extends Taggable>(data: T, action: EventAction): boo
 }
 
 const isValidEvent = (event: Event) => {
-  return event.type == 'userAction' && event.targetIds?.length && event.actions?.length  
+  return event.type == 'userAction' && event.targetIds?.length && event.actions?.length
 }
 
 const applyEventDate = (entry: Taggable, event: Event) => {
@@ -47,14 +47,35 @@ const applyEventDate = (entry: Taggable, event: Event) => {
   }
 }
 
+type EntryIdMap = {[key: string]: Taggable[]}
+
+const idMapReducer = (result: EntryIdMap, entry: Taggable) => {
+  const id = entry.id
+  if (!result[id]) {
+    result[entry.id] = [entry]
+  } else {
+    result[id].push(entry)
+  }
+
+  return result
+}
+
+const flattenReducer = (result: Taggable[], entry: Taggable[]) => {
+  result.push(...entry)
+  return result
+}
+
 export const applyEvents = (entries: Taggable[], events: Event[]): Taggable[] => {
-  const id2Entry: {[key: string]: Taggable} = entries.reduce((result, entry) => { result[entry.id] = entry; return result }, <{[key: string]: Taggable}>{})
+  // on server side duplicated entries ids may exists
+  const id2Entries: EntryIdMap = entries.reduce(idMapReducer, {} as EntryIdMap)
+
   const changedEntries: Taggable[] = [];
   events.filter(isValidEvent).forEach(event => {
     const eventId = event.id;
     const targetEntries: Taggable[] = event.targetIds
-      .filter(entryId => id2Entry[entryId])
-      .map(entryId => id2Entry[entryId])
+      .filter(entryId => id2Entries[entryId]?.length)
+      .map(entryId => id2Entries[entryId])
+      .reduce(flattenReducer, [] as Taggable[])
       .filter((entry: Taggable) => !entry.appliedEventIds || entry.appliedEventIds.indexOf(eventId) < 0);
 
     targetEntries.forEach(entry => {

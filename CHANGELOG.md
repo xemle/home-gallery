@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- events: Fix apply events with duplicated entry ids
 - webapp: Fix location links from media detail
 
 ## [1.8.5] - 2022-12-21
