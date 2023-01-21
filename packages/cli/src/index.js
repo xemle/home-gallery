@@ -32,7 +32,7 @@ const cli = () => {
     .demandCommand()
     .help()
     .alias('h', 'help')
-    .epilog('(c) 2022 HomeGallery - https://home-gallery.org')
+    .epilog('(c) 2023 HomeGallery - https://home-gallery.org')
     .argv;
 }
 
