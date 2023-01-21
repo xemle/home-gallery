@@ -8,7 +8,7 @@ const assert = require('assert')
 const fetch = require('node-fetch')
 const express = require('express')
 
-const { generateId, nextPort, runCliAsync, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase } = require('../utils')
+const { generateId, nextPort, waitFor, runCliAsync, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase } = require('../utils')
 
 const servers = {}
 
@@ -36,26 +36,6 @@ const fetchDatabase = () => fetchFacade('/api/database.json')
     }
     return database
   })
-
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
-
-const waitFor = async (testFn, timeout) => {
-  timeout = timeout || 10 * 1000
-  const startTime = Date.now()
-  let delay = 10
-
-  const next = async () => {
-    if (Date.now() - startTime > timeout) {
-      throw new Error(`Wait timeout exceeded`)
-    }
-    return testFn().catch(() => {
-      delay = Math.min(500, delay * 2)
-      return wait(delay).then(next)
-    })
-  }
-
-  return next()
-}
 
 const createServerId = () => {
   const serverId = generateId(4)

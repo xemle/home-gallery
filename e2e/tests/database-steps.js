@@ -1,6 +1,6 @@
 const { stat, access } = require('fs/promises')
 const assert = require("assert");
-const { getIndexFilename, getStorageDir, getDatabaseFilename, runCli, readDatabase } = require('../utils');
+const { getIndexFilename, getStorageDir, getDatabaseFilename, runCli, readDatabase, waitFor } = require('../utils');
 
 step('Database does not exist', async () => {
   const exists = await access(getDatabaseFilename()).then(() => true).catch(() => false)
@@ -122,7 +122,7 @@ step("Database group <id> has file <filename>", async (id, filename) => {
   assert(!!found, `Could not find filename ${filename} of group ${id}`)
 })
 
-const getDatabaseStat = async () => stat(getDatabaseFilename())
+const getDatabaseStat = async () => stat(getDatabaseFilename()).catch(err => ({errCode: err.code}))
 
 step("Save database file stat", async () => {
   const fileStat = await getDatabaseStat()
@@ -139,4 +139,19 @@ step("Database file stat are unchanged", async () => {
   const fileStat = await getDatabaseStat()
   const prevFileStat = gauge.dataStore.scenarioStore.get('databaseFileStat')
   assertObjectValues(prevFileStat, fileStat, ['atime', 'atimeMs'])
+})
+
+step("Wait for database file stat change", async () => {
+  const prevFileStat = gauge.dataStore.scenarioStore.get('databaseFileStat')
+
+  const hasStatChanges = async (props) => {
+    const fileStat = await getDatabaseStat()
+    const change = props.findIndex(prop => fileStat[prop] && fileStat[prop] != prevFileStat[prop])
+    return change >= 0
+  }
+
+  const test = () => hasStatChanges(['size', 'mtimeMs'])
+    .then(changed => changed || Promise.reject(new Error('Unchanged')))
+
+  return waitFor(test, 15 * 1000)
 })

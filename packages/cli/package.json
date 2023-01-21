@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@home-gallery/logger": "file:../logger",
+    "chokidar": "^3.5.3",
     "enquirer": "^2.3.6"
   }
 }

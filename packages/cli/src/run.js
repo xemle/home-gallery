@@ -1,4 +1,3 @@
-const os = require('os')
 const process = require('process')
 const fs = require('fs/promises')
 const path = require('path')
@@ -6,7 +5,7 @@ const path = require('path')
 const log = require('@home-gallery/logger')('cli.run')
 
 const { initConfig, defaultConfigFile, load } = require('./config')
-const { startServer, importSources } = require('./tasks')
+const { startServer, importSources, watchSources } = require('./tasks')
 
 const galleryDir = path.dirname(process.argv[1])
 
@@ -30,11 +29,17 @@ const runServer = options => {
   return startServer(options)
 }
 
-const runImport = (config, initialImport, incrementalUpdate, smallFiles) => {
-  const sources = config.sources.filter(source => !source.offline)
+const runImport = (config, options) => {
+  const onlineSources = config.sources.filter(source => !source.offline)
+  const sourceDirs = onlineSources.map(source => source.dir)
 
-  log.info(`Import online sources from: ${sources.map(source => source.dir)}`)
-  return importSources(config, sources, initialImport, incrementalUpdate, smallFiles)
+  if (options.watch) {
+    log.info(`Import online sources in watch mode from: ${sourceDirs.join(', ')}`)
+    return watchSources(config, onlineSources, options)
+  } else {
+    log.info(`Import online sources from: ${sourceDirs.join(', ')}`)
+    return importSources(config, onlineSources, options)
+  }
 }
 
 const command = {
@@ -95,9 +100,46 @@ const command = {
           boolean: true,
           describe: 'Import only small files up to 20MB to exclude big files such as videos to speed up the initial import'
         },
+        'watch': {
+          alias: 'w',
+          boolean: true,
+          describe: 'Watch files for changes and run import on changes'
+        },
+        'watch-delay': {
+          number: true,
+          default: 10,
+          describe: 'Delay import after file change detection in seconds. A new file change refreshes the previous delay'
+        },
+        'watch-max-delay': {
+          number: true,
+          default: 10 * 60,
+          describe: 'Maximum delay after file change detection in seconds. Set it to 0 for immediate import on file change'
+        },
+        'watch-poll-interval': {
+          number: true,
+          default: 0,
+          describe: 'Use poll interval in seconds. If set 0 watch mode uses fs events if available.'
+        },
+        'import-on-start': {
+          boolean: true,
+          default: true,
+          describe: 'Run import on watch start'
+        },
       }),
       (argv) => load(argv.config, true)
-          .then(options => runImport(options.config, argv.initial, argv.update, argv.smallFiles))
+          .then(({config}) => {
+            const options = {
+              initialImport: argv.initial,
+              incrementalUpdate: argv.update,
+              smallFiles: argv.smallFiles,
+              watch: argv.watch,
+              watchDelay: Math.max(0, Math.min(argv.watchDelay, argv.watchMaxDelay) * 1000),
+              watchMaxDelay: Math.max(0, argv.watchMaxDelay * 1000),
+              watchPollInterval: argv.watchPollInterval,
+              importOnWatchStart: argv.importOnStart
+            }
+            return runImport(config, options)
+          })
           .then(() => log.info(`Have a good day...`))
           .catch(err => log.error(err, `Error: ${err}`))
       )

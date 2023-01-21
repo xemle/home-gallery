@@ -1,3 +1,4 @@
+const chokidar = require('chokidar')
 const { runCli, loggerArgs } = require('./run')
 
 const log = require('@home-gallery/logger')('cli.task.import')
@@ -130,8 +131,9 @@ const generateJournal = () => {
 
 const requireJournal = (initialImport, incrementalUpdate) => initialImport || incrementalUpdate
 
-const importSources = async (config, sources, initialImport, incrementalUpdate, smallFiles) => {
-  let processing = true;
+const importSources = async (config, sources, options) => {
+  let processing = true
+  const { initialImport, incrementalUpdate, smallFiles } = options
   while (processing) {
     const journal = requireJournal(initialImport, incrementalUpdate) ? generateJournal() : false
 
@@ -146,4 +148,146 @@ const importSources = async (config, sources, initialImport, incrementalUpdate, 
   }
 }
 
-module.exports = { importSources, extract, buildDatabase }
+const watchSources = async (config, sources, options) => {
+  const { watch, watchDelay, watchMaxDelay, watchPollInterval, importOnWatchStart } = options
+  if (!watch) {
+    return batchImport(config, sources, options)
+  }
+
+  let isImporting = false
+  let isInitializing = true
+  let fileChangeCount = 0
+  const sourceDirs = sources.map(source => source.dir)
+
+  log.debug(`Start watching dirs for file changes: ${sourceDirs.join(', ')}`)
+  const usePolling = watchPollInterval > 0
+  const chokidarOptions = {
+    followSymlinks: false,
+    ignoreInitial: true,
+    ignorePermissionErrors: true,
+    usePolling,
+    interval: usePolling ? watchPollInterval * 1000 : 100,
+    binaryInterval: usePolling ? watchPollInterval * 1000 : 300
+  }
+  log.trace({chokidarOptions}, `Use chokidar as file watcher ${usePolling ? 'with polling' : 'with fs events'}`)
+  let watcher = chokidar.watch(sourceDirs, chokidarOptions)
+
+  const runImport = async () => {
+    if (isImporting) {
+      return
+    }
+    isImporting = true
+    fileChangeCount = 0
+    log.info(`Import from online sources: ${sourceDirs.join(', ')}`)
+    return importSources(config, sources, options)
+      .then(() => {
+        isImporting = false
+        if (fileChangeCount > 0) {
+          log.info(`Re-run import due ${fileChangeCount} queued file changes`)
+          return runImport()
+        }
+      })
+  }
+
+  const createChangeDelay = (delay, maxDelay, onChange) => {
+    let firstChangeMs
+    let timerId
+
+    const clearTimer = () => clearTimeout(timerId)
+    process.once('SIGINT', clearTimer)
+    process.once('SIGTERM', clearTimer)
+
+    return (event, path) => {
+      if (fileChangeCount == 0) {
+        firstChangeMs = Date.now()
+      }
+      fileChangeCount++
+      const importDelay = Math.min(Math.max(0, firstChangeMs + maxDelay - Date.now()), delay)
+      log.trace(`File change detected: ${event} at ${path}. Delay import by ${importDelay}ms`)
+      clearTimer()
+      timerId = setTimeout(() => {
+        if (!fileChangeCount) {
+          return
+        } else if (!isImporting) {
+          onChange()
+        } else {
+          log.debug(`Queue file change due running import`)
+        }
+      }, importDelay)
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    const importErrorHandler = err => {
+      isImporting = false
+      log.error(err, `Failed to import: ${err}`);
+      log.info(`Stop watching files due error`)
+      return watcher.close().then(() => reject(err))
+    }
+
+    const onReady = () => {
+      isInitializing = false
+      log.debug(`File watcher initialized`)
+      if (importOnWatchStart) {
+        runImport().catch(importErrorHandler)
+      }
+    }
+
+    const onDelayChange = () => {
+      log.debug(`Run import due ${fileChangeCount} file changes`)
+      runImport().catch(importErrorHandler)
+    }
+
+    const createFallbackWatcher = () => {
+      const pollingOptions = {...chokidarOptions,
+        usePolling: true,
+        interval: 5 * 60 * 1000,
+        binaryInterval: 5 * 60 * 1000
+      }
+
+      log.trace({chokidarOptions: pollingOptions}, `Use chokidar as file watcher with fallback polling`)
+      watcher = chokidar.watch(sourceDirs, pollingOptions)
+
+      watcher.on('ready', onReady)
+      watcher.on('all', createChangeDelay(30 * 1000, 30 * 1000, onDelayChange))
+      watcher.on('error', onError)
+    }
+
+    const onError = err => {
+      watcher.close().then(() => {
+        fileChangeCount = 0
+        if (err.code == 'ENOSPC' && !usePolling) {
+          log.warn(err, `System limit for file watcher exceeded. Increase limit or use polling mode to fix it. Fallback to file watcher with poll interval of 5 min`)
+          createFallbackWatcher()
+        } else {
+          log.error(err, `Stop watcher due watch error ${err}`)
+          reject(err)
+        }
+      })
+    }
+
+    watcher.on('ready', onReady)
+    watcher.on('all', createChangeDelay(watchDelay, watchMaxDelay, onDelayChange))
+    watcher.on('error', onError)
+
+    const shutdown = (signal) => {
+      log.info(`Stop watcher due ${signal} signal`)
+      watcher.close().then(() => {
+        fileChangeCount = 0
+        resolve()
+      })
+    }
+
+    process.once('SIGINT', () => shutdown('SIGINT'))
+    process.once('SIGTERM', () => shutdown('SIGTERM'))
+
+    process.on('SIGUSR1', () => log.info(`File watcher status: ${isInitializing ? 'initializing' : (isImporting ? 'importing' : 'idle')}`))
+  })
+}
+
+module.exports = {
+  importSources,
+  watchSources,
+  extract,
+  buildDatabase
+}

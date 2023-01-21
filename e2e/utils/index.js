@@ -46,6 +46,26 @@ const nextPort = async () => {
   return port
 }
 
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+const waitFor = async (testFn, timeout) => {
+  timeout = timeout || 10 * 1000
+  const startTime = Date.now()
+  let delay = 10
+
+  const next = async () => {
+    if (Date.now() - startTime > timeout) {
+      throw new Error(`Wait timeout exceeded`)
+    }
+    return testFn().catch(() => {
+      delay = Math.min(500, delay * 2)
+      return wait(delay).then(next)
+    })
+  }
+
+  return next()
+}
+
 const getTestDataDir = () => path.resolve(testDataDir)
 
 const getBaseDir = () => gauge.dataStore.scenarioStore.get('baseDir')
@@ -142,10 +162,7 @@ const dropServerPortArgOnDocker = args => {
 }
 
 const runCliAsync = (args, options, cb) => {
-  if (!cb) {
-    cb = options
-    options = {}
-  } else if (!options) {
+  if (!options) {
     options = {}
   }
 
@@ -225,6 +242,8 @@ const dateFormat = (now, format) => format.replace(/%(.)/g, (_, c) => {
 module.exports = {
   generateId,
   nextPort,
+  wait,
+  waitFor,
   getTestDataDir,
   getBaseDir,
   getPath,

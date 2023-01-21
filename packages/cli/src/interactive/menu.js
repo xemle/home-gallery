@@ -44,10 +44,12 @@ const menu = {
         sources = sources.filter(source => indices.indexOf(source.index) >= 0)
       }
 
-      const initialImport = command == 'initial' || command == 'initialSmall'
-      const incrementalUpdate = command == 'increment'
-      const smallFiles = command == 'initialSmall'
-      await importSources(config, sources, initialImport, incrementalUpdate, smallFiles)
+      const importOptions = {
+        initialImport: command == 'initial' || command == 'initialSmall',
+        incrementalUpdate: command == 'increment',
+        smallFiles: command == 'initialSmall'
+      }
+      await importSources(config, sources, importOptions)
       return 'main'
     }
   },
