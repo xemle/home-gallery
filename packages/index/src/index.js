@@ -28,7 +28,7 @@ const isLimitExeeded = filter => typeof filter.limitExceeded == 'function' ? fil
 const asyncCreateOrUpdate = async (directory, filename, options) => {
   const now = new Date();
   const fileIndex = await asyncReadIndex(filename)
-  const filter = await createFilter(fileIndex.data.length, options)
+  const filter = await createFilter(fileIndex.data, options)
   const fsEntries = await asyncCreateIndex(directory, {...options, filter})
   const [entries, changes] = await asyncUpdateIndex(fileIndex.data, fsEntries, options.matcherFn)
   const limitExceeded = isLimitExeeded(filter)

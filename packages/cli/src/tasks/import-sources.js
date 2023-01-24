@@ -129,21 +129,22 @@ const generateJournal = () => {
   return `${pad(now.getUTCMonth() + 1, '0', 2)}${pad(now.getUTCDate(), '0', 2)}-${generateId(4)}`
 }
 
-const requireJournal = (initialImport, incrementalUpdate) => initialImport || incrementalUpdate
-
 const importSources = async (config, sources, options) => {
   let processing = true
-  const { initialImport, incrementalUpdate, smallFiles } = options
+  const { initialImport, incrementalUpdate } = options
+  const withJournal = initialImport || incrementalUpdate
   while (processing) {
-    const journal = requireJournal(initialImport, incrementalUpdate) ? generateJournal() : false
+    const journal = withJournal ? generateJournal() : false
 
-    await updateIndices(config, sources, { initialImport, journal, smallFiles }).then(() => processing = false).catch(catchIndexLimitExceeded)
+    await updateIndices(config, sources, { ...options, journal })
+      .then(() => processing = false)
+      .catch(catchIndexLimitExceeded)
     await extract(config, sources, { journal })
     await buildDatabase(config, sources, { journal })
     await deleteJournals(config, sources, journal)
 
     if (processing) {
-      log.info(`New chunk of media is processed and is ready to browse. Continue with next chunk to process...`)
+      log.info(`New chunk of media is processed and becomes ready to browse. Continue with next chunk to process...`)
     }
   }
 }

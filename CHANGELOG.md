@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - cli: Add watch mode of run import command
 
+### Changed
+
+- index: Keep known files on max size filter
+
 ## [1.9.0] - 2023-01-11
 
 ### Added

@@ -19,7 +19,7 @@ const command = {
     const indexFilename = argv.index;
     statIndex(indexFilename, (err, stats) => {
       if (err) {
-        log.error(`Could not read file index ${indexFilename}: ${err}`);
+        log.error(err, `Could not read file index ${indexFilename}: ${err}`);
         return cb(err);
       }
       console.log(prettyPrint(stats));

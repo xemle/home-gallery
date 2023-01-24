@@ -35,7 +35,7 @@ const command = {
 
     removeJournal(indexFilename, journal, (err) => {
       if (err) {
-        log.warn(`Could not remove journal ${journal} from file index ${indexFilename}: ${err}`)
+        log.warn(err, `Could not remove journal ${journal} from file index ${indexFilename}: ${err}`)
       }
     })
   }

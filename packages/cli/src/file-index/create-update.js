@@ -45,11 +45,16 @@ const command = {
       },
       'max-filesize': {
         string: true,
-        describe: `Limit files up to given filesize. Example values are 2096, 5M or 0.2G`
+        describe: `Limit files up to given filesize. Example values are 2096, 5M or 0.2G. See also option --keep-known`
+      },
+      'keep-known': {
+        boolean: true,
+        default: true,
+        describe: `Keep known files if option --max-filesize is used, even if they have larger size. If set to false, remove larger files from index`
       },
       'add-limits': {
         string: true,
-        describe: `Limits of new index files for incremental imports. Format is initial,add?,factor?,max? eg. 200,500,1.25,8000`
+        describe: `Limits of new index files for incremental imports. Format is initial,add?,factor?,max?. Eg. 200,500,1.25,8000`
       },
       'journal': {
         alias: 'j',
@@ -70,6 +75,7 @@ const command = {
       dryRun: argv['dry-run'],
       matcherFn: matcherFns[argv.m] || matcherFns['size-ctime-inode'],
       maxFilesize: argv.maxFilesize,
+      keepKnownFiles: argv.keepKnown,
       addLimits: argv.addLimits,
       journal: argv.journal
     }
@@ -77,7 +83,7 @@ const command = {
       if (err && err.code == 'EUSERABORT') {
         log.warn(`Index creation aborted: ${err}`)
       } else if (err) {
-        log.error(`Failed to create index: ${err}`)
+        log.error(err, `Failed to create index: ${err}`)
       }
       process.exit(err ? 2 : (limitExceeded ? 1 : 0))
     })
