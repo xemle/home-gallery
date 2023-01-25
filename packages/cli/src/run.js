@@ -33,13 +33,8 @@ const runImport = (config, options) => {
   const onlineSources = config.sources.filter(source => !source.offline)
   const sourceDirs = onlineSources.map(source => source.dir)
 
-  if (options.watch) {
-    log.info(`Import online sources in watch mode from: ${sourceDirs.join(', ')}`)
-    return watchSources(config, onlineSources, options)
-  } else {
-    log.info(`Import online sources from: ${sourceDirs.join(', ')}`)
-    return importSources(config, onlineSources, options)
-  }
+  log.info(`Import online sources: ${sourceDirs.join(', ')}`)
+  return watchSources(config, onlineSources, options)
 }
 
 const command = {

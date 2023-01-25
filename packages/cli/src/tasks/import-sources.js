@@ -4,7 +4,7 @@ const { runCli, loggerArgs } = require('./run')
 const log = require('@home-gallery/logger')('cli.task.import')
 
 const updateIndex = async (config, source, options) => {
-  const { initialImport, journal, smallFiles } = options
+  const { journal, smallFiles, addLimits, maxFilesize } = options
   const args = [...loggerArgs(config), 'index', '--directory', source.dir, '--index', source.index]
   source.matcher && args.push('--matcher', source.matcher)
   source.excludeFromFile && args.push('--exclude-from-file', source.excludeFromFile)
@@ -13,10 +13,10 @@ const updateIndex = async (config, source, options) => {
   const excludes = source.excludes || [];
   excludes.forEach(exclude => args.push('--exclude', exclude))
 
-  if (source.maxFilesize || smallFiles) {
-    args.push('--max-filesize', source.maxFilesize || '20M')
+  if (maxFilesize || source.maxFilesize || smallFiles) {
+    args.push('--max-filesize', maxFilesize || source.maxFilesize || '20M')
   }
-  initialImport && args.push('--add-limits', '200,500,1.25,8000')
+  addLimits && args.push('--add-limits', addLimits || '200,500,1.25,8000')
   journal && args.push('--journal', journal)
   await runCli(args)
 }
@@ -116,23 +116,19 @@ const generateId = len => {
   return id
 }
 
-const pad = (s, c, l) => {
-  s = `${s}`
-  while (s.length < l) {
-    s = c + s
-  }
-  return s
-}
+const pad2 = s => ('' + s).padStart(2, '0')
 
 const generateJournal = () => {
   const now = new Date();
-  return `${pad(now.getUTCMonth() + 1, '0', 2)}${pad(now.getUTCDate(), '0', 2)}-${generateId(4)}`
+  return `${pad2(now.getUTCMonth() + 1)}${pad2(now.getUTCDate())}-${generateId(4)}`
 }
 
 const importSources = async (config, sources, options) => {
   let processing = true
   const { initialImport, incrementalUpdate } = options
   const withJournal = initialImport || incrementalUpdate
+
+  log.info(`Import files from source dirs: ${sources.map(source => source.dir).join(', ')}`)
   while (processing) {
     const journal = withJournal ? generateJournal() : false
 
@@ -149,6 +145,36 @@ const importSources = async (config, sources, options) => {
   }
 }
 
+const batchProfiles = [
+  {
+    description: `Import files up to 20 MB`,
+    addLimits: '10,20,1.2,200',
+    maxFilesize: '20M'
+  },
+  {
+    description: `Import files up to 200 MB`,
+    addLimits: '2,5,1.1,30',
+    maxFilesize: '200M'
+  },
+  {
+    description: `Import all remaining files larger than 200 MB`,
+    addLimits: '1,2,1.05,10',
+  }
+]
+
+const batchImport = async (config, sources, options) => {
+  const { initialImport } = options
+  if (!initialImport) {
+    return importSources(config, sources, options)
+  }
+
+  log.info(`Run initial import in batch mode of different file sizes`)
+  for (const profile of batchProfiles) {
+    log.info(`Run batch import: ${profile.description}`)
+    await importSources(config, sources, {...options, ...profile})
+  }
+}
+
 const watchSources = async (config, sources, options) => {
   const { watch, watchDelay, watchMaxDelay, watchPollInterval, importOnWatchStart } = options
   if (!watch) {
@@ -160,7 +186,7 @@ const watchSources = async (config, sources, options) => {
   let fileChangeCount = 0
   const sourceDirs = sources.map(source => source.dir)
 
-  log.debug(`Start watching dirs for file changes: ${sourceDirs.join(', ')}`)
+  log.debug(`Run import in watch mode. Start watching dirs for file changes: ${sourceDirs.join(', ')}`)
   const usePolling = watchPollInterval > 0
   const chokidarOptions = {
     followSymlinks: false,
@@ -179,8 +205,7 @@ const watchSources = async (config, sources, options) => {
     }
     isImporting = true
     fileChangeCount = 0
-    log.info(`Import from online sources: ${sourceDirs.join(', ')}`)
-    return importSources(config, sources, options)
+    return batchImport(config, sources, options)
       .then(() => {
         isImporting = false
         if (fileChangeCount > 0) {

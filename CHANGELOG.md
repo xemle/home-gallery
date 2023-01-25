@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- cli: Batch and increase file sizes on initial import
 - index: Keep known files on max size filter
 
 ## [1.9.0] - 2023-01-11
