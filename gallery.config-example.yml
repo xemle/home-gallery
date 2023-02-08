@@ -110,16 +110,16 @@ sources:
   #port: 3000
   #host: '0.0.0.0'
   # security configuration for https
-  #key: '{configDir}/server.key'
-  #cert: '{configDir}/server.crt'
+  # key: '{configDir}/server.key'
+  # cert: '{configDir}/server.crt'
   # Open browser when server starts
-  #openBrowser: false
+  #openBrowser: true
   # Enable basic authentication users and ip whitelist rules which require no authentication
   # First matching rule wins. Default rules are: allow: localhost and deny: all.
   # Hashed password can be generated via
   #   node -e "pw=process.argv[1]||'';sha1=require('crypto').createHash('sha1').update(pw).digest('base64');console.log('{SHA}'+sha1)" password
   #   {SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g=
-  #auth:
+  # auth:
   #  users:
   #    - username: password
   #    - username: '{SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g='

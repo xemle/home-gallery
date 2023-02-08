@@ -139,6 +139,21 @@ t.test('readData with json', async t => {
 })
 
 t.test('readData server settings', async t => {
+  t.test('expanded default settings', async t => {
+    const data = `
+        sources:
+          - ~/Pictures
+      `
+    const expected  = `
+      server:
+        host: 0.0.0.0
+        port: 3000
+        openBrowser: true
+        basePath: '/'
+    `
+    t.match(readData(data, true, '/', env), y2o(expected))
+  })
+
   t.test('expand auth user', async t => {
     const data = `
       server:

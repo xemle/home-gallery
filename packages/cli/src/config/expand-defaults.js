@@ -52,6 +52,14 @@ const expandConfigDefaults = (config, env) => {
     {type: 'file', level: 'debug', file: '{configDir}/{configPrefix}gallery.log'}
   ]
 
+  const serverDefaults = {
+    host: '0.0.0.0',
+    port: 3000,
+    openBrowser: true,
+    basePath: '/'
+  }
+  config.server = {...serverDefaults, ...config.server}
+
   const mappings = {
     'server.auth.users': keyValueToProps('username', 'password'),
     'server.auth.rules': keyValueToProps('type', 'value')

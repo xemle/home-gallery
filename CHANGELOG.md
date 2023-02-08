@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - cli: Batch and increase file sizes on initial import
 - index: Keep known files on max size filter
 
+### Fixed
+
+- cli: Honor custom server port in `gallery.config.yml`
+
 ## [1.9.0] - 2023-01-11
 
 ### Added

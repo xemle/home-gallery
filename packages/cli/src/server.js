@@ -51,14 +51,12 @@ const command = {
       },
       host: {
         alias: 'H',
-        default: '0.0.0.0',
         string: true,
         describe: 'Listening host IP address'
       },
       port: {
         alias: 'p',
         number: true,
-        default: 3000,
         describe: 'Listening TCP port'
       },
       key: {
@@ -86,7 +84,6 @@ const command = {
       },
       'open-browser': {
         boolean: true,
-        default: true,
         describe: 'Open browser on server start'
       },
       'remote-console-token': {
@@ -94,6 +91,10 @@ const command = {
         describe: 'Enable remote console with given debug auth token'
       }
     })
+    .default('host', undefined, '0.0.0.0')
+    .default('port', undefined, '3000')
+    .default('base-path', undefined, '/')
+    .default('open-browser', undefined, 'true')
   },
   handler: (argv) => {
     const { startServer, webappDir } = require('@home-gallery/server');
@@ -121,9 +122,9 @@ const command = {
 
       startServer({config, configFile}, (err) => {
         if (err) {
-          log.error(`Could not start server: ${err}`);
+          log.error(err, `Could not start server: ${err}`);
         } else {
-          log.info(`Server started. Open it at http://${argv.host === '0.0.0.0' ? 'localhost' : argv.host}:${argv.port}`);
+          log.info(`Server started. Open your own private gallery at http://${config.server.host === '0.0.0.0' ? 'localhost' : config.server.host}:${config.server.port}`);
         }
       })
     }
