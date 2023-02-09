@@ -1,8 +1,8 @@
 const t = require('tap')
 const yargs = require('yargs')
 
-t.test('vendor yargs: deprecated parsed prop', async t => {
-  t.test('defaulted is not set', async t => {
+t.test('yargs', async t => {
+  t.test('explicit option is set', async t => {
     const argv = yargs()
     .options({
       'port': { alias: ['p'], number: true }
@@ -13,11 +13,11 @@ t.test('vendor yargs: deprecated parsed prop', async t => {
     t.match(argv.port, 3001)
   })
 
-  // Use .default(key, value, description) to cache default values
+  // Use .default(key, value, description) to catch default values
   // See https://github.com/xemle/home-gallery/issues/69
   // See https://yargs.js.org/docs/#api-reference-defaultkey-value-description
   // See https://github.com/yargs/yargs/issues/513
-  t.test('defaulted is set', async t => {
+  t.test('default value is undefined', async t => {
     const argv = yargs()
     .options({
       'port': { alias: ['p'], number: true }
