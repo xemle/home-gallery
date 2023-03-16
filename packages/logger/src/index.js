@@ -22,7 +22,10 @@ const createInstance = options => {
         return method.apply(this, inputArgs)
       }
     },
-    timestamp: pino.stdTimeFunctions.isoTime
+    timestamp: pino.stdTimeFunctions.isoTime,
+    mixin(_context, level) {
+      return { 'levelName': logger.levels.labels[level] }
+    }
   }, ms)
 
   logger.add = stream => ms.add(stream)
