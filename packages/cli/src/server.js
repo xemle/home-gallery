@@ -120,18 +120,23 @@ const command = {
       const { config, configFile } = await load(argv.config, false)
       mapArgs(argv, config, mapping)
 
-      startServer({config, configFile}, (err) => {
-        if (err) {
-          log.error(err, `Could not start server: ${err}`);
-        } else {
-          log.info(`Server started. Open your own private gallery at http://${config.server.host === '0.0.0.0' ? 'localhost' : config.server.host}:${config.server.port}`);
-        }
+      return new Promise((resolve, reject) => {
+        startServer({config, configFile}, (err, server) => {
+          if (err) {
+            return reject(err)
+          }
+          server.once('close', () => {
+            // force exit due dangling processes
+            setTimeout(() => process.exit(0), 100)
+            resolve()
+          })
+        })
       })
     }
 
     run(argv)
       .catch(err => {
-        log.error(err, `Error: ${err}`);
+        log.error(err, `Failed to start server: ${err}`)
         process.exit(1)
       })
   }

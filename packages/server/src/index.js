@@ -101,23 +101,35 @@ function startServer(options, cb) {
 
   const server = createServer(config.server.key, config.server.cert, app);
   server.listen(config.server.port, config.server.host)
-    .on('error', (e) => {
-      if (e.code === 'EADDRINUSE') {
-        log.error(`Address is already in use!`);
+    .on('error', err => {
+      if (err.code === 'EADDRINUSE') {
+        log.error(`Listening port ${config.server.port} is already in use!`);
       }
-      cb(e);
+      cb(err);
     })
     .on('listening', () => {
       const url = serverUrl(config.server.port, config.server.key, config.server.cert)
-      log.info(`Open Home Gallery on ${url}`);
+      log.info(`Your own Home Gallery is running at ${url}`);
       initDatabase();
       if (config.server.openBrowser) {
         log.debug(`Open browser with url ${url}`)
-        return openCb(url, () => cb(null, app))
+        return openCb(url, () => cb(null, server))
       }
-      cb(null, app);
+      cb(null, server);
     })
 
+  process.once('SIGINT', () => {
+    log.trace(`Closing server due SIGINT`)
+    server.closeIdleConnections()
+    server.closeAllConnections()
+    server.close(err => {
+      if (err) {
+        log.error(err, `Failed to close server by SIGINT`)
+      } else {
+        log.debug(err, `Server closed successfully by SIGINT`)
+      }
+    });
+  })
 }
 
 module.exports = {

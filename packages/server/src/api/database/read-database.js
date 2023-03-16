@@ -86,6 +86,16 @@ function waitReadWatch(filename, getEvents, stringifyEntryCache, cb) {
     });
   }
 
+  const watch = () => {
+    log.debug(`Watch database file ${filename} for changes`);
+    const watcher = fs.watch(filename, onChange);
+
+    process.once('SIGINT', () => {
+      log.debug(`Stop watching database file ${filename} due SIGINT`);
+      watcher.close();
+    })
+  }
+
   exists(filename, (err, hasFile) => {
     if (err) {
       return cb(err);
@@ -96,12 +106,12 @@ function waitReadWatch(filename, getEvents, stringifyEntryCache, cb) {
           return cb(err);
         }
         log.info(`Database file ${filename} exists now. Continue`);
-        fs.watchFile(filename, onChange)
         next();
+        watch();
       });
     } else {
-      fs.watchFile(filename, onChange)
       next();
+      watch();
     }
   })
 }

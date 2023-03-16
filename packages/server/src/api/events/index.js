@@ -80,13 +80,8 @@ const events = (eventbus, eventsFilename) => {
     clients.push(newClient);
     log.info(`Add new client ${newClient}`);
 
-    req.on('end', () => {
-      log.info(`Client connection ended. Remove client ${newClient}`);
-      removeClient(newClient);
-    });
-
     req.on('close', () => {
-      log.info(`Client connection closed. Remove client ${newClient}`);
+      log.debug(`Client connection closed. Remove client ${newClient}`);
       removeClient(newClient);
     });
 
