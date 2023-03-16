@@ -21,7 +21,8 @@ const createInstance = options => {
         }
         return method.apply(this, inputArgs)
       }
-    }
+    },
+    timestamp: pino.stdTimeFunctions.isoTime
   }, ms)
 
   logger.add = stream => ms.add(stream)
