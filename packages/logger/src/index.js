@@ -1,8 +1,10 @@
 "use strict";
 const pino = require('pino')
 
-const prettyStream = require('./pretty-stream')
-const fileStream = require('./file-stream')
+const createPrettyStream = require('./pretty-stream')
+const createFileStream = require('./file-stream')
+const createJsonStream = require('./json-stream')
+const mergeLogStream = require('./merge-log-stream')
 
 let instance;
 
@@ -30,37 +32,36 @@ const createInstance = options => {
 
   logger.add = stream => ms.add(stream)
 
-  return logger
-}
-
-const createPrettyStream = level => {
-  if (!instance) {
-    console.log(`No logging instance exists`)
-  }
-  instance.add({level: level || 'info', stream: prettyStream()})
-}
-
-const createFileStream = (filename, level, cb) => {
-  if (!instance) {
-    return cb ? cb(new Error(`No logging instance exists`)) : console.log(`No logging instance exists`)
-  }
-  fileStream(filename, (err, stream) => {
-    if (err && cb) {
-      cb(err)
-    } else if (err) {
-      instance.err(`Could not create file logger for ${fileanme}: ${err}`)
-    } else {
-      instance.add({ level: level || 'info', stream: stream })
-      cb && cb()
+  /**
+   * Before write() of multistream is called the actual log level
+   * is set in write() in proto.js. We emulate that behavior here
+   * to call write() of multistream directly to inject/forward
+   * the log message to the real loggers.
+   *
+   * @param {string} data
+   */
+  const fixLastLevel = data => {
+    try {
+      const log = JSON.parse(data)
+      ms.lastLevel = log.level
+    } catch (e) {
+      ms.lastLevel = 30 // info level as fallback
     }
-  })
+  }
+
+  logger.write = data => {
+    fixLastLevel(data)
+    ms.write(data)
+  }
+
+  return logger
 }
 
 const isString = v => typeof v == 'string'
 
 const toOptions = options => isString(options) ? {module: options} : options
 
-function logger(options) {
+function Logger(options) {
   if (!instance) {
     instance = createInstance(toOptions(options))
     return instance
@@ -69,9 +70,13 @@ function logger(options) {
   }
 }
 
-logger.getInstance = () => instance
-logger.add = dest => instance && instance.add(dest)
-logger.addPretty = createPrettyStream
-logger.addFile = createFileStream
+Object.assign(Logger, {
+  getInstance: () => instance,
+  add: dest => instance && instance.add(dest),
+  addPretty: (level = 'info') => instance && createPrettyStream(instance, level),
+  addFile: (filename, level, cb) => instance && createFileStream(instance, filename, level, cb),
+  addJson: (level = 'info') => instance && createJsonStream(instance, level),
+  mergeLog: (readable) => instance && mergeLogStream(instance, readable),
+})
 
-module.exports = logger
+module.exports = Logger

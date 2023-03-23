@@ -12,6 +12,7 @@ const readJsonGzip = require('./read-json-gzip');
 const sha1Hex = require('./sha1-hex');
 const writeJsonGzip = require('./write-json-gzip');
 const writeSafe = require('./write-safe');
+const { spawn, run } = require('./spawn');
 
 module.exports = {
   callbackify,
@@ -26,8 +27,10 @@ module.exports = {
   readDir,
   readDirCreate,
   readJsonGzip,
+  run,
   sha1Hex,
   sidecars,
+  spawn,
   writeJsonGzip,
   writeSafe
 }

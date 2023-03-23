@@ -5,8 +5,10 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpy \"src/**\" dist",
-    "watch": "onchange \"src/**\" -- npm run build"
+    "build": "cpy \"src/**/!(*.test.js)\" dist",
+    "test": "tap --no-check-coverage --no-coverage-report src/**/*.test.js",
+    "watch": "onchange \"src/**/*.js\" --delay 500 -- npm run build",
+    "watch:test": "tap --no-check-coverage --no-coverage-report -w src/**/*.test.js"
   },
   "keywords": [
     "HomeGallery",

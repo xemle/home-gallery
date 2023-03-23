@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
+- cli: Add json format for console logger
 - cli: Add watch mode of run import command
 
 ### Changed

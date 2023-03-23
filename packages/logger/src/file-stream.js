@@ -22,7 +22,19 @@ const createStream = (filename, cb) => {
       createWriteStream()
     }
   })
-
 }
 
-module.exports = createStream
+const createFileStream = (rootLogger, filename, level, cb) => {
+  createStream(filename, (err, stream) => {
+    if (err && cb) {
+      cb(err)
+    } else if (err) {
+      rootLogger.error(err, `Could not create file logger for ${fileanme}: ${err}`)
+    } else {
+      rootLogger.add({ level: level || 'info', stream: stream })
+      cb && cb()
+    }
+  })
+}
+
+module.exports = createFileStream

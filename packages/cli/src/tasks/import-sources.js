@@ -1,11 +1,11 @@
 const chokidar = require('chokidar')
-const { runCli, loggerArgs } = require('./run')
+const { runCli } = require('./run')
 
 const log = require('@home-gallery/logger')('cli.task.import')
 
-const updateIndex = async (config, source, options) => {
+const updateIndex = async (source, options) => {
   const { journal, smallFiles, addLimits, maxFilesize } = options
-  const args = [...loggerArgs(config), 'index', '--directory', source.dir, '--index', source.index]
+  const args = ['index', '--directory', source.dir, '--index', source.index]
   source.matcher && args.push('--matcher', source.matcher)
   source.excludeFromFile && args.push('--exclude-from-file', source.excludeFromFile)
   source.excludeIfPresent && args.push('--exclude-if-present', source.excludeIfPresent)
@@ -21,23 +21,24 @@ const updateIndex = async (config, source, options) => {
   await runCli(args)
 }
 
-const updateIndices = async (config, sources, options) => {
+const updateIndices = async (sources, options) => {
   for (const source of sources) {
-    await updateIndex(config, source, options);
+    await updateIndex(source, options);
   }
 }
 
-const deleteJournal = async (config, source, journal) => {
-  const args = [...loggerArgs(config), 'index', 'journal', '--index', source.index, '--journal', journal, '-r']
+const deleteJournal = async (source, options) => {
+  const { journal } = options
+  const args = ['index', 'journal', '--index', source.index, '--journal', journal, '-r']
   await runCli(args)
 }
 
-const deleteJournals = async (config, sources, journal) => {
-  if (!journal) {
+const deleteJournals = async (sources, options) => {
+  if (!options.journal) {
     return
   }
   for (const source of sources) {
-    await deleteJournal(config, source, journal);
+    await deleteJournal(source, options);
   }
 }
 
@@ -46,7 +47,7 @@ const extract = async (config, sources, options) => {
     log.warn(`Sources list is empty. No files to extract`);
     return;
   }
-  const args = [...loggerArgs(config), 'extract'];
+  const args = ['extract'];
   const extractor = config.extractor || {};
   sources.forEach(source => args.push('--index', source.index));
 
@@ -81,7 +82,7 @@ const extract = async (config, sources, options) => {
 }
 
 const buildDatabase = async (config, sources, options) => {
-  const args = [...loggerArgs(config), 'database'];
+  const args = ['database'];
 
   sources.forEach(source => args.push('--index', source.index));
   if (options.journal) {
@@ -98,11 +99,11 @@ const buildDatabase = async (config, sources, options) => {
   await runCli(args, {}, nodeArgs);
 }
 
-const catchIndexLimitExceeded = exitCode => {
-  if (exitCode == 1) {
+const catchIndexLimitExceeded = ({code}) => {
+  if (code == 1) {
     return true
   }
-  throw new Error(`Exit code was ${exitCode}`)
+  throw new Error(`Exit code was ${code}`)
 }
 
 const generateId = len => {
@@ -131,13 +132,13 @@ const importSources = async (config, sources, options) => {
   log.info(`Import files from source dirs: ${sources.map(source => source.dir).join(', ')}`)
   while (processing) {
     const journal = withJournal ? generateJournal() : false
-
-    await updateIndices(config, sources, { ...options, journal })
+    const importOptions = { ...options, journal }
+    await updateIndices(sources, importOptions)
       .then(() => processing = false)
       .catch(catchIndexLimitExceeded)
-    await extract(config, sources, { journal })
-    await buildDatabase(config, sources, { journal })
-    await deleteJournals(config, sources, journal)
+    await extract(config, sources, importOptions)
+    await buildDatabase(config, sources, importOptions)
+    await deleteJournals(sources, importOptions)
 
     if (processing) {
       log.info(`New chunk of media is processed and becomes ready to browse. Continue with next chunk to process...`)

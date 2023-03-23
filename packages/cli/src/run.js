@@ -5,7 +5,7 @@ const path = require('path')
 const log = require('@home-gallery/logger')('cli.run')
 
 const { initConfig, defaultConfigFile, load } = require('./config')
-const { startServer, importSources, watchSources } = require('./tasks')
+const { startServer, watchSources } = require('./tasks')
 
 const galleryDir = path.dirname(process.argv[1])
 
@@ -135,7 +135,7 @@ const command = {
             }
             return runImport(config, options)
           })
-          .then(() => log.info(`Have a good day...`))
+          .then(() => log.info(`Import command completed`))
           .catch(err => log.error(err, `Error: ${err}`))
       )
     .demandCommand()

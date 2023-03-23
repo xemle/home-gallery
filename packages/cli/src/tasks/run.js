@@ -1,39 +1,63 @@
-const { spawn } = require('child_process');
+const { spawn } = require('@home-gallery/common')
 
-const log = require('@home-gallery/logger')('cli.task.run')
+const Logger = require('@home-gallery/logger')
+const log = Logger('cli.task.run')
 
 const nodeBin = process.argv[0]
 const cliScript = process.argv[1]
 
-const run = async (command, args, options) => {
-  const defaults = { shell: false, stdio: 'inherit'}
-  const optionsEnv = (options || {}).env || {}
-  const optionsEnvList = Object.keys(optionsEnv).map(name => `${name}=${optionsEnv[name]}`)
+const prettyEnv = (env = {}) => {
+  const list = Object.entries(env).map(([name, value]) => `${name}=${value}`)
+  if (list.length) {
+    list.push('')
+    return list.join(' ')
+  }
+  return ''
+}
+
+const prettyArgs = (args = []) => args.map(v => / /.test(v) ? `"${v}"` : v).join(' ')
+
+const spawnCli = (args, options = {}, nodeArgs = []) => {
+  const runArgs = [...nodeArgs, cliScript, ...args]
+  const env = {
+    ...options.env,
+    GALLERY_LOG_LEVEL: 'trace',
+    GALLERY_LOG_JSON_FORMAT: 'true'
+  }
+  const cmd = `${prettyEnv(env)}${nodeBin} ${prettyArgs(runArgs)}`
+  log.info(`Run cli with ${prettyArgs(args)}`)
+  const t0 = Date.now()
+  const child = spawn(nodeBin, runArgs, { ...options, env, stdio: ['pipe', 'pipe', 'inherit'] })
+  log.trace(`Executing ${cmd} with pid ${child.pid}`)
+  Logger.mergeLog(child.stdout)
+
+  child.once('exit', (code, signal) => {
+    const cli = {cmd, env, nodeBin, nodeArgs, args, code}
+    log.debug({cli, duration: Date.now() - t0}, `Executed cmd ${cmd}`)
+    signal && log.info(`Cli ${prettyArgs(args)} exited by signal ${signal}`)
+  })
+  child.once('error', err => {
+    log.error(err, `Failed to execute cmd: ${cmd}`)
+  })
+
+  return child
+}
+
+const runCli = async (args, options = {}, nodeArgs = []) => {
+  const child = spawnCli(args, options, nodeArgs)
 
   return new Promise((resolve, reject) => {
-    log.info(`Execute: ${optionsEnvList.length ? `${optionsEnvList.join(' ')} ` : ''}${[command, ...args].map(v => / /.test(v) ? `"${v}"` : v).join(' ')}`)
-    const env = {...process.env, ...optionsEnv};
-    const cmd = spawn(command, args, {...defaults, ...options, env});
-    cmd.on('exit', (code, signal) => code == 0 ? resolve(code, signal) : reject(code, signal));
-    cmd.on('err', reject)
+    child.once('exit', (code, signal) => {
+      if (code == 0) {
+        resolve()
+      } else {
+        reject({code, signal})
+      }
+    })
+    child.once('error', err => {
+      reject(err)
+    })
   })
 }
 
-const runCli = async(args, options, nodeArgs) => run(nodeBin, [...(nodeArgs || []), cliScript, ...args], options)
-
-const isValidLevel = level => ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent'].indexOf(level) >= 0
-
-const loggerArgs = config => {
-  const loggers = config.logger || []
-  const args = []
-  loggers.forEach(logger => {
-    if (logger.type == 'console' && isValidLevel(logger.level)) {
-      args.push('--log-level', logger.level)
-    } else if (logger.type == 'file' && isValidLevel(logger.level) && logger.file) {
-      args.push('--log-file', logger.file, '--log-file-level', logger.level)
-    }
-  })
-  return args
-}
-
-module.exports = { run, runCli, loggerArgs }
+module.exports = { runCli, spawnCli }
