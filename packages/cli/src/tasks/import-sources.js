@@ -165,15 +165,17 @@ const batchProfiles = [
 
 const batchImport = async (config, sources, options) => {
   const { initialImport } = options
+  const t0 = Date.now()
   if (!initialImport) {
-    return importSources(config, sources, options)
+    await importSources(config, sources, options)
+  } else {
+    log.info(`Run incremental import in batch mode of different file sizes`)
+    for (const profile of batchProfiles) {
+      log.info(`Run batch import: ${profile.description}`)
+      await importSources(config, sources, {...options, ...profile})
+    }
   }
-
-  log.info(`Run initial import in batch mode of different file sizes`)
-  for (const profile of batchProfiles) {
-    log.info(`Run batch import: ${profile.description}`)
-    await importSources(config, sources, {...options, ...profile})
-  }
+  log.debug(t0, `Import of online sources finished`)
 }
 
 const watchSources = async (config, sources, options) => {
