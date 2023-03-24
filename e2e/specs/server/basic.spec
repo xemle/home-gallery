@@ -6,7 +6,7 @@ Tags: server,docker
 
 * Init dir from "database/basic"
 * Create database
-* Start server
+* Start only server
 * Server has file "/index.html"
 * Server has file "/api/database.json"
 
@@ -14,7 +14,7 @@ Tags: server,docker
 
 * Init dir from "database/basic"
 * Create database
-* Start server
+* Start only server
 * Fetch database with query "?q=2018-01-10"
 * Fetched database has "1" entries
 
@@ -23,7 +23,7 @@ Tags: server,docker
 * Init dir from "database/basic"
 * Create database
 * Append tag event with "hello" for media "96419bb03fb2a041ff265e27cfccc4be8b04346d"
-* Start server
+* Start only server
 * Fetch database with query "?q=hello"
 * Fetched database has "1" entries
 * Fetched database with entry "0" has no property "textCache"

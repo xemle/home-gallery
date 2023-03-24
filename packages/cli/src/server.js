@@ -89,6 +89,11 @@ const command = {
       'remote-console-token': {
         string: true,
         describe: 'Enable remote console with given debug auth token'
+      },
+      'watch-sources': {
+        boolean: true,
+        default: true,
+        describe: 'Watch source files for changes'
       }
     })
     .default('host', undefined, '0.0.0.0')
@@ -113,28 +118,32 @@ const command = {
       openBrowser: 'server.openBrowser',
       remoteConsoleToken: 'server.removeConsoleToken',
       user: {path: 'server.auth.users', type: 'add', map: mapUsers},
-      ipWhitelistRule: {path: 'server.auth.rules', map: mapRules}
+      ipWhitelistRule: {path: 'server.auth.rules', map: mapRules},
+      watchSources: {path: 'server.watchSources'}
     }
 
     const run = async (argv) => {
-      const { config, configFile } = await load(argv.config, false)
-      mapArgs(argv, config, mapping)
+      const options = await load(argv.config, false)
+      mapArgs(argv, options.config, mapping)
 
       return new Promise((resolve, reject) => {
-        startServer({config, configFile}, (err, server) => {
+        startServer(options, (err, server) => {
           if (err) {
             return reject(err)
           }
-          server.once('close', () => {
-            // force exit due dangling processes
-            setTimeout(() => process.exit(0), 100)
-            resolve()
+          process.once('SIGINT', () => {
+            log.debug(`Stopping server`)
+            server.shutdown().then(resolve)
           })
         })
       })
     }
 
     run(argv)
+      .then(() => {
+        log.info(`Server stopped`)
+        process.exit(0)
+      })
       .catch(err => {
         log.error(err, `Failed to start server: ${err}`)
         process.exit(1)

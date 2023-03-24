@@ -1,5 +1,9 @@
 const createJsonStream = (rootLogger, level) => {
-  rootLogger.add({level, stream: process.stdout})
+  const stream = process.stdout
+  rootLogger.add({level, stream})
+  stream.on('error', err => {
+    // ignore. This error can happen on process termination
+  })
 }
 
 module.exports = createJsonStream

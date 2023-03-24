@@ -5,12 +5,14 @@ package-lock.json
 node_modules
 **/node_modules
 **/dist
+**/fonts
 **/.nyc_output
 /build
 /data
 /dist
 /e2e/.gauge
 /e2e/reports
+/e2e/logs
 /examples
 /latest-e2e-test
 /node

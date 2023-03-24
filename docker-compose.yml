@@ -21,6 +21,8 @@ services:
       #- GALLERY_API_SERVER_CONCURRENT=1 # On low powered devices
       #- GALLERY_API_SERVER_TIMEOUT=60 # On low powered devices
       - GALLERY_OPEN_BROWSER=false
+      # Use polling for safety of possible network mounts. Try 0 to use inotify via fs.watch
+      - GALLERY_WATCH_POLL_INTERVAL=300
     volumes:
       - ./data:/data
       # Mount your media directories below /data

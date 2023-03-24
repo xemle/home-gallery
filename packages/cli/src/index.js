@@ -18,6 +18,7 @@ const cli = () => {
   yargs.usage('Usage: $0 [global options] <command> [options]')
     .env('GALLERY')
     .options(loggerOptions)
+    .default('level', undefined, 'debug')
     .middleware(loggerMiddleware)
     .command(fileIndexCli)
     .command(extractCli)

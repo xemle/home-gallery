@@ -29,6 +29,9 @@
     "./fs": {
       "node": "./dist/fs/index.js"
     },
+    "./os": {
+      "node": "./dist/os/index.js"
+    },
     "./utils": {
       "node": "./dist/utils/index.js",
       "browser": "./dist/utils/index.js"

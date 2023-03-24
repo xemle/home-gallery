@@ -56,7 +56,8 @@ const expandConfigDefaults = (config, env) => {
     host: '0.0.0.0',
     port: 3000,
     openBrowser: true,
-    basePath: '/'
+    basePath: '/',
+    watchSources: true
   }
   config.server = {...serverDefaults, ...config.server}
 

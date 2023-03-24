@@ -140,14 +140,24 @@ const runCommand = (command, args, options, cb) => {
   child.stdout.on('data', chunk => stdoutChunks.push(chunk))
   child.stderr.on('data', chunk => stderrChunks.push(chunk))
 
-  child.on('exit', (code) => {
+  child.on('exit', (code, signal) => {
     const stdout = Buffer.concat(stdoutChunks).toString('utf8')
     const stderr = Buffer.concat(stderrChunks).toString('utf8')
     const commandHistory = gauge.dataStore.scenarioStore.get('commandHistory') || []
-    commandHistory.push({code, command, args, stdout, stderr})
+    commandHistory.push({env: options.env || {}, command, args, pid: child.pid, code, signal, stdout, stderr})
     gauge.dataStore.scenarioStore.put('commandHistory', commandHistory)
     gauge.dataStore.scenarioStore.put('lastExitCode', code)
-    const data = { env: options.env || {}, command, args, exitCode: code, commandLine, stdout, stderr, time: t0, duration: Date.now() - t0 }
+    const spawnInfo = { env: options.env || {}, command, args, pid: child.pid, code, signal, cmd: commandLine, stdout, stderr }
+    const data = {level: 30, time: new Date(t0).toISOString(), spawn: spawnInfo, duration: Date.now() - t0, msg: `${commandLine} exited with ${code}` }
+    appendLog(logFile, data, () => {
+      if (cb) {
+        cb(code, stdout, stderr)
+      }
+    })
+  })
+
+  child.on('error', (err) => {
+    const data = {level: 50, time: new Date().toISOString(), error, msg: `Failed to execute command ${commandLine}: ${err.message}`}
     appendLog(logFile, data, () => {
       if (cb) {
         cb(code, stdout, stderr)

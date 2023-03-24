@@ -43,6 +43,8 @@ ENV GALLERY_CACHE_DIR=/data
 ENV GALLERY_CONFIG=/data/config/gallery.config.yml
 ENV GALLERY_OPEN_BROWSER=false
 ENV GALLERY_USE_NATIVE=ffprobe,ffmpeg
+# Use polling for safety of possible network mounts. Try 0 to use inotify via fs.watch
+ENV GALLERY_WATCH_POLL_INTERVAL=300
 
 EXPOSE 3000
 

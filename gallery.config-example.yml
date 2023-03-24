@@ -128,6 +128,7 @@ sources:
   #    - allow: '192.168/16'
   #    - deny: all
   #basePath: /
+  #watchSources: true
 
 logger:
   # Currently console and file loggers are available

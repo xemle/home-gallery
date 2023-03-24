@@ -3,6 +3,7 @@
 
 const { Buffer } = require('buffer')
 const fs = require('fs/promises')
+const http = require('http')
 const https = require('https')
 const assert = require('assert')
 const fetch = require('node-fetch')
@@ -59,10 +60,12 @@ const startServer = async (args = []) => {
   }
   gauge.dataStore.scenarioStore.put('serverUrl', url)
 
-  return waitFor(() => fetchFacade(''), 10 * 1000).catch(e => {throw new Error(`Could not start server with args: ${args}. Error ${e}`)})
+  return waitFor(() => fetchFacade(''), 10 * 1000).catch(e => {throw new Error(`Could not start server with args: ${args.join(' ')}. Error ${e}`)})
 }
 
 step("Start server", startServer)
+
+step("Start only server", () => startServer(['--no-watch-sources']))
 
 step("Start server with args <args>", async (args) => {
   const argList = args.split(/\s+/)
@@ -169,17 +172,52 @@ step("Wait for current database", async () => {
     .catch(e => {throw new Error(`Failed to fetch current database. Error ${e}`)})
 })
 
+step("Listen to server events", async () => {
+  const url = gauge.dataStore.scenarioStore.get('serverUrl')
+
+  const onResponse = res => {
+    res.on('data', (data) => {
+      const lines = data.toString().split('\n').filter(line => !!line)
+      let event = Object.fromEntries(lines.map(line => line.split(/:\s+/)))
+      if (event.data.match(/^\{.*\}$/)) {
+        event = JSON.parse(event.data)
+      }
+      const events = gauge.dataStore.scenarioStore.get('events') || []
+      events.push(event)
+      gauge.dataStore.scenarioStore.put('events', events)
+    })
+  }
+
+  http.get(`${url}/api/events/stream`, onResponse)
+})
+
+step("Reset server events", () => {
+  gauge.dataStore.scenarioStore.put('events', [])
+})
+
+step("Wait for database reload event", async () => {
+  await waitFor(async () => {
+    const events = gauge.dataStore.scenarioStore.get('events') || []
+    const reloadEvent = events.find(event => event.action == 'databaseReloaded')
+    if (!reloadEvent) {
+      return Promise.reject(new Error(`No reload event found`))
+    }
+  }, 15000)
+})
+
 const killChildProcess = async child => {
   return new Promise(resolve => {
-    const id = setTimeout(() => {
-      child.kill('SIGKILL')
+    let count = 0
+    const id = setInterval(() => {
+      count++
+      child.kill(count <= 3 ? 'SIGINT' : 'SIGTERM')
     }, 1000)
 
     child.on('exit', () => {
-      clearTimeout(id)
+      clearInterval(id)
       resolve()
     })
-    child.kill('SIGTERM')
+    child.kill('SIGINT')
   })
 }
 
@@ -236,6 +274,19 @@ const mapValuesByKey = key => {
     return result
   }
 }
+
+step("Wait for log entry with key <key> and value <value>", async (key, value) => {
+  const logFile = getPath('e2e.log')
+  await waitFor(async () => {
+    const data = await fs.readFile(logFile, 'utf-8')
+    const entries = data.split(/\n/g).filter(v => !!v).map(line => JSON.parse(line))
+
+    const values = entries.map(mapValuesByKey(key)).filter(v => !!v)
+    if (!values.length) {
+      return Promise.reject(new Error(`Could not find ${key} with value ${value}`))
+    }
+  }, 2000)
+})
 
 step("Log has entry with key <key> and value <value>", async (key, value) => {
   const logFile = getPath('e2e.log')

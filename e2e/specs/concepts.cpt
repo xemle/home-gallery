@@ -16,11 +16,11 @@
 # Init server from <dir>
 
 * Init database from <dir>
-* Start server
+* Start only server
 * Wait for database
 
 # Start server from <dir>
 
 * Init dir from <dir>
 * Create database
-* Start server
+* Start only server

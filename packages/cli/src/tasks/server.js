@@ -1,20 +1,27 @@
-const { spawnCli } = require('./run')
+const { ProcessManager } = require('@home-gallery/common')
 
-const getCommonCliArgs = options => {
+const { spawnCli } = require('../utils/spawn-cli')
+
+const log = require('@home-gallery/logger')('cli.task.server')
+
+const getConfigEnv = options => {
   const { configFile, autoConfigFile } = options
-  const configArgs = !autoConfigFile ? ['-c', configFile] : []
-
-  return [...configArgs]
+  return !autoConfigFile ? {GALLERY_CONFIG: configFile} : {}
 }
 
+const pm = new ProcessManager()
+
 const startServer = async options => {
-  const commonArgs = getCommonCliArgs(options)
-
   await new Promise((resolve, reject) => {
-    const serverProcess = spawnCli([...commonArgs, 'server'])
+    serverProcess = spawnCli(['server'], {env: getConfigEnv(options)})
+    pm.addProcess(serverProcess, {terminateTimeout: 15 * 1000})
 
-    serverProcess.once('exit', (code) => {
-      code == 0 ? resolve() : reject(new Error('Server exited with code ' + code))
+    serverProcess.once('SIGINT', () => {
+      log.info(`Stopping server`)
+      pm.killAll('SIGINT')
+    })
+    serverProcess.once('exit', (code, signal) => {
+      code == 0 ? resolve() : reject(new Error(`Server exited with code ${code} and signal ${signal}`))
     })
   })
   return 'exit'

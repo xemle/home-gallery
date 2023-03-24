@@ -1,7 +1,9 @@
 const chokidar = require('chokidar')
-const { runCli } = require('./run')
+
+const { CliProcessManager } = require('../utils/cli-process-manager')
 
 const log = require('@home-gallery/logger')('cli.task.import')
+const pm = new CliProcessManager()
 
 const updateIndex = async (source, options) => {
   const { journal, smallFiles, addLimits, maxFilesize } = options
@@ -18,7 +20,7 @@ const updateIndex = async (source, options) => {
   }
   addLimits && args.push('--add-limits', addLimits || '200,500,1.25,8000')
   journal && args.push('--journal', journal)
-  await runCli(args)
+  await pm.runCli(args, 15 * 1000)
 }
 
 const updateIndices = async (sources, options) => {
@@ -30,7 +32,7 @@ const updateIndices = async (sources, options) => {
 const deleteJournal = async (source, options) => {
   const { journal } = options
   const args = ['index', 'journal', '--index', source.index, '--journal', journal, '-r']
-  await runCli(args)
+  await pm.runCli(args)
 }
 
 const deleteJournals = async (sources, options) => {
@@ -78,7 +80,7 @@ const extract = async (config, sources, options) => {
     args.push('--limit', options.limit || 0)
   }
 
-  await runCli(args)
+  await pm.runCli(args)
 }
 
 const buildDatabase = async (config, sources, options) => {
@@ -96,7 +98,7 @@ const buildDatabase = async (config, sources, options) => {
 
   const maxMemory = config.database?.maxMemory || 2048;
   const nodeArgs = maxMemory ? [`--max-old-space-size=${maxMemory}`] : [];
-  await runCli(args, {}, nodeArgs);
+  await pm.runCli(args, 2000, nodeArgs);
 }
 
 const catchIndexLimitExceeded = ({code}) => {
@@ -130,7 +132,7 @@ const importSources = async (config, sources, options) => {
   const withJournal = initialImport || incrementalUpdate
 
   log.info(`Import files from source dirs: ${sources.map(source => source.dir).join(', ')}`)
-  while (processing) {
+  while (processing && !pm.isStopped) {
     const journal = withJournal ? generateJournal() : false
     const importOptions = { ...options, journal }
     await updateIndices(sources, importOptions)
@@ -189,7 +191,7 @@ const watchSources = async (config, sources, options) => {
   let fileChangeCount = 0
   const sourceDirs = sources.map(source => source.dir)
 
-  log.debug(`Run import in watch mode. Start watching dirs for file changes: ${sourceDirs.join(', ')}`)
+  log.info(`Run import in watch mode. Start watching source dirs for file changes: ${sourceDirs.join(', ')}`)
   const usePolling = watchPollInterval > 0
   const chokidarOptions = {
     followSymlinks: false,
@@ -224,7 +226,6 @@ const watchSources = async (config, sources, options) => {
 
     const clearTimer = () => clearTimeout(timerId)
     process.once('SIGINT', clearTimer)
-    process.once('SIGTERM', clearTimer)
 
     return (event, path) => {
       if (fileChangeCount == 0) {
@@ -256,7 +257,7 @@ const watchSources = async (config, sources, options) => {
 
     const onReady = () => {
       isInitializing = false
-      log.debug(`File watcher initialized`)
+      log.debug(`File watcher is initialized`)
       if (importOnWatchStart) {
         runImport().catch(importErrorHandler)
       }
@@ -299,16 +300,16 @@ const watchSources = async (config, sources, options) => {
     watcher.on('all', createChangeDelay(watchDelay, watchMaxDelay, onDelayChange))
     watcher.on('error', onError)
 
-    const shutdown = (signal) => {
-      log.info(`Stop watcher due ${signal} signal`)
-      watcher.close().then(() => {
-        fileChangeCount = 0
-        resolve()
-      })
+    const shutdown = () => {
+      log.info(`Stopping file watcher`)
+      Promise.all([watcher.close(), pm.killAll('SIGINT')])
+        .then(() => {
+          fileChangeCount = 0
+          resolve()
+        })
     }
 
-    process.once('SIGINT', () => shutdown('SIGINT'))
-    process.once('SIGTERM', () => shutdown('SIGTERM'))
+    process.once('SIGINT', shutdown)
 
     process.on('SIGUSR1', () => log.info(`File watcher status: ${isInitializing ? 'initializing' : (isImporting ? 'importing' : 'idle')}`))
   })

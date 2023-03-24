@@ -1,5 +1,6 @@
 const format = require('./format')
 const fs = require('./fs')
+const os = require('./os')
 const utils = require('./utils')
 
 const {
@@ -21,6 +22,12 @@ const {
   writeJsonGzip,
   writeSafe
 } = fs
+
+const {
+  ProcessManager,
+  run,
+  spawn
+} = os
 
 const {
   callbackify,
@@ -51,6 +58,11 @@ module.exports = {
     sidecars,
     writeJsonGzip,
     writeSafe,
+
+  os,
+    ProcessManager,
+    run,
+    spawn,
 
   utils,
     callbackify,

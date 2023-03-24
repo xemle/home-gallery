@@ -16,11 +16,12 @@ const events = (eventbus, eventsFilename) => {
   let events = false;
 
   const create = (type, data) => {
-    return Object.assign(data, {
+    return {
       type,
       id: uuidv4(),
       date: new Date().toISOString(),
-    })
+      ...data
+    }
   }
 
   const emit = (event) => {
@@ -67,8 +68,9 @@ const events = (eventbus, eventsFilename) => {
     };
     res.writeHead(200, headers);
 
-    const clientId = Date.now();
-    res.write(`event: hello\nid: ${Date.now()}\ndata: ${clientId}\n\n\n`);
+    const clientId = uuidv4();
+    const event = create('pong', {clientId})
+    res.write(`data: ${JSON.stringify(event)}\n\n`);
     const newClient = {
       id: clientId,
       res,

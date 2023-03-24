@@ -1,11 +1,12 @@
 const open = require('open')
 
-const { callbackify } = require('@home-gallery/common')
+const { callbackify, ProcessManager } = require('@home-gallery/common')
 
 const log = require('@home-gallery/logger')('server')
 const openCb = callbackify(open)
 
 const { createApp } = require('./app')
+const { spawnCli } = require('./utils/spawn-cli')
 
 const isHttps = (key, cert) => key && cert
 
@@ -27,9 +28,15 @@ function createServer(key, cert, app) {
 
 const serverUrl = (port, key, cert) =>`${isHttps(key, cert) ? 'https' : 'http'}://localhost:${port}`
 
+const getConfigEnv = options => {
+  const { configFile, autoConfigFile } = options
+  return !autoConfigFile ? {GALLERY_CONFIG: configFile} : {}
+}
+
 function startServer(options, cb) {
   const { config } = options
 
+  const pm = new ProcessManager()
   const { app, initDatabase } = createApp(config)
 
   const server = createServer(config.server.key, config.server.cert, app);
@@ -44,6 +51,10 @@ function startServer(options, cb) {
       const url = serverUrl(config.server.port, config.server.key, config.server.cert)
       log.info(`Your own Home Gallery is running at ${url}`);
       initDatabase();
+      if (config.server.watchSources) {
+        const watcher = spawnCli('run import --initial --update --watch'.split(' '), getConfigEnv(options))
+        pm.addProcess(watcher, 15 * 1000)
+      }
       if (config.server.openBrowser) {
         log.debug(`Open browser with url ${url}`)
         return openCb(url, () => cb(null, server))
@@ -51,18 +62,20 @@ function startServer(options, cb) {
       cb(null, server);
     })
 
-  process.once('SIGINT', () => {
-    log.trace(`Stopping server`)
-    server.closeIdleConnections()
-    server.closeAllConnections()
+  server.shutdown = async () => {
+    // use closeAllConnections from node >= v18.2.0
+    if (typeof server?.closeAllConnections == 'function') {
+      server.closeIdleConnections()
+      server.closeAllConnections()
+    }
     server.close(err => {
       if (err) {
         log.error(err, `Failed to stop server: ${err}`)
-      } else {
-        log.debug(`Server stopped successfully`)
       }
     });
-  })
+    return pm.killAll('SIGINT')
+  }
+
 }
 
 module.exports = {

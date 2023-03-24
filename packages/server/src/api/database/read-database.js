@@ -98,7 +98,7 @@ function waitReadWatch(filename, getEvents, stringifyEntryCache, cb) {
     });
 
     process.once('SIGINT', () => {
-      log.debug(`Stop watching database file ${filename} due SIGINT`);
+      log.debug(`Stop watching database file ${filename}`);
       watcher.close();
     })
   }
