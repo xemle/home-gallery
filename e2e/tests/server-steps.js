@@ -10,6 +10,7 @@ const express = require('express')
 
 const { generateId, nextPort, waitFor, runCliAsync, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase } = require('../utils')
 
+const serverTestHost = '127.0.0.1'
 const servers = {}
 
 const insecureOption = {
@@ -47,10 +48,10 @@ const createServerId = () => {
 const startServer = async (args = []) => {
   const serverId = createServerId()
   const port = await nextPort()
-  const child = runCliAsync(['server', '-s', getStorageDir(), '-d', getDatabaseFilename(), '-e', getEventsFilename(), '--port', port, '--no-open-browser', ...args])
+  const child = runCliAsync(['server', '-s', getStorageDir(), '-d', getDatabaseFilename(), '-e', getEventsFilename(), '--host', serverTestHost, '--port', port, '--no-open-browser', ...args])
 
   const protocol = args.includes('-K') ? 'https' : 'http'
-  const url = `${protocol}://127.0.0.1:${port}`
+  const url = `${protocol}://${serverTestHost}:${port}`
   servers[serverId] = {
     child,
     port,
@@ -77,7 +78,7 @@ step("Start static server", async () => {
   const app = express()
   app.use(express.static(getBaseDir()))
 
-  const url = `http://127.0.0.1:${port}`
+  const url = `http://${serverTestHost}:${port}`
   servers[serverId] = {
     server: false,
     port,
@@ -86,7 +87,7 @@ step("Start static server", async () => {
   gauge.dataStore.scenarioStore.put('serverUrl', url)
 
   return new Promise((resolve, reject) => {
-    const server = app.listen(port, (err) => {
+    const server = app.listen(port, serverTestHost, (err) => {
       if (err) {
         return reject(err)
       }
@@ -131,7 +132,7 @@ step("Start mock server", async () => {
   app.use(mockApiServer)
   app.use(mockGeoServer)
 
-  const url = `http://127.0.0.1:${port}`
+  const url = `http://${serverTestHost}:${port}`
   servers[serverId] = {
     server: false,
     port,
@@ -142,7 +143,7 @@ step("Start mock server", async () => {
   gauge.dataStore.scenarioStore.put('geoServerUrl', url)
 
   return new Promise((resolve, reject) => {
-    const server = app.listen(port, (err) => {
+    const server = app.listen(port, serverTestHost, (err) => {
       if (err) {
         return reject(err)
       }
