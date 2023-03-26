@@ -14,10 +14,15 @@ const getSegment = (config, path, create = true) => {
   return [segment, parts[parts.length - 1]]
 }
 
+const safeStringify = value => {
+  const json = JSON.stringify(value)
+  return json.replace(/"(pass\w*|auth\w*|key)":"([^\"]*)"/g, (_, prop) => `"${prop}":"***"`)
+}
+
 const setTo = (config, path, value) => {
   const [segment, name] = getSegment(config, path)
   segment[name] = value
-  log.trace(`Set config path ${path} to ${JSON.stringify(value)}`)
+  log.trace(`Set config path ${path} to ${safeStringify(value)}`)
 }
 
 const addTo = (config, path, value) => {
@@ -30,7 +35,7 @@ const addTo = (config, path, value) => {
   } else {
     segment[name].push(value)
   }
-  log.trace(`Add ${JSON.stringify(value)} to config path ${path}`)
+  log.trace(`Add ${safeStringify(value)} to config path ${path}`)
 }
 
 const mapArgs = (argv, config, mapping) => {
