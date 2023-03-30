@@ -1,4 +1,4 @@
-const humanize = (size) => {
+const humanizeBytes = (size) => {
   const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
   let unitIndex = 0;
   while (size > 786 && unitIndex < units.length - 1) {
@@ -8,4 +8,4 @@ const humanize = (size) => {
   return size.toFixed(unitIndex === 0 ? 0 : 1) + units[unitIndex];
 }
 
-module.exports = humanize;
+module.exports = humanizeBytes;

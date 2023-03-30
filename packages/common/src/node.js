@@ -1,4 +1,5 @@
 const format = require('./format')
+const fs = require('./fs')
 const utils = require('./utils')
 
 const {
@@ -6,6 +7,20 @@ const {
   humanizeBytes,
   humanizeDuration,
 } = format
+
+const {
+  fileFilter,
+  fileTypes,
+  getFileTypeByExtension,
+  mkdirp,
+  readDir,
+  readDirCreate,
+  readJsonGzip,
+  sha1Hex,
+  sidecars,
+  writeJsonGzip,
+  writeSafe
+} = fs
 
 const {
   callbackify,
@@ -21,6 +36,20 @@ module.exports = {
     humanize: humanizeBytes,
     humanizeBytes,
     humanizeDuration,
+
+  fs,
+    fileFilter,
+    fileTypes,
+    getFileTypeByExtension,
+    mkdir: mkdirp,
+    mkdirp,
+    readDir,
+    readDirCreate,
+    readJsonGzip,
+    sha1Hex,
+    sidecars,
+    writeJsonGzip,
+    writeSafe,
 
   utils,
     callbackify,

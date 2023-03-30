@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const mkdir = require('./mkdir');
+const mkdir = require('./mkdirp');
 
 const writeSafe = (filename, data, cb) => {
   fs.writeFile(filename, data, (err) => {

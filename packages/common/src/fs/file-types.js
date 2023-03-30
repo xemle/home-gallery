@@ -29,4 +29,7 @@ function getFileTypeByExtension(filename) {
   return 'unknown';
 }
 
-module.exports = { fileTypes, getFileTypeByExtension };
+module.exports = {
+  fileTypes,
+  getFileTypeByExtension
+};

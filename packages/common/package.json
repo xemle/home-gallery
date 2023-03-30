@@ -21,6 +21,23 @@
     "url": "https://github.com/xemle/home-gallery.git",
     "directory": "packages/common"
   },
+  "exports": {
+    "./format": {
+      "node": "./dist/format/index.js",
+      "browser": "./dist/format/index.js"
+    },
+    "./fs": {
+      "node": "./dist/fs/index.js"
+    },
+    "./utils": {
+      "node": "./dist/utils/index.js",
+      "browser": "./dist/utils/index.js"
+    },
+    ".": {
+      "node": "./dist/node.js",
+      "browser": "./dist/index.js"
+    }
+  },
   "dependencies": {
     "@home-gallery/logger": "file:../logger",
     "ignore": "^5.1.4"
