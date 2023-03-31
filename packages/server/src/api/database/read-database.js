@@ -1,6 +1,8 @@
 const fs = require('fs');
+const path = require('path');
 const log = require('@home-gallery/logger')('server.api.database.read');
 
+const { debounce } = require('@home-gallery/common');
 const { readDatabase } = require('@home-gallery/database');
 const { applyEvents } = require('@home-gallery/events')
 
@@ -58,18 +60,17 @@ const mergeEvents = (database, getEvents, stringifyEntryCache, cb) => {
 }
 
 function waitReadWatch(filename, getEvents, stringifyEntryCache, cb) {
-  let changeTimer
-
-  const onChange = (cur, prev) => {
-    clearTimeout(changeTimer)
-    if (cur.size) {
-      changeTimer = setTimeout(() => {
+  const onChange = () => {
+    exists(filename, (err, hasFile) => {
+      if (err) {
+        log.warn(err, `File ${filename} changed but could not read it. Ignore`)
+      } else if (!hasFile) {
+        log.warn(`Database file ${filename} was removed. Ignore`);
+      } else {
         log.info(`Database file ${filename} changed. Re-import it`);
         next()
-      }, 250)
-    } else if (!cur.size && prev.size) {
-      log.warn(`Database file ${filename} was removed. Ignore`);
-    }
+      }
+    })
   }
 
   const next = () => {
@@ -88,7 +89,13 @@ function waitReadWatch(filename, getEvents, stringifyEntryCache, cb) {
 
   const watch = () => {
     log.debug(`Watch database file ${filename} for changes`);
-    const watcher = fs.watch(filename, onChange);
+    const debounceOnChange = debounce(onChange, 1000)
+
+    const watcher = fs.watch(path.dirname(filename), (_, name) => {
+      if (name == path.basename(filename)) {
+        debounceOnChange()
+      }
+    });
 
     process.once('SIGINT', () => {
       log.debug(`Stop watching database file ${filename} due SIGINT`);

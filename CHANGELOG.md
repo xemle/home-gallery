@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- server: Fix database watcher
 - cli: Honor custom server port in `gallery.config.yml`
 
 ## [1.9.0] - 2023-01-11

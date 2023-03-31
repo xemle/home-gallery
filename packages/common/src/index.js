@@ -9,6 +9,7 @@ const {
 
 const {
   callbackify,
+  debounce,
   forEach,
   lruCache,
   promisify,
@@ -24,6 +25,7 @@ module.exports = {
 
   utils,
     callbackify,
+    debounce,
     forEach,
     lruCache,
     promisify,
