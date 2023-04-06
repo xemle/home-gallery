@@ -8,7 +8,7 @@ const assert = require('assert')
 const fetch = require('node-fetch')
 const express = require('express')
 
-const { generateId, nextPort, waitFor, runCliAsync, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase } = require('../utils')
+const { generateId, nextPort, waitFor, runCliAsync, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase, addCliEnv } = require('../utils')
 
 const serverTestHost = '127.0.0.1'
 const servers = {}
@@ -139,8 +139,10 @@ step("Start mock server", async () => {
     url
   }
 
-  gauge.dataStore.scenarioStore.put('apiServerUrl', url)
-  gauge.dataStore.scenarioStore.put('geoServerUrl', url)
+  addCliEnv({
+    GALLERY_API_SERVER: url,
+    GALLERY_GEO_SERVER: url
+  })
 
   return new Promise((resolve, reject) => {
     const server = app.listen(port, serverTestHost, (err) => {

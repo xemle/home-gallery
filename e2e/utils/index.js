@@ -115,6 +115,10 @@ const appendLog = (file, data, cb) => {
   })
 }
 
+const envToString = ([key, value]) => `${key}=${value}`
+
+const escapeWhitespace = v => `${v}`.match(/\s/) ? `"${v}"` : v
+
 const runCommand = (command, args, options, cb) => {
   const spawnOptions = {
     silent: false,
@@ -122,8 +126,10 @@ const runCommand = (command, args, options, cb) => {
     cwd: projectRoot,
     shell: false
   }
-  const commandLine = [command, ...args].map(v => `${v}`.match(/\s/) ? `"${v}"` : v).join(' ')
-  gauge.message(`Execute command: ${commandLine}`)
+
+  const prettyEnv = Object.entries(options.env || {}).map(envToString)
+  const commandLine = [...prettyEnv, command, ...args].map(escapeWhitespace).join(' ')
+  gauge.message(`Execute command: ${[command, ...args].map(escapeWhitespace).join(' ')}`)
   gauge.dataStore.scenarioStore.put('lastCommand', commandLine)
 
   const stdoutChunks = []
@@ -141,7 +147,7 @@ const runCommand = (command, args, options, cb) => {
     commandHistory.push({code, command, args, stdout, stderr})
     gauge.dataStore.scenarioStore.put('commandHistory', commandHistory)
     gauge.dataStore.scenarioStore.put('lastExitCode', code)
-    const data = { command, args, exitCode: code, commandLine, stdout, stderr, time: t0, duration: Date.now() - t0 }
+    const data = { env: options.env || {}, command, args, exitCode: code, commandLine, stdout, stderr, time: t0, duration: Date.now() - t0 }
     appendLog(logFile, data, () => {
       if (cb) {
         cb(code, stdout, stderr)
@@ -161,11 +167,12 @@ const dropServerPortArgOnDocker = args => {
   }
 }
 
-const runCliAsync = (args, options, cb) => {
-  if (!options) {
-    options = {}
-  }
+const addCliEnv = (env = {}) => {
+  const cliEnv = {...gauge.dataStore.scenarioStore.get('cliEnv') || {}, ...env}
+  gauge.dataStore.scenarioStore.put('cliEnv', cliEnv)
+}
 
+const runCliAsync = (args, cb) => {
   const vars = {
     projectRoot,
     baseDir: getBaseDir(),
@@ -179,10 +186,11 @@ const runCliAsync = (args, options, cb) => {
   dropServerPortArgOnDocker(args)
   const commandArgs = [...galleryArgsResolved, ...logOptions, ...args]
 
-  return runCommand(galleryBin, commandArgs, {TZ: 'Europe/Berlin', ...options}, cb)
+  const env = gauge.dataStore.scenarioStore.get('cliEnv') || {}
+  return runCommand(galleryBin, commandArgs, {TZ: 'Europe/Berlin', env}, cb)
 }
 
-const runCli = async (args, options) => new Promise(resolve => runCliAsync(args, options, (code, stdout, stderr) => resolve({code, stdout, stderr})))
+const runCli = async (args) => new Promise(resolve => runCliAsync(args, (code, stdout, stderr) => resolve({code, stdout, stderr})))
 
 const readJsonGz = async (filename) => {
   return new Promise((resolve, reject) => {
@@ -240,6 +248,7 @@ const dateFormat = (now, format) => format.replace(/%(.)/g, (_, c) => {
 })
 
 module.exports = {
+  addCliEnv,
   generateId,
   nextPort,
   wait,

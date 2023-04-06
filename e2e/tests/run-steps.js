@@ -1,7 +1,15 @@
 /* globals gauge*/
 "use strict"
 const path = require('path')
-const { getBaseDir, getFilesDir, getConfigFilename, runCliAsync, runCli } = require('../utils')
+const { addCliEnv, getBaseDir, getPath, getFilesDir, getConfigFilename, runCliAsync, runCli } = require('../utils')
+
+step("Set test env", async () => {
+  addCliEnv({
+    GALLERY_CONFIG: getConfigFilename(),
+    GALLERY_CONFIG_DIR: getPath('config'),
+    GALLERY_CACHE_DIR: getBaseDir()
+  })
+})
 
 step("Init config", async () => {
   await runCli(['run', 'init', '--config', getConfigFilename(), '--source', getFilesDir()])
@@ -12,16 +20,7 @@ step("Run import with <args>", async (args) => {
   await runCli(['run', 'import', '--config', getConfigFilename(), ...argList])
 })
 
-const getOptions = () => {
-  return {
-    env: {
-      'GALLERY_CONFIG_DIR': path.join(getBaseDir(), 'config'),
-      'GALLERY_CACHE_DIR': getBaseDir()
-    }
-  }
-}
-
-const runImport = async args => await runCli(['run', 'import', '--config', getConfigFilename(), ...args], getOptions())
+const runImport = async args => await runCli(['run', 'import', '--config', getConfigFilename(), ...args])
 
 step("Run intital import", async () => runImport(['--initial']))
 
@@ -33,7 +32,7 @@ step("Run import in watch mode", async () => {
   const onExit = () => {
     gauge.dataStore.scenarioStore.put('importWatchChild', null)
   }
-  const child = runCliAsync(['run', 'import', '--config', getConfigFilename(), '--update', '--watch', '--watch-max-delay', '0'], getOptions(), onExit)
+  const child = runCliAsync(['run', 'import', '--config', getConfigFilename(), '--update', '--watch', '--watch-max-delay', '0'], onExit)
   gauge.dataStore.scenarioStore.put('importWatchChild', child)
 })
 
@@ -73,6 +72,7 @@ step("Wait for watch for idle", async () => {
     }, 20 * 1000)
   })
 })
+
 step("Stop import", async() => {
   const child = gauge.dataStore.scenarioStore.get('importWatchChild')
   if (!child) {
@@ -80,7 +80,16 @@ step("Stop import", async() => {
   }
 
   return new Promise((resolve) => {
-    child.on('exit', resolve)
+    let timerId
+    child.on('exit', () => {
+      clearTimeout(timerId)
+      resolve()
+    })
+
+    timerId = setTimeout(() => {
+      process.kill(child.pid, 'SIGKILL')
+    }, 3000)
+
     process.kill(child.pid, 'SIGINT')
   })
 })

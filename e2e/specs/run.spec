@@ -3,6 +3,7 @@
 Tags: run,docker
 
 * Init files from "index/basic"
+* Set test env
 * Init config
 
 ## Initial Import
