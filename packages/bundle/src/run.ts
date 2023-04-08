@@ -2,7 +2,7 @@ import { spawn } from 'child_process'
 
 import { logger } from './log'
 
-const log = logger.child({module: 'run'})
+const log = logger('run')
 
 export const run = async (command: string, args: string[], options: any) => {
   const defaults = { shell: true }

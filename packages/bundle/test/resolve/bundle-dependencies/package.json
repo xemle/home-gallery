@@ -1,0 +1,15 @@
+{
+	"name": "base",
+	"version": "1.0.0",
+	"dependencies": {
+		"a": "1.0.0",
+		"b": "1.0.0"
+	},
+	"optionalDependencies": {
+		"c": "1.0.0"
+	},
+	"bundleDependencies": [
+		"a",
+		"c"
+	]
+}

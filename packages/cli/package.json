@@ -22,8 +22,17 @@
     "watch:test": "tap --no-check-coverage --no-coverage-report -w src/*.test.js src/**/*.test.js"
   },
   "dependencies": {
+    "@home-gallery/index": "file:../index",
+    "@home-gallery/cast": "file:../cast",
+    "@home-gallery/database": "file:../database",
+    "@home-gallery/export": "file:../export",
+    "@home-gallery/extractor": "file:../extractor",
+    "@home-gallery/server": "file:../server",
+    "@home-gallery/fetch": "file:../fetch",
     "@home-gallery/logger": "file:../logger",
     "chokidar": "^3.5.3",
-    "enquirer": "^2.3.6"
+    "enquirer": "^2.3.6",
+    "yaml": "^1.10.2",
+    "yargs": "^17.3.1"
   }
 }

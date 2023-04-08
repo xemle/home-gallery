@@ -5,7 +5,7 @@ import { Readable } from 'stream'
 
 import { logger } from './log'
 
-const log = logger.child({module: 'caxa'})
+const log = logger('caxa')
 
 const exists = async (file: string) => access(file).then(() => true, () => false)
 

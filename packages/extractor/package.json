@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Preview and metadata extractor of HomeGallery",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "validate-sharp.js"
+  ],
   "scripts": {
     "postinstall": "node validate-sharp.js",
     "clean": "rimraf dist",

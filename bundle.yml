@@ -17,7 +17,7 @@ targets:
 before:
   - npm run clean
   - npm run build
-  - npm install --force --no-save @ffmpeg-installer/linux-x64 @ffmpeg-installer/linux-arm @ffmpeg-installer/linux-arm64 @ffmpeg-installer/win32-x64 @ffmpeg-installer/darwin-x64 @ffprobe-installer/linux-x64 @ffprobe-installer/linux-arm @ffprobe-installer/linux-arm64 @ffprobe-installer/win32-x64 @ffprobe-installer/darwin-x64 exiftool-vendored.exe exiftool-vendored.pl
+  - npm install --force --no-save @ffmpeg-installer/linux-x64 @ffmpeg-installer/win32-x64 @ffmpeg-installer/darwin-x64 @ffprobe-installer/linux-x64 @ffprobe-installer/win32-x64 @ffprobe-installer/darwin-x64 exiftool-vendored.exe exiftool-vendored.pl
   - node scripts/download-nodejs.js --version=18.15.0 --platforms=linux-x64,darwin-x64,win-x64 --targetDir=node
 run:
   - npx rimraf node_modules/sharp/{build,vendor,platform.json}
@@ -31,27 +31,15 @@ run:
     platformArch: darwin-x64
   - command: npm --prefix=node_modules/sharp --platform=win32 --arch=x64 run install
     platformArch: win-x64
-entries:
-  - ./bundle-entry.js
-  - name: sharp
-    arch: '!generic'
-  - name: sharp:dependencies
-    arch: '!generic'
-  - jpeg-js
+packages:
+  - './packages/cli'
 includes:
-  - package.json
-  - CHANGELOG.md
-  - README.md
-  - LICENSE
-  - gallery.js
-  - gallery.config-example.yml
-  - node_modules/sharp
-  - pattern: node_modules/exiftool-vendored.pl
-    platform: '!win'
-  - pattern: node_modules/exiftool-vendored.exe
-    platform: win
-  - node_modules/@ffmpeg-installer
-  - node_modules/@ffprobe-installer
+  - ./package.json
+  - ./CHANGELOG.md
+  - ./README.md
+  - ./LICENSE
+  - ./gallery.js
+  - ./gallery.config-example.yml
   - pattern: node/linux-x64
     platformArch: linux-x64
   - pattern: node/linux-arm64
@@ -65,33 +53,6 @@ excludes:
   - '*/node_modules/.bin/*'
   - node_modules/.cache/*
   - '*/node_modules/.cache/*'
-  - packages/*/src
-  - pattern: node_modules/exiftool-vendored.pl
-    platform: win
-  - pattern: node_modules/exiftool-vendored.exe
-    platform: '!win'
-  - pattern: node_modules/@ffmpeg-installer/linux-x64
-    platformArch: '!linux-x64'
-  - pattern: node_modules/@ffmpeg-installer/linux-arm64
-    platformArch: '!linux-arm64'
-  - pattern: node_modules/@ffmpeg-installer/darwin-x64
-    platformArch: '!darwin-x64'
-  - pattern: node_modules/@ffmpeg-installer/win32-x64
-    platformArch: '!win-x64'
-  - node_modules/@ffmpeg-installer/linux-arm
-  - node_modules/@ffmpeg-installer/linux-ia32
-  - node_modules/@ffmpeg-installer/win32-ia32
-  - pattern: node_modules/@ffprobe-installer/linux-x64
-    platformArch: '!linux-x64'
-  - pattern: node_modules/@ffprobe-installer/linux-arm64
-    platformArch: '!linux-arm64'
-  - pattern: node_modules/@ffprobe-installer/darwin-x64
-    platformArch: '!darwin-x64'
-  - pattern: node_modules/@ffprobe-installer/win32-x64
-    platformArch: '!win-x64'
-  - node_modules/@ffprobe-installer/linux-arm
-  - node_modules/@ffprobe-installer/linux-ia32
-  - node_modules/@ffprobe-installer/win32-ia32
   - pattern: node_modules/sharp
     arch: generic
 map:

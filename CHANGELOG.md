@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- bundle: Rewrite dependency resolver
 - logger: Log ISO timestamp instead of epoch
 - cli: Batch and increase file sizes on initial import
 - index: Keep known files on max size filter

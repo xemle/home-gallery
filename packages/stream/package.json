@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Stream utilities for HomeGallery",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rimraf dist",
     "build": "cpy \"src/**\" dist",

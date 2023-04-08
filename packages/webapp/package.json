@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Web application frontend of HomeGallery",
   "main": "index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm-run-all build:dev",
@@ -35,7 +38,6 @@
     "directory": "packages/webapp"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.0.0",
     "@home-gallery/events": "file:../events",
     "@home-gallery/query": "file:../query",
     "hammerjs": "^2.0.8",
@@ -44,5 +46,8 @@
     "nearley": "^2.19.3",
     "uuid": "^8.0.0",
     "zustand": "^4.1.1"
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^6.0.0"
   }
 }

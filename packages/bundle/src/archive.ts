@@ -11,7 +11,7 @@ export interface MapFunction {
   (name: string): string
 }
 
-const log = logger.child({module: 'archive'})
+const log = logger('archive')
 
 export const writeArchive = async (dir: string, filter: FilterFunction, mapName: MapFunction, archivePrefix: string, outputFilename: string) => {
   const tarStream = tar.pack(dir, {

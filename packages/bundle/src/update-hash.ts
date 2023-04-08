@@ -4,7 +4,7 @@ import path from 'path'
 import { logger } from './log'
 import { hash } from './hash'
 
-const log = logger.child({module: 'updateHash'});
+const log = logger('updateHash');
 
 const read = async (hashFile: string) => {
   const content = await fs.readFile(hashFile, 'utf8')

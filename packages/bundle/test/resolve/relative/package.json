@@ -1,0 +1,7 @@
+{
+	"name": "relative",
+	"version": "1.0.0",
+	"dependencies": {
+		"a": "file:packages/a"
+	}
+}

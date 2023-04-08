@@ -1,0 +1,5 @@
+node-arg:
+  - --loader
+  - tsx
+test-regex: src\/.*\.test\.ts
+reporter: tap

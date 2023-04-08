@@ -17,4 +17,4 @@ if [ -e gallery.bin ]; then
 fi
 ln -s dist/0.0.0/home-gallery-0.0.0-RC-linux-x64 gallery.bin
 rm -rf /tmp/caxa/home-gallery/0.0.0
-npm run test:e2e -- --env binary,default
+npm run test:e2e -- --env binary,default --tags !skipBinary

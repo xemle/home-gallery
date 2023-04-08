@@ -1,0 +1,10 @@
+{
+    "name": "test",
+    "version": "1.0.0",
+    "files": [
+        "dist"
+    ],
+    "dependencies": {
+        "a": "1.0.0"
+    }
+}

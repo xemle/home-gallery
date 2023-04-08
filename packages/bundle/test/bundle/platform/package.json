@@ -1,0 +1,9 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "optionalDependencies": {
+    "a": "1.0.0",
+    "b": "1.0.0"
+  }
+}

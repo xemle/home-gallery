@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "User events",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm run clean",

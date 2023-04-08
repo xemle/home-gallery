@@ -5,7 +5,7 @@ import pretty from 'pino-pretty'
 
 const streams : StreamEntry[] = [
   {
-    level: 'debug',
+    level: <Level>process.env.LOG_LEVEL || 'debug',
     stream: fs.createWriteStream('bundle-debug.log')
   },
   {
@@ -19,6 +19,14 @@ const streams : StreamEntry[] = [
   }
 ]
 
-export const logger = pino({
-  level: 'debug'
-}, pino.multistream(streams))
+let instance: import('pino').Logger
+
+export const logger = (name: string) => {
+  if (!instance) {
+    instance = pino({
+      level: 'trace'
+    }, pino.multistream(streams))
+  }
+
+  return instance.child({module: name})
+}

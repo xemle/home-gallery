@@ -2,6 +2,9 @@
   "name": "@home-gallery/styleguide",
   "version": "1.0.0",
   "description": "Styleguide of HomeGallery",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm-run-all -p build:css -s build:styleguide copy",
@@ -29,7 +32,7 @@
     "url": "https://github.com/xemle/home-gallery.git",
     "directory": "packages/styleguide"
   },
-  "dependencies": {
+  "devDependencies": {
     "@home-gallery/webapp": "file:../webapp"
   }
 }

@@ -3,7 +3,7 @@ const glob = require('glob')
 const args = process.argv.splice(2)
 const watch = args.indexOf('--watch') >= 0
 
-glob('./src/**/*.ts', (_, files) => {
+glob('./src/**/!(*.test.ts)', (_, files) => {
   const targets = [
     {
       entryPoints: files,

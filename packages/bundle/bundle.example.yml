@@ -42,17 +42,14 @@ before:
 run:
   # same as before commands
   - npm run install
-entries:
-  # Relative entry file
-  - ./index.js
+packages:
   # Relative package
   - ./packages/bundle
   # Package entry
   - sharp
-  # Use `dependency` property from package.json of package `sharp`. Use object keys as dependency entries
-  - sharp:dependency
-  # Use `main` property from package.json of package `sharp` as relative file entry
-  - sharp:main
+  # Package entry
+  - name: sharp
+    platform: '!armv7'
 includes:
   # Simple notation
   - node_modules/.bin

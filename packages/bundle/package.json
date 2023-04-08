@@ -27,13 +27,16 @@
     "build": "npm-run-all -p build:js build:types",
     "build:js": "node build.js",
     "build:types": "npx tsc -d --emitDeclarationOnly",
+    "test": "tap --no-coverage",
     "watch": "npm-run-all -p watch:js watch:types",
     "watch:js": "node build.js --watch",
-    "watch:types": "npx tsc -d --emitDeclarationOnly --watch"
+    "watch:types": "npx tsc -d --emitDeclarationOnly --watch",
+    "watch:test": "tap --watch"
   },
   "dependencies": {
     "caxa": "^1.0.0",
     "glob-to-regexp": "^0.4.1",
+    "picomatch": "^2.3.1",
     "pino": "^7.8.0",
     "pino-pretty": "^7.5.1",
     "tar-fs": "^2.1.1",

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "HomeGallery database",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rimraf dist",
     "build": "cpy \"src/**\" dist",

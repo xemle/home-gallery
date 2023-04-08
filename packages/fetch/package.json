@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Fetch data from other HomeGalleries",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rimraf dist",
     "build": "cpy \"src/**\" dist",
