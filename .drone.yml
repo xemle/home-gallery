@@ -9,11 +9,10 @@ platform:
 
 steps:
 - name: install
-  image: node:18-alpine
+  image: node:18.15-alpine # node:18.16-alpine breaks gauge
   commands:
   - rm -rf packages/api-server
   - npm set registry $NPM_REGISTRY
-  - npm config set unsafe-perm true
   - node scripts/disable-dependency.js api-server
   - npm install
   - find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
@@ -22,17 +21,17 @@ steps:
       from_secret: npm_registry
 
 - name: build
-  image: node:18-alpine
+  image: node:18.5-alpine
   commands:
   - npm run build
 
 - name: test
-  image: node:18-alpine
+  image: node:18.5-alpine
   commands:
   - npm run test
 
 - name: test:e2e
-  image: node:18-alpine
+  image: node:18.5-alpine
   commands:
   - apk add --no-cache git git-lfs perl vips-tools imagemagick
   - git clone $E2E_DATA_REPO ./data

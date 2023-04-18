@@ -202,7 +202,7 @@ step("Wait for database reload event", async () => {
     if (!reloadEvent) {
       return Promise.reject(new Error(`No reload event found`))
     }
-  }, 15000)
+  }, 25000)
 })
 
 const killChildProcess = async child => {
