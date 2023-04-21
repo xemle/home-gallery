@@ -40,7 +40,7 @@ jobs:
           fi
 
           # Set output parameters.
-          echo name=tags=${TAGS} >> $GITHUB_OUTPUT
+          echo tags=${TAGS} >> $GITHUB_OUTPUT
           echo docker_image=${DOCKER_IMAGE} >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
