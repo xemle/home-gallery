@@ -37,9 +37,9 @@ jobs:
           fi
 
           # Set output parameters.
-          echo ::set-output name=VERSION::${VERSION}
-          echo ::set-output name=SNAPSHOT::${SNAPSHOT}
-          echo ::set-output name=TARGET_DIR::${TARGET_DIR}
+          echo VERSION=${VERSION} >> $GITHUB_OUTPUT
+          echo SNAPSHOT=${SNAPSHOT} >> $GITHUB_OUTPUT
+          echo TARGET_DIR=${TARGET_DIR} >> $GITHUB_OUTPUT
 
       - name: Install packages
         id: install
