@@ -1,6 +1,6 @@
 /* globals gauge*/
 "use strict";
-const fs = require('fs/promises')
+const fs = require('fs').promises
 const path = require('path')
 const { mkdir, cp, mv, rm } = require('shelljs')
 const assert = require("assert")

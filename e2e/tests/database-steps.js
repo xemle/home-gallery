@@ -1,4 +1,4 @@
-const { stat, access } = require('fs/promises')
+const { stat, access } = require('fs').promises
 const assert = require("assert");
 const { getIndexFilename, getStorageDir, getDatabaseFilename, runCli, readDatabase, waitFor } = require('../utils');
 

@@ -1,6 +1,6 @@
 /* globals gauge*/
 "use strict";
-const { access } = require('fs/promises')
+const { access } = require('fs').promises
 const assert = require('assert');
 const { getFilesDir, getIndexFilename, getJournalFilename, runCli, readIndex, readJournal } = require('../utils');
 

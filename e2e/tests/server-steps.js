@@ -2,7 +2,7 @@
 "use strict"
 
 const { Buffer } = require('buffer')
-const fs = require('fs/promises')
+const fs = require('fs').promises
 const http = require('http')
 const https = require('https')
 const assert = require('assert')
