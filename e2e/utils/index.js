@@ -4,7 +4,8 @@ const { createReadStream } = require('fs')
 const net = require('net')
 const zlib = require('zlib')
 const { spawn } = require('child_process')
-const userInfo = require("os").userInfo()
+const os = require('os')
+const userInfo = os.userInfo()
 
 const galleryBin = process.env.gallery_bin || 'node'
 const galleryBinArgs = process.env.gallery_bin_args ? process.env.gallery_bin_args.split(/\s/) : []
@@ -13,6 +14,10 @@ const projectRoot = path.resolve(process.cwd(), '..')
 const testDataDir = path.join(projectRoot, process.env.gallery_data_dir || 'data')
 
 const logLevel = process.env.gallery_log_level || 'debug'
+
+const isWindows = os.platform == 'win32'
+
+const pathToPlatformPath = isWindows ? p => p.split('/').join('\\') : p => p
 
 const generateId = (size) => {
   let id = '';
@@ -280,5 +285,6 @@ module.exports = {
   readIndex,
   readJournal,
   readDatabase,
-  dateFormat
+  dateFormat,
+  pathToPlatformPath
 }

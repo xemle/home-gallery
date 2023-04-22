@@ -1,6 +1,6 @@
 const { stat, access } = require('fs').promises
 const assert = require("assert");
-const { getIndexFilename, getStorageDir, getDatabaseFilename, runCli, readDatabase, waitFor } = require('../utils');
+const { getIndexFilename, getStorageDir, getDatabaseFilename, runCli, readDatabase, waitFor, pathToPlatformPath } = require('../utils');
 
 step('Database does not exist', async () => {
   const exists = await access(getDatabaseFilename()).then(() => true).catch(() => false)
@@ -88,7 +88,7 @@ step("Database entry <id> has <amount> files", async (id, amount) => {
 
 step("Database entry <id> has file <filename>", async (id, filename) => {
   const entry = await getEntry(id)
-  const file = entry.files.find(file => file.filename == filename)
+  const file = entry.files.find(file => file.filename == pathToPlatformPath(filename))
   assert(!!file, `Could not find filename ${filename} of entry ${id}`)
 })
 
@@ -118,7 +118,7 @@ step("Database group <id> has file <filename>", async (id, filename) => {
   const entries = await getGroupEntries(id)
 
   const groupFiles = entries.reduce((result, entry) => result.concat(entry.files), [])
-  const found = groupFiles.find(file => file.filename == filename)
+  const found = groupFiles.find(file => file.filename == pathToPlatformPath(filename))
   assert(!!found, `Could not find filename ${filename} of group ${id}`)
 })
 
