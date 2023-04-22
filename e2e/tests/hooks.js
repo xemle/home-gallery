@@ -1,9 +1,10 @@
 const fs = require('fs').promises
 const path = require('path')
+const os = require('os')
 const { rm } = require('shelljs')
 const { generateId, dateFormat } = require('../utils')
 
-const testBaseDir = process.env.gallery_tmp_dir
+const testBaseDir = process.env.gallery_tmp_dir || os.tmpdir()
 const randomId = !!`${process.env.gallery_tmp_dir_radomize || 'true'}`.toLowerCase().match(/(true|1)/)
 const keepTempDir = !!`${process.env.gallery_tmp_dir_keep || 'true'}`.toLowerCase().match(/(true|1)/)
 const runDirName = 'gallery-e2e'
