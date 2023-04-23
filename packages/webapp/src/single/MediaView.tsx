@@ -73,9 +73,11 @@ export const MediaView = () => {
   const dimensions = useBodyDimensions();
 
   const entries = useEntryStore(state => state.entries);
+  const lastIndex = useSingleViewStore(state => state.lastIndex);
   const showDetails = useSingleViewStore(state => state.showDetails);
   const showNavigation = useSingleViewStore(state => state.showNavigation);
   const setLastId = useSingleViewStore(state => state.setLastId);
+  const setLastIndex = useSingleViewStore(state => state.setLastIndex);
   const search = useSearchStore(state => state.search);
   const setShowDetails = useSingleViewStore(actions => actions.setShowDetails);
   const setShowNavigation = useSingleViewStore(actions => actions.setShowNavigation);
@@ -96,21 +98,21 @@ export const MediaView = () => {
   const scaleSize = scaleDimensions(current, dimensions);
   console.log(scaleSize, dimensions, current);
 
-  useEffect(() => {
-    if (id) {
-      setLastId(id)
-    }
-  }, [id])
+  useEffect(() => { id && setLastId(id) }, [id])
+  useEffect(() => { index >= 0 && setLastIndex(index) }, [index])
 
-  const viewEntry = (index) => {
+  const viewEntry = (index: number) => {
     const { shortId } = entries[index]
     navigate(`/view/${shortId}`, {state: {index, listLocation}});
   }
 
-  const dispatch = (action) => {
+  const dispatch = (action: any) => {
     const { type } = action
     let prevNextMatch = type.match(/(prev|next)(-(\d+))?/)
-    if (prevNextMatch && entries.length) {
+    if (type === 'index') {
+      const i = Math.min(entries.length - 1, Math.max(0, action.index))
+      viewEntry(i)
+    } else if (prevNextMatch && entries.length) {
       const offset = prevNextMatch[3] ? +prevNextMatch[3] : 1
       const negate = prevNextMatch[1] == 'prev' ? -1 : 1
       const i = Math.min(entries.length - 1, Math.max(0, index + (negate * offset)))
@@ -126,7 +128,7 @@ export const MediaView = () => {
     } else if (type == 'last' && entries.length) {
       viewEntry(entries.length - 1)
     } else if (type == 'list') {
-      navigate(`${listLocation.pathname}${listLocation.search ? encodeUrl(listLocation.search) : ''}`, {state: {id: current.id}});
+      navigate(`${listLocation.pathname}${listLocation.search ? encodeUrl(listLocation.search) : ''}`, {state: {id: current?.id}});
     } else if (type == 'chronology') {
       search({type: 'none'});
       navigate('/');
@@ -163,6 +165,15 @@ export const MediaView = () => {
       ev.preventDefault()
     }
   }, [index, showDetails, showNavigation])
+
+  const mediaVanishes = index < 0 && lastIndex >= 0 && entries.length > 0
+  if (mediaVanishes) {
+    dispatch({type: 'index', index: lastIndex})
+  }
+  const listBecomesEmpty = entries.length == 0 && lastIndex >= 0
+  if (listBecomesEmpty) {
+    dispatch({type: 'list'})
+  }
 
   console.log('Media object', current, showDetails);
 

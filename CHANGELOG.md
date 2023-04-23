@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- webapp: Fix vanished media in single view
 - database: Fix preview paths on Windows hosts
 - server: Fix database watcher
 - cli: Honor custom server port in `gallery.config.yml`
