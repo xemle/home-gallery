@@ -1,18 +1,24 @@
 import path from 'path'
 import t from 'tap'
-
 import { PackageReolver } from './PackageResolver'
 
 const testDir = path.resolve(__dirname, '..', 'test')
 
-const relativePackageDirs = (resolver: PackageReolver) => resolver.packages.map(p => path.relative(resolver.baseDir, p.dir))
+const isWindows = process.platform == 'win32'
+const toPosixPath = (f: string) => isWindows ? f.split(path.sep).join(path.posix.sep) : f
 
-const relativePackageFiles = async (resolver: PackageReolver) => (await resolver.files).map(f => path.relative(resolver.baseDir, f))
+const relativePackageDirs = (resolver: PackageReolver) => resolver.packages.map(p => path.relative(resolver.baseDir, p.dir)).map(toPosixPath)
+
+const relativePackageFiles = async (resolver: PackageReolver) => (await resolver.files).map(f => path.relative(resolver.baseDir, f)).map(toPosixPath)
 
 t.test('PackageResolver class', async t => {
-  let resolver = new PackageReolver(path.join(testDir, 'walk'))
-  await resolver.addPackage('a')
-  t.same(resolver.packages.length, 1, 'Should have one package')
+  let resolver
+
+  t.test('simple', async t => {
+    resolver = new PackageReolver(path.join(testDir, 'walk'))
+    await resolver.addPackage('a')
+    t.same(resolver.packages.length, 1, 'Should have one package')
+  })
 
   t.test('relative', async t => {
     resolver = new PackageReolver(path.join(testDir, 'resolve'))

@@ -71,13 +71,14 @@ t.test('Bundle', async t => {
       baseDir: getBaseDir('include-exclude'),
       version: '1.0.0',
       bundleConfig: toBundleConfig('include-exclude', {
+        targets: [{platform: 'linux', arch: 'x64'}],
         packages: ['.'],
         includes: ['vendor'],
         excludes: ['vendor/*-win.exe']
       })
     }
     await bundle(options)
-    t.same(await listTarGzFiles('include-exclude'), [
+    t.same(await listTarGzFiles('include-exclude', 'linux-x64'), [
       '.',
       'index.js',
       'package.json',
@@ -104,7 +105,7 @@ t.test('Bundle', async t => {
       'bin',
       'bin/bin-linux',
       'bin/bin-win.exe',
-    ], 'should contain only linux bin from vendor')
+    ], 'should contain linux and windows bin from vendor')
   })
 
   t.test('platform specific', async t => {

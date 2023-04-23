@@ -6,6 +6,9 @@ import { Package } from './Package'
 
 const testDir = path.resolve(__dirname, '..', 'test')
 
+const isWindows = process.platform == 'win32'
+const toPosixPath = (f: string) => isWindows ? f.split(path.sep).join(path.posix.sep) : f
+
 const moduleFrom = async (dir: string) => {
   const pkg = await fs.readFile(path.join(dir, 'package.json'), 'utf8').then(JSON.parse)
   return new Package(dir, pkg)
@@ -13,12 +16,12 @@ const moduleFrom = async (dir: string) => {
 
 t.test('Package class', async t => {
   let module = await moduleFrom(path.join(testDir, 'walk'))
-  t.same(await module.files(), [
+  t.same((await module.files()).map(toPosixPath), [
     'package.json'
   ])
 
   module = await moduleFrom(path.join(testDir, 'walk', 'node_modules', 'a'))
-  t.same(await module.files(), [
+  t.same((await module.files()).map(toPosixPath), [
     'dist/index.js',
     'src/index.js',
     'README',
@@ -26,20 +29,20 @@ t.test('Package class', async t => {
   ], 'src/index.js should be included default')
 
   module = await moduleFrom(path.join(testDir, 'walk', 'node_modules', 'a'))
-  t.same(await module.files(true), [
+  t.same((await module.files(true)).map(toPosixPath), [
     'dist/index.js',
     'README',
     'package.json'
   ], 'src/index.js should be exclued file entry filter')
 
   module = await moduleFrom(path.join(testDir, 'package', 'dir-pattern'))
-  t.same(await module.files(true), [
+  t.same((await module.files(true)).map(toPosixPath), [
     'lib/index.js',
     'package.json'
   ], 'lib/index.js should be included by "lib" file entry')
 
   module = await moduleFrom(path.join(testDir, 'package', 'tailing-slash'))
-  t.same(await module.files(true), [
+  t.same((await module.files(true)).map(toPosixPath), [
     'lib/index.js',
     'package.json'
   ], 'lib/index.js should be included by "lib/" file entry')

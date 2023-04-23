@@ -113,14 +113,14 @@ export const bundle = async (options: BundleOptions): Promise<void> => {
     await writeArchive(dir, filter, mapping, archivePrefix, archiveFile)
     await updateHash(archiveFile, hashAlgorithm, `${archiveFile}.${hashAlgorithm}sum`)
     await updateHash(archiveFile, hashAlgorithm, hashFile)
-    await symlink(archiveFile, archiveLatestLink)
+    await symlink(archiveFile, archiveLatestLink).catch(err => log.warn(err, `Could not create symlink from ${archiveFile} to ${archiveLatestLink}`))
     log.info(`Created archive ${archiveFile}`)
 
     if (Array.isArray(target.command)) {
       await pack(archiveFile, archivePrefix, `${output.name}/${version}`, target.platform, target.command, binFile)
       await updateHash(binFile, hashAlgorithm, `${binFile}.${hashAlgorithm}sum`)
       await updateHash(binFile, hashAlgorithm, hashFile)
-      await symlink(binFile, binLatestLink)
+      await symlink(binFile, binLatestLink).catch(err => log.warn(err, `Could not create symlink from ${binFile} to ${binLatestLink}`))
       log.info(`Created binary ${binFile}`)
     }
 
