@@ -50,6 +50,8 @@ const filterPackages = (packages: Package[], platform: string, arch: string): st
   return packages.filter(p => matchPlatformArch(p, platform, arch)).map(entry => entry.name)
 }
 
+const toPackagePlatform = (platform: string) => platform == 'win' ? 'win32' : platform
+
 export interface BundleOptions {
   baseDir?: string
   version: string
@@ -103,7 +105,7 @@ export const bundle = async (options: BundleOptions): Promise<void> => {
 
     const targetPackages = filterPackages(packages, target.platform, target.arch)
     const packageResolver = new PackageReolver(dir)
-    await packageResolver.addPackages(targetPackages, dir, {platform: target.platform, arch: target.arch})
+    await packageResolver.addPackages(targetPackages, dir, {platform: toPackagePlatform(target.platform), arch: target.arch})
     const packageFiles = (await packageResolver.files).map(file => path.relative(dir, file))
     log.info(`Require ${packageResolver.packageCount} packages with ${packageFiles.length} files for ${targetPackages.length} main packages`)
 

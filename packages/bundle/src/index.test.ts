@@ -113,7 +113,7 @@ t.test('Bundle', async t => {
       baseDir: getBaseDir('platform'),
       version: '1.0.0',
       bundleConfig: toBundleConfig('linux-platform', {
-        targets: [{platform: 'linux', arch: 'x64'}, {platform: 'darwin', arch: 'x64'}],
+        targets: [{platform: 'linux', arch: 'x64'}, {platform: 'darwin', arch: 'x64'}, {platform: 'win', arch: 'x64'}],
         packages: ['.'],
       })
     }
@@ -134,6 +134,14 @@ t.test('Bundle', async t => {
       'node_modules/b',
       'node_modules/b/package.json',
     ], 'should contain only darwin dependency')
+    t.same(await listTarGzFiles('linux-platform', 'win-x64'), [
+      '.',
+      'index.js',
+      'node_modules',
+      'package.json',
+      'node_modules/c',
+      'node_modules/c/package.json',
+    ], 'should contain only win dependency')
   })
 
 })
