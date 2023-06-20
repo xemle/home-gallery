@@ -47,7 +47,8 @@ const humanizeDuration = duration => {
 const createStream = () => {
   return pretty({
     colorize: false,
-    ignore: 'hostname,pid,level,time',
+    ignore: 'hostname,pid,level',
+    translateTime: 'SYS:yyyy-mm-dd HH:MM:ss.l',
     hideObject: true,
     messageFormat: (log, messageKey) => {
       const msg = log[messageKey]
