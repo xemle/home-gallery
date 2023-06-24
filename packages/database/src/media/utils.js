@@ -6,7 +6,7 @@ const getEntryMetaByKey = (entry, key) => {
     return false
   } else if (entry.meta[key]) {
     return entry.meta[key]
-  } else if (entry.sidecars.length) {
+  } else if (entry.sidecars?.length) {
     for (let i = 0; i < entry.sidecars.length; i++) {
       const sidecar = entry.sidecars[i]
       if (!sidecar.meta) {

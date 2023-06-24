@@ -5,6 +5,7 @@ const log = require('@home-gallery/logger')('database.media')
 const { getEntryDate } = require('./date')
 const { getVibrantColors } = require('./vibrant-colors')
 const { getExif } = require('./exif')
+const { getVideo } = require('./video')
 const { getAddress } = require('./address')
 const { getGeo} = require('./geo')
 const { getTags } = require('./tags')
@@ -21,6 +22,7 @@ const createMedia = (entry, updated) => {
   const vibrantColors = getVibrantColors(entry)
   
   const exif = getExif(entry)
+  const video = getVideo(entry)
   const address = getAddress(entry)
   const geo = getGeo(entry)
   
@@ -40,7 +42,7 @@ const createMedia = (entry, updated) => {
     tags,
     objects,
     faces
-  }, exif, address, geo, similarityHash)
+  }, exif, video, address, geo, similarityHash)
 
   return media
 }

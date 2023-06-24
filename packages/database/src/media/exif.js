@@ -66,7 +66,7 @@ const getExif = (entry) => {
     width,
     height,
     orientation: exif.Orientation,
-    duration: exif.MediaDuration || 0,
+    duration: exif.MediaDuration || exif.Duration || 0,
     make: exif.Make || 'unknown',
     model: exif.Model || 'unknown',
     iso: exif.ISO,
