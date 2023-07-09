@@ -36,7 +36,7 @@ module.exports = {
       },
     },
     {
-      urlPattern: /-preview-320\.jpg$/,
+      urlPattern: /-preview-800\.jpg$/,
       handler: 'CacheFirst',
       options: {
         cacheName: 'images',

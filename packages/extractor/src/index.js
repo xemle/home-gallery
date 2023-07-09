@@ -49,7 +49,7 @@ const extractData = async (options) => {
   const videoFrameExtractor = createVideoFrameExtractor(ffmpegPath, ffprobePath)
   const storage = createStorage(storageDir);
 
-  const imagePreviewSizes = [1920, 1280, 800, 320, 128];
+  const imagePreviewSizes = [2048, 1920, 1280, 800, 320, 128];
   const videoFrameCount = 10;
   const apiServerImagePreviewSizes = [800, 320];
 

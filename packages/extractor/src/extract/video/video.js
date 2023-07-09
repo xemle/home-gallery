@@ -35,16 +35,15 @@ function convertVideo(storage, entry, ffprobePath, ffmpegPath, cb) {
     .output(tmpFile)
     .videoCodec('libx264')
     .audioCodec('aac')
+    .size('50%')
     .outputOptions([
       '-y',
-      '-r 30', // frame rate
-      '-vf scale=-2:\'min(720,ih)\',format=yuv420p', // Scale to 720p without upscaling
       '-preset slow',
       '-tune film',
-      '-profile:v baseline',
-      '-level 3.0',
-      '-maxrate 4000k',
-      '-bufsize 8000k',
+      '-profile:v high',
+      '-level 4.0',
+      '-maxrate 6000k',
+      '-bufsize 12000k',
       '-movflags +faststart',
       '-b:a 128k',
       '-f mp4'

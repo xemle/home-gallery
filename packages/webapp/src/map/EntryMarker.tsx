@@ -22,14 +22,14 @@ export const EntryMarker = ({entry, dispatch}) => {
     iconSize: resize(entry, ICON_SIZE)
   }), [entry])
 
-  const [width, height] = useMemo(() => resize(entry, 320), [entry])
+  const [width, height] = useMemo(() => resize(entry, 800), [entry])
 
   const position = useMemo(() => L.latLng(entry.latitude, entry.longitude), [entry])
 
   return (
     <Marker key={entry.id} position={position} icon={icon}>
       <Popup closeButton={false} minWidth={width} maxWidth={width}>
-        <img src={getHigherPreviewUrl(entry.previews, 320)} width={width} height={height} onClick={() => dispatch({type: 'entryClick', entry})}/>
+        <img src={getHigherPreviewUrl(entry.previews, 800)} width={width} height={height} onClick={() => dispatch({type: 'entryClick', entry})}/>
         <p>File: {entry.files[0].index}:{entry.files[0].filename}</p>
         <p>Date: {formatDate('%d.%m.%Y %H:%M', entry.date)}</p>
       </Popup>

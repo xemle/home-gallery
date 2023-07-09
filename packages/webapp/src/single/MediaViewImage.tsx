@@ -14,10 +14,8 @@ export const MediaViewImage = (props) => {
   const { width } = useBodyDimensions();
   const navigate = useNavigate();
 
-  const largeSize = width <= 1280 ? 1280 : 1920;
-
-  const smallUrl = getLowerPreviewUrl(previews, 320)
-  const largeUrl = getLowerPreviewUrl(previews, largeSize)
+  const smallUrl = getLowerPreviewUrl(previews, 800)
+  const largeUrl = getLowerPreviewUrl(previews, 2048)
   const [src, setSrc] = useState('');
 
   useEffect(() => {

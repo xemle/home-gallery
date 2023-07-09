@@ -24,14 +24,13 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
 
   useEffect(() => {
     let abort = false;
-    const large = width <= 1280 ? 1280 : 1920;
 
     const preloadPrevNext = async () => {
       if (!abort) {
-        await Promise.all([loadImage(getLowerPreviewUrl(next?.previews, 320)), loadImage(getLowerPreviewUrl(prev?.previews, 320))])
+        await Promise.all([loadImage(getLowerPreviewUrl(next?.previews, 800)), loadImage(getLowerPreviewUrl(prev?.previews, 800))])
       }
       if (!abort) {
-        await Promise.all([loadImage(getLowerPreviewUrl(next?.previews, large)), loadImage(getLowerPreviewUrl(prev?.previews, large))])
+        await Promise.all([loadImage(getLowerPreviewUrl(next?.previews, 2048)), loadImage(getLowerPreviewUrl(prev?.previews, 2048))])
       }
     }
 

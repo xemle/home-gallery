@@ -45,7 +45,7 @@ const byDate = reverse => {
 
 const extractMedia = (entries, baseUrl) => {
   return entries.reduce((result, entry) => {
-    const image = entry.previews.find(preview => preview.match('image-preview-1280'))
+    const image = entry.previews.find(preview => preview.match('image-preview-2048'))
     const title = path.parse(entry.files[0].filename).name
     if (entry.type == 'video') {
       const video = entry.previews.find(preview => preview.match('video-preview-720'))

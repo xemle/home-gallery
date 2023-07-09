@@ -6,14 +6,14 @@ const log = require('@home-gallery/logger')('extractor.image.resize')
 const { getNativeCommand } = require('../utils/native-command')
 
 const jpgOptions = {
-  quality: 80,
+  quality: 100,
   progressive: true,
   optimiseCoding: true,
   mozjpeg: true // same as {trellisQuantisation: true, overshootDeringing: true, optimiseScans: true, quantisationTable: 3}
 }
 
 const vipsthumbnailJpgOptions = [
-  'Q=80', // jpg quality
+  'Q=100', // jpg quality
   'interlace',
   'optimize-coding',
   'trellis-quant', 'overshoot-deringing', 'optimize-scans', 'quant-table=3', // mozjpeg defaults
