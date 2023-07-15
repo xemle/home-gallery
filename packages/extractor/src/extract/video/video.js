@@ -19,44 +19,55 @@ function convertVideo(storage, entry, ffprobePath, ffmpegPath, cb) {
   const command = ffmpeg(input);
   command.setFfmpegPath(ffmpegPath);
   command.setFfprobePath(ffprobePath);
-  command
-    .on('error', cb)
-    .on('end', () => {
-      fs.rename(tmpFile, file, (err) => {
-        if (err) {
-          log.error(err, `Could not rename file ${tmpFile} to ${file} for ${entry}`)
-          return cb();
-        }
-        storage.addEntryFilename(entry, videoSuffix);
-        log.info(t0, `Video conversion of ${entry} done`);
-        cb();
+
+  command.ffprobe(function(err, data) {
+    const width = data.streams[0].width;
+    const height = data.streams[0].height;
+
+    let sizePercentage = '50%';
+    if (width <= 1920 && height <= 1080){
+      sizePercentage = '100%';
+    }
+
+    command
+      .on('error', cb)
+      .on('end', () => {
+        fs.rename(tmpFile, file, (err) => {
+          if (err) {
+            log.error(err, `Could not rename file ${tmpFile} to ${file} for ${entry}`)
+            return cb();
+          }
+          storage.addEntryFilename(entry, videoSuffix);
+          log.info(t0, `Video conversion of ${entry} done`);
+          cb();
+        })
       })
-    })
-    .output(tmpFile)
-    .videoCodec('libx264')
-    .audioCodec('aac')
-    .size('50%')
-    .outputOptions([
-      '-y',
-      '-preset slow',
-      '-tune film',
-      '-profile:v high',
-      '-level 4.0',
-      '-maxrate 6000k',
-      '-bufsize 12000k',
-      '-movflags +faststart',
-      '-b:a 128k',
-      '-f mp4'
-    ])
-    .on('progress', progress => {
-      const now = Date.now();
-      if (now > last + intervalMs) {
-        const optionalPercent = progress.percent ? ` is ${progress.percent?.toFixed()}%` : '';
-        log.info(`Video conversion of ${entry} at ${progress.timemark}${optionalPercent} done`);
-        last = now;
-      }
-    })
-    .run();
+      .output(tmpFile)
+      .videoCodec('libx264')
+      .audioCodec('aac')
+      .size(sizePercentage)
+      .outputOptions([
+        '-y',
+        '-preset slow',
+        '-tune film',
+        '-profile:v high',
+        '-level 4.0',
+        '-maxrate 6000k',
+        '-bufsize 12000k',
+        '-movflags +faststart',
+        '-b:a 128k',
+        '-f mp4'
+      ])
+      .on('progress', progress => {
+        const now = Date.now();
+        if (now > last + intervalMs) {
+          const optionalPercent = progress.percent ? ` is ${progress.percent?.toFixed()}%` : '';
+          log.info(`Video conversion of ${entry} at ${progress.timemark}${optionalPercent} done`);
+          last = now;
+        }
+      })
+      .run();
+  });
 }
 
 function video(storage, ffmpegPath, ffprobePath) {
