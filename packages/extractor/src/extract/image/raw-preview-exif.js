@@ -1,5 +1,3 @@
-const ExifTool = require('exiftool-vendored').ExifTool
-
 const log = require('@home-gallery/logger')('extractor.image.rawPreviewExif')
 
 const { toPipe, conditionalTask } = require('../../stream/task')

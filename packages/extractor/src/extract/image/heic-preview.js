@@ -6,7 +6,7 @@ const { promisify } = require('@home-gallery/common')
 const log = require('@home-gallery/logger')('extractor.image.heic')
 const { toPipe, conditionalTask } = require('../../stream/task')
 
-const { useExternalImageResizer, jpgOptions } = require('./image-resizer')
+const { useExternalImageResizer } = require('./image-resizer')
 
 let sharp
 let jpegJs
@@ -16,6 +16,13 @@ const imageTypes = ['rawImage']
 const rawPreviewSuffix = 'raw-preview.jpg'
 
 const maxSize = 1920
+
+const sharpJpgOptions = {
+  quality: 90,
+  progressive: true,
+  optimiseCoding: true,
+  mozjpeg: true // same as {trellisQuantisation: true, overshootDeringing: true, optimiseScans: true, quantisationTable: 3}
+}
 
 const fileExtension = filename => {
   const pos = filename.lastIndexOf('.')
@@ -39,12 +46,12 @@ const arrayBuffer2Buffer = data => Buffer.from(new Uint8Array(data))
 const sharpJpgWriter = async ({width, height, data}, maxSize, dst) => {
   const image = sharp(data, { raw: {width, height, channels: 4}})
   const resize = Math.max(width, height) > maxSize ? image.resize({width: maxSize, height: maxSize, fit: 'inside'}) : image
-  return resize.jpeg(jpgOptions).toFile(dst)
+  return resize.jpeg(sharpJpgOptions).toFile(dst)
 }
 
 const createFallbackJpgWriter = imageResizer => async ({width, height, data}, maxSize, dst) => {
   const t0 = Date.now()
-  const result = jpegJs.encode({width, height, data}, jpgOptions.quality)
+  const result = jpegJs.encode({width, height, data}, sharpJpgOptions.quality)
   log.debug(t0, `Encoded raw image data (${width}x${height}) to JPEG via jpeg-js`)
   if (Math.max(width, height) <= maxSize) {
     return fs.writeFile(dst, result.data)
@@ -86,7 +93,7 @@ const initJpgWriter = (options, imageResizer) => {
   }
 }
 
-function heicPreview(storage, {options, imageResizer}) {
+function heicPreview(storage, {imageResizer, ...options}) {
 
   const jpgWriter = initJpgWriter(options, promisify(imageResizer))
 

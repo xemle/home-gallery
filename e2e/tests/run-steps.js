@@ -1,6 +1,8 @@
 /* globals gauge*/
 "use strict"
+const fs = require('fs').promises
 const path = require('path')
+const Yaml = require('yaml')
 const { addCliEnv, getBaseDir, getPath, getFilesDir, getConfigFilename, runCliAsync, runCli } = require('../utils')
 
 step("Set test env", async () => {
@@ -13,6 +15,39 @@ step("Set test env", async () => {
 
 step("Init config", async () => {
   await runCli(['run', 'init', '--config', getConfigFilename(), '--source', getFilesDir()])
+})
+
+const readConfig = async filename => {
+  const yml = await fs.readFile(filename, 'utf-8')
+  try {
+    return Yaml.parse(yml)
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+const writeConfig = async (filename, config) => fs.writeFile(filename, Yaml.stringify(config))
+
+const getSegement = (object, key) => {
+  const parts = key.split('.')
+  let segment = object
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!segment[parts[i]] || typeof segment[parts[i]] != 'object') {
+      segment[parts[i]] = {}
+    }
+    segment = segment[parts[i]]
+  }
+  return [segment, parts[parts.length - 1]]
+}
+
+step("Set config <key> to <value>", async (key, jsonValue) => {
+  const filename = getConfigFilename()
+  const config = await readConfig(filename)
+
+  const [segment, name] = getSegement(config, key)
+  segment[name] = JSON.parse(jsonValue)
+
+  await writeConfig(filename, config)
 })
 
 step("Run import with <args>", async (args) => {

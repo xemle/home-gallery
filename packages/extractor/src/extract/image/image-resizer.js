@@ -5,21 +5,6 @@ const log = require('@home-gallery/logger')('extractor.image.resize')
 
 const { getNativeCommand } = require('../utils/native-command')
 
-const jpgOptions = {
-  quality: 80,
-  progressive: true,
-  optimiseCoding: true,
-  mozjpeg: true // same as {trellisQuantisation: true, overshootDeringing: true, optimiseScans: true, quantisationTable: 3}
-}
-
-const vipsthumbnailJpgOptions = [
-  'Q=80', // jpg quality
-  'interlace',
-  'optimize-coding',
-  'trellis-quant', 'overshoot-deringing', 'optimize-scans', 'quant-table=3', // mozjpeg defaults
-  'strip', // no meta data
-].join(',')
-
 const run = (command, args, cb) => {
   const t0 = Date.now()
   const defaults = {
@@ -54,12 +39,19 @@ const run = (command, args, cb) => {
 
 const errorResizer = (src, dst, size, cb) => cb(new Error(`Image resizer could not be initialized`))
 
-const getSharpResize = async () => {
+const getSharpResize = async (factoryOptions) => {
   let sharp
   try {
     sharp = require('sharp')
   } catch (e) {
     throw new Error(`Could not load sharp`)
+  }
+
+  const jpgOptions = {
+    quality: factoryOptions.quality,
+    progressive: true,
+    optimiseCoding: true,
+    mozjpeg: true // same as {trellisQuantisation: true, overshootDeringing: true, optimiseScans: true, quantisationTable: 3}
   }
 
   return (src, dst, size, cb) => {
@@ -71,8 +63,16 @@ const getSharpResize = async () => {
   }
 }
 
-const getVipsResize = async () => {
+const getVipsResize = async (factoryOptions) => {
   const vipsthumbnail = getNativeCommand('vipsthumbnail')
+
+  const vipsthumbnailJpgOptions = [
+    `Q=${factoryOptions.quality}`, // jpg quality
+    'interlace',
+    'optimize-coding',
+    'trellis-quant', 'overshoot-deringing', 'optimize-scans', 'quant-table=3', // mozjpeg defaults
+    'strip', // no meta data
+  ].join(',')
 
   return new Promise((resolve, reject) => {
     run(vipsthumbnail, ['--vips-version'], (err, {code, stderr, stdout}) => {
@@ -95,7 +95,7 @@ const getVipsResize = async () => {
   })
 }
 
-const getConvertResize = async () => {
+const getConvertResize = async (factoryOptions) => {
   const convert = getNativeCommand('convert')
   return new Promise((resolve, reject) => {
     run(convert, ['--version'], (err, {code, stderr, stdout}) => {
@@ -110,7 +110,7 @@ const getConvertResize = async () => {
       }
 
       resolve((src, dst, size, cb) => {
-        run(convert, [src, '-auto-orient', '-resize', `${size}x${size}`, '-strip', '-quality', '80', dst], cb)
+        run(convert, [src, '-auto-orient', '-resize', `${size}x${size}`, '-strip', '-quality', `${factoryOptions.quality}`, dst], cb)
       })
     })
   })
@@ -127,6 +127,10 @@ const createImageResizer = (options, cb) => {
     { active: true, factory: getConvertResize, name: 'convert fallback' },
   ].filter(item => item.active)
 
+  const factoryOptions = {
+    quality: +(options.image?.previewQuality || 80)
+  }
+
   let index = 0
   const next = () => {
     if (index == resizer.length) {
@@ -134,10 +138,10 @@ const createImageResizer = (options, cb) => {
       cb(null, errorResizer)
     }
     const item = resizer[index++]
-    item.factory()
-      .then(fn => {
+    item.factory(factoryOptions)
+      .then(imageResizer => {
         log.info(`Use ${item.name} to resize images`)
-        cb(null, fn)
+        cb(null, imageResizer)
       })
       .catch(err => {
         log.warn(err, `Could not load ${item.name} image resizer`)
@@ -148,10 +152,9 @@ const createImageResizer = (options, cb) => {
   next()
 }
 
-const useExternalImageResizer = options => options.useNative.includes('vipsthumbnail') || options.useNative.includes('convert')
+const useExternalImageResizer = options => options.useNative?.includes('vipsthumbnail') || options.useNative?.includes('convert')
 
 module.exports = {
   createImageResizer,
-  useExternalImageResizer,
-  jpgOptions
+  useExternalImageResizer
 }

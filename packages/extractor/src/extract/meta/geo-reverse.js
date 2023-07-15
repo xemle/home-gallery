@@ -20,12 +20,12 @@ const getAcceptLanguageValue = (languages) => {
 
 const geoReverseSuffix = 'geo-reverse.json';
 
-function geoReverse(storage, {geoAddressLanguage, geoServerUrl}) {
+function geoReverse(storage, {url: serverUrl, addressLanguage}) {
   let isLimitExceeded = false;
 
-  const acceptLanguageValue = getAcceptLanguageValue([].concat(geoAddressLanguage || ['en', 'de']));
+  const acceptLanguageValue = getAcceptLanguageValue([].concat(addressLanguage || ['en', 'de']));
 
-  log.debug(`Use geo server ${geoServerUrl} with languages ${geoAddressLanguage}`)
+  log.debug(`Use geo server ${serverUrl} with languages ${addressLanguage}`)
 
   function passThrough(entry) {
     if (isLimitExceeded) {
@@ -57,7 +57,7 @@ function geoReverse(storage, {geoAddressLanguage, geoServerUrl}) {
       return cb();
     }
 
-    const url = `${geoServerUrl}/reverse?format=jsonv2&lat=${lat}&lon=${lon}&polygon_geojson=1`;
+    const url = `${serverUrl}/reverse?format=jsonv2&lat=${lat}&lon=${lon}&polygon_geojson=1`;
     const options = {
       url,
       headers: {

@@ -13,16 +13,16 @@ const isSupportedImage = entry => fileExtension(entry.filename).match(/(jpe?g|jp
 
 const sizeToImagePreviewSuffix = size => `image-preview-${size}.jpg`
 
-function resizeImage(storage, imageResizer, entry, src, imageSizes, cb) {
+function resizeImage(storage, imageResizer, entry, src, previewSizes, cb) {
   let calculatedSizes = [];
 
   let index = 0;
   const next = () => {
-    if (index === imageSizes.length) {
+    if (index === previewSizes.length) {
       return cb(null, calculatedSizes);
     }
 
-    const size = imageSizes[index++];
+    const size = previewSizes[index++];
     const suffix = sizeToImagePreviewSuffix(size);
 
     const dst = storage.getEntryFilename(entry, suffix);
@@ -52,9 +52,9 @@ const getMaxImageSizeBy = exif => {
   return 0
 }
 
-function imagePreview(storage, { imageResizer, imagePreviewSizes }) {
+function imagePreview(storage, { imageResizer, previewSizes }) {
 
-  const defaultMaxSize = Math.max(...imagePreviewSizes)
+  const defaultMaxSize = Math.max(...previewSizes)
 
   const test = entry => (entry.type === 'image' && isSupportedImage(entry)) || storage.hasEntryFile(entry, rawPreviewSuffix);
 
@@ -63,9 +63,9 @@ function imagePreview(storage, { imageResizer, imagePreviewSizes }) {
 
     const src = storage.hasEntryFile(entry, rawPreviewSuffix) ? storage.getEntryFilename(entry, rawPreviewSuffix) : entry.src
     const size = getMaxImageSizeBy(entry.meta.rawPreviewExif) || getMaxImageSizeBy(entry.meta.exif) || defaultMaxSize
-    const previewSizes = imagePreviewSizes.filter(s => s <= size)
+    const resizePreviewSizes = previewSizes.filter(s => s <= size)
 
-    resizeImage(storage, imageResizer, entry, src, previewSizes, (err, calculatedSizes) => {
+    resizeImage(storage, imageResizer, entry, src, resizePreviewSizes, (err, calculatedSizes) => {
       if (err) {
         log.error(`Could not calculate image preview of ${entry}: ${err}`);
       } else if (calculatedSizes.length) {

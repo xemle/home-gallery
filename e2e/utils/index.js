@@ -71,6 +71,8 @@ const waitFor = async (testFn, timeout) => {
   return next()
 }
 
+const getProjectRoot = () => path.resolve(projectRoot)
+
 const getTestDataDir = () => path.resolve(testDataDir)
 
 const getBaseDir = () => gauge.dataStore.scenarioStore.get('baseDir')
@@ -268,6 +270,7 @@ module.exports = {
   nextPort,
   wait,
   waitFor,
+  getProjectRoot,
   getTestDataDir,
   getBaseDir,
   getPath,

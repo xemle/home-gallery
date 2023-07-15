@@ -2,7 +2,7 @@ const { pipeline } = require('stream');
 
 const log = require('@home-gallery/logger')('extractor');
 
-const { promisify, callbackify } = require('@home-gallery/common');
+const { promisify } = require('@home-gallery/common');
 const { readStreams } = require('@home-gallery/index');
 
 const { concurrent, each, filter, limit, purge, memoryIndicator, processIndicator, skip, flatten } = require('@home-gallery/stream');
@@ -36,22 +36,25 @@ const { createVideoFrameExtractor } = require('./extract/video/video-frame-extra
 const readStreamsAsync = promisify(readStreams)
 const createImageResizerAsync = promisify(createImageResizer)
 
+const byNumberDesc = (a, b) => b - a
+
 const extractData = async (options) => {
-  const {indexFilenames, journal} = options
+  const { config } = options
+  const { indexFilenames, journal, fileFilterFn, minChecksumDate } = config.sources
   const entryStream = await readStreamsAsync(indexFilenames, journal)
-  const {storageDir, fileFilterFn, minChecksumDate, apiServer, geoAddressLanguage, geoServerUrl} = options;
-  const { url: apiServerUrl, timeout: apiServerTimeout, concurrent: apiServerConcurrent } = apiServer
-  const { queueEntry, releaseEntry } = concurrent(options.concurrent, options.skip)
 
-  const exiftool = initExiftool(options)
-  const [ffmpegPath, ffprobePath] = getFfmpegPaths(options)
-  const imageResizer = await createImageResizerAsync(options)
+  const { extractor } = config
+  const { queueEntry, releaseEntry } = concurrent(extractor.stream.concurrent, extractor.stream.skip)
+
+  const exiftool = initExiftool(extractor)
+  const [ffmpegPath, ffprobePath] = getFfmpegPaths(extractor)
+  const imageResizer = await createImageResizerAsync(extractor)
   const videoFrameExtractor = createVideoFrameExtractor(ffmpegPath, ffprobePath)
-  const storage = createStorage(storageDir);
+  const storage = createStorage(config.storage.dir);
 
-  const imagePreviewSizes = [1920, 1280, 800, 320, 128];
+  const imagePreviewSizes = (extractor.image?.previewSizes || [1920, 1280, 800, 320, 128]).sort(byNumberDesc);
   const videoFrameCount = 10;
-  const apiServerImagePreviewSizes = [800, 320];
+  const apiServerImagePreviewSizes = imagePreviewSizes.filter(size => size <= 800);
 
   const stats = {
     queued: 0,
@@ -66,42 +69,42 @@ const extractData = async (options) => {
       filter(entry => entry.fileType === 'f' && entry.sha1sum && entry.size > 0),
       filter(entry => !minChecksumDate || entry.sha1sumDate > minChecksumDate),
       filter(entry => fileFilterFn(entry.filename)),
-      skip(options.skip),
-      limit(options.limit),
+      skip(extractor.stream.skip),
+      limit(extractor.stream.limit),
       mapToStorageEntry,
       each(() => stats.queued++),
       queueEntry,
       each(() => stats.processing++),
-      each(entry => options.printEntry && log.info(`Processing entry #${options.skip + stats.processed} ${entry}`)),
+      each(entry => extractor.stream.printEntry && log.info(`Processing entry #${extractor.stream.skip + stats.processed} ${entry}`)),
       // read existing files and meta data (json files)
       readAllEntryFiles(storage),
 
       exif(storage, {exiftool}),
-      ffprobe(storage, options),
+      ffprobe(storage, ffprobePath),
 
       groupByDir(),
       groupSidecars(),
       flatten(),
       // images grouped by sidecars in a dir ordered by file size
-      heicPreview(storage, {options, imageResizer}),
+      heicPreview(storage, {...options, imageResizer}),
       embeddedRawPreview(storage, {exiftool}),
       ungroupSidecars(),
       rawPreviewExif(storage, {exiftool}),
 
       // single ungrouped entries
-      imagePreview(storage, {imageResizer, imagePreviewSizes} ),
+      imagePreview(storage, {imageResizer, previewSizes: imagePreviewSizes} ),
       videoPoster(storage, {imageResizer, videoFrameExtractor, imagePreviewSizes}),
-      vibrant(storage),
-      geoReverse(storage, {geoAddressLanguage, geoServerUrl}),
-      similarEmbeddings(storage, apiServerUrl, apiServerImagePreviewSizes, apiServerTimeout, apiServerConcurrent),
-      objectDetection(storage, apiServerUrl, apiServerImagePreviewSizes, apiServerTimeout, apiServerConcurrent),
-      faceDetection(storage, apiServerUrl, apiServerImagePreviewSizes, apiServerTimeout, apiServerConcurrent),
+      vibrant(storage, imagePreviewSizes),
+      geoReverse(storage, {url: extractor.geoReverse?.url, addressLanguage: extractor.geoReverse?.addressLanguage}),
+      similarEmbeddings(storage, extractor.apiServer.url, apiServerImagePreviewSizes, extractor.apiServer.timeout, extractor.apiServer.concurrent),
+      objectDetection(storage, extractor.apiServer.url, apiServerImagePreviewSizes, extractor.apiServer.timeout, extractor.apiServer.concurrent),
+      faceDetection(storage, extractor.apiServer.url, apiServerImagePreviewSizes, extractor.apiServer.timeout, extractor.apiServer.concurrent),
       video(storage, ffmpegPath, ffprobePath),
       //.pipe(videoFrames(storageDir, videoFrameCount))
 
       releaseEntry,
       each(() => stats.processed++),
-      processIndicator({onTick: ({diff, lastTime}) => log.info(lastTime, `Processed ${stats.processed} entries (#${options.skip + stats.processed}, +${diff}, processing ${stats.processing - stats.processed} and queued ${stats.queued - stats.processing} entries)`)}),
+      processIndicator({onTick: ({diff, lastTime}) => log.info(lastTime, `Processed ${stats.processed} entries (#${extractor.stream.skip + stats.processed}, +${diff}, processing ${stats.processing - stats.processed} and queued ${stats.queued - stats.processing} entries)`)}),
 
       groupByEntryFilesCacheKey(),
       updateEntryFilesCache(storage),
@@ -122,4 +125,4 @@ const extractData = async (options) => {
   });
 }
 
-module.exports = callbackify(extractData);
+module.exports = extractData;

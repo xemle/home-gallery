@@ -47,7 +47,11 @@ const mapArgs = (argv, config, mapping) => {
     if (typeof value == 'string') {
       setTo(config, value, argv[key])
     } else if (typeof value.path == 'string') {
+      const test = typeof value.test == 'function' ? value.test : () => true
       const map = typeof value.map == 'function' ? value.map : v => v
+      if (!test(argv[key])) {
+        return
+      }
       if (value.type == 'add') {
         addTo(config, value.path, map(argv[key]))
       } else {
@@ -76,7 +80,19 @@ const mapConfig = (config, mappings) => {
   return config
 }
 
+const getMissingPaths = (config, paths = []) => {
+  const missing = []
+  paths.forEach(path => {
+    const [segment, name] = getSegment(config, path, false)
+    if (!segment || typeof segment[name] == 'undefined') {
+      missing.push(path)
+    }
+  })
+  return missing
+}
+
 module.exports = {
   mapArgs,
-  mapConfig
+  mapConfig,
+  getMissingPaths
 }

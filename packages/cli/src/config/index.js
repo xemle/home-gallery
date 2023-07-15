@@ -3,7 +3,7 @@ const { readConfig, readData } = require('./read')
 const { validateConfig } = require('./validate')
 const { findConfig, defaultConfigFilename, defaultConfigDir, defaultConfigFile, defaultCacheDir } = require('./find-config')
 const { load } = require('./load')
-const { mapArgs } = require('./map-args')
+const { mapArgs, getMissingPaths } = require('./map-args')
 
 module.exports = {
   findConfig,
@@ -16,5 +16,6 @@ module.exports = {
   readData,
   validateConfig,
   load,
-  mapArgs
+  mapArgs,
+  getMissingPaths
 }

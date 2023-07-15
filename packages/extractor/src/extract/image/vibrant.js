@@ -4,11 +4,16 @@ const log = require('@home-gallery/logger')('extractor.vibrant');
 
 const { toPipe, conditionalTask } = require('../../stream/task');
 
-const imageSuffix = 'image-preview-128.jpg';
 const vibrantSuffix = 'vibrant.json';
 
-function vibrantColors(storage) {
-  const test = entry => storage.hasEntryFile(entry, imageSuffix) && !storage.hasEntryFile(entry, vibrantSuffix)
+function vibrantColors(storage, imagePreviewSizes) {
+  const imageSize = imagePreviewSizes.filter(size => size <= 256).shift()
+  if (!imageSize) {
+    log.warn(`Could not find preview image size (<= 256) for vibrant image from preview sizes ${imagePreviewSizes}. Disable vibrant color extraction`)
+  }
+  const imageSuffix = `image-preview-${imageSize || 128}.jpg`;
+
+  const test = entry => imageSize > 0 && storage.hasEntryFile(entry, imageSuffix) && !storage.hasEntryFile(entry, vibrantSuffix)
 
   const task = (entry, cb) => {
     const t0 = Date.now();

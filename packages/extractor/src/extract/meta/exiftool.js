@@ -13,7 +13,7 @@ const initExiftool = options => {
   const exiftoolOptions = {
     taskTimeoutMillis: 5000
   }
-  if (options.useNative.includes('exiftool')) {
+  if (options.useNative?.includes('exiftool')) {
     log.debug(`Use native system command exiftool`)
     exiftoolOptions.exiftoolPath = getNativeCommand('exiftool')
   }

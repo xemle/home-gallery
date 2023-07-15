@@ -1,7 +1,7 @@
 const request = require('request');
 
 const log = require('@home-gallery/logger')('extractor.apiEntry');
-const { parallel } = require('@home-gallery/stream');
+const { through, parallel } = require('@home-gallery/stream');
 
 const { conditionalTask } = require('../../stream/task');
 const { sizeToImagePreviewSuffix } = require('./image-preview')

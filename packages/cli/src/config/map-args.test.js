@@ -1,6 +1,6 @@
 const t = require('tap')
 
-const { mapArgs, mapConfig } = require('./map-args')
+const { mapArgs, mapConfig, getMissingPaths } = require('./map-args')
 
 t.test('mapArgs', async t => {
   t.test('empty', async t => {
@@ -43,6 +43,11 @@ t.test('mapArgs', async t => {
     t.match(mapArgs({foo: 'bar'}, {foo: {bar: ['BAZ']}}, {foo: {path: 'foo.bar', type: 'add', map: v => v.toUpperCase()}}), {foo: {bar: ['BAZ', 'BAR']}})
   })
 
+  t.test('test function', async t => {
+    t.match(mapArgs({foo: [undefined]}, {bar: true}, {foo: {path: 'bar', test: () => false}}), {bar: true})
+    t.match(mapArgs({foo: [true]}, {bar: true}, {foo: {path: 'bar', test: () => true}}), {bar: [true]})
+  })
+
 })
 
 t.test('mapConfig', async t => {
@@ -65,6 +70,22 @@ t.test('mapConfig', async t => {
 
   t.test('mapping function on array', async t => {
     t.match(mapConfig({foo: ['bar', 'baz']}, {foo: v => v.toUpperCase()}), {foo: ['BAR', 'BAZ']})
+  })
+})
+
+t.test('getMissingPaths', async t => {
+  t.test('empty paths', async t => {
+    t.match(getMissingPaths({}), [])
+    t.match(getMissingPaths({}, []), [])
+    t.match(getMissingPaths({foo: true}, []), [])
+  })
+
+  t.test('no missing paths', async t => {
+    t.match(getMissingPaths({foo: true, bar: {baz: 4}}, ['foo', 'bar', 'bar.baz']), [])
+  })
+
+  t.test('missing paths', async t => {
+    t.match(getMissingPaths({foo: { bar: {baz: 4}}}, ['foo.bar.baz', 'foo.bar.zoo']), ['foo.bar.zoo'])
   })
 })
 

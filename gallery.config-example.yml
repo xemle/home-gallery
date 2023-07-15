@@ -70,14 +70,20 @@ sources:
 # Extractor settings
 #
 #extractor:
+  # Preview image settings
+  #image:
+  #  previewSizes: [1920, 1280, 800, 320, 128]
+  #  previewQuality: 80
   # Api Server is used for image similarity, object and face detection
   #apiServer:
   #  url: https://api.home-gallery.org
   #  timeout: 30
   #  concurrent: 5
-  # Preffered address language of geo code reverse lookups
-  # geoAddressLanguage: [de, en-US] # for multiple languages
-  #geoAddressLanguage: en
+  #geoReverse:
+  #  url: https://nominatim.openstreetmap.org
+  #   Preffered address language of geo code reverse lookups
+  #   addressLanguage: [de, en-US] # for multiple languages
+  #  addressLanguage: [en, de]
   # excludes are using gitignore patterns
   #excludes: []
   # Use native system commands. It is recoomended on armv6 and arm7 platform

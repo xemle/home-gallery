@@ -5,7 +5,7 @@ const { getNativeCommand } = require('./native-command')
 
 const getFfmpegPaths = options => {
   let ffmpegPath
-  if (options.useNative.includes('ffmpeg')) {
+  if (options.useNative?.includes('ffmpeg')) {
     log.debug(`Use native system command ffmpeg`)
     ffmpegPath = getNativeCommand('ffmpeg')
   } else {
@@ -13,7 +13,7 @@ const getFfmpegPaths = options => {
   }
 
   let ffprobePath
-  if (options.useNative.includes('ffprobe')) {
+  if (options.useNative?.includes('ffprobe')) {
     log.debug(`Use native system command ffprobe`)
     ffprobePath = getNativeCommand('ffprobe')
   } else {
