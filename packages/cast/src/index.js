@@ -7,6 +7,7 @@ const log = require('@home-gallery/logger')('cast')
 const { scanFirst } = require('./scanner')
 const { slideshow } = require('./player')
 const { proxy } = require('./proxy')
+const { getPreview } = require('./utils')
 
 const defaultProxyPort = 38891
 
@@ -43,12 +44,12 @@ const byDate = reverse => {
   }
 }
 
-const extractMedia = (entries, baseUrl) => {
+const extractMedia = (entries, maxPreviewSize, baseUrl) => {
   return entries.reduce((result, entry) => {
-    const image = entry.previews.find(preview => preview.match('image-preview-1280'))
+    const image = getPreview(entry, 'image', maxPreviewSize) || getPreview(entry, 'image')
     const title = path.parse(entry.files[0].filename).name
     if (entry.type == 'video') {
-      const video = entry.previews.find(preview => preview.match('video-preview-720'))
+      const video = getPreview(entry, 'video', maxPreviewSize) || getPreview(entry, 'video')
       if (image && video) {
         result.push({
           type: 'video',
@@ -76,7 +77,7 @@ const extractMedia = (entries, baseUrl) => {
   }, [])
 }
 
-const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure, random, reverse, delay} = {}) => {
+const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure, random, reverse, delay, maxPreviewSize} = {}) => {
   const [database, device] = await Promise.all([
     fetchRemote(serverUrl, {query, insecure}),
     scanFirst(10 * 1000)
@@ -93,7 +94,7 @@ const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure, random
     log.info(`Started HTTP file proxy ${baseUrl}`)
   }
 
-  const entries = extractMedia(database.data.sort(byDate(reverse)), baseUrl)
+  const entries = extractMedia(database.data.sort(byDate(reverse)), maxPreviewSize || 1920, baseUrl)
   log.info(`Start slideshow to device ${device.name} at ${device.host} with ${entries.length} entries`)
   await slideshow(device.host, entries, { random, delay })
 }

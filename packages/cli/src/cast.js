@@ -48,6 +48,11 @@ const command = {
         default: 5,
         describe: 'Delay between the images in seconds'
       },
+      'max-preview-size': {
+        number: true,
+        default: 1920,
+        describe: 'Maximum size of preview images'
+      }
     })
     .demandOption(['server-url'])
   },
@@ -62,7 +67,8 @@ const command = {
       insecure: argv.insecure,
       random: argv.random,
       reverse: argv.reverse,
-      delay: argv.delay * 1000
+      delay: argv.delay * 1000,
+      maxPreviewSize: argv.maxPreviewSize
     }
     const t0 = Date.now();
     cast(options)
