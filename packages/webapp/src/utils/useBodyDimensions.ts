@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import { throttle } from './throttle'; 
 
@@ -10,27 +10,14 @@ function getBodyDimensions() {
   };
 }
 
-function requestNAnimationFrames(n, cb) {
-  requestAnimationFrame(() => {
-    n--;
-
-    if (n <= 0) {
-      cb();
-    } else {
-      requestNAnimationFrames(n, cb);
-    }
-  })
-}
-
 export default function useBodyDimensions() {
   const [bodyDimensions, setBodyDimensions] = useState(getBodyDimensions());
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const resizeHandler = throttle(() => {
       setBodyDimensions(getBodyDimensions());
     }, 100);
 
-    console.log(`useBodyDimenstions:useLayoutEffect`);
     setBodyDimensions(getBodyDimensions());
     window.addEventListener('resize', resizeHandler);
     return () => window.removeEventListener('resize', resizeHandler);
