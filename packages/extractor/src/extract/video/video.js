@@ -52,6 +52,7 @@ function convertVideo(storage, entry, ffprobePath, ffmpegPath, cb) {
       '-b:a 128k',
       '-f mp4'
     ].map(fixRotatedScale(rotated)))
+    .on('start', commandLine => log.debug(`Start video conversion via ffmpeg command: ${commandLine}`))
     .on('progress', progress => {
       const now = Date.now();
       if (now > last + intervalMs) {
