@@ -5,6 +5,8 @@ const log = require('@home-gallery/logger')('extractor.video');
 
 const { toPipe, conditionalTask } = require('../../stream/task');
 
+const { getVideoStream, isVideoRotated, fixRotatedScale } = require('./video-utils')
+
 const videoSuffix = 'video-preview-720.mp4';
 
 function convertVideo(storage, entry, ffprobePath, ffmpegPath, cb) {
@@ -13,6 +15,7 @@ function convertVideo(storage, entry, ffprobePath, ffmpegPath, cb) {
   const t0 = Date.now();
   const input = entry.src;
   const file = storage.getEntryFilename(entry, videoSuffix);
+  const rotated = isVideoRotated(getVideoStream(entry))
   const tmpFile = `${file}.tmp`;
   const intervalMs = 30*1000;
   let last = Date.now();
@@ -48,7 +51,7 @@ function convertVideo(storage, entry, ffprobePath, ffmpegPath, cb) {
       '-movflags +faststart',
       '-b:a 128k',
       '-f mp4'
-    ])
+    ].map(fixRotatedScale(rotated)))
     .on('progress', progress => {
       const now = Date.now();
       if (now > last + intervalMs) {
