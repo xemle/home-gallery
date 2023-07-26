@@ -1,14 +1,14 @@
 import * as React from "react";
 import { useEffect } from "react";
 
-import useBodyDimensions from "../utils/useBodyDimensions";
 import { useSearchStore } from "../store/search-store";
 
-import { getLowerPreviewUrl } from '../utils/preview'
+import { getHigherPreviewUrl, getLowerPreviewUrl } from '../utils/preview'
+import { usePreviewSize } from "./usePreviewSize";
 
 export const MediaNav = ({current, prev, next, listLocation, showNavigation, dispatch}) => {
-  const { width } = useBodyDimensions();
   const query = useSearchStore(state => state.query);
+  const previewSize = usePreviewSize()
 
   const loadImage = async (url: string | false) => {
     return new Promise((resolve) => {
@@ -24,14 +24,13 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
 
   useEffect(() => {
     let abort = false;
-    const large = width <= 1280 ? 1280 : 1920;
 
     const preloadPrevNext = async () => {
       if (!abort) {
-        await Promise.all([loadImage(getLowerPreviewUrl(next?.previews, 320)), loadImage(getLowerPreviewUrl(prev?.previews, 320))])
+        await Promise.all([loadImage(getLowerPreviewUrl(next?.previews, previewSize / 4)), loadImage(getLowerPreviewUrl(prev?.previews, previewSize / 4))])
       }
       if (!abort) {
-        await Promise.all([loadImage(getLowerPreviewUrl(next?.previews, large)), loadImage(getLowerPreviewUrl(prev?.previews, large))])
+        await Promise.all([loadImage(getHigherPreviewUrl(next?.previews, previewSize)), loadImage(getHigherPreviewUrl(prev?.previews, previewSize))])
       }
     }
 

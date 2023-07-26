@@ -2,8 +2,8 @@ import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
-import useBodyDimensions from "../utils/useBodyDimensions";
-import { getLowerPreviewUrl } from '../utils/preview'
+import { getLowerPreviewUrl, getHigherPreviewUrl } from '../utils/preview'
+import { usePreviewSize } from "./usePreviewSize";
 
 export const MediaViewImage = (props) => {
   const imgRef = useRef<HTMLElement>();
@@ -11,16 +11,17 @@ export const MediaViewImage = (props) => {
   const [objectRects, setObjectRects] = useState([]);
   const { showDetails } = props;
   const { id, shortId, previews, faces, objects } = props.media;
-  const { width } = useBodyDimensions();
   const navigate = useNavigate();
+  const previewSize = usePreviewSize()
 
-  const largeSize = width <= 1280 ? 1280 : 1920;
-
-  const smallUrl = getLowerPreviewUrl(previews, 320)
-  const largeUrl = getLowerPreviewUrl(previews, largeSize)
+  const smallUrl = getLowerPreviewUrl(previews, previewSize / 4)
+  const largeUrl = getHigherPreviewUrl(previews, previewSize)
   const [src, setSrc] = useState('');
 
   useEffect(() => {
+    if (!largeUrl) {
+      return
+    }
     const img = new Image();
     img.addEventListener('load', () => {
       setSrc(largeUrl);
