@@ -29,7 +29,7 @@ const { similarEmbeddings, objectDetection, faceDetection } = require('./extract
 
 const { getFfmpegPaths } = require('./extract/utils/ffmpeg-path')
 
-const video = require('./extract/video/video');
+const { video } = require('./extract/video/video');
 const videoPoster = require('./extract/video/video-poster');
 const { createVideoFrameExtractor } = require('./extract/video/video-frame-extractor');
 
@@ -99,7 +99,7 @@ const extractData = async (options) => {
       similarEmbeddings(storage, extractor.apiServer.url, apiServerImagePreviewSizes, extractor.apiServer.timeout, extractor.apiServer.concurrent),
       objectDetection(storage, extractor.apiServer.url, apiServerImagePreviewSizes, extractor.apiServer.timeout, extractor.apiServer.concurrent),
       faceDetection(storage, extractor.apiServer.url, apiServerImagePreviewSizes, extractor.apiServer.timeout, extractor.apiServer.concurrent),
-      video(storage, ffmpegPath, ffprobePath),
+      video(storage, {...extractor, ffmpegPath, ffprobePath}),
       //.pipe(videoFrames(storageDir, videoFrameCount))
 
       releaseEntry,

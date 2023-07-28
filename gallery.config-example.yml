@@ -74,6 +74,8 @@ sources:
   #image:
   #  previewSizes: [1920, 1280, 800, 320, 128]
   #  previewQuality: 80
+  #video:
+  #  previewSize: 720
   # Api Server is used for image similarity, object and face detection
   #apiServer:
   #  url: https://api.home-gallery.org

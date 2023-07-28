@@ -7,15 +7,34 @@ const { toPipe, conditionalTask } = require('../../stream/task');
 
 const { getVideoStream, isVideoRotated, fixRotatedScale } = require('./video-utils')
 
-const videoSuffix = 'video-preview-720.mp4';
+function getFfmpegOptions(entry, options) {
+  const rotated = isVideoRotated(getVideoStream(entry))
 
-function convertVideo(storage, entry, ffprobePath, ffmpegPath, cb) {
+  const ffmpegOptions = [
+    '-c:v libx264',
+    '-c:a aac',
+    '-r 30', // frame rate
+    `-vf scale=-2:\'min(${options.size || 720},ih)\',format=yuv420p`, // Scale to 720p without upscaling
+    '-preset slow',
+    '-tune film',
+    '-profile:v baseline',
+    '-level 3.0',
+    '-maxrate 4000k',
+    '-bufsize 8000k',
+    '-movflags +faststart',
+    '-b:a 128k',
+    '-f mp4'
+  ].map(fixRotatedScale(rotated))
+  return ffmpegOptions
+}
+
+function convertVideo(storage, entry, options, cb) {
   log.info(`Start video conversion of ${entry}`);
 
+  const {ffprobePath, ffmpegPath, videoSuffix} = options
   const t0 = Date.now();
   const input = entry.src;
   const file = storage.getEntryFilename(entry, videoSuffix);
-  const rotated = isVideoRotated(getVideoStream(entry))
   const tmpFile = `${file}.tmp`;
   const intervalMs = 30*1000;
   let last = Date.now();
@@ -36,22 +55,8 @@ function convertVideo(storage, entry, ffprobePath, ffmpegPath, cb) {
       })
     })
     .output(tmpFile)
-    .videoCodec('libx264')
-    .audioCodec('aac')
-    .outputOptions([
-      '-y',
-      '-r 30', // frame rate
-      '-vf scale=-2:\'min(720,ih)\',format=yuv420p', // Scale to 720p without upscaling
-      '-preset slow',
-      '-tune film',
-      '-profile:v baseline',
-      '-level 3.0',
-      '-maxrate 4000k',
-      '-bufsize 8000k',
-      '-movflags +faststart',
-      '-b:a 128k',
-      '-f mp4'
-    ].map(fixRotatedScale(rotated)))
+    .outputOptions('-y')
+    .outputOptions(getFfmpegOptions(entry, options))
     .on('start', commandLine => log.debug(`Start video conversion via ffmpeg command: ${commandLine}`))
     .on('progress', progress => {
       const now = Date.now();
@@ -64,12 +69,15 @@ function convertVideo(storage, entry, ffprobePath, ffmpegPath, cb) {
     .run();
 }
 
-function video(storage, ffmpegPath, ffprobePath) {
+function video(storage, extractor) {
+  const options = extractor?.video
+
+  const videoSuffix = `video-preview-${options.size || 720}.mp4`;
 
   const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, videoSuffix);
 
   const task = (entry, cb) => {
-    convertVideo(storage, entry, ffprobePath, ffmpegPath, (err) => {
+    convertVideo(storage, entry, {...options, videoSuffix}, (err) => {
       if (err) {
         log.error(err, `Video preview conversion of ${entry} failed: ${err}`);
       }
@@ -80,4 +88,7 @@ function video(storage, ffmpegPath, ffprobePath) {
   return toPipe(conditionalTask(test, task));
 }
 
-module.exports = video;
+module.exports = {
+  video,
+  getFfmpegOptions
+};

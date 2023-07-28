@@ -2,12 +2,21 @@ import * as React from "react";
 import { useState, useRef, useEffect } from "react";
 import Hammer from 'hammerjs'
 
+import { getHigherPreviewUrl } from '../utils/preview'
+import { usePreviewSize } from "./usePreviewSize";
+
 export const MediaViewVideo = (props) => {
   const { media, dispatch } = props
   const { previews } = media;
   const [isPlaying, setIsPlaying] = useState(false)
   const ref = useRef()
   const gestureOverlay = useRef()
+  const previewSize = usePreviewSize()
+  const posterUrl = getHigherPreviewUrl(previews, previewSize) || ''
+
+  const videoPreview = previews.filter(p => p.match(/video-preview/)).shift()
+  const videoUrl = videoPreview ? `files/${videoPreview}` : ''
+  const videoMime = videoPreview ? `video/${videoPreview.substring(videoPreview.lastIndexOf('.') + 1).toLowerCase()}` : 'video/mp4'
 
   useEffect(() => {
     const e: HTMLElement = ref.current;
@@ -90,9 +99,9 @@ export const MediaViewVideo = (props) => {
   return (
     <>
       <div className="mediaView -video">
-        <video ref={ref} className="mediaView__media" controls poster={`files/${previews.filter(p => p.match(/image-preview-800/)).shift()}`}>
-          <source src={`files/${previews.filter(p => p.match(/video-preview/)).shift()}`}  type="video/mp4" />
-          No native video element support. Watch video file from <a href={`files/${previews.filter(p => p.match(/video-preview/)).shift()}`}>here</a>
+        <video ref={ref} className="mediaView__media" controls poster={posterUrl}>
+          <source src={videoUrl} type={videoMime} />
+          No native video element support. Watch video file from <a href={videoUrl}>here</a>
         </video>
         <div ref={gestureOverlay} style={overlayStyle}></div>
       </div>

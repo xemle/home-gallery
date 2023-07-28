@@ -128,6 +128,9 @@ const command = {
         previewSizes: [1920, 1280, 800, 320, 128],
         previewQuality: 80
       },
+      video: {
+        previewSize: 720,
+      },
       apiServer: {
         url: 'https://api.home-gallery.org',
         timeout: 30,
@@ -145,6 +148,7 @@ const command = {
         ...config.extractor,
         stream: {...extractorDefaults.stream, ...config.extractor?.stream},
         image: {...extractorDefaults.image, ...config.extractor?.image},
+        video: {...extractorDefaults.video, ...config.extractor?.video},
         apiServer: {...extractorDefaults.apiServer, ...config.extractor?.apiServer},
         geoReverse: {...extractorDefaults.geoReverse, ...config.extractor?.geoReverse},
       }

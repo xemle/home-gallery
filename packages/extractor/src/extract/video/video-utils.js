@@ -1,5 +1,5 @@
 const getVideoStream = (entry) => {
-  const streams = entry.meta.ffprobe?.streams
+  const streams = entry.meta?.ffprobe?.streams
   return streams?.find(stream => stream.codec_type == 'video')
 }
 
