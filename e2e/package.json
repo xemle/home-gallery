@@ -17,6 +17,7 @@
     "directory": "e2e"
   },
   "dependencies": {
+    "exiftool-vendored": "^22.0.0",
     "express": "^4.17.3",
     "image-size": "^1.0.1",
     "node-fetch": "^2.6.7",

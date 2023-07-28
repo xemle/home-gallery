@@ -1,6 +1,6 @@
 const t = require('tap')
 
-const { getVideoStream, isVideoRotated, fixRotatedScale } = require('./video-utils')
+const { getVideoStream, isPortraitVideo, fixRotatedScale, getFfmpegArgs, getVideoOptions } = require('./video-utils')
 
 t.test('getVideoStream', async t => {
   t.test('success', async t => {
@@ -36,15 +36,15 @@ t.test('getVideoStream', async t => {
   })
 })
 
-t.test('isVideoRotated', async t => {
+t.test('isPortraitVideo', async t => {
   t.test('undefined video', async t => {
-    t.match(isVideoRotated(), false)
+    t.match(isPortraitVideo(), false)
   })
 
   t.test('missing side data', async t => {
     const video = {}
-    
-    t.match(isVideoRotated(video), false)
+
+    t.match(isPortraitVideo(video), false)
   })
 
   t.test('ccw', async t => {
@@ -56,8 +56,8 @@ t.test('isVideoRotated', async t => {
         }
       ]
     }
-    
-    t.match(isVideoRotated(video), true)
+
+    t.match(isPortraitVideo(video), true)
   })
 
   t.test('cw', async t => {
@@ -69,8 +69,8 @@ t.test('isVideoRotated', async t => {
         }
       ]
     }
-    
-    t.match(isVideoRotated(video), true)
+
+    t.match(isPortraitVideo(video), true)
   })
 
 })
@@ -109,6 +109,294 @@ t.test('fixRotatedScale', async t => {
       '-vf scale=\'min(720,iw/2)\':-2,format=yuv420p'
     ]
     t.match(args.map(fixRotatedScale(true)), ['-vf scale=-2:\'min(720,ih/2)\',format=yuv420p'])
+  })
+
+  t.test('replace all iw', async t => {
+    const args = [
+      '-vf scale=\'min(max(720,iw*.5),iw)\':-2,format=yuv420p'
+    ]
+    t.match(args.map(fixRotatedScale(true)), ['-vf scale=-2:\'min(max(720,ih*.5),ih)\',format=yuv420p'])
+  })
+
+  t.test('swap dimensions', async t => {
+    const args = [
+      '-vf scale=-2:iw/ih,format=yuv420p'
+    ]
+    t.match(args.map(fixRotatedScale(true)), ['-vf scale=ih/iw:-2,format=yuv420p'])
+  })
+
+  t.test('swap long dimensions', async t => {
+    const args = [
+      '-vf scale=-2:in_w/in_h,format=yuv420p'
+    ]
+    t.match(args.map(fixRotatedScale(true)), ['-vf scale=in_h/in_w:-2,format=yuv420p'])
+  })
+
+})
+
+t.test('getFfmpegArgs', async t => {
+  const roatedEntry = {
+    meta: {
+      ffprobe: {
+        streams: [
+          {
+            codec_type: 'video',
+            side_data_list: [
+              {
+                side_data_type: 'Display Matrix',
+                rotation: -90
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+
+  t.test('basic', async t => {
+    const args = getFfmpegArgs({}, {})
+    t.match(args, [
+      '-c:v libx264',
+      '-c:a aac',
+      '-r 30',
+      '-vf scale=-2:\'min(720,ih)\',format=yuv420p',
+      '-preset slow',
+      '-tune film',
+      '-profile:v baseline',
+      '-level:v 3.0',
+      '-maxrate 4000k',
+      '-bufsize 8000k',
+      '-movflags +faststart',
+      '-b:a 128k',
+      '-f mp4',
+      ]
+    )
+  })
+
+  t.test('rotated video', async t => {
+    const args = getFfmpegArgs(roatedEntry, {})
+    t.match(args, [
+      '-c:v libx264',
+      '-c:a aac',
+      '-r 30',
+      '-vf scale=\'min(720,iw)\':-2,format=yuv420p',
+      '-preset slow',
+      '-tune film',
+      '-profile:v baseline',
+      '-level:v 3.0',
+      '-maxrate 4000k',
+      '-bufsize 8000k',
+      '-movflags +faststart',
+      '-b:a 128k',
+      '-f mp4',
+      ]
+    )
+  })
+
+  t.test('video preview size', async t => {
+    const args = getFfmpegArgs({}, {previewSize: 1920})
+    t.match(args, [
+      '-c:v libx264',
+      '-c:a aac',
+      '-r 30',
+      '-vf scale=-2:\'min(1920,ih)\',format=yuv420p',
+      '-preset slow',
+      '-tune film',
+      '-profile:v baseline',
+      '-level:v 3.0',
+      '-maxrate 4000k',
+      '-bufsize 8000k',
+      '-movflags +faststart',
+      '-b:a 128k',
+      '-f mp4',
+      ]
+    )
+  })
+
+  t.test('video scale', async t => {
+    const args = getFfmpegArgs(roatedEntry, {previewSize: 500, scale: '-2:\'min(ih,max(720,min(1080,ih*.5)))\''})
+    t.match(args, [
+      '-c:v libx264',
+      '-c:a aac',
+      '-r 30',
+      '-vf scale=\'min(iw,max(720,min(1080,iw*.5)))\':-2,format=yuv420p',
+      '-preset slow',
+      '-tune film',
+      '-profile:v baseline',
+      '-level:v 3.0',
+      '-maxrate 4000k',
+      '-bufsize 8000k',
+      '-movflags +faststart',
+      '-b:a 128k',
+      '-f mp4',
+      ]
+    )
+  })
+
+  t.test('custom video ext', async t => {
+    const args = getFfmpegArgs({}, {ext: 'mov'})
+    t.match(args, [
+      '-c:v libx264',
+      '-c:a aac',
+      '-r 30',
+      '-vf scale=-2:\'min(720,ih)\',format=yuv420p',
+      '-preset slow',
+      '-tune film',
+      '-profile:v baseline',
+      '-level:v 3.0',
+      '-maxrate 4000k',
+      '-bufsize 8000k',
+      '-movflags +faststart',
+      '-b:a 128k',
+      '-f mov',
+      ]
+    )
+  })
+
+  t.test('max video bit rate', async t => {
+    const args = getFfmpegArgs({}, {maxVideoBitRate: 2000})
+    t.match(args, [
+      '-c:v libx264',
+      '-c:a aac',
+      '-r 30',
+      '-vf scale=-2:\'min(720,ih)\',format=yuv420p',
+      '-preset slow',
+      '-tune film',
+      '-profile:v baseline',
+      '-level:v 3.0',
+      '-maxrate 2000k',
+      '-bufsize 4000k',
+      '-movflags +faststart',
+      '-b:a 128k',
+      '-f mp4',
+      ]
+    )
+  })
+
+  t.test('frame rate', async t => {
+    const args = getFfmpegArgs({}, {frameRate: 25})
+    t.match(args, [
+      '-c:v libx264',
+      '-c:a aac',
+      '-r 25',
+      '-vf scale=-2:\'min(720,ih)\',format=yuv420p',
+      '-preset slow',
+      '-tune film',
+      '-profile:v baseline',
+      '-level:v 3.0',
+      '-maxrate 4000k',
+      '-bufsize 8000k',
+      '-movflags +faststart',
+      '-b:a 128k',
+      '-f mp4',
+      ]
+    )
+  })
+
+  t.test('custom video encoder', async t => {
+    const args = getFfmpegArgs({}, {videoEncoder: 'h264_qsv'})
+    t.match(args, [
+      '-c:v h264_qsv',
+      ]
+    )
+  })
+
+  t.test('custom h264 preset', async t => {
+    const args = getFfmpegArgs({}, {preset: 'faster'})
+    t.match(args.filter(arg => arg.match(/preset/)), [
+      '-preset faster',
+      ]
+    )
+  })
+
+  t.test('custom h264 profile', async t => {
+    const args = getFfmpegArgs({}, {profile: 'high'})
+    t.match(args.filter(arg => arg.match(/profile/)), [
+      '-profile:v high',
+      ]
+    )
+  })
+
+  t.test('custom h264 level', async t => {
+    const args = getFfmpegArgs({}, {level: '4.2'})
+    t.match(args.filter(arg => arg.match(/level/)), [
+      '-level:v 4.2',
+      ]
+    )
+  })
+
+  t.test('custom ffmpeg args', async t => {
+    const args = getFfmpegArgs({}, {customFfmpegArgs: ['-c:v', 'libx264']})
+    t.match(args, [
+      '-c:v',
+      'libx264',
+      ]
+    )
+  })
+
+  t.test('custom ffmpeg args with rotated scale', async t => {
+    const args = getFfmpegArgs(roatedEntry, {customFfmpegArgs: ['-c:v', 'libx264', '-vf', 'scale=-2:\'min(720,ih)\',format=yuv420p']})
+    t.match(args, [
+      '-c:v',
+      'libx264',
+      '-vf',
+      'scale=\'min(720,iw)\':-2,format=yuv420p'
+      ]
+    )
+  })
+
+  t.test('add ffmpeg args', async t => {
+    const args = getFfmpegArgs({}, {addFfmpegArgs: ['-global_quality 25']})
+    t.match(args, [
+      '-c:v libx264',
+      '-c:a aac',
+      '-r 30',
+      '-vf scale=-2:\'min(720,ih)\',format=yuv420p',
+      '-preset slow',
+      '-tune film',
+      '-profile:v baseline',
+      '-level:v 3.0',
+      '-maxrate 4000k',
+      '-bufsize 8000k',
+      '-movflags +faststart',
+      '-b:a 128k',
+      '-f mp4',
+      '-global_quality 25'
+      ]
+    )
+  })
+
+})
+
+t.test('getVideoOptions', async t => {
+  t.test('emtpy', async t => {
+    const extractor = {
+      ffprobePath: './ffprobe',
+      ffmpegPath: './ffmpeg'
+    }
+    t.match(getVideoOptions(extractor), {
+      ffprobePath: './ffprobe',
+      ffmpegPath: './ffmpeg',
+      videoSuffix: 'video-preview-720.mp4',
+    })
+  })
+
+  t.test('preview', async t => {
+    const extractor = {
+      ffprobePath: './ffprobe',
+      ffmpegPath: './ffmpeg',
+      video: {
+        previewSize: 640,
+        ext: 'mov'
+      }
+    }
+    t.match(getVideoOptions(extractor), {
+      ffprobePath: './ffprobe',
+      ffmpegPath: './ffmpeg',
+      previewSize: 640,
+      ext: 'mov',
+      videoSuffix: 'video-preview-640.mov',
+    })
   })
 
 })

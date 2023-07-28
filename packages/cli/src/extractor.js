@@ -130,6 +130,7 @@ const command = {
       },
       video: {
         previewSize: 720,
+        ext: 'mp4',
       },
       apiServer: {
         url: 'https://api.home-gallery.org',

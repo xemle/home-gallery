@@ -5,28 +5,7 @@ const log = require('@home-gallery/logger')('extractor.video');
 
 const { toPipe, conditionalTask } = require('../../stream/task');
 
-const { getVideoStream, isVideoRotated, fixRotatedScale } = require('./video-utils')
-
-function getFfmpegOptions(entry, options) {
-  const rotated = isVideoRotated(getVideoStream(entry))
-
-  const ffmpegOptions = [
-    '-c:v libx264',
-    '-c:a aac',
-    '-r 30', // frame rate
-    `-vf scale=-2:\'min(${options.size || 720},ih)\',format=yuv420p`, // Scale to 720p without upscaling
-    '-preset slow',
-    '-tune film',
-    '-profile:v baseline',
-    '-level 3.0',
-    '-maxrate 4000k',
-    '-bufsize 8000k',
-    '-movflags +faststart',
-    '-b:a 128k',
-    '-f mp4'
-  ].map(fixRotatedScale(rotated))
-  return ffmpegOptions
-}
+const { getVideoOptions, getFfmpegArgs } = require('./video-utils')
 
 function convertVideo(storage, entry, options, cb) {
   log.info(`Start video conversion of ${entry}`);
@@ -56,7 +35,7 @@ function convertVideo(storage, entry, options, cb) {
     })
     .output(tmpFile)
     .outputOptions('-y')
-    .outputOptions(getFfmpegOptions(entry, options))
+    .outputOptions(getFfmpegArgs(entry, options))
     .on('start', commandLine => log.debug(`Start video conversion via ffmpeg command: ${commandLine}`))
     .on('progress', progress => {
       const now = Date.now();
@@ -70,14 +49,12 @@ function convertVideo(storage, entry, options, cb) {
 }
 
 function video(storage, extractor) {
-  const options = extractor?.video
+  const videoOptions = getVideoOptions(extractor)
 
-  const videoSuffix = `video-preview-${options.size || 720}.mp4`;
-
-  const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, videoSuffix);
+  const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, videoOptions.videoSuffix);
 
   const task = (entry, cb) => {
-    convertVideo(storage, entry, {...options, videoSuffix}, (err) => {
+    convertVideo(storage, entry, videoOptions, (err) => {
       if (err) {
         log.error(err, `Video preview conversion of ${entry} failed: ${err}`);
       }
@@ -89,6 +66,5 @@ function video(storage, extractor) {
 }
 
 module.exports = {
-  video,
-  getFfmpegOptions
+  video
 };

@@ -45,7 +45,11 @@ step("Set config <key> to <value>", async (key, jsonValue) => {
   const config = await readConfig(filename)
 
   const [segment, name] = getSegement(config, key)
-  segment[name] = JSON.parse(jsonValue)
+  try {
+    segment[name] = JSON.parse(jsonValue)
+  } catch (e) {
+    segment[name] = `${jsonValue}`
+  }
 
   await writeConfig(filename, config)
 })
