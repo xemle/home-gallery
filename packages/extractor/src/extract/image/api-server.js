@@ -93,7 +93,20 @@ const logPublicApiPrivacyHint = (config) => {
 
 const apiServerPreviewSizeFilter = size => size <= 800
 
+const isDisabled = (config, feature) => {
+  const disable = config?.extractor?.apiServer?.disable || []
+  if (Array.isArray(disable)) {
+    return disable.includes(feature)
+  }
+  return disable == feature
+}
+
 const similarEmbeddings = (storage, common, config) => {
+  if (isDisabled(config, 'similarDetection')) {
+    log.info(`Disable similar detection`)
+    return noop()
+  }
+
   const apiServer = config.extractor.apiServer
   return apiServerEntry(storage, {
     name: 'similarity embeddings',
@@ -107,6 +120,11 @@ const similarEmbeddings = (storage, common, config) => {
 }
 
 const objectDetection = (storage, common, config) => {
+  if (isDisabled(config, 'objectDetection')) {
+    log.info(`Disable object detection`)
+    return noop()
+  }
+
   const apiServer = config.extractor.apiServer
   return apiServerEntry(storage, {
     name: 'object detection',
@@ -120,6 +138,11 @@ const objectDetection = (storage, common, config) => {
 }
 
 const faceDetection = (storage, common, config) => {
+  if (isDisabled(config, 'faceDetection')) {
+    log.info(`Disable face detection`)
+    return noop()
+  }
+
   const apiServer = config.extractor.apiServer
   return apiServerEntry(storage, {
     name: 'face detection',

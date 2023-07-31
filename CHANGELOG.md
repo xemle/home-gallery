@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- extractor: Optional disable api detections
 - extractor: Add custom ffmpeg args
 - extractor: Add custom preview video size
 - extractor: Add custom preview image sizes
