@@ -80,54 +80,61 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imagePreviewSuffi
   return parallel({task: conditionalTask(test, task), concurrent});
 }
 
-const logPublicApiPrivacyHint = (apiServerUrl, feature) => {
-  if (!apiServerUrl.startsWith(PUBLIC_API_SERVER)) {
-    return
+const noop = () => through((entry, _, cb) => cb(null, entry))
+
+const logPublicApiPrivacyHint = (config) => {
+  const apiServerUrl = config?.extractor?.apiServer?.url
+  if (apiServerUrl.startsWith(PUBLIC_API_SERVER)) {
+    log.warn(`You are using the public api server ${apiServerUrl}. Please read its documentation at ${DOCUMENATION_URL} for privacy concerns`)
   }
-  log.warn(`You are using the public api server ${apiServerUrl} for ${feature}. Please read its documentation at ${DOCUMENATION_URL} for privacy concerns`)
+
+  return noop()
 }
 
-const similarEmbeddings = (storage, apiServerUrl, imagePreviewSizes, timeout = 30, concurrent = 5) => {
-  logPublicApiPrivacyHint(apiServerUrl, 'similar images')
+const apiServerPreviewSizeFilter = size => size <= 800
+
+const similarEmbeddings = (storage, common, config) => {
+  const apiServer = config.extractor.apiServer
   return apiServerEntry(storage, {
     name: 'similarity embeddings',
-    apiServerUrl,
+    apiServerUrl: apiServer.url,
     apiPath: '/embeddings',
-    imagePreviewSuffixes: imagePreviewSizes.map(sizeToImagePreviewSuffix),
+    imagePreviewSuffixes: common.imagePreviewSizes.filter(apiServerPreviewSizeFilter).map(sizeToImagePreviewSuffix),
     entrySuffix: 'similarity-embeddings.json',
-    concurrent,
-    timeout,
+    concurrent: apiServer.timeout,
+    timeout: apiServer.concurrent,
   })
 }
 
-const objectDetection = (storage, apiServerUrl, imagePreviewSizes, timeout = 30, concurrent = 5) => {
-  logPublicApiPrivacyHint(apiServerUrl, 'object detection')
+const objectDetection = (storage, common, config) => {
+  const apiServer = config.extractor.apiServer
   return apiServerEntry(storage, {
     name: 'object detection',
-    apiServerUrl,
+    apiServerUrl: apiServer.url,
     apiPath: '/objects',
-    imagePreviewSuffixes: imagePreviewSizes.map(sizeToImagePreviewSuffix),
+    imagePreviewSuffixes: common.imagePreviewSizes.filter(apiServerPreviewSizeFilter).map(sizeToImagePreviewSuffix),
     entrySuffix: 'objects.json',
-    concurrent,
-    timeout,
+    concurrent: apiServer.timeout,
+    timeout: apiServer.concurrent,
   })
 }
 
-const faceDetection = (storage, apiServerUrl, imagePreviewSizes, timeout = 30, concurrent = 2) => {
-  logPublicApiPrivacyHint(apiServerUrl, 'face detection')
+const faceDetection = (storage, common, config) => {
+  const apiServer = config.extractor.apiServer
   return apiServerEntry(storage, {
     name: 'face detection',
-    apiServerUrl,
+    apiServerUrl: apiServer.url,
     apiPath: '/faces',
-    imagePreviewSuffixes: imagePreviewSizes.map(sizeToImagePreviewSuffix),
+    imagePreviewSuffixes: common.imagePreviewSizes.filter(apiServerPreviewSizeFilter).map(sizeToImagePreviewSuffix),
     entrySuffix: 'faces.json',
-    concurrent,
-    timeout,
+    concurrent: apiServer.timeout,
+    timeout: apiServer.concurrent,
   })
 }
 
 module.exports = {
   apiServerEntry,
+  logPublicApiPrivacyHint,
   similarEmbeddings,
   objectDetection,
   faceDetection

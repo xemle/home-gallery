@@ -6,7 +6,8 @@ const { toPipe, conditionalTask } = require('../../stream/task');
 
 const vibrantSuffix = 'vibrant.json';
 
-function vibrantColors(storage, imagePreviewSizes) {
+function vibrantColors(storage, extractor) {
+  const { imagePreviewSizes } = extractor
   const imageSize = imagePreviewSizes.filter(size => size <= 256).shift()
   if (!imageSize) {
     log.warn(`Could not find preview image size (<= 256) for vibrant image from preview sizes ${imagePreviewSizes}. Disable vibrant color extraction`)

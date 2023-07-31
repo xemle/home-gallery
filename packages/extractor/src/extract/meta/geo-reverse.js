@@ -20,12 +20,17 @@ const getAcceptLanguageValue = (languages) => {
 
 const geoReverseSuffix = 'geo-reverse.json';
 
-function geoReverse(storage, {url: serverUrl, addressLanguage}) {
+function geoReverse(storage, config) {
+  const geoOptions = {
+    url: 'https://nominatim.openstreetmap.org',
+    addressLanguage: ['en', 'de'],
+    ...config?.extractor?.geoReverse
+  }
   let isLimitExceeded = false;
 
-  const acceptLanguageValue = getAcceptLanguageValue([].concat(addressLanguage || ['en', 'de']));
+  const acceptLanguageValue = getAcceptLanguageValue([].concat(geoOptions.addressLanguage || ['en', 'de']));
 
-  log.debug(`Use geo server ${serverUrl} with languages ${addressLanguage}`)
+  log.debug(`Use geo server ${geoOptions.url} with languages ${geoOptions.addressLanguage}`)
 
   function passThrough(entry) {
     if (isLimitExceeded) {
@@ -57,7 +62,7 @@ function geoReverse(storage, {url: serverUrl, addressLanguage}) {
       return cb();
     }
 
-    const url = `${serverUrl}/reverse?format=jsonv2&lat=${lat}&lon=${lon}&polygon_geojson=1`;
+    const url = `${geoOptions.url}/reverse?format=jsonv2&lat=${lat}&lon=${lon}&polygon_geojson=1`;
     const options = {
       url,
       headers: {

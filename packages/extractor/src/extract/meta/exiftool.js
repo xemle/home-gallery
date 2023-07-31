@@ -9,11 +9,11 @@ const exifSuffix = 'exif.json';
 
 const exifTypes = ['image', 'rawImage', 'video', 'meta']
 
-const initExiftool = options => {
+const initExiftool = config => {
   const exiftoolOptions = {
     taskTimeoutMillis: 5000
   }
-  if (options.useNative?.includes('exiftool')) {
+  if (config?.extractor?.useNative?.includes('exiftool')) {
     log.debug(`Use native system command exiftool`)
     exiftoolOptions.exiftoolPath = getNativeCommand('exiftool')
   }

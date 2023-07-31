@@ -116,8 +116,8 @@ const getConvertResize = async (factoryOptions) => {
   })
 }
 
-const createImageResizer = (options, cb) => {
-  const useNative = options.useNative || []
+const createImageResizer = (config, cb) => {
+  const useNative = config?.extrator?.useNative || []
 
   const resizer = [
     { active: useNative.includes('vipsthumbnail'), factory: getVipsResize, name: 'vipthumbnail' },
@@ -128,7 +128,7 @@ const createImageResizer = (options, cb) => {
   ].filter(item => item.active)
 
   const factoryOptions = {
-    quality: +(options.image?.previewQuality || 80)
+    quality: +(config?.extrator?.image?.previewQuality || 80)
   }
 
   let index = 0
@@ -152,7 +152,7 @@ const createImageResizer = (options, cb) => {
   next()
 }
 
-const useExternalImageResizer = options => options.useNative?.includes('vipsthumbnail') || options.useNative?.includes('convert')
+const useExternalImageResizer = config => config?.extractor?.useNative?.includes('vipsthumbnail') || config?.extractor?.useNative?.includes('convert')
 
 module.exports = {
   createImageResizer,

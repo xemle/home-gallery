@@ -71,11 +71,15 @@ function getFfmpegArgs(entry, options) {
   return ffmpegArgs.map(fixRotatedScale(isPortrait))
 }
 
-const getVideoOptions = (extractor) => {
+const getVideoOptions = (extractor, config) => {
   const { ffprobePath, ffmpegPath } = extractor
-  const options = extractor?.video
+  const options = {
+    previewSize: 720,
+    ext: 'mp4',
+    ...config?.extractor?.video
+  }
 
-  const videoSuffix = `video-preview-${options?.previewSize || 720}.${options?.ext || 'mp4'}`;
+  const videoSuffix = `video-preview-${options.previewSize}.${options.ext}`;
   return {...options, videoSuffix, ffprobePath, ffmpegPath }
 }
 

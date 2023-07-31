@@ -48,8 +48,8 @@ function convertVideo(storage, entry, options, cb) {
     .run();
 }
 
-function video(storage, extractor) {
-  const videoOptions = getVideoOptions(extractor)
+function video(storage, extractor, config) {
+  const videoOptions = getVideoOptions(extractor, config)
 
   const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, videoOptions.videoSuffix);
 

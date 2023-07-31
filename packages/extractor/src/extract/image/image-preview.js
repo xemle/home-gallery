@@ -52,8 +52,8 @@ const getMaxImageSizeBy = exif => {
   return 0
 }
 
-function imagePreview(storage, { imageResizer, previewSizes }) {
-
+function imagePreview(storage, extractor) {
+  const { imageResizer, imagePreviewSizes: previewSizes } = extractor
   const defaultMaxSize = Math.max(...previewSizes)
 
   const test = entry => (entry.type === 'image' && isSupportedImage(entry)) || storage.hasEntryFile(entry, rawPreviewSuffix);

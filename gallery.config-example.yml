@@ -90,7 +90,11 @@ sources:
   #apiServer:
   #  url: https://api.home-gallery.org
   #  timeout: 30
-  #  concurrent: 5
+  #  concurrent: 5,
+  #  disable:
+  #    - similarDetection
+  #    - objectDetection
+  #    - faceDetection
   #geoReverse:
   #  url: https://nominatim.openstreetmap.org
   #   Preffered address language of geo code reverse lookups

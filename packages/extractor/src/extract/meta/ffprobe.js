@@ -7,12 +7,12 @@ const { toPipe, conditionalTask } = require('../../stream/task');
 
 const ffprobeSuffix = 'ffprobe.json';
 
-function videoMeta(storage, ffprobePath) {
+function videoMeta(storage, extractor) {
   const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, ffprobeSuffix);
 
   const task = (entry, cb) => {
     const t0 = Date.now();
-    ffprobe(entry.src, { path: ffprobePath }, function (err, info) {
+    ffprobe(entry.src, { path: extractor.ffprobePath }, function (err, info) {
       if (err) {
         log.warn(err, `Could not extract video meta data from ${entry}: ${err}`);
         return cb();

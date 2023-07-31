@@ -385,12 +385,17 @@ t.test('getVideoOptions', async t => {
     const extractor = {
       ffprobePath: './ffprobe',
       ffmpegPath: './ffmpeg',
-      video: {
-        previewSize: 640,
-        ext: 'mov'
+    }
+    const config = {
+      extractor: {
+        video: {
+          previewSize: 640,
+          ext: 'mov'
+        }
       }
     }
-    t.match(getVideoOptions(extractor), {
+
+    t.match(getVideoOptions(extractor, config), {
       ffprobePath: './ffprobe',
       ffmpegPath: './ffmpeg',
       previewSize: 640,

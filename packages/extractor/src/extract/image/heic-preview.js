@@ -77,8 +77,8 @@ const convertHeic = async (src, maxSize, dst, jpgWriter) => {
     })
 }
 
-const initJpgWriter = (options, imageResizer) => {
-  if (!useExternalImageResizer(options)) {
+const initJpgWriter = (config, imageResizer) => {
+  if (!useExternalImageResizer(config)) {
     try {
       sharp = require('sharp')
       return sharpJpgWriter
@@ -93,9 +93,10 @@ const initJpgWriter = (options, imageResizer) => {
   }
 }
 
-function heicPreview(storage, {imageResizer, ...options}) {
+function heicPreview(storage, extractor, config) {
+  const { imageResizer } = extractor
 
-  const jpgWriter = initJpgWriter(options, promisify(imageResizer))
+  const jpgWriter = initJpgWriter(config, promisify(imageResizer))
 
   const test = entry => {
     if (!imageTypes.includes(entry.type) || hasJpg(entry) || storage.hasEntryFile(entry, rawPreviewSuffix)) {

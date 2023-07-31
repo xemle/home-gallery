@@ -12,8 +12,8 @@ const getMaxVideoSize = (entry, defaultSize) => {
     || defaultSize
 }
 
-function videoPoster(storage, { imageResizer, videoFrameExtractor, imagePreviewSizes }) {
-
+function videoPoster(storage, extractor) {
+  const { imageResizer, videoFrameExtractor, imagePreviewSizes } = extractor
   const maxPreviewSize = Math.max(...imagePreviewSizes)
 
   const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, videoPosterSuffix);
