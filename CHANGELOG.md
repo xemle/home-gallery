@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- webapp: Fix database load on bootstrap
 - cli: Fix find config for undefined HOME env
 - extractor: Fix preview video size of portrait videos
 - database: Fix video rotation

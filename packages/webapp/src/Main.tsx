@@ -66,7 +66,7 @@ export const Main = () => {
       const chunkLimits = [1000, 2000, 4000, 8000, 16000, 32000];
       fetchAll(chunkLimits, onChunk)
         .finally(fetchEvents)
-        .then(subscribeEvents);
+        .finally(subscribeEvents);
     }, []);
 
     const base = document.querySelector('base')?.getAttribute('href') || '/';
