@@ -14,25 +14,24 @@ const { getIndexName, byDirDescFileAsc } = require('./utils')
 const readJournalCb = callbackify(readJournal)
 
 const readHead = (filename, chunk, next) => {
-  const [headData, entry] = chunk.split('data":[');
+  const [headData, tail] = chunk.split('"data":[');
   let head;
   let headJson;
   try {
-    headJson = headData + 'data":[]}';
+    headJson = headData + '"data":[]}';
     head = JSON.parse(headJson);
     if (!head || !head.type || head.type != 'home-gallery/fileindex@1.0') {
       next(new Error(`Unknown file index format ${head && head.type || 'unknown'} for index file '${filename}'. Please read CHANGELOG and migrate!`))
       return [head, false]
     }
-    return [head, entry];
+    return [head, tail];
   } catch (e) {
-    next(new Error(`Could not parse head JSON of index file '${filename}': ${e}. Data: ${headJson.substr(0, 160)}`));
+    next(new Error(`Could not parse head JSON of index file '${filename}': ${e}. Data: ${headJson.substring(0, 160)}`));
     return [head, false]
   }
 }
 
-const isLastEntry = (data, tail) => data.substring(data.length - tail.length) == tail
-const stripLastEntry = (data, tail) => isLastEntry(data, tail) ? data.substring(0, data.length - tail.length) : data
+const stripLastEntry = (data, tail) => data.endsWith(tail) ? data.substring(0, data.length - tail.length) : data
 
 const parseJsonChunks = (filename) => {
   let isHead = true
@@ -42,15 +41,15 @@ const parseJsonChunks = (filename) => {
     transform: function (chunk, enc, next) {
       if (isHead) {
         isHead = false
-        const [head, entry] = readHead(filename, chunk, next)
-        if (entry === false) {
+        const [head, tail] = readHead(filename, chunk, next)
+        if (tail === false) {
           return;
         }
         this.emit('head', head)
-        if (entry.startsWith(']}')) {
+        if (tail.startsWith(']}')) {
           return next()
         }
-        chunk = entry.substring(1)
+        chunk = tail.substring(1)
       }
       let entryJson = '{' + stripLastEntry(chunk, '}]}') + '}'
       let entry;
