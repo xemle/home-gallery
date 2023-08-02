@@ -14,7 +14,7 @@ const { getIndexName, byDirDescFileAsc } = require('./utils')
 const readJournalCb = callbackify(readJournal)
 
 const readHead = (filename, chunk, next) => {
-  const [headData, entry] = chunk.split('data":[{');
+  const [headData, entry] = chunk.split('data":[');
   let head;
   let headJson;
   try {
@@ -47,7 +47,10 @@ const parseJsonChunks = (filename) => {
           return;
         }
         this.emit('head', head)
-        chunk = entry;
+        if (entry.startsWith(']}')) {
+          return next()
+        }
+        chunk = entry.substring(1)
       }
       let entryJson = '{' + stripLastEntry(chunk, '}]}') + '}'
       let entry;

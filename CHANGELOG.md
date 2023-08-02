@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- index: Fix read stream for empty index
 - webapp: Fix icon paths of PWA webmanifest
 - webapp: Fix database load on bootstrap
 - cli: Fix find config for undefined HOME env
