@@ -4,11 +4,9 @@
   "description": "Preview and metadata extractor of HomeGallery",
   "main": "dist/index.js",
   "files": [
-    "dist",
-    "validate-sharp.js"
+    "dist"
   ],
   "scripts": {
-    "postinstall": "node validate-sharp.js",
     "clean": "rimraf dist",
     "build": "cpy \"src/**/!(*.test.js)\" dist",
     "test": "tap --no-check-coverage --no-coverage-report src/**/*.test.js",
@@ -42,6 +40,6 @@
     "jpeg-js": "^0.4.3",
     "node-vibrant": "^3.1.5",
     "request": "^2.88.2",
-    "sharp": "^0.28.2"
+    "sharp": "^0.32.4"
   }
 }

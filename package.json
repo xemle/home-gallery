@@ -4,7 +4,7 @@
   "description": "",
   "main": "gallery.js",
   "scripts": {
-    "postinstall": "npm --prefix e2e install && link-parent-bin && node packages/extractor/validate-sharp.js",
+    "postinstall": "npm --prefix e2e install && link-parent-bin",
     "clean": "pnpm -r clean",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
