@@ -175,6 +175,22 @@ const runCommand = (command, args, options, cb) => {
   return child;
 }
 
+const killChildProcess = async child => {
+  return new Promise(resolve => {
+    let count = 0
+    const id = setInterval(() => {
+      count++
+      child.kill(count <= 3 ? 'SIGINT' : 'SIGTERM')
+    }, 1000)
+
+    child.on('exit', () => {
+      clearInterval(id)
+      resolve()
+    })
+    child.kill('SIGINT')
+  })
+}
+
 const dropServerPortArgOnDocker = args => {
   if (galleryBin == 'docker') {
     const portPos = args.indexOf('--port')
@@ -285,6 +301,7 @@ module.exports = {
   tree,
   runCli,
   runCliAsync,
+  killChildProcess,
   readIndex,
   readJournal,
   readDatabase,

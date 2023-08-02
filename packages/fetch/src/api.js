@@ -11,6 +11,8 @@ const { isEventTypeCompatible, HeaderType: EventHeaderType } = require('@home-ga
 
 const log = require('@home-gallery/logger')('fetch.api')
 
+const { EventSource } = require('./event-source')
+
 const insecureAgent = new https.Agent({
   rejectUnauthorized: false,
 });
@@ -25,9 +27,9 @@ const options = (url, insecure) => {
 }
 
 const createIncompatibleError = (data, expectedType) => {
-  const err = new Error(`Incompabtible data type ${data && data.type}. Expect ${expectedType}`)
+  const err = new Error(`Incompabtible data type ${data?.type}. Expect ${expectedType}`)
   err.code = 'EINCOMP'
-  err.type = database && database.type
+  err.type = data?.type
   err.expectedType = expectedType
   return err
 }
@@ -46,10 +48,10 @@ const fetchDatabase = async (serverUrl, {query, insecure} = {}) => {
       return res.json()
     })
     .then(database => {
-      if (!isDatabaseTypeCompatible(database && database.type)) {
-        throw createIncompatibleError(data, DatabaseHeaderType)
+      if (!isDatabaseTypeCompatible(database?.type)) {
+        throw createIncompatibleError(database, DatabaseHeaderType)
       }
-      log.info(t0, `Fetched database with ${database.data.length} entries from remote ${serverUrl}`)
+      log.info(t0, `Fetched database with ${database?.data?.length || 0} entries from remote ${serverUrl}`)
       return database
     })
 }
@@ -67,10 +69,10 @@ const fetchEvents = async (serverUrl, { insecure } = {}) => {
       }
       return res.json()
     }).then(events => {
-      if (!isEventTypeCompatible(events && events.type)) {
-        throw createIncompatibleError(data, EventHeaderType)
+      if (!isEventTypeCompatible(events?.type)) {
+        throw createIncompatibleError(events, EventHeaderType)
       }
-      log.info(t0, `Fetched events with ${events.data.length} entries from remote ${serverUrl}`)
+      log.info(t0, `Fetched events with ${events?.data?.length || 0} entries from remote ${serverUrl}`)
       return events
     })
 }
@@ -103,8 +105,58 @@ const fetchFile = async (serverUrl, file, storageDir, { insecure } = {}) => {
     .catch(err => log.warn(err, `Failed to fetch ${file} from remote ${url}: ${err}. Continue`))
 }
 
+const connectEventStream = (url, { insecure }, onEvent) => {
+  const source = new EventSource(`${url}/api/events/stream`, options(url, insecure))
+  let stopped = false
+  let retries = 0
+  let timer = false
+
+  source.on('connected', () => log.debug(`Connected to the remote event stream`))
+  source.on('event', event => {
+    retries = 0
+    if (typeof onEvent == 'function') {
+      onEvent(event)
+    }
+  })
+
+  const retryTimer = retry => retry > 0 ? Math.pow(2, Math.min(9, retries - 1)) * 1000 : 0
+
+  const reconnect = () => {
+    if (stopped || timer) {
+      return
+    }
+    timer = setTimeout(() => {
+      log.debug(`Connecting to remote event stream of ${url}`)
+      source.connect()
+      retries++
+      timer = false
+    }, retryTimer(retries))
+  }
+
+  source.on('disconnected', () => {
+    log.debug(`Disconnected from the remote event stream. Reconnect`)
+    reconnect()
+  })
+
+
+  source.on('error', err => {
+    log.info(err, `Failed to connect to remote event stream. Reconnect`)
+    reconnect()
+  })
+
+  process.once('SIGINT', () => {
+    stopped = true
+    log.debug(`Stop listening from event stream`)
+    source.disconnect()
+    clearTimeout(timer)
+  })
+
+  reconnect()
+}
+
 module.exports = {
   fetchDatabase,
   fetchEvents,
-  fetchFile
+  fetchFile,
+  connectEventStream,
 }

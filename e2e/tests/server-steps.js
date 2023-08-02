@@ -9,7 +9,7 @@ const assert = require('assert')
 const fetch = require('node-fetch')
 const express = require('express')
 
-const { generateId, nextPort, waitFor, runCliAsync, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase, addCliEnv } = require('../utils')
+const { generateId, nextPort, waitFor, runCliAsync, killChildProcess, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase, addCliEnv } = require('../utils')
 
 const serverTestHost = '127.0.0.1'
 const servers = {}
@@ -204,22 +204,6 @@ step("Wait for database reload event", async () => {
     }
   }, 25000)
 })
-
-const killChildProcess = async child => {
-  return new Promise(resolve => {
-    let count = 0
-    const id = setInterval(() => {
-      count++
-      child.kill(count <= 3 ? 'SIGINT' : 'SIGTERM')
-    }, 1000)
-
-    child.on('exit', () => {
-      clearInterval(id)
-      resolve()
-    })
-    child.kill('SIGINT')
-  })
-}
 
 const stopServer = async serverId => {
   const server = servers[serverId]

@@ -12,6 +12,10 @@ step("Exit code was <code>", (code) => {
   assert(lastCode == code, `Expected exit code to be ${code} but was ${lastCode}`)
 })
 
+step("Init files dir", async () => {
+  mkdir('-p', getFilesDir())
+})
+
 step("Init dir from <dir>", async (dir) => {
   const baseDir = getBaseDir()
   mkdir('-p', baseDir)

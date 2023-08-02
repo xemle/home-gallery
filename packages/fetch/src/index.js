@@ -1,7 +1,7 @@
 
 const log = require('@home-gallery/logger')('fetch')
 
-const { fetchDatabase, fetchEvents } = require('./api')
+const { fetchDatabase, fetchEvents, connectEventStream } = require('./api')
 const { readDatabase, mergeDatabase, filterDatabaseByQuery } = require('./database')
 const { handlePreviews } = require('./preview')
 const { handleEvents, applyEvents } = require('./event')
@@ -51,8 +51,59 @@ const fetchRemote = async (serverUrl, {query, insecure, requireEvents}) => {
   return mergeAndFilterDatabase(database, events, query)
 }
 
+const fetchWatchFacade = async (options) => {
+  let hasNewDatabase = false
+  let isFetching = false
+
+  const doFetch = async () => {
+    if (isFetching) {
+      return
+    }
+    isFetching = true
+    hasNewDatabase = false
+    const t0 = Date.now()
+    return fetch(options)
+      .then(() => log.info(t0, `Fetched remote from ${options.serverUrl}`))
+      .catch(err => {
+        log.error(err, `Failed to fetch from remote ${options.serverUrl}: ${err}`)
+        return Promise.reject(err)
+      })
+      .finally(() => {
+        isFetching = false
+        if (hasNewDatabase) {
+          return doFetch()
+        }
+      })
+  }
+
+  const isDatabaseReloadEvent = event => event?.data?.type == 'server' && event?.data?.action == 'databaseReloaded'
+
+  const onEvent = (event) => {
+    if (isDatabaseReloadEvent(event)) {
+      log.debug(event, `Receiving database reload event`)
+      log.info(`Fetching remote due remote database change`)
+      hasNewDatabase = true
+      doFetch()
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    if (options.watch) {
+      log.info(`Fetch remote in watch mode from ${options.serverUrl}`)
+      connectEventStream(options.serverUrl, { insecure: options.insecure }, onEvent)
+      doFetch()
+      process.once('SIGINT', () => {
+        log.info(`Received SIGINT. Stop watch mode`)
+        resolve()
+      })
+    } else {
+      doFetch().then(resolve).catch(reject)
+    }
+  })
+}
+
 module.exports = {
-  fetch,
+  fetch: fetchWatchFacade,
   fetchDatabase,
   fetchEvents,
   fetchRemote,

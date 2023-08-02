@@ -24,3 +24,9 @@
 * Init dir from <dir>
 * Create database
 * Start only server
+
+# Update database
+
+* Create index
+* Extract files
+* Create database

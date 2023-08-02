@@ -37,6 +37,12 @@ const command = {
         default: false,
         describe: 'Delete local files which are missing remote for all remote index'
       },
+      watch: {
+        alias: 'w',
+        boolean: true,
+        default: false,
+        describe: 'Watch server for database change and fetch remote on changes'
+      },
     })
     .demandOption(['url', 'storage', 'database', 'events'])
   },
@@ -50,16 +56,11 @@ const command = {
       insecure: argv.insecure,
       query: argv.query,
       deleteLocal: argv.delete,
+      watch: argv.watch
     }
     const t0 = Date.now();
     fetch(options)
-      .then(() => {
-        log.info(t0, `Fetched remote from ${options.serverUrl}`)
-      })
-      .catch(err => {
-        log.error(err, `Fetch failed from ${options.serverUrl}: ${err}`)
-        process.exit(1)
-      })
+      .catch(() => process.exit(1))
   }
 }
 
