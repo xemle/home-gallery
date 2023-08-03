@@ -117,7 +117,7 @@ const getConvertResize = async (factoryOptions) => {
 }
 
 const createImageResizer = (config, cb) => {
-  const useNative = config?.extrator?.useNative || []
+  const useNative = config?.extractor?.useNative || []
 
   const resizer = [
     { active: useNative.includes('vipsthumbnail'), factory: getVipsResize, name: 'vipthumbnail' },

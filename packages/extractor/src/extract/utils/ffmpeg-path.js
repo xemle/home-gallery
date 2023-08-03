@@ -4,7 +4,7 @@ const log = require('@home-gallery/logger')('extractor.ffmpeg');
 const { getNativeCommand } = require('./native-command')
 
 const getFfmpegPath = config => {
-  if (config?.extrator?.useNative?.includes('ffmpeg')) {
+  if (config?.extractor?.useNative?.includes('ffmpeg')) {
     log.debug(`Use native system command ffmpeg`)
     return getNativeCommand('ffmpeg')
   } else {
@@ -13,7 +13,7 @@ const getFfmpegPath = config => {
 }
 
 const getFprobePath = config => {
-  if (config?.extrator?.useNative?.includes('ffprobe')) {
+  if (config?.extractor?.useNative?.includes('ffprobe')) {
     log.debug(`Use native system command ffprobe`)
     return getNativeCommand('ffprobe')
   } else {
