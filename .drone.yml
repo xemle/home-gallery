@@ -9,7 +9,7 @@ platform:
 
 steps:
 - name: install
-  image: node:18.15-alpine # node:18.16-alpine breaks gauge
+  image: node:18-alpine
   commands:
   - rm -rf packages/api-server
   - npm set registry $NPM_REGISTRY
@@ -21,25 +21,91 @@ steps:
       from_secret: npm_registry
 
 - name: build
-  image: node:18.5-alpine
+  image: node:18-alpine
   commands:
   - npm run build
 
 - name: test
-  image: node:18.5-alpine
+  image: node:18-alpine
   commands:
-  - npm run test
+  - npm run test -- --workspace-concurrency=1
 
-- name: test:e2e
-  image: node:18.5-alpine
+- name: test:e2e setup
+  image: node:18-alpine
   commands:
-  - apk add --no-cache git git-lfs perl vips-tools imagemagick
+  - apk add --no-cache git git-lfs
   - git clone $E2E_DATA_REPO ./data
+  environment:
+    E2E_DATA_REPO:
+      from_secret: e2e_data_repo
+  when:
+    branch:
+    - master
+    - develop
+    # execute also on tagged feature/fix branches
+    - feature/*e2e*
+    - fix/*e2e*
+    event:
+    - push
+
+- name: test:e2e - node v18 LTS
+  image: node:18-alpine
+  commands:
+  - apk add --no-cache perl vips-tools imagemagick
   - npm run test:e2e
   environment:
     TZ: Europe/Berlin
-    E2E_DATA_REPO:
-      from_secret: e2e_data_repo
+    GAUGE_HOME: /drone/src/.gauge
+  when:
+    branch:
+    - master
+    - develop
+    # execute also on tagged feature/fix branches
+    - feature/*e2e*
+    - fix/*e2e*
+    event:
+    - push
+
+- name: test - node v16
+  image: node:16-alpine
+  commands:
+  - npm run test -- --workspace-concurrency=1
+  when:
+    branch:
+    - master
+    - develop
+    # execute also on tagged feature/fix branches
+    - feature/*e2e*
+    - fix/*e2e*
+    event:
+    - push
+
+- name: test:e2e - node v16
+  image: node:16-alpine
+  commands:
+  - apk add --no-cache perl
+  - npm run test:e2e -- --tags run
+  environment:
+    TZ: Europe/Berlin
+    GAUGE_HOME: /drone/src/.gauge
+  when:
+    branch:
+    - master
+    - develop
+    # execute also on tagged feature/fix branches
+    - feature/*e2e*
+    - fix/*e2e*
+    event:
+    - push
+
+- name: test:e2e - node v14
+  image: node:14-alpine
+  commands:
+  - apk add --no-cache perl
+  - npm run test:e2e -- --tags run
+  environment:
+    TZ: Europe/Berlin
+    GAUGE_HOME: /drone/src/.gauge # Fix for v14. Reuse gauge plugins from v18/v16
   when:
     branch:
     - master
@@ -66,88 +132,3 @@ steps:
   when:
     status:
     - failure
-
----
-# node env with pre-LTS: v16
-# triggers only on merges or tagged branches
-kind: pipeline
-type: docker
-name: node pre LTS
-
-platform:
-  arch: arm64
-
-steps:
-- name: install
-  image: node:16-alpine
-  commands:
-  - rm -rf packages/api-server
-  - npm set registry $NPM_REGISTRY
-  - npm config set unsafe-perm true
-  - node scripts/disable-dependency.js api-server
-  - npm install --force # due react-leaflet dep to react 18
-  - find node_modules/@ffprobe-installer -name ffprobe -exec chmod ugo+x {} \;
-  environment:
-    NPM_REGISTRY:
-      from_secret: npm_registry
-
-- name: build
-  image: node:16-alpine
-  commands:
-  - npm run build
-
-- name: test
-  image: node:16-alpine
-  commands:
-  - npm run test
-
-- name: test:e2e
-  image: node:16-alpine
-  commands:
-  - apk add --no-cache git git-lfs perl vips-tools imagemagick
-  - git clone $E2E_DATA_REPO ./data
-  - npm run test:e2e
-  environment:
-    TZ: Europe/Berlin
-    E2E_DATA_REPO:
-      from_secret: e2e_data_repo
-
-- name: test node v14
-  image: node:14-alpine
-  commands:
-  - npm run test
-
-- name: test:e2e node v14
-  image: node:14-alpine
-  commands:
-  - apk add --no-cache git git-lfs perl vips-tools imagemagick
-  - npm run test:e2e -- --tags run
-  environment:
-    TZ: Europe/Berlin
-
-- name: notify
-  image: sfelis/drone-email
-  settings:
-    from:
-      from_secret: mail_from
-    host:
-      from_secret: mail_host
-    port:
-      from_secret: mail_port
-    username:
-      from_secret: mail_username
-    password:
-      from_secret: mail_password
-  when:
-    status:
-    - failure
-
-trigger:
-  branch:
-  - master
-  - develop
-  # execute also on tagged feature/fix branches
-  - feature/*e2e*
-  - fix/*e2e*
-  event:
-  - push

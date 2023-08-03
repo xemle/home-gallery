@@ -25,7 +25,7 @@
   ],
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^6.0.0",
-    "@getgauge/cli": "^1.4.3",
+    "@getgauge/cli": "^1.5.4",
     "@react-leaflet/core": "^2.0.0",
     "@types/chai": "^4.3.0",
     "@types/glob-to-regexp": "^0.4.0",
