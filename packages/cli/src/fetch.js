@@ -43,6 +43,16 @@ const command = {
         default: false,
         describe: 'Watch server for database change and fetch remote on changes'
       },
+      'force-download': {
+        boolean: true,
+        default: false,
+        describe: 'Force to download and overwrite preview files. Use this option if the remote preview content changed (e.g. through a fix)'
+      },
+      'download-all': {
+        boolean: true,
+        default: false,
+        describe: 'Download preview files from all remote entries. Use this option if preview files are missing from remote'
+      },
     })
     .demandOption(['url', 'storage', 'database', 'events'])
   },
@@ -56,7 +66,9 @@ const command = {
       insecure: argv.insecure,
       query: argv.query,
       deleteLocal: argv.delete,
-      watch: argv.watch
+      watch: argv.watch,
+      forceDownload: argv.forceDownload,
+      downloadAll: argv.downloadAll
     }
     const t0 = Date.now();
     fetch(options)

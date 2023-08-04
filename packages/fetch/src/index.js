@@ -26,26 +26,27 @@ const mergeAndFilterDatabase = async (database, events, query) => {
   return filterDatabaseByQuery(appliedDatabase, query)
 }
 
-const fetch = async ({ serverUrl, databaseFile, storageDir, eventFile, insecure, query, deleteLocal, requireEvents } = {}) => {
+const fetch = async (options = {}) => {
+  const { serverUrl, databaseFile, storageDir, eventFile, query, deleteLocal, requireEvents } = options
   log.info(`Fetch local and remote database`)
   const [remoteDatabase, remoteEvents, localDatabase] = await Promise.all([
-    fetchDatabase(serverUrl, { query, insecure }),
-    fetchEvents(serverUrl, { insecure }).catch(handleEventError(requireEvents)),
+    fetchDatabase(serverUrl, options),
+    fetchEvents(serverUrl, options).catch(handleEventError(requireEvents)),
     readDatabase(databaseFile)
   ])
 
   const remoteFilteredDatabase = await mergeAndFilterDatabase(remoteDatabase, remoteEvents, query)
-  await handlePreviews(serverUrl, remoteFilteredDatabase, localDatabase, storageDir, { insecure })
+  await handlePreviews(serverUrl, remoteFilteredDatabase, localDatabase, storageDir, options)
   await handleEvents(remoteEvents, eventFile).catch(err => {
     log.warn(`Failed to merge events: ${err}. Skip events`)
   })
   await mergeDatabase(remoteFilteredDatabase, localDatabase, databaseFile, deleteLocal)
 }
 
-const fetchRemote = async (serverUrl, {query, insecure, requireEvents}) => {
+const fetchRemote = async (serverUrl, options) => {
   const [database, events] = await Promise.all([
-    fetchDatabase(serverUrl, {query, insecure}),
-    fetchEvents(serverUrl, { insecure }).catch(handleEventError(requireEvents))
+    fetchDatabase(serverUrl, options),
+    fetchEvents(serverUrl, options).catch(handleEventError(requireEvents))
   ])
 
   return mergeAndFilterDatabase(database, events, query)

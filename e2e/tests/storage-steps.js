@@ -50,6 +50,14 @@ step("Storage image <name> for <id> has size <size>", async (name, id, size) => 
   assert(width == dimensions.width && height == dimensions.height, `Expected size of ${name} to be ${size} but was ${dimensions.width}x${dimensions.height}`)
 })
 
+step("Storage entry <entry> for <id> has file size <size>", async (name, id, size) => {
+  const file = await getEntryFile(id, name)
+  assert(file != null, `No ${name} entry for ${id}`)
+
+  const stat = await fs.stat(path.resolve(getStorageDir(), file))
+  assert(stat.size == size, `Expected that file size is ${size} but was ${stat.size}`)
+})
+
 step("Storage entry <entry> for <id> has exif value <value> for <key>", async (name, id, value, key) => {
   const file = await getEntryFile(id, name)
   assert(file != null, `No ${name} entry for ${id}`)
