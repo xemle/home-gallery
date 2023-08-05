@@ -23,8 +23,6 @@ run:
   - npx rimraf node_modules/sharp/{build,vendor,platform.json}
   - command: npm --prefix=node_modules/sharp --platform=linux --arch=x64 --sharp-install-force run install
     platformArch: linux-x64
-  - command: npm --prefix=packages/extractor --platform=linux --arch=x64 --libvips-fallback-install run postinstall
-    platformArch: linux-x64
   #- command: npm --prefix=node_modules/sharp --platform=linux --arch=arm64 --sharp-install-force run install
   #  platformArch: linux-arm64
   - command: npm --prefix=node_modules/sharp --platform=darwin --arch=x64 run install

@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - fetch: Add `--force-download` and `--download-all` options
 
+### Fixed
+
+- bundle: Fix binary app bundling
+
 ## [1.11.1] - 2023-08-03
 
 ### Fixed
