@@ -1,5 +1,5 @@
 const fileTypes = {
-  image: 'ico,bmp,gif,png,jpg,jpeg,jpe,tif,tiff,thm'.split(','),
+  image: 'ico,bmp,gif,png,jpg,jpeg,jpe,tif,tiff,thm,webp'.split(','),
   binImage: 'psd,xcf'.split(','),
   rawImage: 'mrw,crw,cr2,cr3,dng,rw2,heic,heif'.split(','),
   video: 'avi,wmv,mov,mpg,mpeg,mp4,m4v,3gp,mjpeg,mts,flv,swf,webm,mkv'.split(','),

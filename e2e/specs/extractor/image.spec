@@ -15,5 +15,12 @@ Tags: extractor
 * Storage has entry "image-preview-640.jpg" for "2e17e23"
 * Storage has entry "image-preview-256.jpg" for "2e17e23"
 
+## webp format
+
+* Add file "extractor/images/IMG_20190807_105328.webp"
+* Create index
+* Extract files
+* Storage has entry "image-preview-1920.jpg" for "3f184e8"
+
 ___
 * Stop server
