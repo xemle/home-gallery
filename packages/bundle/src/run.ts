@@ -4,6 +4,23 @@ import { logger } from './log'
 
 const log = logger('run')
 
+class CmdError extends Error {
+    code: number
+    stdout: string
+    stderr: string
+
+    constructor(message: string, code: number, stdout: string, stderr: string) {
+        super(message)
+        this.code = code || 254
+        this.stdout = stdout || ''
+        this.stderr = stderr || ''
+    }
+
+    toString() {
+        return `${this.message}`
+    }
+}
+
 export const run = async (command: string, args: string[], options: any) => {
   const defaults = { shell: true }
   const optionsEnv = (options || {}).env || {}
@@ -21,16 +38,13 @@ export const run = async (command: string, args: string[], options: any) => {
           cmd.stderr.on('data', data => stderr.push(data))
       }
 
-      cmd.on('exit', (code, signal) => {
-          const result = { code, signal, stdout: Buffer.concat(stdout), stderr: Buffer.concat(stderr) }
-          return code == 0 ? resolve(result) : reject(result)
+      const createError = (code: number = 254) => new CmdError(`Could not run ${command} ${args.join(' ')}. Exit code is ${code}`, code, Buffer.concat(stdout).toString(), Buffer.concat(stderr).toString())
+
+      cmd.on('exit', (code: number, signal) => {
+          const result = { code, signal, stdout: Buffer.concat(stdout).toString(), stderr: Buffer.concat(stderr).toString() }
+          return code == 0 ? resolve(result) : reject(createError(code))
       });
-      cmd.on('err', err => {
-          err.code = err.code || 254;
-          err.stdout = Buffer.concat(stdout);
-          err.stderr = Buffer.concat(stderr);
-          reject(err)
-      })
+      cmd.on('err', err => reject(createError(err.code)))
   })
 }
 

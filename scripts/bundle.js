@@ -57,4 +57,7 @@ const parseOptions = async () => {
 parseOptions()
   .then(bundler.bundle)
   .then(() => console.log(`Bundling done`))
-  .catch(e => console.error(`Bundling failed!`, e))
+  .catch(e => {
+    console.error(`Bundling failed! ${e}`)
+    process.exit(1)
+  })
