@@ -46,10 +46,10 @@ const fetch = async (options = {}) => {
 const fetchRemote = async (serverUrl, options) => {
   const [database, events] = await Promise.all([
     fetchDatabase(serverUrl, options),
-    fetchEvents(serverUrl, options).catch(handleEventError(requireEvents))
+    fetchEvents(serverUrl, options).catch(handleEventError(options?.requireEvents))
   ])
 
-  return mergeAndFilterDatabase(database, events, query)
+  return mergeAndFilterDatabase(database, events, options?.query)
 }
 
 const fetchWatchFacade = async (options) => {
