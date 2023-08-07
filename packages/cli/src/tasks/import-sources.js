@@ -83,8 +83,8 @@ const extract = async (config, sources, options) => {
   await pm.runCli(args)
 }
 
-const buildDatabase = async (config, sources, options) => {
-  const args = ['database'];
+const createDatabase = async (config, sources, options) => {
+  const args = ['database', 'create'];
 
   sources.forEach(source => args.push('--index', source.index));
   if (options.journal) {
@@ -139,7 +139,7 @@ const importSources = async (config, sources, options) => {
       .then(() => processing = false)
       .catch(catchIndexLimitExceeded)
     await extract(config, sources, importOptions)
-    await buildDatabase(config, sources, importOptions)
+    await createDatabase(config, sources, importOptions)
     await deleteJournals(sources, importOptions)
 
     if (processing) {
@@ -319,5 +319,5 @@ module.exports = {
   importSources,
   watchSources,
   extract,
-  buildDatabase
+  createDatabase
 }

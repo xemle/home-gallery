@@ -1,11 +1,6 @@
 import { Event, EventAction } from './models';
 
-export interface Taggable {
-  id: string;
-  updated?: string;
-  tags?: string[];
-  appliedEventIds?: string[];
-}
+import { Taggable } from './taggable';
 
 const applyEventAction = <T extends Taggable>(data: T, action: EventAction): boolean => {
   let changed = false;

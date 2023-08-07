@@ -2,7 +2,7 @@ const path = require('path')
 const { Select, MultiSelect } = require('enquirer');
 const YAML = require('yaml')
 
-const { importSources, extract, buildDatabase, startServer } = require('../tasks')
+const { importSources, extract, createDatabase, startServer } = require('../tasks')
 
 const menu = {
   main: {
@@ -77,7 +77,7 @@ const menu = {
       choices: [
         {name: 'showConfig', message: 'Show expanded configuration'},
         {name: 'debugExtractor', message: 'Debug extractor'},
-        {name: 'buildDatabase', message: 'Rebuild database'},
+        {name: 'createDatabase', message: 'Rebuild database'},
         {name: 'main', message: 'Back'}
       ]
     }).run(),
@@ -99,9 +99,9 @@ const menu = {
           skip: 0,
           limit: 0
         });
-      } else if (command === 'buildDatabase') {
+      } else if (command === 'createDatabase') {
         console.log('Rebuild database')
-        await buildDatabase(config, config.sources, {});
+        await createDatabase(config, config.sources, {});
       } else {
         return 'main'
       }

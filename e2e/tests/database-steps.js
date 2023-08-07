@@ -1,6 +1,8 @@
 const { stat, access } = require('fs').promises
 const assert = require("assert");
-const { getIndexFilename, getStorageDir, getDatabaseFilename, runCli, readDatabase, waitFor, pathToPlatformPath } = require('../utils');
+const Yaml = require('yaml')
+
+const { getIndexFilename, getStorageDir, getDatabaseFilename, runCli, readDatabase, waitFor, pathToPlatformPath, getEventsFilename } = require('../utils');
 
 step('Database does not exist', async () => {
   const exists = await access(getDatabaseFilename()).then(() => true).catch(() => false)
@@ -53,10 +55,42 @@ const resolveProperty = (value, path) => {
   return value
 }
 
+const parseValue = yamlLike => {
+  if (yamlLike.match(/^(\[[^\]]+]|\{[^\}]+})$/)) {
+    try {
+      return Yaml.parse(yamlLike)
+    } catch (e) {
+      assert(false, `Could not parse given YAML value ${yamlLike}: ${e}`)
+    }
+  }
+  return yamlLike
+}
+
+const assertDeep = (value, expected, path = '.') => {
+  if (Array.isArray(expected)) {
+    assert(Array.isArray(value), `Expected an array but was ${typeof value} in ${path}`)
+    for (let i = 0; i < expected.length; i++) {
+      assertDeep(value[i], expected[i], `[${i}].`)
+    }
+  } else if (typeof expected == 'object') {
+    assert(typeof value == 'object', `Expected an object but was ${typeof value} in ${path}`)
+    for (let prop in expected) {
+      assertDeep(value[prop], expected[prop], `${prop}.`)
+    }
+  } else {
+    assert(value == expected, `Expected ${expected} but was ${value} in ${path}`)
+  }
+}
+
 step("Database entry <id> has property <property> with value <value>", async (id, property, value) => {
   const entry = await getEntry(id)
   const resolvedProperty = resolveProperty(entry, property)
-  assert(resolvedProperty == value, `Expected property ${property} of entry ${id} to be ${value} but it is ${resolvedProperty}`)
+  const parsedValue = parseValue(value)
+  try {
+    assertDeep(resolvedProperty, parsedValue)
+  } catch (e) {
+    assert(false, `Expected property ${property} of entry ${id} to be ${value} but: ${e}`)
+  }
 })
 
 const toRegExp = pattern => {
@@ -154,4 +188,21 @@ step("Wait for database file stat change", async () => {
     .then(changed => changed || Promise.reject(new Error('Unchanged')))
 
   return waitFor(test, 15 * 1000)
+})
+
+step("Remove database entries by query <query>", async (query) => {
+  return runCli(['database', 'remove', '-d', getDatabaseFilename(), '-e', getEventsFilename(), '-q', query]);
+})
+
+step("Remove database entries with args <args> by query <query>", async (args, query) => {
+  const argList = args.split(/\s+/)
+  return runCli(['database', 'remove', '-d', getDatabaseFilename(), '-e', getEventsFilename(), '-q', query, ...argList]);
+})
+
+step("Remove database entries without events by query <query>", async (query) => {
+  return runCli(['database', 'remove', '-d', getDatabaseFilename(), '-q', query]);
+})
+
+step("Remove database entries with config by query <query>", async (query) => {
+  return runCli(['database', 'remove', '-q', query]);
 })

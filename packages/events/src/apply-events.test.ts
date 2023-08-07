@@ -1,4 +1,5 @@
-import { applyEvents, Taggable } from './apply-events';
+import { applyEvents } from './apply-events';
+import { Taggable } from './taggable';
 import { expect } from 'chai';
 import 'mocha';
 import { Event } from './models';

@@ -11,19 +11,36 @@ const injectState = require('./inject-state');
 const setBasePath = require('./set-base-path');
 const createArchive = require('./create-archive');
 const deleteDirectory = require('./delete-directory');
+const { wrapCowProxy, unwrapCowProxy } = require('./cow-proxy');
+
+const proxyMutableEntries = (database, cb) => {
+  database.data = database.data.map(wrapCowProxy)
+  cb(null, database)
+}
 
 const buildDatabase = (databaseFilename, eventsFilename, query, cb) => {
   waterfall([
     (callback) => readDatabase(databaseFilename, callback),
+    (database, callback) => proxyMutableEntries(database, callback),
     (database, callback) => applyEvents(database, eventsFilename, callback),
     (database, callback) => applyQuery(database, query, callback),
-    (database, callback) => cleanupDatabase(database,callback),
   ], cb);
+}
+
+const buildDatabaseImmutableFacade = (databaseFilename, eventsFilename, query, cb) => {
+  buildDatabase(databaseFilename, eventsFilename, query, (err, database) => {
+    if (err) {
+      return cb(err)
+    }
+    database.data = database.data.map(unwrapCowProxy)
+    cb(null, database)
+  })
 }
 
 const exportBuilder = (databaseFilename, storageDir, options, cb) => {
   waterfall([
     (callback) => buildDatabase(databaseFilename, options.eventsFilename, options.query, callback),
+    (database, callback) => cleanupDatabase(database, callback),
     (database, callback) => exportStorage(database, storageDir, options.outputDirectory, options.basePath, callback),
     (database, outputDirectory, basePath, callback) => writeDatabase(database, outputDirectory, basePath, callback),
     (database, outputDirectory, basePath, callback) => copyWebapp(database, outputDirectory, basePath, callback),
@@ -36,10 +53,7 @@ const exportBuilder = (databaseFilename, storageDir, options, cb) => {
   })
 }
 
-
-
-
-
-
-
-module.exports = { exportBuilder };
+module.exports = {
+  buildDatabase: buildDatabaseImmutableFacade,
+  exportBuilder
+};
