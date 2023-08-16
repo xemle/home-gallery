@@ -114,8 +114,8 @@ const similarEmbeddings = (storage, common, config) => {
     apiPath: '/embeddings',
     imagePreviewSuffixes: common.imagePreviewSizes.filter(apiServerPreviewSizeFilter).map(sizeToImagePreviewSuffix),
     entrySuffix: 'similarity-embeddings.json',
-    concurrent: apiServer.timeout,
-    timeout: apiServer.concurrent,
+    concurrent: apiServer.concurrent,
+    timeout: apiServer.timeout,
   })
 }
 
@@ -132,8 +132,8 @@ const objectDetection = (storage, common, config) => {
     apiPath: '/objects',
     imagePreviewSuffixes: common.imagePreviewSizes.filter(apiServerPreviewSizeFilter).map(sizeToImagePreviewSuffix),
     entrySuffix: 'objects.json',
-    concurrent: apiServer.timeout,
-    timeout: apiServer.concurrent,
+    concurrent: apiServer.concurrent,
+    timeout: apiServer.timeout,
   })
 }
 
@@ -150,8 +150,8 @@ const faceDetection = (storage, common, config) => {
     apiPath: '/faces',
     imagePreviewSuffixes: common.imagePreviewSizes.filter(apiServerPreviewSizeFilter).map(sizeToImagePreviewSuffix),
     entrySuffix: 'faces.json',
-    concurrent: apiServer.timeout,
-    timeout: apiServer.concurrent,
+    concurrent: apiServer.concurrent,
+    timeout: apiServer.timeout,
   })
 }
 
