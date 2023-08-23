@@ -71,7 +71,11 @@ const command = {
         array: true,
         describe: 'Use native system executables. Possible values are exitool, vipsthumbnail, convert, ffprobe or ffmpeg',
         string: true,
-      }
+      },
+      config: {
+        alias: 'c',
+        describe: 'Configuration file'
+      },
     })
     .demandOption(['index'])
     .default('api-server', undefined, 'https://api.home-gallery.org')

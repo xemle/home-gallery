@@ -40,31 +40,35 @@ const command = {
         })
         .demandOption(['index', 'storage', 'database']),
       (argv) => {
-        const { fileFilter } = require('@home-gallery/common');
-        const { buildDatabase } = require('@home-gallery/database');
+        const { fileFilter } = require('@home-gallery/common')
+        const { buildDatabase } = require('@home-gallery/database')
+        const { promisify } = require('@home-gallery/common')
 
-        const t0 = Date.now();
-        fileFilter(argv.exclude, argv['exclude-from-file'], (err, fileFilterFn) => {
-          if (err) {
-            log.error(err);
-          } else {
-            const options = {
-              fileFilterFn,
-              journal: argv.journal,
-              supportedTypes: ['image', 'rawImage', 'video'],
-              updated: new Date().toISOString()
-            }
-            buildDatabase(argv.index, argv.storage, argv.database, options, (err, database) => {
-              if (err && err.code == 'ENOCHANGE') {
-                log.info(`Database unchanged: ${err}`);
-              } else if (err) {
-                log.error(`Could not build catalog database: ${err}`);
-              } else {
-                log.info(t0, `Build catalog database ${argv.database} with ${database.data.length} entries`);
-              }
-            })
+        const fileFilterAsync = promisify(fileFilter)
+        const buildDatabaseAsync = promisify(buildDatabase)
+
+        const run = async () => {
+          const t0 = Date.now();
+          const fileFilterFn = await fileFilterAsync(argv.exclude, argv['exclude-from-file'])
+          const options = {
+            fileFilterFn,
+            journal: argv.journal,
+            supportedTypes: ['image', 'rawImage', 'video'],
+            updated: new Date().toISOString()
           }
-        })
+
+          const database = await buildDatabaseAsync(argv.index, argv.storage, argv.database, options)
+          log.info(t0, `Build catalog database ${argv.database} with ${database.data.length} entries`)
+        }
+
+        run()
+          .catch(err => {
+            if (err?.code == 'ENOCHANGE') {
+              return log.info(`Database unchanged: ${err?.message}`)
+            }
+            log.error(err, `Could not build catalog database: ${err}`)
+            process.exit(1)
+          })
       }
     )
     .command(
