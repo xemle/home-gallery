@@ -183,4 +183,33 @@ describe('applyEvents()', () => {
     expect(entries[0]).to.eql(result[0]);
   });
 
+  it('should change only one entry', () => {
+    const entries: Taggable[] = [{id: '1'}];
+    const events: Event[] = [
+      {
+        type: 'userAction',
+        id: '8',
+        targetIds: ['1'],
+        actions: [
+          {
+            action: 'addTag',
+            value: 'foo'
+          }
+        ]
+      },
+      {
+        type: 'userAction',
+        id: '9',
+        targetIds: ['1'],
+        actions: [
+          {
+            action: 'addTag',
+            value: 'bar'
+          }
+        ]
+      }
+    ]
+    const result = applyEvents(entries, events);
+    expect(result.length).to.eql(1);
+  });
 });

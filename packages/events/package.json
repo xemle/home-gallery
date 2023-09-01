@@ -24,6 +24,13 @@
     "url": "https://github.com/xemle/home-gallery.git",
     "directory": "packages/events"
   },
+  "exports": {
+    ".": {
+      "node": "./dist/node.js",
+      "browser": "./dist/index.js"
+    }
+  },
+  "types": "./dist/node.d.ts",
   "dependencies": {
     "@home-gallery/logger": "file:../logger"
   }

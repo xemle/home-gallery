@@ -28,6 +28,7 @@ const command = {
           },
           'dry-run': {
             alias: 'n',
+            boolean: true,
             describe: 'Do not perform any writes'
           },
         }),

@@ -103,7 +103,7 @@ const command = {
         .example('$0 database remove -k -q tag:good', 'Keep all entries with tag "good"')
         .demandOption(['q']),
       (argv) => {
-        const { buildDatabase } = require('@home-gallery/export')
+        const { buildDatabase } = require('@home-gallery/export-static')
         const { writeDatabase } = require('@home-gallery/database')
         const { promisify } = require('@home-gallery/common')
 

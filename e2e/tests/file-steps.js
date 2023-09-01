@@ -4,6 +4,7 @@ const fs = require('fs').promises
 const path = require('path')
 const { mkdir, cp, mv, rm } = require('shelljs')
 const assert = require("assert")
+const exiftool = require('exiftool-vendored').exiftool
 
 const { getTestDataDir, getBaseDir, getFilesDir } = require('../utils')
 
@@ -56,8 +57,18 @@ step("Remove file <file>", async (file) => {
   rm(path.join(getFilesDir(), file))
 })
 
+step("File <file> does not exist", async (file) => {
+  const exist = await fs.access(path.join(getFilesDir(), file)).then(() => true).catch(() => false)
+  assert(exist === false, `Expected no such file ${file} but does exist`)
+})
+
 step("Rename file <file> to <other>", async (file, other) => {
   const filesDir = getFilesDir()
   mkdir('-p', path.dirname(path.join(filesDir, other)))
   mv(path.join(filesDir, file), path.join(filesDir, other))
+})
+
+step("File <file> has tags <tags>", async (file, tags) => {
+  const exif = await exiftool.read(path.join(getFilesDir(), file))
+  assert.deepEqual(exif.TagsList, tags.split(','), `Expected to be ${tags} but was ${exif.TagsList}`)
 })

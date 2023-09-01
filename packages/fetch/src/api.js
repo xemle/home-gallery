@@ -7,7 +7,7 @@ const https = require('https');
 
 const { isDatabaseTypeCompatible, HeaderType: DatabaseHeaderType } = require('@home-gallery/database')
 
-const { isEventTypeCompatible, HeaderType: EventHeaderType } = require('@home-gallery/events/dist/node')
+const { isEventTypeCompatible, HeaderType: EventHeaderType } = require('@home-gallery/events')
 
 const log = require('@home-gallery/logger')('fetch.api')
 

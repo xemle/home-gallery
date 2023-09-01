@@ -1,6 +1,6 @@
 const log = require('@home-gallery/logger')('api.events')
 
-const { applyEvents, mergeEvents } = require('@home-gallery/events/dist/node')
+const { applyEvents, mergeEvents } = require('@home-gallery/events')
 
 const applyEventsFacade = (database, events) => {
   if (!events.data.length) {

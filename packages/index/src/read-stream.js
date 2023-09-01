@@ -74,6 +74,34 @@ const ifThen = (ifFn, thenFn) => cb => ifFn(err => err ? cb(err) : thenFn(cb))
 
 const ifThenElse = (ifFn, thenFn, elseFn) => cb => ifFn(err => err ? elseFn(cb) : thenFn(cb))
 
+const readIndexHead = (indexFilename, cb) => {
+  const indexName = getIndexName(indexFilename)
+  const stream = fs.createReadStream(indexFilename)
+
+  let done = false
+  stream
+    .pipe(zlib.createGunzip())
+    .pipe(split2('},{'))
+    .pipe(parseJsonChunks(indexFilename))
+    .on('head', head => {
+      if (!done) {
+        done = true
+        cb(null, {indexName, ...head})
+      }
+    })
+    .on('err', err => {
+      if (!done) {
+        done = true
+        cb(err)
+      }
+    })
+    .on('close', () => {
+      if (!done) {
+        cb(new Error(`Index header not found`))
+      }
+    })
+}
+
 const fromIndex = (indexFilename, cb) => {
   log.info(`Reading file index from ${indexFilename}`)
   let indexHead;
@@ -158,4 +186,4 @@ const readStreams = (indexFilenames, journal, cb) => {
 }
 
 
-module.exports = { readStream, readStreams };
+module.exports = { readIndexHead, readStream, readStreams };

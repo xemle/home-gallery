@@ -25,7 +25,7 @@ const createUserAction = (tag, id) => {
     id: createUUID(),
     type: 'userAction',
     targetIds: id.split(','),
-    actions: tag.split(',').map(t => { return { action: 'addTag', value: tag } }),
+    actions: tag.split(',').map(t => { return { action: tag.startsWith('-') ? 'removeTag' : 'addTag', value: tag.replace(/^-/, '') } }),
     date: new Date().toISOString()
   }
 }

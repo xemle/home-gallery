@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- export: Export metadata to xmp sidecar files
 - database: Add `remove` subcommand
 
 ## [1.12.2] - 2023-08-17

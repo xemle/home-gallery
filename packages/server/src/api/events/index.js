@@ -2,7 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const log = require('@home-gallery/logger')('server.api.events');
 
-const { readEvents, appendEvent } = require('@home-gallery/events/dist/node');
+const { readEvents, appendEvent } = require('@home-gallery/events');
 
 const { sendError } = require('../error');
 

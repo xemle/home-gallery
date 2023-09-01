@@ -1,12 +1,13 @@
 {
-  "name": "@home-gallery/export",
+  "name": "@home-gallery/export-static",
   "version": "1.0.0",
-  "description": "Create static export of HomeGallery",
+  "description": "Create static gallery export of HomeGallery",
   "main": "dist/index.js",
   "files": [
     "dist"
   ],
   "scripts": {
+    "clean": "rimraf dist",
     "build": "cpy \"src/**/!(*.test.js)\" dist",
     "postbuild": "cpy \"../webapp/dist/**\" dist/public",
     "test": "tap --no-check-coverage --no-coverage-report src/*.test.js",
@@ -23,7 +24,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/xemle/home-gallery.git",
-    "directory": "packages/export"
+    "directory": "packages/export-static"
   },
   "dependencies": {
     "@home-gallery/common": "file:../common",

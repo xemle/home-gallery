@@ -12,7 +12,7 @@ const checksum = require('./checksum');
 const { statIndex, prettyPrint } = require('./stat')
 
 const { matcherFns } = require('./merge');
-const { readStream, readStreams } = require('./read-stream');
+const { readIndexHead, readStream, readStreams } = require('./read-stream');
 const { createFilter } = require('./filter');
 const { getJournalFilename, createJournal, readJournal, removeJournal } = require('./journal')
 const { getIndexName } = require('./utils');
@@ -88,6 +88,7 @@ module.exports = {
   getIndexName,
   getJournalFilename,
   removeJournal: callbackify(removeJournal),
+  readIndexHead,
   readStream,
   readStreams,
   readJournal: callbackify(readJournal),

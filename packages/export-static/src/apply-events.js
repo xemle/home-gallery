@@ -1,5 +1,5 @@
 const log = require('@home-gallery/logger')('export.events');
-const { readEvents } = require('@home-gallery/events/dist/node');
+const { readEvents } = require('@home-gallery/events');
 const { applyEvents } = require('@home-gallery/events');
 
 const events = (database, eventsFilename, cb) => {

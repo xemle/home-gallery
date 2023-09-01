@@ -84,7 +84,9 @@ export const applyEvents = (entries: Taggable[], events: Event[]): Taggable[] =>
       }
       entry.appliedEventIds.push(event.id);
       if (changed) {
-        changedEntries.push(entry);
+        if (!changedEntries.includes(entry)) {
+          changedEntries.push(entry);
+        }
         applyEventDate(entry, event);
       }
     })

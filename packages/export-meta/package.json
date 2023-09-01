@@ -1,0 +1,38 @@
+{
+  "name": "@home-gallery/export-meta",
+  "version": "1.0.0",
+  "description": "Export metadata to xmp sidecar files",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "cpy \"src/**/!(*.test.js)\" dist",
+    "test": "tap --no-check-coverage --no-coverage-report src/*.test.js",
+    "watch": "onchange -d 1000 \"src/**\" -- npm run build",
+    "watch:test": "tap --no-check-coverage --no-coverage-report -w src/*.test.js"
+  },
+  "keywords": [
+    "HomeGallery",
+    "export",
+    "meta",
+    "xmp",
+    "tags"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xemle/home-gallery.git",
+    "directory": "packages/export-meta"
+  },
+  "dependencies": {
+    "@home-gallery/common": "file:../common",
+    "@home-gallery/index": "file:../index",
+    "@home-gallery/database": "file:../database",
+    "@home-gallery/events": "file:../events",
+    "@home-gallery/logger": "file:../logger",
+    "exiftool-vendored": "^14.4.0"
+  }
+}

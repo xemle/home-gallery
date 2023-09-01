@@ -2,7 +2,7 @@ const path = require('path')
 const { Select, MultiSelect } = require('enquirer');
 const YAML = require('yaml')
 
-const { importSources, extract, createDatabase, startServer } = require('../tasks')
+const { importSources, extract, createDatabase, startServer, exportMeta } = require('../tasks')
 
 const menu = {
   main: {
@@ -11,6 +11,7 @@ const menu = {
       choices: [
         {name: 'server', message: 'Start server'},
         {name: 'update', message: 'Update and process source files'},
+        {name: 'export', message: 'Export meta data'},
         {name: 'system', message: 'System'},
         {name: 'exit', message: 'Exit'}
       ]
@@ -18,8 +19,35 @@ const menu = {
     action: async (command, options) => {
       if (command === 'server') {
         return startServer(options);
+      } else if (command === 'export') {
+        const { config } = options
+        let sources = config.sources.filter(source => !source.offline)
+        if (sources.length > 1) {
+          const indices = await runner('selectSources', config)
+          sources = sources.filter(source => indices.indexOf(source.index) >= 0)
+        }
+        if (!sources.length) {
+          console.log(`No sources selected. Return to menu`);
+          return 'main'
+        }
+        return ['confirmExportMeta', sources]
       }
-      return command;
+      return command
+    }
+  },
+  confirmExportMeta: {
+    prompt: (_, sources) => new Select({
+      message: `Do you really want to write meta data to ${sources.length} sources: ${sources.map(s => s.dir).join(', ')}?`,
+      choices: [
+        {name: 'yes', message: 'Yes. I do have backups. Please write the meta data'},
+        {name: 'no', message: `No. I'm not sure yet`},
+      ]
+    }).run(),
+    action: async (command, options, sources) => {
+      if (command == 'yes') {
+        await exportMeta(options.config, sources.map(s => s.index))
+      }
+      return 'main'
     }
   },
   update: {
@@ -109,13 +137,16 @@ const menu = {
   }
 }
 
-const runner = (name, config, ...args) => {
+const runner = (name, options, ...args) => {
   const item = menu[name]
-  return item.prompt(config)
-    .then(result => item.action ? item.action(result, config, ...args) : result)
+  return item.prompt(options, ...args)
+    .then(command => {
+      return item.action ? item.action(command, options, ...args) : command
+    })
     .then(result => {
-      if (menu[result]) {
-        return runner(result, config, ...args);
+      const [ name, ...rest] = Array.isArray(result) ? result : [result]
+      if (menu[name]) {
+        return runner(name, options, ...rest);
       } else {
         return result;
       }

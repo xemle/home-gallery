@@ -1,6 +1,6 @@
 const assert = require("assert")
 
-const { getStorageDir, getDatabaseFilename, getEventsFilename, getExportOutputDir, tree, runCli } = require('../utils')
+const { getIndexFilename, getStorageDir, getDatabaseFilename, getEventsFilename, getExportOutputDir, tree, runCli } = require('../utils')
 
 const runExport = async query => runCli(['export', '-s', getStorageDir(), '-d', getDatabaseFilename(), '-e', getEventsFilename(), '-o', getExportOutputDir(), '-q', query || '']);
 step("Create export", async () => runExport(''))
@@ -21,4 +21,15 @@ step("Export file <file> exists", async (filename) => {
 step("Export file <file> does not exist", async (filename) => {
   const matches = await fileMatches(filename)
   assert(matches.length == 0, `Export contains file ${filename}`)
+})
+
+const exportMeta = async (args = []) => runCli(['export', 'meta', '-i', getIndexFilename(), '-d', getDatabaseFilename(), '-e', getEventsFilename(), ...args])
+
+step("Export meta", async () => {
+  return exportMeta()
+})
+
+step("Export meta with args <args>", async (args) => {
+  const argList = args.split(/\s+/)
+  return exportMeta(argList)
 })

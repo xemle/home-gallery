@@ -1,6 +1,6 @@
-# Export
+# Export: Static
 
-Tags: export
+Tags: export,static
 
 * Init dir from "export/basic"
 
