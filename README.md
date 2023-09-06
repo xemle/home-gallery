@@ -13,7 +13,8 @@ or enjoy the [food images](https://demo.home-gallery.org/similar/c7f8a3bf0142fc9
 Ask questions on [gitter.im](https://gitter.im/home-gallery/community).
 
 Do you like HomeGallery? Does it solve your media problem?
-Please support this project through any recurring support to my
+Would you like to help? Please read the [CONTRIBUTING](CONTRIBUTING.md) guidlines and
+support this project through any recurring financial support to my
 [patreon.com/xemle](https://www.patreon.com/xemle) or one time support to my
 [paypal.me/xemle](https://paypal.me/xemle) account. Thank you in advance.
 
