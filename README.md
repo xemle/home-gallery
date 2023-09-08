@@ -53,14 +53,12 @@ Following steps need to be performed to use HomeGallery
 * **Download** the gallery software as prebuilt binary or docker image
 * **Init the configuration** with media sources like `~/Pictures`
 * **Start the server** on [localhost:3000](http://localhost:3000)
-* **Import media** source(s) via CLI
 
 ```
 curl -sL https://dl.home-gallery.org/dist/latest/home-gallery-latest-linux-x64 -o gallery
 chmod 755 gallery
 ./gallery init --source ~/Pictures
-./gallery run server &
-./gallery run import --initial
+./gallery run server
 ```
 
 and open [localhost:3000](http://localhost:3000) in your browser. Run `./gallery -h` for
@@ -86,8 +84,7 @@ alias gallery="docker run -ti --rm \
   -u $(id -u):$(id -g) \
   -p 3000:3000 xemle/home-gallery"
 gallery init --source /data/Pictures
-gallery run server &
-gallery run import --initial
+gallery run server
 ```
 
 and open [localhost:3000](http://localhost:3000) in your browser. Run `gallery -h` for
@@ -122,6 +119,7 @@ See [docs.home-gallery.org](https://docs.home-gallery.org) for general documenta
 - Media are identified by their content. Duplicated media (identical files byte-by-byte) are only processed once. Renaming is supported without recalulating previews etc.
 - Fast file changes detection such as add, removes, renames or moves
 - Static web gallery site export such as the [demo gallery](https://demo.home-gallery.org)
+- Meta data export to XMP sidecar files
 - Stream photos and videos to Chromcast enabled TV devices
 - Runs on SoC such Raspberry PI
 
@@ -200,10 +198,10 @@ HomeGallery uses npm workspaces with multi
 packages. Common npm scripts are `clean`, `build`, `test`.
 
 To run only a subset of packages you can use pnpm's
-filter feature, e.g build only module `export` and `database`:
+filter feature, e.g build only module `export-static` and `database`:
 
 ```
-npx pnpm -r --filter './*/{export,database}' build
+npx pnpm -r --filter './*/{export-static,database}' build
 ```
 
 ### Unit Test
