@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - export: Export metadata to xmp sidecar files
 - database: Add `remove` subcommand
 
+### Fixed
+
+- cli: Fix config default value of sources
+
 ## [1.12.2] - 2023-08-17
 
 ### Fixed

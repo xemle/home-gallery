@@ -25,6 +25,12 @@ t.test('readConfig', async t => {
 t.test('readData source', async t => {
   const baseDir = '/app'
 
+  t.test('empty sources', async t => {
+    const data = `{}`
+    const config = readData(data, true, baseDir, env)
+    t.same(config.sources, [])
+  })
+
   t.test('as string', async t => {
     const data = `
       sources:

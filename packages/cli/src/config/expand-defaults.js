@@ -33,6 +33,8 @@ const expandConfigDefaults = (config, env) => {
         excludeIfPresent: '.galleryignore'
       }, source)
     }
+  } else {
+    config.sources = []
   }
 
   config.storage = Object.assign({
