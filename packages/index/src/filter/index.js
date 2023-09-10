@@ -6,11 +6,20 @@ const { createLimitFilter } = require('./limit-filter')
 
 const asyncFileFilter = promisify(fileFilter)
 
+const createFilename2Entry = (entries) => {
+  return entries
+    .reduce((result, entry) => {
+      result[entry.filename] = entry
+      return result
+    }, {})
+}
+
 const createFilter = async (entries, options) => {
   const filters = []
+  const filename2Entry = createFilename2Entry(entries)
 
   if (options.maxFilesize) {
-    filters.push(createFilesizeFilter(entries, options.maxFilesize, options.keepKnownFiles))
+    filters.push(createFilesizeFilter(filename2Entry, options.maxFilesize, options.keepKnownFiles))
   }
 
   if (options.exclude && options.exclude.length || options.excludeFromFile) {
@@ -18,7 +27,7 @@ const createFilter = async (entries, options) => {
     filters.push(excludeFilter)
   }
 
-  return createLimitFilter(entries.length, options.addLimits, createFilterChain(filters))
+  return createLimitFilter(entries.length, filename2Entry, options.addLimits, createFilterChain(filters))
 }
 
 module.exports = {

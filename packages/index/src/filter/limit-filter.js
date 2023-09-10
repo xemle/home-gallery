@@ -44,46 +44,49 @@ const getLimitValues = addLimits => {
   return {
     initial: +limits[0] || 200,
     offset: +limits[1] || 500,
-    factor: Math.max(1, +limits[2] || 1),
+    factor: Math.max(1, +limits[2] || 1) - 1,
     max: +limits[3] || 8000
   }
 }
 
-const getLimit = (entryCount, addLimits) => {
+const getNewFileLimit = (entryCount, addLimits) => {
   const {initial, offset, factor, max} = getLimitValues(addLimits);
   if (entryCount == 0) {
     return initial;
   } else {
-    return +Math.min(entryCount + max, Math.max(entryCount + offset, entryCount * factor)).toFixed(0);
+    return Math.min(max, Math.max(offset, Math.floor(entryCount * factor)));
   }
 }
 
-const createLimitFilter = (entryCount, addLimits, filter) => {
+const createLimitFilter = (entryCount, filename2Entry, addLimits, filter) => {
   if (!addLimits) {
     return filter;
   }
 
-  const limit = getLimit(entryCount, addLimits);
+  const fileLimit = getNewFileLimit(entryCount, addLimits);
+  log.info(`Index has ${entryCount} entries. Set index limit to max ${fileLimit} new entries`)
 
-  log.info(`Index has ${entryCount} entries. Set index limit to max ${limit} entries with ${limit - entryCount} new entries`)
   let count = 0;
-  const limitFilter = (path, stat) => {
-    const result = filter(path, stat);
+  const limitFilter = (filename, stat) => {
+    const result = filter(filename, stat);
     if (!result) {
       return result;
+    } else if (filename2Entry[filename]) {
+      return true;
     }
 
     count++
-    if (count == limit) {
-      log.info(`Index limit of ${limit} exceeded. No more files are added to the file index.`)
+    if (count == fileLimit) {
+      log.info(`Index limit of ${fileLimit} exceeded. No more new files are added to the file index.`)
     }
-    return count <= limit;
+    return count <= fileLimit;
   }
 
-  limitFilter.limitExceeded = () => count >= limit;
+  limitFilter.limitExceeded = () => count >= fileLimit;
   return limitFilter
 }
 
 module.exports = {
+  getNewFileLimit,
   createLimitFilter
 }

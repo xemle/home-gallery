@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- index: Fix passing existing files in file limit filter
 - cli: Fix config default value of sources
 
 ## [1.12.2] - 2023-08-17
