@@ -4,6 +4,7 @@ const forEach = require('./for-each')
 const lruCache = require('./lru-cache')
 const promisify = require('./promisify')
 const rateLimit = require('./rate-limit')
+const serialize = require('./serialize')
 
 module.exports = {
   callbackify,
@@ -11,5 +12,6 @@ module.exports = {
   forEach,
   lruCache,
   promisify,
-  rateLimit
+  rateLimit,
+  serialize
 }

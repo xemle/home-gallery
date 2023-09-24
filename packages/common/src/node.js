@@ -35,7 +35,8 @@ const {
   forEach,
   lruCache,
   promisify,
-  rateLimit
+  rateLimit,
+  serialize
 } = utils
 
 module.exports = {
@@ -70,5 +71,6 @@ module.exports = {
     forEach,
     lruCache,
     promisify,
-    rateLimit
+    rateLimit,
+    serialize
 }
