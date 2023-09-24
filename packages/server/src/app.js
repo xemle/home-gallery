@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const { loggerMiddleware } = require('./logger-middleware')
 const { EventBus } = require('./eventbus');
 const databaseApi = require('./api/database');
+const treeApi = require('./api/database/tree');
 const eventsApi = require('./api/events');
 const webapp = require('./webapp');
 const { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } = require('./auth')
@@ -52,11 +53,14 @@ function createApp(config) {
   app.use(bodyParser.json({limit: '1mb'}))
 
   const { read: readEvents, push: pushEvent, stream, getEvents } = eventsApi(eventbus, config.events.file);
-  const { read: readDatabase, init: initDatabase, getFirstEntries } = databaseApi(eventbus, config.database.file, getEvents);
+  const { read: readDatabase, init: initDatabase, getFirstEntries, getDatabase } = databaseApi(eventbus, config.database.file, getEvents);
+  const { read: readTree } = treeApi(eventbus, getDatabase);
+
   app.get('/api/events.json', readEvents);
   app.get('/api/events/stream', stream);
   app.post('/api/events', pushEvent);
   app.get('/api/database.json', readDatabase);
+  app.get('/api/database/tree/:hash', readTree);
 
   if (config.server.remoteConsoleToken) {
     const debugApi = require('./api/debug')({remoteConsoleToken: config.server?.remoteConsoleToken})

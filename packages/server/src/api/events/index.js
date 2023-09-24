@@ -40,8 +40,8 @@ const events = (eventbus, eventsFilename) => {
   }
 
   const bridgeClientEvents = (event) => {
-    emit(event)
     eventbus.emit(event.type, event)
+    process.nextTick(() => emit(event))
   }
 
   const removeClient = (client) => {

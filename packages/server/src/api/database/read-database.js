@@ -4,7 +4,7 @@ const log = require('@home-gallery/logger')('server.api.database.read');
 
 const { debounce } = require('@home-gallery/common');
 const { readDatabase } = require('@home-gallery/database');
-const { applyEvents } = require('@home-gallery/events')
+const { applyEvents } = require('./events-facade')
 
 function read(filename, cb) {
   const t0 = Date.now();
@@ -42,7 +42,7 @@ const wait = (filename, delay, cb) => {
   })
 }
 
-const mergeEvents = (database, getEvents, stringifyEntryCache, cb) => {
+const mergeEvents = (database, getEvents, cb) => {
   getEvents((err, events) => {
     if ((err && err.code == 'ENOENT')) {
       cb(null, database)
@@ -51,8 +51,7 @@ const mergeEvents = (database, getEvents, stringifyEntryCache, cb) => {
       cb(null, database)
     } else {
       const t0 = Date.now()
-      const changedEntries = applyEvents(database.data, events.data)
-      stringifyEntryCache.evictEntries(changedEntries)
+      const changedEntries = applyEvents(database, events.data)
       log.debug(t0, `Applied ${events.data.length} events to ${changedEntries.length} of ${database.data.length} database entries`)
       cb(null, database)
     }

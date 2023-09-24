@@ -1,7 +1,7 @@
 const log = require('@home-gallery/logger')('server.api.database');
 
 const { filterEntriesByQuery, createStringifyEntryCache } = require('@home-gallery/query')
-const { applyEvents } = require('@home-gallery/events')
+const { applyEvents } = require('./events-facade')
 
 const { waitReadWatch } = require('./read-database');
 const { cache } = require('./cache-middleware');
@@ -43,10 +43,14 @@ function databaseApi(eventbus, databaseFilename, getEvents) {
     }
   }
 
-  const clearCaches = () => {
+  const clearCaches = (entries = []) => {
     databaseCache.clear();
     entryCache = {};
-    stringifyEntryCache.evictAll();
+    if (entries.length) {
+      stringifyEntryCache.evictEntries(entries);
+    } else {
+      stringifyEntryCache.evictAll();
+    }
     log.trace(`Cleared caches`);
   }
 
@@ -55,15 +59,16 @@ function databaseApi(eventbus, databaseFilename, getEvents) {
       log.warn(`Received a user action event without a database. Skip event merging for database`);
       return
     }
-    const changedEntries = applyEvents(database.data, [event])
+    const changedEntries = applyEvents(database, [event])
     if (!changedEntries.length) {
       log.debug(`Event did not change current database`);
       return
     }
     log.debug(`Applied user action event to ${changedEntries.length} database entries`);
-    clearCaches()
-    eventbus.emit('server', {
-      action: 'databaseUpdated'
+    clearCaches(changedEntries)
+    eventbus.emit('database', {
+      action: 'updateEntries',
+      entries: changedEntries
     })
 
   })
@@ -73,7 +78,7 @@ function databaseApi(eventbus, databaseFilename, getEvents) {
      * @param {string} databaseFilename
      */
     init: () => {
-      waitReadWatch(databaseFilename, getEvents, stringifyEntryCache, (err, newDatabase) => {
+      waitReadWatch(databaseFilename, getEvents, (err, newDatabase) => {
         if (err) {
           log.error(`Could not read database file ${databaseFilename}: ${err}`);
         } else {
@@ -92,7 +97,8 @@ function databaseApi(eventbus, databaseFilename, getEvents) {
       }
       return entryCache[key]
     },
-    read: (req, res) => databaseCache.middleware(req, res, () => send(req, res))
+    read: (req, res) => databaseCache.middleware(req, res, () => send(req, res)),
+    getDatabase: () => database
   }
 }
 
