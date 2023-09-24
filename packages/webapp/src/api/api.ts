@@ -56,7 +56,7 @@ export const fetchAll = async (limits, onChunk) => {
         if (!database.data || !database.data.length) {
           return;
         }
-        let entries = database.data.map(mapEntriesForBrowser);
+        const entries = database.data;
         onChunk(entries);
         if (entries.length == limit) {
           increaseLimit(offset, limit, chunkStart);
@@ -70,6 +70,8 @@ export const fetchAll = async (limits, onChunk) => {
 
 export const getEvents = () => fetchJsonWorker(`api/events.json`)
 
+export const getTree = async (hash: string) => fetchJsonWorker(`api/database/tree/${hash}.json`)
+
 let eventSourceReconnectTimeout = 1000;
 const eventSourceReconnectTimeoutMax = 2 * 60 * 1000;
 
@@ -82,7 +84,7 @@ export interface ServerEvent {
 
 export declare type ServerEventListener = (event: ServerEvent) => void;
 
-export const eventStream = (onActionEvent: EventListener, onServerEvent: ServerEventListener) => {
+export const eventStream = (onEvent) => {
   const events = new EventSource(`api/events/stream`);
 
   events.addEventListener('open', () => {
@@ -90,14 +92,12 @@ export const eventStream = (onActionEvent: EventListener, onServerEvent: ServerE
   })
 
   events.addEventListener('message', (event: MessageEvent) => {
-    console.log(`Received action event: ${event}`);
     try {
       const data = JSON.parse(event.data);
-      if (data.type == 'userAction') {
-        onActionEvent(data);
-      } else if (data.type == 'server') {
-        onServerEvent(data);
+      if (data.type == 'pong') {
+        console.log(`Connected to server events`);
       }
+      onEvent(data)
     } catch (e) {
       console.log(`Could not read Event: ${e}`);
     }
@@ -106,9 +106,7 @@ export const eventStream = (onActionEvent: EventListener, onServerEvent: ServerE
   events.addEventListener('error', event => {
     console.log(`EventSource error. Try to reconnect ${JSON.stringify(event)}`);
     events.close();
-    setTimeout(() => {
-      eventStream(onActionEvent, onServerEvent);
-    }, eventSourceReconnectTimeout);
+    setTimeout(() => eventStream(onEvent), eventSourceReconnectTimeout);
     eventSourceReconnectTimeout = Math.min(eventSourceReconnectTimeoutMax, eventSourceReconnectTimeout * 2);
   });
 }

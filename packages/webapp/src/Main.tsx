@@ -11,7 +11,7 @@ import { LastLocationProvider } from './utils/lastLocation/LoastLocationProvider
 import { useEntryStore } from './store/entry-store'
 import { useEventStore } from './store/event-store'
 
-import { fetchAll, getEvents, eventStream, mapEntriesForBrowser } from './api/ApiService';
+import { fetchAll, getEvents, eventStream, mapEntriesForBrowser, syncOfflineDatabase, purgeOfflineDatabase, eventBus } from './api/ApiService';
 
 import { AllView } from "./list/All";
 import { SearchView } from './list/Search';
@@ -22,6 +22,8 @@ import { Tags } from './tags/Tags';
 import { Map } from './map';
 import { MediaView } from './single/MediaView';
 import { useAppConfig } from './utils/useAppConfig'
+import { loadDatabase as loadOfflineDatabase, OfflineDatabase } from './offline'
+import { applyEvents } from "@home-gallery/events";
 
 export const Root = () => {
   return (
@@ -31,42 +33,63 @@ export const Root = () => {
 
 export const Main = () => {
     const addEntries = useEntryStore(state => state.addEntries);
-    const initEvents = useEventStore(state => state.initEvents);
-    const addEvent = useEventStore(state => state.addEvent);
+    const addEvents = useEventStore(state => state.addEvents);
+    const reapplyEvents = useEventStore(state => state.reapplyEvents);
     const appConfig = useAppConfig()
-
-    addEntries(appConfig.entries.map(mapEntriesForBrowser));
 
     useEffect(() => {
       const fetchEvents = () => getEvents()
-        .then(events => initEvents(events?.data || []))
+        .then(events => addEvents(events?.data || []))
         .catch(e => {
           console.log(`Could not fetch intitial events: ${e}`);
         })
 
       const onChunk = entries => {
-        addEntries(entries)
+        addEntries(entries.map(mapEntriesForBrowser))
       }
 
-      const subscribeEvents = () => {
-        if (appConfig.disabledServerEvents) {
-          return
-        }
-        eventStream(
-          (event) => addEvent(event),
-          (serverEvent) => {
-            if (serverEvent.action === 'databaseReloaded') {
-              console.log(`Reload database due server event`)
-              fetchAll(chunkLimits, onChunk)
-            }
+      onChunk(appConfig.entries)
+      eventBus.addEventListener('userAction', event => addEvents([event]))
+
+      const onDatabaseReloaded = cb => {
+        eventBus.addEventListener('server', event => {
+          if (event.action === 'databaseReloaded') {
+            console.log(`Reload database due server event`)
+            cb()
           }
-        )
+        })
+
+      }
+      const syncDatabase = (db: OfflineDatabase) => {
+        return syncOfflineDatabase(db, onChunk)
+          .then(() => {
+            console.log(`Load entries via offline database`)
+            reapplyEvents()
+            onDatabaseReloaded(() => syncOfflineDatabase(db, onChunk))
+          })
+          .then(() => purgeOfflineDatabase(db))
       }
 
-      const chunkLimits = [1000, 2000, 4000, 8000, 16000, 32000];
-      fetchAll(chunkLimits, onChunk)
-        .finally(fetchEvents)
-        .finally(subscribeEvents);
+      const loadLegacyDatabase = () => {
+        const chunkLimits = [1000, 2000, 4000, 8000, 16000, 32000];
+        onDatabaseReloaded(() => fetchAll(chunkLimits, onChunk))
+        fetchAll(chunkLimits, onChunk)
+      }
+
+      if (!appConfig.disabledServerEvents) {
+        eventStream()
+      }
+      fetchEvents()
+      if (!appConfig.disabledOfflineDatabase) {
+        loadOfflineDatabase()
+          .then(syncDatabase)
+          .catch(err => {
+            console.log(`Failed to load entries via offline database: ${err}. Use fallback`, err)
+            loadLegacyDatabase()
+          })
+      } else {
+        loadLegacyDatabase()
+      }
     }, []);
 
     const base = document.querySelector('base')?.getAttribute('href') || '/';

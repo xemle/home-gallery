@@ -29,8 +29,8 @@ export interface EventStore {
   events: Event[]
   recentTags: string[]
 
-  initEvents: (events: Event[]) => void
-  addEvent: (event: Event) => void
+  addEvents: (events: Event[]) => void
+  reapplyEvents: () => void
 }
 
 const _applyEvents = (events: Event[]) => {
@@ -54,16 +54,15 @@ export const useEventStore = create<EventStore>((set) => ({
   events: [],
   recentTags: [],
 
-  initEvents: (events: Event[]) => set((state) => {
+  addEvents: (events: Event[]) => set((state) => {
     if (!events.length) {
       return state
     }
     _applyEvents(events)
     return {...state, events, recentTags: getRecentTags(events, [])}
   }),
-  addEvent: (event: Event) => set((state) => {
-    _applyEvents([event])
-    const events = [...state.events, event]
-    return {...state, events, recentTags: getRecentTags(events, state.recentTags)}
+  reapplyEvents: () => set((state) => {
+    _applyEvents(state.events)
+    return state
   }),
 }))

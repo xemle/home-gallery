@@ -11,6 +11,6 @@
       ]
   },
   "include": [
-      "src/webapp/*"
+      "src/**/*.{ts,tsx}"
   ]
 }

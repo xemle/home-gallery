@@ -10,6 +10,7 @@ export interface EntryStore {
   allEntries: Entry[]
   entries: Entry[]
 
+  reset: () => void
   addEntries: (entries: Entry[]) => void
   setEntries: (entries: Entry[]) => void
 }
@@ -19,6 +20,14 @@ const slice = (set) => ({
   allEntries: [],
   entries: [],
 
+  reset: () => set((state) => {
+    return {
+      ...state,
+      id2Entries: {},
+      allEntries: [],
+      entries: []
+    }
+  }),
   addEntries: (entries: Entry[]) => set((state) => {
     if (!entries.length) {
       return state

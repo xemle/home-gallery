@@ -4,13 +4,14 @@ const defaultConfig = {
   entries: [],
   /**
    * List of disabled features
-   * 
+   *
    * - edit: No edit menu button
    * - serverEvents: No subscription to server sent events (SSE)
-   * 
+   * - offlineDatabase: No offline database via IndexedDB
+   *
    * A feature will be expanded to `disabledEdit: true`
    */
-  disabled: []
+  disabled: [],
 }
 
 export const useAppConfig = () => {

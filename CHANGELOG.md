@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- webapp: Add offline database via IndexedDB
+
 ### Changed
 
 - extractor: Set video file extension for custom ffmpeg args
