@@ -27,11 +27,11 @@
     "build": "npm-run-all -p build:js build:types",
     "build:js": "node build.js",
     "build:types": "npx tsc -d --emitDeclarationOnly",
-    "test": "tap --no-coverage",
+    "test": "tap",
     "watch": "npm-run-all -p watch:js watch:types",
     "watch:js": "node build.js --watch",
     "watch:types": "npx tsc -d --emitDeclarationOnly --watch",
-    "watch:test": "tap --watch"
+    "watch:test": "tap repl w"
   },
   "dependencies": {
     "caxa": "^1.0.0",

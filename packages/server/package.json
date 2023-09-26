@@ -12,8 +12,8 @@
     "postbuild": "cpy \"../webapp/dist/**\" dist/public",
     "serve": "node index.js",
     "watch": "onchange -d 200 \"src/**\" -- npm run build",
-    "test": "tap --no-check-coverage --no-coverage-report src/*/*.test.js",
-    "watch:test": "tap --no-check-coverage --no-coverage-report -w src/*/*.test.js"
+    "test": "tap",
+    "watch:test": "tap repl w"
   },
   "keywords": [
     "HomeGallery",
