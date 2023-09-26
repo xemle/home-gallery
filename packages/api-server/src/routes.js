@@ -4,7 +4,11 @@ const asyncMiddleware = require('./server/async-middleware');
 const readJpeg = require('./utils/read-jpeg');
 const toSha1 = require('./utils/sha1');
 
+const t0 = Date.now()
 const routes = (app, maxBytes, modelConfig, embeddings, objects, faces) => {
+  app.get('/health', (_, res) => {
+    res.send({health: 'OK', uptime: Date.now() - t0})
+  })
   app.post('/embeddings', [
     isMimeMiddleware('image/jpeg'),
     binaryBodyMiddleware(maxBytes),

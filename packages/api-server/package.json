@@ -4,7 +4,9 @@
   "description": "Public api server for HomeGallery",
   "main": "index.js",
   "scripts": {
-    "serve": "node index.js"
+    "serve": "node index.js",
+    "test": "tap",
+    "watch:test": "tap repl w"
   },
   "keywords": [
     "HomeGallery",
