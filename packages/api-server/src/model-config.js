@@ -1,7 +1,7 @@
-const path = require('path');
+const path = require('path')
 
-const nodeModulesDir = process.env.NODE_MODULES_DIR || path.resolve(__dirname, '../node_modules')
-const faceApiModelDir = process.env.FACE_API_MODEL_DIR || path.resolve(nodeModulesDir, '@vladmandic/face-api/model')
+const faceApiPackageDir = path.dirname(require.resolve('@vladmandic/face-api/package.json'))
+const faceApiModelDir = process.env.FACE_API_MODEL_DIR || path.resolve(faceApiPackageDir, 'model')
 const modelDir = process.env.MODEL_DIR || path.resolve(__dirname, '../models')
 
 const modelConfig = {
