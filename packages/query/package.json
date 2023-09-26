@@ -13,8 +13,8 @@
     "watch": "npm-run-all -p watch:js watch:nearley",
     "watch:js": "onchange \"src/**/*.js\" --delay 500 -- npm run build",
     "watch:nearley": "onchange \"src/parser/*.ne\" --delay 500 -- npm run compile",
-    "test": "tap --no-check-coverage --no-coverage-report src/*.test.js src/**/*.test.js",
-    "watch:test": "tap --no-check-coverage --no-coverage-report -w src/*.test.js src/**/*.test.js"
+    "test": "tap",
+    "watch:test": "tap repl w"
   },
   "keywords": [
     "HomeGallery",

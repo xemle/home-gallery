@@ -17,9 +17,9 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "cpy \"src/**/!(*.test.js)\" dist",
-    "test": "tap --no-check-coverage --no-coverage-report src/*.test.js src/**/*.test.js",
+    "test": "tap",
     "watch": "onchange \"src/**\" -- npm run build",
-    "watch:test": "tap --no-check-coverage --no-coverage-report -w src/*.test.js src/**/*.test.js"
+    "watch:test": "tap repl w"
   },
   "dependencies": {
     "@home-gallery/index": "file:../index",

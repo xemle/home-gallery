@@ -10,9 +10,9 @@
     "clean": "rimraf dist",
     "build": "cpy \"src/**/!(*.test.js)\" dist",
     "postbuild": "cpy \"../webapp/dist/**\" dist/public",
-    "test": "tap --no-check-coverage --no-coverage-report src/*.test.js",
+    "test": "tap ",
     "watch": "onchange \"src/**\" -- npm run build",
-    "watch:test": "tap --no-check-coverage --no-coverage-report -w src/*.test.js"
+    "watch:test": "tap repl w"
   },
   "keywords": [
     "HomeGallery",
