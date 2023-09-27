@@ -1,11 +1,11 @@
+import t from 'tap'
+
 import { applyEvents } from './apply-events';
 import { Taggable } from './taggable';
-import { expect } from 'chai';
-import 'mocha';
 import { Event } from './models';
 
-describe('applyEvents()', () => {
-  it('should add one tag', () => {
+t.test('applyEvents()', async t => {
+  t.test('should add one tag', async t => {
     const entries: Taggable[] = [{id: '1'}]
     const events: Event[] = [
       {
@@ -22,11 +22,11 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result).to.eql([{id: '1', updated: '2022-02-22', tags: ['foo'], appliedEventIds: ['5']}]);
-    expect(entries[0]).to.eql(result[0]);
+    t.same(result, [{id: '1', updated: '2022-02-22', tags: ['foo'], appliedEventIds: ['5']}]);
+    t.same(entries[0], result[0]);
   });
 
-  it('should add one tag to tow entries with same id', () => {
+  t.test('should add one tag to tow entries with same id', async t => {
     const entries: Taggable[] = [{id: '1'}, {id: '1'}]
     const events: Event[] = [
       {
@@ -43,11 +43,11 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result).to.eql([{id: '1', updated: '2022-02-22', tags: ['foo'], appliedEventIds: ['5']}, {id: '1', updated: '2022-02-22', tags: ['foo'], appliedEventIds: ['5']}]);
-    expect(entries[0]).to.eql(result[0]);
+    t.same(result, [{id: '1', updated: '2022-02-22', tags: ['foo'], appliedEventIds: ['5']}, {id: '1', updated: '2022-02-22', tags: ['foo'], appliedEventIds: ['5']}]);
+    t.same(entries[0], result[0]);
   });
 
-  it('should add two tags', () => {
+  t.test('should add two tags', async t => {
     const entries: Taggable[] = [{id:'1', updated: '2022-03-06'}];
     const events: Event[] = [
       {
@@ -68,11 +68,11 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result).to.eql([{id: '1', updated: '2022-03-06', tags: ['foo', 'bar'], appliedEventIds: ['6']}]);
-    expect(entries[0]).to.eql(result[0]);
+    t.same(result, [{id: '1', updated: '2022-03-06', tags: ['foo', 'bar'], appliedEventIds: ['6']}]);
+    t.same(entries[0], result[0]);
   });
 
-  it('should remove one tag', () => {
+  t.test('should remove one tag', async t => {
     const entries: Taggable[] = [{id: '1', updated: '2022-02-22', tags: ['foo', 'bar']}];
     const events: Event[] = [
       {
@@ -88,11 +88,11 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result).to.eql([{id: '1', updated: '2022-02-22', tags: ['bar'], appliedEventIds: ['7']}]);
-    expect(entries[0]).to.eql(result[0]);
+    t.same(result, [{id: '1', updated: '2022-02-22', tags: ['bar'], appliedEventIds: ['7']}]);
+    t.same(entries[0], result[0]);
   });
 
-  it('should remove two tags', () => {
+  t.test('should remove two tags', async t => {
     const entries: Taggable[] = [{id: '1', updated: '2022-01-01', tags: ['foo', 'bar']}];
     const events: Event[] = [
       {
@@ -113,11 +113,11 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result).to.eql([{id: '1', updated: '2022-02-22', tags: [], appliedEventIds: ['8']}]);
-    expect(entries[0]).to.eql(result[0]);
+    t.same(result, [{id: '1', updated: '2022-02-22', tags: [], appliedEventIds: ['8']}]);
+    t.same(entries[0], result[0]);
   });
 
-  it('should not apply event', () => {
+  t.test('should not apply event', async t => {
     const entries: Taggable[] = [{id: '1', updated: '2022-01-01', tags: ['foo'], appliedEventIds: ['9']}];
     const events: Event[] = [
       {
@@ -134,11 +134,11 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result).to.eql([]);
-    expect(entries[0]).to.eql({id: '1', updated: '2022-01-01', tags: ['foo'], appliedEventIds: ['9']});
+    t.same(result, []);
+    t.same(entries[0], {id: '1', updated: '2022-01-01', tags: ['foo'], appliedEventIds: ['9']});
   });
 
-  it('should not add existing tag', () => {
+  t.test('should not add existing tag', async t => {
     const entries: Taggable[] = [{id: '1', updated: '2022-01-01', tags: ['foo']}];
     const events: Event[] = [
       {
@@ -155,11 +155,11 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result).to.eql([]);
-    expect(entries[0]).to.eql({id: '1', updated: '2022-01-01', tags: ['foo'], appliedEventIds: ['10']});
+    t.same(result, []);
+    t.same(entries[0], {id: '1', updated: '2022-01-01', tags: ['foo'], appliedEventIds: ['10']});
   });
 
-  it('should add and remove tag', () => {
+  t.test('should add and remove tag', async t => {
     const entries: Taggable[] = [{id: '1'}];
     const events: Event[] = [
       {
@@ -179,11 +179,11 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result).to.eql([{id: '1', tags: [], appliedEventIds: ['8']}]);
-    expect(entries[0]).to.eql(result[0]);
+    t.same(result, [{id: '1', tags: [], appliedEventIds: ['8']}]);
+    t.same(entries[0], result[0]);
   });
 
-  it('should change only one entry', () => {
+  t.test('should change only one entry', async t => {
     const entries: Taggable[] = [{id: '1'}];
     const events: Event[] = [
       {
@@ -210,6 +210,6 @@ describe('applyEvents()', () => {
       }
     ]
     const result = applyEvents(entries, events);
-    expect(result.length).to.eql(1);
+    t.same(result.length, 1);
   });
 });
