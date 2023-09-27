@@ -2,6 +2,7 @@
 .vscode
 .nyc_output
 build
+bundle-debug.log
 data
 dist
 node_modules
