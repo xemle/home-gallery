@@ -7,6 +7,13 @@ import { useEntryStore } from '../store/entry-store';
 
 
 export const Tags = () => {
+  const escapeSearchValue = value => /[\s]/.test(value) ? `"${value}"` : value
+
+  const searchLink = (value) => {
+    let query = `tag:${escapeSearchValue(value)}`
+    return query
+  }
+
   const allEntries = useEntryStore(state => state.allEntries);
 
   const tags = useMemo(() => {
@@ -39,8 +46,9 @@ export const Tags = () => {
       <h2 style={{marginTop: '40px'}}>Tags</h2>
       <ul className="menu">
         {tags.map(tag => {
-          return <li key={tag.tag}>
-            <Link to={`/search/${tag.tag}`}><i className="fas fa-tag"></i> {tag.tag} - {tag.count}</Link>
+            let query = searchLink(tag.tag)
+            return <li key={tag.tag}>
+            <Link to={`/search/${query}`}><i className="fas fa-tag"></i> {tag.tag} - {tag.count}</Link>
           </li>
         })}
       </ul>
