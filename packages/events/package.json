@@ -8,10 +8,14 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "prebuild": "npm run clean",
-    "build": "tsc",
-    "watch": "tsc -w",
-    "test": "mocha -r esbuild-register \"src/**/*.test.ts\""
+    "build": "npm-run-all -p build:js build:types",
+    "build:js": "node build.js",
+    "build:types": "npx tsc -d --emitDeclarationOnly",
+    "test": "tap",
+    "watch": "npm-run-all -p watch:js watch:types",
+    "watch:js": "node build.js --watch",
+    "watch:types": "npx tsc -d --emitDeclarationOnly --watch",
+    "watch:test": "tap repl w"
   },
   "keywords": [
     "HomeGallery",
