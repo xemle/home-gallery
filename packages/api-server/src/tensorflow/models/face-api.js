@@ -1,4 +1,4 @@
-const faceapi = require('@vladmandic/face-api');
+const faceapi = require('@vladmandic/face-api/dist/face-api.node-cpu')
 
 const toPoint = p => { return {x: p.x, y: p.y } }
 
