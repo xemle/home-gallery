@@ -98,24 +98,6 @@ steps:
     event:
     - push
 
-- name: test:e2e - node v14
-  image: node:14-alpine
-  commands:
-  - apk add --no-cache perl
-  - npm run test:e2e -- --tags run
-  environment:
-    TZ: Europe/Berlin
-    GAUGE_HOME: /drone/src/.gauge # Fix for v14. Reuse gauge plugins from v18/v16
-  when:
-    branch:
-    - master
-    - develop
-    # execute also on tagged feature/fix branches
-    - feature/*e2e*
-    - fix/*e2e*
-    event:
-    - push
-
 - name: notify
   image: sfelis/drone-email
   settings:
