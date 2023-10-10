@@ -2,6 +2,7 @@ const format = require('./format')
 const fs = require('./fs')
 const os = require('./os')
 const utils = require('./utils')
+const createHash = require('./utils/hash')
 
 const {
   formatDate,
@@ -65,12 +66,13 @@ module.exports = {
     run,
     spawn,
 
-  utils,
+  utils: {...utils, createHash},
     callbackify,
     debounce,
     forEach,
     lruCache,
     promisify,
     rateLimit,
-    serialize
+    serialize,
+    createHash
 }
