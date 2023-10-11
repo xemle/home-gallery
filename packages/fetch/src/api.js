@@ -5,9 +5,11 @@ const { pipeline } = require('stream')
 const fetch = require('node-fetch')
 const https = require('https');
 
-const { isDatabaseTypeCompatible, HeaderType: DatabaseHeaderType } = require('@home-gallery/database')
-
+const { promisify } = require('@home-gallery/common')
+const { isDatabaseTypeCompatible, HeaderType: DatabaseHeaderType, migrate } = require('@home-gallery/database')
 const { isEventTypeCompatible, HeaderType: EventHeaderType } = require('@home-gallery/events')
+
+const migrateAsync = promisify(migrate)
 
 const log = require('@home-gallery/logger')('fetch.api')
 
@@ -52,7 +54,7 @@ const fetchDatabase = async (serverUrl, {query, insecure} = {}) => {
         throw createIncompatibleError(database, DatabaseHeaderType)
       }
       log.info(t0, `Fetched database with ${database?.data?.length || 0} entries from remote ${serverUrl}`)
-      return database
+      return migrateAsync(database)
     })
 }
 

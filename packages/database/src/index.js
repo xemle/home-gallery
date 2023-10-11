@@ -1,4 +1,4 @@
-const { HeaderType, isDatabaseTypeCompatible, readDatabase, readOrCreateDatabase, writeDatabase, writeDatabasePlain } = require('./database')
+const { HeaderType, isDatabaseTypeCompatible, readDatabase, readOrCreateDatabase, writeDatabase, writeDatabasePlain, migrate } = require('./database')
 const buildDatabase = require('./build');
 const { mergeEntries } = require('./merge/merge-entry')
 
@@ -9,6 +9,7 @@ module.exports = {
   mergeEntries,
   readDatabase,
   readOrCreateDatabase,
+  migrate,
   writeDatabase,
   writeDatabasePlain
 };

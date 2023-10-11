@@ -1,6 +1,7 @@
 const { readJsonGzip } = require('@home-gallery/common');
 
 const { HeaderType, isDatabaseTypeCompatible } = require('./header')
+const { migrate } = require('./migrate')
 
 function readDatabase(filename, cb) {
   readJsonGzip(filename, (err, database) => {
@@ -9,7 +10,7 @@ function readDatabase(filename, cb) {
     } else if (!isDatabaseTypeCompatible(database && database.type)) {
       return cb(new Error(`Incompatible database format ${database && database.type || 'unknown'} of file ${filename}. Expect ${HeaderType}`))
     }
-    cb(null, database);
+    migrate(database, cb)
   });
 }
 

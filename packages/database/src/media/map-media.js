@@ -1,4 +1,5 @@
 const { through } = require('@home-gallery/stream');
+const { serialize, createHash } = require('@home-gallery/common');
 
 const log = require('@home-gallery/logger')('database.media')
 
@@ -33,6 +34,7 @@ const createMedia = (entry, updated) => {
 
   const media = Object.assign({
     id: entry.sha1sum,
+    hash: '',
     type: entry.type,
     updated,
     date,
@@ -44,6 +46,7 @@ const createMedia = (entry, updated) => {
     faces
   }, exif, video, address, geo, similarityHash)
 
+  media.hash = createHash(serialize(media, 'hash'))
   return media
 }
 
