@@ -8,8 +8,12 @@ const injectState = (database, outputDirectory, basePath, disableEdit, cb) => {
   const t0 = Date.now();
   const indexFilename = path.join(outputDirectory, basePath, 'index.html')
   rewriteFile(indexFilename, data => {
+    const disabled = ['offlineDatabase']
+    if (disableEdit) {
+      disabled.push('edit', 'serverEvent')
+    }
     const state = {
-      disabled: disableEdit ? ['edit', 'serverEvent'] : [],
+      disabled,
       entries: database.data.slice(0, 50)
     };
     return data.replace('window.__homeGallery={}', `window.__homeGallery=${JSON.stringify(state)}`);
