@@ -24,7 +24,7 @@ const Cell = ({height, width, index, item, items}) => {
   const navigate = useNavigate();
 
   const widthFactor = getWidthFactor(width, height);
-  const previewUrl = getHigherPreviewUrl(previews, width * widthFactor);
+  const previewUrl = getHigherPreviewUrl(previews, width * widthFactor * (window.devicePixelRatio || 1));
 
   const showImage = () => {
     navigate(`/view/${shortId}`, {state: {listLocation: location, index}});

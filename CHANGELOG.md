@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- webapp: Fix preview size quality by devicePixelRatio
 - fetch: Fix reconnect on unknown host
 
 ## [1.13.1] - 2023-09-30
