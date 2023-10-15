@@ -111,7 +111,12 @@ const connectEventStream = (url, { insecure }, onEvent) => {
   let retries = 0
   let timer = false
 
-  source.on('connected', () => log.debug(`Connected to the remote event stream`))
+  source.on('connected', () => {
+    log.debug(`Connected to the remote event stream`)
+    if (typeof onEvent == 'function') {
+      onEvent({ data: { type: 'connect' }})
+    }
+  })
   source.on('event', event => {
     retries = 0
     if (typeof onEvent == 'function') {

@@ -55,6 +55,7 @@ const fetchRemote = async (serverUrl, options) => {
 const fetchWatchFacade = async (options) => {
   let hasNewDatabase = false
   let isFetching = false
+  let fetchOnReconnect = false
 
   const doFetch = async () => {
     if (isFetching) {
@@ -84,7 +85,15 @@ const fetchWatchFacade = async (options) => {
       log.debug(event, `Receiving database reload event`)
       log.info(`Fetching remote due remote database change`)
       hasNewDatabase = true
-      doFetch()
+      doFetch().catch(err => {
+        log.warn(err, `Failed to fetch: ${err}`)
+      })
+    } else if (fetchOnReconnect && event?.data?.type == 'connect') {
+      log.info(`Fetching remote due reconnection to remote`)
+      fetchOnReconnect = false
+      doFetch().catch(err => {
+        log.warn(err, `Failed to fetch: ${err}`)
+      })
     }
   }
 
@@ -92,7 +101,10 @@ const fetchWatchFacade = async (options) => {
     if (options.watch) {
       log.info(`Fetch remote in watch mode from ${options.serverUrl}`)
       connectEventStream(options.serverUrl, { insecure: options.insecure }, onEvent)
-      doFetch()
+      doFetch().catch(err => {
+        log.warn(err, `Failed to fetch remote ${err}. Retry fetch on reconnection`)
+        fetchOnReconnect = true
+      })
       process.once('SIGINT', () => {
         log.info(`Received SIGINT. Stop watch mode`)
         resolve()
