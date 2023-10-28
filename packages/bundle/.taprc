@@ -1,9 +1,6 @@
 disable-coverage: true
 allow-empty-coverage: true
 allow-incomplete-coverage: true
-node-arg:
-  - --loader
-  - tsx
 include:
   - 'src/*.test.ts'
 reporter: tap

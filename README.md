@@ -168,7 +168,7 @@ is supported by various platforms such as Linux (also Raspberry PIs), Mac and Wi
 
 For most cases a customized environment should be sufficient with
 
-* [node](https://nodejs.org) version 18 LTS (or 16 old LTS)
+* [node](https://nodejs.org) version 20 LTS (or 18 old LTS)
 * perl (Linux)
 
 ### Setup
