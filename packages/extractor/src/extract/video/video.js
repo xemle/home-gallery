@@ -12,12 +12,12 @@ function convertVideo(storage, entry, options, cb) {
 
   const {ffprobePath, ffmpegPath, videoSuffix} = options
   const t0 = Date.now();
-  const input = entry.src;
   const file = storage.getEntryFilename(entry, videoSuffix);
   const tmpFile = `${file}.tmp`;
   const intervalMs = 30*1000;
   let last = Date.now();
-  const command = ffmpeg(input);
+  const ffmpegArgs = getFfmpegArgs(entry, options)
+  const command = ffmpeg(entry.src);
   command.setFfmpegPath(ffmpegPath);
   command.setFfprobePath(ffprobePath);
   command
@@ -33,10 +33,9 @@ function convertVideo(storage, entry, options, cb) {
         cb();
       })
     })
+    .addOptions(ffmpegArgs)
     .output(tmpFile)
-    .outputOptions('-y')
-    .outputOptions(getFfmpegArgs(entry, options))
-    .on('start', commandLine => log.debug(`Start video conversion via ffmpeg command: ${commandLine}`))
+    .on('start', commandLine => log.debug({ffmpegArgs}, `Start video conversion via ffmpeg command: ${commandLine}`))
     .on('progress', progress => {
       const now = Date.now();
       if (now > last + intervalMs) {
