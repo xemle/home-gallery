@@ -3,17 +3,11 @@ const { ProcessManager } = require('@home-gallery/common')
 const { spawnCli } = require('../utils/spawn-cli')
 
 const log = require('@home-gallery/logger')('cli.task.server')
-
-const getConfigEnv = options => {
-  const { configFile, autoConfigFile } = options
-  return !autoConfigFile ? {GALLERY_CONFIG: configFile} : {}
-}
-
 const pm = new ProcessManager()
 
 const startServer = async options => {
   await new Promise((resolve, reject) => {
-    serverProcess = spawnCli(['server'], {env: getConfigEnv(options)})
+    serverProcess = spawnCli(['server'], {env: options.configEnv})
     pm.addProcess(serverProcess, {terminateTimeout: 15 * 1000})
 
     serverProcess.once('SIGINT', () => {

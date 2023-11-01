@@ -24,17 +24,22 @@ const createConfig = async argv => {
   return initConfig(configFile, sourceConfigFile, source)
 }
 
+const getConfigEnv = options => {
+  const { configFile, autoConfigFile } = options
+  return !autoConfigFile && configFile ? {GALLERY_CONFIG: configFile} : {}
+}
+
 const runServer = options => {
   log.info(`Starting server`)
   return startServer(options)
 }
 
-const runImport = (config, options) => {
-  const onlineSources = config.sources.filter(source => !source.offline)
+const runImport = (options) => {
+  const onlineSources = options.config.sources.filter(source => !source.offline)
   const sourceDirs = onlineSources.map(source => source.dir)
 
   log.info(`Import online sources: ${sourceDirs.join(', ')}`)
-  return watchSources(config, onlineSources, options)
+  return watchSources(onlineSources, options)
 }
 
 const command = {
@@ -72,7 +77,9 @@ const command = {
       'Start the webserver',
       (yargs) => yargs,
       (argv) => load(argv.config, true)
-          .then(runServer)
+          .then(configOptions => {
+            runServer({...configOptions, configEnv: getConfigEnv(configOptions)})
+          })
           .then(() => log.info(`Have a good day...`))
           .catch(err => log.error(err, `Error: ${err}`))
       )
@@ -122,8 +129,10 @@ const command = {
         },
       }),
       (argv) => load(argv.config, true)
-          .then(({config}) => {
+          .then((configOptions) => {
             const options = {
+              ...configOptions,
+              configEnv: getConfigEnv(configOptions),
               initialImport: argv.initial,
               incrementalUpdate: argv.update,
               smallFiles: argv.smallFiles,
@@ -133,7 +142,7 @@ const command = {
               watchPollInterval: argv.watchPollInterval,
               importOnWatchStart: argv.importOnStart
             }
-            return runImport(config, options)
+            return runImport(options)
           })
           .then(() => log.info(`Import command completed`))
           .catch(err => log.error(err, `Error: ${err}`))

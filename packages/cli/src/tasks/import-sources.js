@@ -20,7 +20,7 @@ const updateIndex = async (source, options) => {
   }
   addLimits && args.push('--add-limits', addLimits || '200,500,1.25,8000')
   journal && args.push('--journal', journal)
-  await pm.runCli(args, 15 * 1000)
+  await pm.runCli(args, {env: options.configEnv, terminateTimeout: 15 * 1000})
 }
 
 const updateIndices = async (sources, options) => {
@@ -32,7 +32,7 @@ const updateIndices = async (sources, options) => {
 const deleteJournal = async (source, options) => {
   const { journal } = options
   const args = ['index', 'journal', '--index', source.index, '--journal', journal, '-r']
-  await pm.runCli(args)
+  await pm.runCli(args, {env: options.configEnv})
 }
 
 const deleteJournals = async (sources, options) => {
@@ -44,16 +44,16 @@ const deleteJournals = async (sources, options) => {
   }
 }
 
-const extract = async (config, sources, options) => {
+const extract = async (sources, options) => {
   if (!sources.length) {
     log.warn(`Sources list is empty. No files to extract`);
     return;
   }
   const args = ['extract'];
-  const extractor = config.extractor || {};
+  const extractor = options.config.extractor || {};
   sources.forEach(source => args.push('--index', source.index));
 
-  args.push('--storage', config.storage.dir)
+  args.push('--storage', options.config.storage.dir)
 
   if (extractor.apiServer) {
     // for version <= v1.4.1 apiServer was a string for api server url
@@ -80,10 +80,10 @@ const extract = async (config, sources, options) => {
     args.push('--limit', options.limit || 0)
   }
 
-  await pm.runCli(args)
+  await pm.runCli(args, {env: options.configEnv})
 }
 
-const createDatabase = async (config, sources, options) => {
+const createDatabase = async (sources, options) => {
   const args = ['database', 'create'];
 
   sources.forEach(source => args.push('--index', source.index));
@@ -91,14 +91,14 @@ const createDatabase = async (config, sources, options) => {
     args.push('--journal', options.journal)
   }
 
-  const storage = config.storage || {}
-  args.push('--storage', storage.dir, '--database', config.database.file);
+  const storage = options.config.storage || {}
+  args.push('--storage', storage.dir, '--database', options.config.database.file);
   const excludes = storage.excludes || [];
   excludes.forEach(exclude => args.push('--exclude', exclude))
 
-  const maxMemory = config.database?.maxMemory || 2048;
+  const maxMemory = options.config.database?.maxMemory || 2048;
   const nodeArgs = maxMemory ? [`--max-old-space-size=${maxMemory}`] : [];
-  await pm.runCli(args, 2000, nodeArgs);
+  await pm.runCli(args, {env: options.configEnv, terminateTimeout: 2000, nodeArgs});
 }
 
 const catchIndexLimitExceeded = ({code}) => {
@@ -126,7 +126,7 @@ const generateJournal = () => {
   return `${pad2(now.getUTCMonth() + 1)}${pad2(now.getUTCDate())}-${generateId(4)}`
 }
 
-const importSources = async (config, sources, options) => {
+const importSources = async (sources, options) => {
   let processing = true
   const { initialImport, incrementalUpdate } = options
   const withJournal = initialImport || incrementalUpdate
@@ -138,8 +138,8 @@ const importSources = async (config, sources, options) => {
     await updateIndices(sources, importOptions)
       .then(() => processing = false)
       .catch(catchIndexLimitExceeded)
-    await extract(config, sources, importOptions)
-    await createDatabase(config, sources, importOptions)
+    await extract(sources, importOptions)
+    await createDatabase(sources, importOptions)
     await deleteJournals(sources, importOptions)
 
     if (processing) {
@@ -165,25 +165,25 @@ const batchProfiles = [
   }
 ]
 
-const batchImport = async (config, sources, options) => {
+const batchImport = async (sources, options) => {
   const { initialImport } = options
   const t0 = Date.now()
   if (!initialImport) {
-    await importSources(config, sources, options)
+    await importSources(sources, options)
   } else {
     log.info(`Run incremental import in batch mode of different file sizes`)
     for (const profile of batchProfiles) {
       log.info(`Run batch import: ${profile.description}`)
-      await importSources(config, sources, {...options, ...profile})
+      await importSources(sources, {...options, ...profile})
     }
   }
   log.debug(t0, `Import of online sources finished`)
 }
 
-const watchSources = async (config, sources, options) => {
+const watchSources = async (sources, options) => {
   const { watch, watchDelay, watchMaxDelay, watchPollInterval, importOnWatchStart } = options
   if (!watch) {
-    return batchImport(config, sources, options)
+    return batchImport(sources, options)
   }
 
   let isImporting = false
@@ -210,7 +210,7 @@ const watchSources = async (config, sources, options) => {
     }
     isImporting = true
     fileChangeCount = 0
-    return batchImport(config, sources, options)
+    return batchImport(sources, options)
       .then(() => {
         isImporting = false
         if (fileChangeCount > 0) {

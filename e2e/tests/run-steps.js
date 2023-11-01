@@ -13,6 +13,12 @@ step("Set test env", async () => {
   })
 })
 
+step("Set test cache env", async () => {
+  addCliEnv({
+    GALLERY_CACHE_DIR: getBaseDir()
+  })
+})
+
 step("Init config", async () => {
   await runCli(['run', 'init', '--config', getConfigFilename(), '--source', getFilesDir()])
 })
@@ -54,12 +60,9 @@ step("Set config <key> to <value>", async (key, jsonValue) => {
   await writeConfig(filename, config)
 })
 
-step("Run import with <args>", async (args) => {
-  const argList = args.split(/\s+/)
-  await runCli(['run', 'import', '--config', getConfigFilename(), ...argList])
-})
-
 const runImport = async args => await runCli(['run', 'import', '--config', getConfigFilename(), ...args])
+
+step("Run import with <args>", async (args) => runImport(args.split(/\s+/)))
 
 step("Run intital import", async () => runImport(['--initial']))
 
