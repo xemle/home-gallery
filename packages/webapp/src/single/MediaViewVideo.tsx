@@ -4,6 +4,7 @@ import Hammer from 'hammerjs'
 
 import { getHigherPreviewUrl } from '../utils/preview'
 import { usePreviewSize } from "./usePreviewSize";
+import { classNames } from "../utils/class-names";
 
 export const MediaViewVideo = (props) => {
   const { media, dispatch } = props
@@ -87,23 +88,14 @@ export const MediaViewVideo = (props) => {
     }
   }, [ref, gestureOverlay])
 
-  const overlayStyle = {
-    display: isPlaying ? 'none' : 'block',
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    bottom: 40,
-    right: 0
-  }
-
   return (
     <>
-      <div className="mediaView -video">
-        <video ref={ref} className="mediaView__media" controls poster={posterUrl}>
+      <div className="flex items-center justify-center w-full h-full">
+        <video ref={ref} controls poster={posterUrl} className="w-full h-full">
           <source src={videoUrl} type={videoMime} />
           No native video element support. Watch video file from <a href={videoUrl}>here</a>
         </video>
-        <div ref={gestureOverlay} style={overlayStyle}></div>
+        <div ref={gestureOverlay} className={classNames('absolute top-0 left-0 right-0 bottom-14 md:bottom-18', {'hidden': isPlaying})}></div>
       </div>
     </>
   )

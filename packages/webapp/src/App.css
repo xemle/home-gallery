@@ -1,0 +1,5 @@
+@import 'leaflet/dist/leaflet';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

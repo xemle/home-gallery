@@ -20,7 +20,7 @@ const tagToAction = (tag: Tag): EventAction => {
 
 export const addTags = async (entryIds: string[], tags: Tag[]) => {
   const actions = tags.map(tagToAction);
-  const event: Event = {id: uuidv4(), type: 'userAction', targetIds: entryIds, actions };
+  const event: Event = {type: 'userAction', id: uuidv4(), targetIds: entryIds, actions };
   return pushEvent(event);
 }
 

@@ -1,13 +1,12 @@
 import * as React from "react";
 import { useState, useMemo } from 'react';
+import * as icons from '@fortawesome/free-solid-svg-icons'
+
 import { useEditModeStore, ViewMode } from "../store/edit-mode-store";
 
-import { SearchNavBar } from './search/SearchNavBar';
-import { MultiTagDialog } from '../dialog/tag-dialog';
-import { addTags } from '../api/ApiService';
+import { NavItem } from "./NavItem";
 
-export const EditNavBar = () => {
-  const [dialogVisible, setDialogVisible] = useState(false);
+export const EditNavBar = ({showDialog}) => {
   const viewMode = useEditModeStore(state => state.viewMode)
 
   const showSelected = useEditModeStore(state => state.showSelected);
@@ -24,31 +23,47 @@ export const EditNavBar = () => {
     setViewMode(viewMode === ViewMode.VIEW ? ViewMode.EDIT : ViewMode.VIEW)
   }
 
-  const onSubmit = ({tags}) => {
-    const entryIds = Object.entries(selectedIds).filter(([_, selected]) => selected).map(([id]) => id)
-    addTags(entryIds, tags).then(() => {
-      setDialogVisible(false);
-    })
-
-    return false;
-  }
-
   const selecedCount = useMemo(count, [selectedIds])
+
+  const items = [
+    {
+      icon: icons.faArrowLeft,
+      text: 'Back',
+      action: toggleViewMode
+    },
+    {
+      icon: icons.faUndo,
+      text: 'Reset all',
+      action: reset
+    },
+    {
+      icon: icons.faFolder,
+      text: 'All',
+      action: selectAll
+    },
+    {
+      icon: icons.faExchangeAlt,
+      text: 'invert',
+      action: invert
+    },
+    {
+      icon: icons.faEye,
+      text: 'View selected',
+      action: toggleShowSelected
+    },
+    {
+      icon: icons.faCheck,
+      text: `Edit ${selecedCount} media`,
+      smText: `${selecedCount}`,
+      action: showDialog
+    },
+  ]
+
   return (
     <>
-      <SearchNavBar>
-        <div className="nav_group">
-          <a className="nav_item link" onClick={toggleViewMode}><i className="fas fa-arrow-left"></i> <span className="hide-sm">Back</span></a>
-          <a className="nav_item link" onClick={reset}><i className="fas fa-undo"></i> <span className="hide-sm">Reset all</span></a>
-          <a className="nav_item link" onClick={selectAll}><i className="fas fa-folder"></i> <span className="hide-sm">All</span></a>
-          <a className="nav_item link" onClick={invert}><i className="fas fa-exchange-alt"></i> <span className="hide-sm">Invert</span></a>
-          <a className={`nav_item link ${showSelected ? '-active' : ''}`} onClick={toggleShowSelected}><i className="fas fa-eye"></i> <span className="hide-sm">View selected</span></a>
-          <a className="nav_item link" onClick={() => setDialogVisible(true)}><i className="fas fa-check"></i> <span className="hide-sm">{`Edit ${selecedCount} media`}</span><span className="hide-md">{selecedCount}</span></a>
-        </div>
-      </SearchNavBar>
-      { dialogVisible &&
-        <MultiTagDialog visible={dialogVisible} onCancel={() => setDialogVisible(false)} onSubmit={onSubmit} />
-      }
+      {items.map((item, key) => (
+        <NavItem key={key} onClick={item.action} icon={item.icon} text={item.text} smText={item.smText} />
+      ))}
     </>
   )
 }

@@ -2,12 +2,14 @@ import * as React from "react";
 import {
   useNavigate
 } from "react-router-dom";
+import * as icons from '@fortawesome/free-solid-svg-icons'
+
 import { useSearchStore } from "../store/search-store";
 import { useEditModeStore, ViewMode } from "../store/edit-mode-store";
 
-import { SearchNavBar } from './search/SearchNavBar';
 import useListLocation from '../utils/useListLocation'
 import { useAppConfig } from "../utils/useAppConfig";
+import { NavItem } from "./NavItem";
 
 export const ViewNavBar = ({disableEdit}) => {
   const search = useSearchStore(state => state.search);
@@ -17,53 +19,58 @@ export const ViewNavBar = ({disableEdit}) => {
   const listLocation = useListLocation()
   const appConfig = useAppConfig()
 
-  const dispatch = (action) => {
-    switch (action.type) {
-      case 'all': {
-        navigate('/');
+  const items = [
+    {
+      icon: icons.faGlobe,
+      text: 'Show All',
+      action: () => {
+        navigate('/')
         search({type: 'none'});
-        break;
-      }
-      case 'years': {
-        navigate('/years');
-        break;
-      }
-      case 'video': {
-        navigate('/search/type:video');
-        break;
-      }
-      case 'edit': {
-        if (disableEdit) {
+      },
+      disabled: false,
+    },
+    {
+      icon: icons.faClock,
+      text: 'Years',
+      action: () => navigate('/years'),
+      disabled: false,
+    },
+    {
+      icon: icons.faPlay,
+      text: 'Videos',
+      action: () => navigate('/search/type:video'),
+      disabled: false,
+    },
+    {
+      icon: icons.faPen,
+      text: 'Edit',
+      action: () => {
+        if (disableEdit || appConfig.disabledEdit) {
           return
         }
         setViewMode(viewMode === ViewMode.VIEW ? ViewMode.EDIT : ViewMode.VIEW)
-        break;
-      }
-      case 'tags': {
-        navigate('/tags');
-        break;
-      }
-      case 'map': {
-        navigate('/map', {state: {listLocation}});
-        break;
-      }
-    }
-  }
+      },
+      disabled: disableEdit || appConfig.disabledEdit,
+    },
+    {
+      icon: icons.faTags,
+      text: 'Tags',
+      action: () => navigate('/tags'),
+      disabled: false,
+    },
+    {
+      icon: icons.faMap,
+      text: 'Map',
+      action: () => navigate('/map', {state: {listLocation}}),
+      disabled: false,
+    },
+  ]
 
   return (
     <>
-      <SearchNavBar>
-        <div className="nav_group">
-          <a className="nav_item link" onClick={() => dispatch({type: 'all'})}><i className="fas fa-globe"></i> <span className="hide-sm">Show all</span></a>
-          <a className="nav_item link" onClick={() => dispatch({type: 'years'})}><i className="fas fa-clock"></i> <span className="hide-sm">Years</span></a>
-          <a className="nav_item link" onClick={() => dispatch({type: 'video'})}><i className="fas fa-play"></i> <span className="hide-sm">Videos</span></a>
-          {!appConfig.disabledEdit &&
-            <a className={`nav_item link ${disableEdit ? '-disabled' : ''}`} onClick={() => dispatch({type: 'edit'})}><i className="fas fa-pen"></i> <span className="hide-sm">Edit</span></a>
-          }
-          <a className="nav_item link" onClick={() => dispatch({type: 'tags'})}><i className="fas fa-tags"></i> <span className="hide-sm">Tags</span></a>
-          <a className="nav_item link" onClick={() => dispatch({type: 'map'})}><i className="fas fa-map"></i> <span className="hide-sm">Map</span></a>
-        </div>
-      </SearchNavBar>
+      {items.map((item, key) => (
+        <NavItem key={key} onClick={item.action} icon={item.icon} text={item.text} disabled={item.disabled} />
+      ))}
     </>
   )
 }

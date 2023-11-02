@@ -59,7 +59,8 @@ export const useEventStore = create<EventStore>((set) => ({
       return state
     }
     _applyEvents(events)
-    return {...state, events, recentTags: getRecentTags(events, [])}
+    const allEvents = [...state.events, ...events]
+    return {...state, events: allEvents, recentTags: getRecentTags(allEvents, [])}
   }),
   reapplyEvents: () => set((state) => {
     _applyEvents(state.events)

@@ -18,8 +18,8 @@ export const SuggestionList = ({suggestions, input, dispatch}: {suggestions: Tag
 
     setStyle({
       position: 'fixed',
-      top: rect.bottom,
-      left: rect.left,
+      //top: rect.bottom,
+      //left: rect.left,
       width: rect.width,
       maxHeight: window.innerHeight - rect.bottom - 24
     })
@@ -33,7 +33,7 @@ export const SuggestionList = ({suggestions, input, dispatch}: {suggestions: Tag
       return
     }
 
-    const active = list.querySelector('.-active')
+    const active = list.querySelector('.active')
     if (!active) {
       return
     }
@@ -53,10 +53,10 @@ export const SuggestionList = ({suggestions, input, dispatch}: {suggestions: Tag
   }
 
   return (
-    <div className="-list" style={style} ref={listRef}>
+    <div className="z-30 flex flex-col bg-gray-800 border border-gray-300 rounded rounded-t-none" style={style} ref={listRef}>
       {suggestions.map((item) => (
-        <div key={toKey(item)} className={classNames({'-active': item.active})} onClick={() => dispatch({type: 'addTag', value: item.name})}>
-          {item.parts.map(part => part.isMatch ? (<em key={toKey(part)}>{part.text}</em>) : part.text)}
+        <div key={toKey(item)} className={classNames('text-gray-300 px-4 py-2 hover:bg-gray-600 hover:cursor-pointer', {'bg-gray-700 active': item.active})} onClick={() => dispatch({type: 'addTag', value: item.name})}>
+          {item.parts.map(part => part.isMatch ? (<em key={toKey(part)} className="not-italic underline">{part.text}</em>) : part.text)}
         </div>
       ))}
     </div>

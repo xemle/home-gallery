@@ -20,6 +20,8 @@ import { MediaViewVideo } from './MediaViewVideo';
 import { Details } from './Details';
 import { Zoomable } from "./Zoomable";
 import useBodyDimensions from "../utils/useBodyDimensions";
+import { classNames } from '../utils/class-names'
+import { SingleTagDialogProvider } from "../dialog/tag-dialog-provider";
 
 const findEntryIndex = (location, entries, id) => {
   if (location.state?.index && entries[location.state.index]?.id.startsWith(id)) {
@@ -179,31 +181,33 @@ export const MediaView = () => {
 
   return (
     <>
-      <div className={`single ${showDetails ? '-withDetail' : ''}`}>
-        <div className="single__media position-fixed-md">
-          <div className="MediaViewContainer">
-            {!hideNavigation &&
-              <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} dispatch={dispatch} />
-            }
-            {isImage &&
-              <Zoomable key={key} childWidth={scaleSize.width} childHeight={scaleSize.height} onSwipe={onSwipe}>
-                <MediaViewImage key={key} media={current} next={next} prev={prev} showDetails={showDetails}/>
-              </Zoomable>
-            }
-            {isVideo &&
-              <MediaViewVideo key={key} media={current} next={next} prev={prev} dispatch={dispatch}/>
-            }
-            {isUnknown &&
-              <MediaViewUnknownType key={key} media={current} next={next} prev={prev}/>
-            }
+      <SingleTagDialogProvider>
+        <div className="flex flex-col w-screen md:flex-row h-dvh">
+          <div className={classNames('w-full', {'h-1/2 flex-shrink-0 md:flex-shrink md:h-full': showDetails, 'h-full': !showDetails})}>
+            <div className="relative w-full h-full overflow-hidden">
+              {!hideNavigation &&
+                <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} dispatch={dispatch} />
+              }
+              {isImage &&
+                <Zoomable key={key} childWidth={current.width} childHeight={current.height} onSwipe={onSwipe}>
+                  <MediaViewImage key={key} media={current} next={next} prev={prev} showDetails={showDetails}/>
+                </Zoomable>
+              }
+              {isVideo &&
+                <MediaViewVideo key={key} media={current} next={next} prev={prev} dispatch={dispatch}/>
+              }
+              {isUnknown &&
+                <MediaViewUnknownType key={key} media={current} next={next} prev={prev}/>
+              }
+            </div>
           </div>
+          { showDetails &&
+            <div className="md:flex-shrink-0 md:w-90">
+              <Details entry={current} dispatch={dispatch} />
+            </div>
+          }
         </div>
-        { showDetails &&
-          <div className="single__detail">
-            <Details entry={current} dispatch={dispatch} />
-          </div>
-        }
-      </div>
+      </SingleTagDialogProvider>
     </>
   )
 }

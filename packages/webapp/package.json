@@ -10,17 +10,16 @@
     "clean": "rimraf dist",
     "build": "npm-run-all build:dev",
     "postbuild": "node postbuild.js",
-    "build:dev": "npm-run-all -p build:css build:js build:sw -p copy:html copy:static copy:fonts",
+    "build:dev": "npm-run-all -p build:css build:js build:sw -p copy:html copy:static",
     "build:js": "node build.js",
-    "build:css": "npx sass -I ../../node_modules --source-map --style=compressed ../webapp/src/app.scss dist/app.css",
+    "build:css": "tailwindcss -i src/App.css -m -o dist/App.css",
     "build:sw": "workbox generateSW",
     "copy:html": "cpy \"src/*.{html,webmanifest}\" dist",
     "copy:static": "cpy \"src/public/*\" dist",
-    "copy:fonts": "cpy \"../../node_modules/@fortawesome/fontawesome-free/webfonts/*.*\" dist/fonts",
     "serve": "node dev-server",
     "watch": "npm-run-all -p watch:css watch:js watch:sw watch:html",
     "watch:js": "node build.js --watch",
-    "watch:css": "sass -I ../../node_modules --source-map --style=compressed --watch ../webapp/src/app.scss dist/app.css",
+    "watch:css": "tailwindcss -i src/App.css --watch -o dist/App.css",
     "watch:html": "onchange \"src/*.html\" -- npm run copy:html",
     "watch:sw": "onchange \"workbox-config.js\" -- npm run build:sw",
     "dev": "npm-run-all -s clean -p build:dev -p copy:html serve watch"
@@ -46,8 +45,5 @@
     "nearley": "^2.19.3",
     "uuid": "^8.0.0",
     "zustand": "^4.1.1"
-  },
-  "devDependencies": {
-    "@fortawesome/fontawesome-free": "^6.0.0"
   }
 }

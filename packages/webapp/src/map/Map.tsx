@@ -41,7 +41,7 @@ export const Map = () => {
   return (
     <>
       <NavBar disableEdit={true} />
-      <div style={{width: '100%', height: 'calc(100vh - 40px)', marginTop: 40}}>
+      <div className="fixed top-0 w-screen h-screen mt-12">
         <MapContainer scrollWheelZoom={true} style={{width: '100%', height: '100%'}}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

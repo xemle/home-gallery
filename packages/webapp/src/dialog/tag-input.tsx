@@ -1,4 +1,6 @@
 import React, { FunctionComponent, KeyboardEvent, useRef } from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import * as icons from '@fortawesome/free-solid-svg-icons'
 
 import { Tag } from "../api/models";
 import { classNames } from '../utils/class-names'
@@ -10,14 +12,21 @@ const TagList = ({tags, withRemove, dispatch}: {tags: Tag[], withRemove: boolean
   return (
     <>
       {tags.map((tag, i) => (
-        <span key={toKey(tag)} className={classNames('tag', '-large', {'-button': withRemove, '-danger': tag.remove})}>
-          { withRemove &&
-            <span onClick={() => dispatch({type: 'toggleRemoveFlag', value: tag.name})} title={`Click to ${tag.remove ? 'add tag to media' : 'remove tag from media'}`}><i className={classNames('fas', {'fa-plus': !tag.remove, 'fa-minus': tag.remove})}></i> {tag.name}</span>
-          }
-          { !withRemove &&
-            <span>{tag.name}</span>
-          }
-          <a onClick={() => dispatch({type: 'removeTag', value: tag.name})}><i className="fas fa-times"></i></a>
+        <span key={toKey(tag)} className={classNames('flex items-center align-middle rounded overflow-auto text-gray-300', {'cursor-pointer': withRemove, 'bg-danger-600 hover:bg-danger-500': tag.remove, 'bg-gray-700 ': !tag.remove, 'hover:bg-gray-600': !tag.remove && withRemove})}>
+          { withRemove && (
+            <>
+              <span className="flex items-center justify-center px-2 py-1 pr-0">
+                <FontAwesomeIcon icon={tag.remove ? icons.faMinus : icons.faPlus} />
+              </span>
+              <span className="px-2 py-1 pr-1" onClick={() => dispatch({ type: 'toggleRemoveFlag', value: tag.name })} title={`Click to ${tag.remove ? 'add tag to media' : 'remove tag from media'}`}>{tag.name}</span>
+            </>
+          )}
+          { !withRemove && (
+            <span className="px-2 py-1 pr-1">{tag.name}</span>
+          )}
+          <a className={classNames('px-2 py-1 hover:cursor-pointer group', {'hover:bg-gray-700': withRemove && !tag.remove, 'hover:bg-gray-600': !withRemove && !tag.remove, 'hover:bg-danger-600': tag.remove})} onClick={() => dispatch({type: 'removeTag', value: tag.name})}>
+            <FontAwesomeIcon icon={icons.faTimes} className={classNames({' hover:text-gray-100': !tag.remove})}/>
+          </a>
         </span>
       ))}
     </>
@@ -80,10 +89,10 @@ export const TagInput : FunctionComponent<TagInputProps> = ({value, tags, withRe
 
   return (
     <>
-      <div className="autocomplete">
-        <div ref={ref} className="input -tag-list">
+      <div className="relative">
+        <div ref={ref} className="flex flex-row flex-wrap items-center justify-start w-full gap-2 px-2 py-1 bg-gray-800 border rounded border-bg-gray-700">
           <TagList tags={tags} withRemove={withRemove} dispatch={dispatch} />
-          <input id="tags" ref={input => input && input.focus()} value={value} placeholder='Create or add tag' onKeyDown={handleKeyDown} onChange={handleChange}/>
+          <input className="flex-1 py-1 text-gray-300 bg-transparent border-0 focus:border-transparent focus:ring-0 focus:outline-none" id="tags" ref={input => input && input.focus()} value={value} placeholder='Create or add tag' onKeyDown={handleKeyDown} onChange={handleChange}/>
         </div>
         { showSuggestions &&
           <SuggestionList suggestions={suggestions} dispatch={dispatch} input={ref} />

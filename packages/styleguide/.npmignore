@@ -1,6 +1,0 @@
-.cache
-node_moduldes
-*.tsx
-*.ts
-dev-server.js
-*.tmp

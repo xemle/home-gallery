@@ -24,7 +24,9 @@
     "./packages/*"
   ],
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "^6.0.0",
+    "@fortawesome/fontawesome-svg-core": "^6.4.2",
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
+    "@fortawesome/react-fontawesome": "^0.2.0",
     "@getgauge/cli": "^1.5.4",
     "@react-leaflet/core": "^2.0.0",
     "@types/glob-to-regexp": "^0.4.0",
@@ -59,6 +61,7 @@
     "react-router-dom": "^6.4.3",
     "rimraf": "^3.0.2",
     "sass": "^1.49.8",
+    "tailwindcss": "^3.4.1",
     "tap": "^18.1.5",
     "tar-fs": "^2.1.1",
     "ts-node": "^10.5.0",
@@ -82,7 +85,6 @@
     "@home-gallery/server": "file:packages/server",
     "@home-gallery/storage": "file:packages/storage",
     "@home-gallery/stream": "file:packages/stream",
-    "@home-gallery/styleguide": "file:packages/styleguide",
     "@home-gallery/webapp": "file:packages/webapp"
   }
 }

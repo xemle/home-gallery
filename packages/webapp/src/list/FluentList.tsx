@@ -4,12 +4,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useSingleViewStore } from '../store/single-view-store'
 import { useEditModeStore, ViewMode } from '../store/edit-mode-store'
 import Hammer from 'hammerjs';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlay } from '@fortawesome/free-solid-svg-icons'
 
 import { useLastLocation } from '../utils/lastLocation/useLastLocation'
 import useBodyDimensions from '../utils/useBodyDimensions';
 import { VirtualScroll } from "./VirtualScroll";
 import { humanizeDuration } from "../utils/format";
 import { getHigherPreviewUrl, getWidthFactor } from '../utils/preview';
+import { classNames } from '../utils/class-names'
 
 const Cell = ({height, width, index, item, items}) => {
   const ref = useRef();
@@ -77,11 +80,11 @@ const Cell = ({height, width, index, item, items}) => {
   });
 
   return (
-    <div ref={ref} key={id} className={`fluent__cell ${isSelected() ? '-selected' : ''}`} style={style}>
-      <img style={style} src={previewUrl} loading="lazy" />
+    <div ref={ref} key={id} className={classNames('relative group', {'outline outline-4 outline-primary-300 outline-offset-[-0.25rem] brightness-110 saturate-[1.3]': isSelected()})} style={style}>
+      <img className={classNames('object-cover')} style={style} src={previewUrl} loading="lazy" />
       {type == 'video' &&
-        <span className="_detail">
-          <i className="fas fa-play pr-4"></i>
+        <span className="absolute flex flex-row items-center gap-2 px-2 text-sm text-gray-100 bg-gray-900 rounded bottom-2 right-2 lg:bg-gray-900/60 group-hover:bg-gray-900">
+          <FontAwesomeIcon icon={faPlay} size="sm"/>
           {humanizeDuration(duration)}
         </span>
       }
@@ -91,11 +94,13 @@ const Cell = ({height, width, index, item, items}) => {
 
 const Row = (props) => {
   const style = {
+    gap: '8px',
+    padding: '4px',
     height: props.height
   }
   const columns = props.columns;
   return (
-    <div className='fluent__row' style={style}>
+    <div className="flex w-full item-center" style={style}>
       {columns.map((cell, index) => <Cell key={index} width={cell.width} height={cell.height} item={cell.item} index={cell.index} items={cell.items} />)}
     </div>
   )
@@ -134,7 +139,7 @@ export const FluentList = ({rows, padding}) => {
   }, [virtualScrollRef, rows, lastViewId])
 
   return (
-    <div className="fluent" style={{width}}>
+    <div className="relative w-full">
       <VirtualScroll ref={virtualScrollRef} items={rows} padding={padding} >
         {({row}) => <Row height={row.height} columns={row.columns}></Row>}
       </VirtualScroll>

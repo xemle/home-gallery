@@ -11,6 +11,7 @@ import { Scrollbar } from "./scrollbar";
 import useBodyDimensions from '../utils/useBodyDimensions';
 import { useDeviceType, DeviceType } from "../utils/useDeviceType";
 import { fluent } from "./fluent";
+import { MultiTagDialogProvider } from "../dialog/tag-dialog-provider";
 
 const NAV_HEIGHT = 44
 const BOTTOM_MARGIN = 4
@@ -65,14 +66,18 @@ export const List = () => {
 
   return (
     <>
-      <NavBar />
-      <div style={{paddingTop: NAV_HEIGHT}}>
-        <Scrollbar containerRef={containerRef}
-          style={{marginTop: NAV_HEIGHT, marginBottom: BOTTOM_MARGIN}}
-          pageHeight={viewHeight}
-          topDateItems={topDateItems} />
-        <FluentList rows={rows} padding={padding} />
-      </div>
+      <MultiTagDialogProvider>
+        <>
+          <NavBar />
+          <div className="relative z-0">
+            <Scrollbar containerRef={containerRef}
+              style={{marginTop: 0, marginBottom: BOTTOM_MARGIN}}
+              pageHeight={viewHeight}
+              topDateItems={topDateItems} />
+            <FluentList rows={rows} padding={padding} />
+          </div>
+        </>
+      </MultiTagDialogProvider>
     </>
   )
 }

@@ -65,7 +65,7 @@ export const Scrollbar = ({containerRef, style, pageHeight, topDateItems}: Scrol
 
   return (
     <>
-      <div className="scrollbar -fixed" style={style}>
+      <div className="fixed bottom-0 right-0 z-10 top-12 bg-gray-900/80" style={style}>
         {overviewItems.length > 0 && <ScrollbarOverview overviewItems={overviewItems} show={showOverview} />}
         <ScrollbarHandle dispatch={dispatch} top={handleTop} visible={visibleHandle} detailText={handleDetailText} showDetail={showHandleDetail}/>
       </div>

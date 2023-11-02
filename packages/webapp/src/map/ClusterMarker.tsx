@@ -47,7 +47,7 @@ export const ClusterMarker = ({cluster, dispatch}) => {
   const icon = useMemo(() => {
     return L.divIcon({
       iconSize: L.point(1, 1),
-      html: `<div class="map-cluster">${cluster.length}</div>`
+      html: `<div class="inline-block -translate-x-1/2 -translate-y-1/2 px-2 py-1 bg-gray-700 border border-gray-800 shadow-md rounded-full text-base text-gray-300">${cluster.length}</div>`
     })
   }, [cluster])
 
@@ -56,15 +56,17 @@ export const ClusterMarker = ({cluster, dispatch}) => {
     <>
       <Marker position={cluster.center} icon={icon}>
         <Popup closeButton={false}>
-          <div className="cluster-grid" onClick={() => dispatch({type: 'clusterClick', cluster})}>
+          <div className="flex flex-wrap w-64">
             {cluster.entries.slice(0, 16).map(entry => {
               return (
-                <img key={entry.shortId} src={getHigherPreviewUrl(entry.previews, 48)} width="48" height="48"/>
+                <a key={entry.shortId} onClick={() => dispatch({type: 'entryClick', entry})} className="hover:cursor-pointer" >
+                  <img className="object-cover w-16 h-16 p-1 hover:cursor-pointer" src={getHigherPreviewUrl(entry.previews, 48)} alt={entry.name} />
+                </a>
               )
             })}
           </div>
           {cluster.length > 16 &&
-            <p><a className="link" onClick={() => dispatch({type: 'clusterClick', cluster})}>and view {cluster.length - 16} more...</a></p>
+            <p><a className="hover:cursor-pointer" onClick={() => dispatch({type: 'clusterClick', cluster})}>and view {cluster.length - 16} more...</a></p>
           }
           <ClusterDate cluster={cluster} dispatch={dispatch}/>
         </Popup>

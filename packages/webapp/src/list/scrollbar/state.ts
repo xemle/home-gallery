@@ -32,7 +32,7 @@ export const initialState: ScrollbarState = {
   handleTop: 0,
   handleTopDraggingStart: 0,
   handleHeight: 50,
-  visibleHandle: 'hidden',
+  visibleHandle: 'full', // TODO 'hidden',
   showHandleDetail: false,
   isDragging: false,
   handleDetailText: '',

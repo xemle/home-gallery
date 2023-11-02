@@ -128,7 +128,7 @@ export const useTouchDragging = (ref: RefObject<any>): Dragging => {
 export const useMouseDragging = (ref: RefObject<any>): Dragging => {
   const [dragging, setMouseDragging] = useState(createDraggingState())
 
-  const state = useMemo(() => ({isPressing: false}), [])
+  const state = useMemo(() => ({isPressing: false, start: false}), [])
 
   const getMousePos = e => ({x: e.clientX, y: e.clientY})
 

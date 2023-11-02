@@ -1,7 +1,22 @@
 import React from 'react';
 import { useState, useRef, useLayoutEffect, FunctionComponent } from 'react';
 import Hammer from 'hammerjs';
-import useBodyDimensions from "../utils/useBodyDimensions";
+import { useClientRect } from "../utils/useClientRect";
+
+const containsSize = (containerWidth, containerHeight, childWidth, childHeight) => {
+  if (!containerWidth) {
+    return [childWidth, childHeight]
+  }
+  const containerRatio = containerWidth / containerHeight
+  const childRatio = childWidth / childHeight
+  if (containerRatio > childRatio) {
+    const childScale = containerHeight / childHeight
+    return [childScale * childWidth, containerHeight]
+  } else {
+    const childScale = containerWidth / childWidth
+    return [containerWidth, childScale * childHeight]
+  }
+}
 
 type ZoomableProps = {
   childWidth: number;
@@ -12,11 +27,11 @@ type ZoomableProps = {
 export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHeight, onSwipe, children}) => {
   const ref = useRef<HTMLDivElement>();
   const [style, setStyle] = useState({});
-  const dimensions = useBodyDimensions();
+  const clientRect = useClientRect(ref);
 
   useLayoutEffect(() => {
     const el = ref.current;
-    if (!el) {
+    if (!el || !clientRect) {
       return;
     }
 
@@ -26,9 +41,10 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHei
     let ticking = false;
     let transform;
     let initScale = 1;
+    const [childContainsWidth, childContainsHeight] = containsSize(clientRect?.width, clientRect?.height, childWidth, childHeight)
 
     const logEvent = (ev) => {
-      //console.log(ev);
+      //console.log(`Type ${ev.type}`, ev);
       //el.innerText = ev.type;
     }
 
@@ -43,8 +59,8 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHei
     const updateElementTransform = () => {
       const scale = Math.min(5, Math.max(1, transform.scale));
 
-      const maxX = (scale * childWidth - childWidth) / 2;
-      const maxY = (scale * childHeight - childHeight) / 2;
+      const maxX = Math.max(0, (scale * childContainsWidth - clientRect.width) / 2);
+      const maxY = Math.max(0, (scale * childContainsHeight - clientRect.height) / 2);
       const x = Math.min(maxX, Math.max(-maxX, transform.translate.x));
       const y = Math.min(maxY, Math.max(-maxY, transform.translate.y));
 
@@ -105,8 +121,8 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHei
           y: childHeight / 2 - ev.center.y
         };
         const childOffset = {
-          x: (dimensions.width - childWidth) / 2,
-          y: (dimensions.height - childHeight) / 2
+          x: (clientRect.width - childWidth) / 2,
+          y: (clientRect.height - childHeight) / 2
         };
         const scaleUxOffset = 0.5;
         const scale = transform.scale - scaleUxOffset;
@@ -146,19 +162,38 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHei
 
     console.log('init layoutEffect');
 
+    const onWheel = (ev) => {
+      if (transform.scale == 1 && !ev.shiftKey) {
+        return
+      }
+
+      const zoom = ev.wheelDelta < 0 ? 0.8 : 1.2
+      transform.scale = Math.min(5, Math.max(1, transform.scale * zoom));
+
+      logEvent(ev);
+      requestElementUpdate();
+    }
+
+    el.addEventListener('wheel', onWheel)
+
+    const onMouseDown = ev => ev.preventDefault()
+    el.addEventListener('mousedown', onMouseDown, false)
+
     return () => {
       console.log('reset layoutEffect');
+      el.removeEventListener('wheel', onWheel)
+      el.removeEventListener('mousedown', onMouseDown)
       if (!mc) {
         return;
       }
       mc.stop(false);
       mc.destroy();
     }
-  }, [ref]);
+  }, [ref, clientRect]);
 
   return (
     <>
-      <div ref={ref} className='zoomable' style={style}>{children}</div>
+      <div ref={ref} className='relative w-full h-full' style={style}>{children}</div>
     </>
   )
 }
