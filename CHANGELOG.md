@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- extractor: Custom image preview size for heic files
 - cli: Keep config env for run import
 
 ## [1.13.2] - 2023-10-15

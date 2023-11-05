@@ -94,7 +94,7 @@ const initJpgWriter = (config, imageResizer) => {
 }
 
 function heicPreview(storage, extractor, config) {
-  const { imageResizer } = extractor
+  const { imageResizer, imagePreviewSizes: previewSizes } = extractor
 
   const jpgWriter = initJpgWriter(config, promisify(imageResizer))
 
@@ -113,7 +113,7 @@ function heicPreview(storage, extractor, config) {
 
     const heicEntry = findHeicEntry(entry)
     const dst = storage.getEntryFilename(entry, rawPreviewSuffix)
-    convertHeic(heicEntry.src, maxSize, dst, jpgWriter)
+    convertHeic(heicEntry.src, Math.max(...previewSizes) || 1920, dst, jpgWriter)
       .then(() => {
         storage.addEntryFilename(entry, rawPreviewSuffix)
         log.debug(t0, `Created jpg preview image from heic image of ${entry}`)
