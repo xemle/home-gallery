@@ -1,4 +1,4 @@
-import create from 'zustand'
+import { create } from 'zustand'
 
 import { applyEvents, Event, EventAction } from '@home-gallery/events'
 
