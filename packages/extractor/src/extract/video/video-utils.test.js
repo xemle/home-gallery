@@ -330,6 +330,18 @@ t.test('getFfmpegArgs', async t => {
     t.match(args, [
       '-c:v',
       'libx264',
+      '-f mp4'
+      ]
+    )
+  })
+
+
+  t.test('custom ffmpeg args with extension', async t => {
+    const args = getFfmpegArgs({}, {ext: 'mov', customFfmpegArgs: ['-c:v', 'libx264']})
+    t.match(args, [
+      '-c:v',
+      'libx264',
+      '-f mov'
       ]
     )
   })
@@ -340,7 +352,8 @@ t.test('getFfmpegArgs', async t => {
       '-c:v',
       'libx264',
       '-vf',
-      'scale=\'min(720,iw)\':-2,format=yuv420p'
+      'scale=\'min(720,iw)\':-2,format=yuv420p',
+      '-f mp4'
       ]
     )
   })
@@ -360,12 +373,22 @@ t.test('getFfmpegArgs', async t => {
       '-bufsize 8000k',
       '-movflags +faststart',
       '-b:a 128k',
+      '-global_quality 25',
       '-f mp4',
-      '-global_quality 25'
       ]
     )
   })
 
+  t.test('custom ffmpeg args with add ffmpeg args', async t => {
+    const args = getFfmpegArgs(roatedEntry, {customFfmpegArgs: ['-c:v', 'libx264'], addFfmpegArgs: ['-global_quality 25']})
+    t.match(args, [
+      '-c:v',
+      'libx264',
+      '-global_quality 25',
+      '-f mp4'
+      ]
+    )
+  })
 })
 
 t.test('getVideoOptions', async t => {

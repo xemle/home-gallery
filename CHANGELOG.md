@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- extractor: Set video file extension for custom ffmpeg args
 - Update node LTS to v20
 
 ## [1.13.3] - 2023-11-07

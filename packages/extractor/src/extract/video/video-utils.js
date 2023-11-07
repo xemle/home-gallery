@@ -51,7 +51,7 @@ function getFfmpegArgs(entry, options) {
   const scale = options.scale ? options.scale : `-2:\'min(${options.previewSize || 720},ih)\'`
   const ffmpegOptions = {...defaultFfmpegOptions, ...options, scale}
 
-  const ffmpegArgs = Array.isArray(options.customFfmpegArgs) ? options.customFfmpegArgs : [
+  const defaultFfmpegArgs = [
     `-c:v ${ffmpegOptions.videoEncoder}`,
     '-c:a aac',
     `-r ${ffmpegOptions.frameRate}`,
@@ -63,9 +63,13 @@ function getFfmpegArgs(entry, options) {
     `-maxrate ${ffmpegOptions.maxVideoBitRate}k`,
     `-bufsize ${2 * ffmpegOptions.maxVideoBitRate}k`,
     '-movflags +faststart',
-    '-b:a 128k',
+    '-b:a 128k'
+  ]
+
+  const ffmpegArgs = [
+    ...(Array.isArray(options.customFfmpegArgs) ? options.customFfmpegArgs : defaultFfmpegArgs),
+    ...(options.addFfmpegArgs ? options.addFfmpegArgs : []),
     `-f ${ffmpegOptions.ext}`,
-    ...(options.addFfmpegArgs ? options.addFfmpegArgs : [])
   ]
 
   return ffmpegArgs.map(fixRotatedScale(isPortrait))
