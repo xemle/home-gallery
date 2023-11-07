@@ -1,8 +1,7 @@
 const { stat, access } = require('fs').promises
 const assert = require("assert");
-const Yaml = require('yaml')
 
-const { getIndexFilename, getStorageDir, getDatabaseFilename, runCli, readDatabase, waitFor, pathToPlatformPath, getEventsFilename } = require('../utils');
+const { getIndexFilename, getStorageDir, getDatabaseFilename, runCli, readDatabase, waitFor, pathToPlatformPath, getEventsFilename, resolveProperty, parseValue, assertDeep } = require('../utils');
 
 step('Database does not exist', async () => {
   const exists = await access(getDatabaseFilename()).then(() => true).catch(() => false)
@@ -38,48 +37,6 @@ const getEntry = async id => {
   const entry = entries.shift()
   assert(!!entry, `Could not find entry with id ${id}`)
   return entry
-}
-
-const resolveProperty = (value, path) => {
-  const parts = path.split('.')
-  let i = 0
-  while (i < parts.length && value) {
-    const part = parts[i++]
-    const [orig, name, _, index] = part.match(/^([a-zA-Z]+)(\[(\d+)\])?$/)
-    if (index) {
-      return Array.isArray(value[name]) ? value[name][+index] : undefined
-    } else {
-      return value[name]
-    }
-  }
-  return value
-}
-
-const parseValue = yamlLike => {
-  if (yamlLike.match(/^(\[[^\]]+]|\{[^\}]+})$/)) {
-    try {
-      return Yaml.parse(yamlLike)
-    } catch (e) {
-      assert(false, `Could not parse given YAML value ${yamlLike}: ${e}`)
-    }
-  }
-  return yamlLike
-}
-
-const assertDeep = (value, expected, path = '.') => {
-  if (Array.isArray(expected)) {
-    assert(Array.isArray(value), `Expected an array but was ${typeof value} in ${path}`)
-    for (let i = 0; i < expected.length; i++) {
-      assertDeep(value[i], expected[i], `[${i}].`)
-    }
-  } else if (typeof expected == 'object') {
-    assert(typeof value == 'object', `Expected an object but was ${typeof value} in ${path}`)
-    for (let prop in expected) {
-      assertDeep(value[prop], expected[prop], `${prop}.`)
-    }
-  } else {
-    assert(value == expected, `Expected ${expected} but was ${value} in ${path}`)
-  }
 }
 
 step("Database entry <id> has property <property> with value <value>", async (id, property, value) => {

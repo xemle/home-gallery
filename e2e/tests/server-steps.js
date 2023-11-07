@@ -9,7 +9,7 @@ const assert = require('assert')
 const fetch = require('node-fetch')
 const express = require('express')
 
-const { generateId, nextPort, waitFor, runCliAsync, killChildProcess, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase, addCliEnv } = require('../utils')
+const { generateId, nextPort, waitFor, runCliAsync, killChildProcess, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase, addCliEnv, resolveProperty, parseValue, assertDeep } = require('../utils')
 
 const serverTestHost = '127.0.0.1'
 const servers = {}
@@ -20,13 +20,13 @@ const insecureOption = {
   })
 }
 
-const fetchFacade = path => {
+const fetchFacade = (path, options = {}) => {
   const url = gauge.dataStore.scenarioStore.get('serverUrl')
   assert(!!url, `Expected serverUrl but was empty. Start server first`)
 
   const headers = gauge.dataStore.scenarioStore.get('request.headers') || {}
   const agent = url.startsWith('https') ? insecureOption : {}
-  return fetch(`${url}${path || ''}`, Object.assign({timeout: 500, headers}, agent))
+  return fetch(`${url}${path || ''}`, Object.assign(options, {timeout: 500, headers: Object.assign({}, options.headers, headers)}, agent))
 }
 
 const fetchDatabase = () => fetchFacade('/api/database.json')
@@ -172,6 +172,16 @@ step("Wait for current database", async () => {
     .catch(e => {throw new Error(`Failed to fetch current database. Error ${e}`)})
 })
 
+const waitForEvent = async (eventPredicate) => {
+  await waitFor(async () => {
+    const events = gauge.dataStore.scenarioStore.get('events') || []
+    const reloadEvent = events.find(eventPredicate)
+    if (!reloadEvent) {
+      return Promise.reject(new Error(`No reload event found`))
+    }
+  }, 25000)
+}
+
 step("Listen to server events", async () => {
   const url = gauge.dataStore.scenarioStore.get('serverUrl')
 
@@ -189,21 +199,16 @@ step("Listen to server events", async () => {
   }
 
   http.get(`${url}/api/events/stream`, onResponse)
+  return waitForEvent(event => event.type == 'pong')
 })
 
 step("Reset server events", () => {
   gauge.dataStore.scenarioStore.put('events', [])
 })
 
-step("Wait for database reload event", async () => {
-  await waitFor(async () => {
-    const events = gauge.dataStore.scenarioStore.get('events') || []
-    const reloadEvent = events.find(event => event.action == 'databaseReloaded')
-    if (!reloadEvent) {
-      return Promise.reject(new Error(`No reload event found`))
-    }
-  }, 25000)
-})
+step("Wait for database reload event", async () => waitForEvent(event => event.type == 'server' && event.action == 'databaseReloaded'))
+
+step("Wait for user action event", async () => waitForEvent(event => event.type == 'userAction'))
 
 const stopServer = async serverId => {
   const server = servers[serverId]
@@ -224,12 +229,30 @@ step("Stop server", async () => {
 
 step("Request file <file>", async (file) => {
   return fetchFacade(file)
-    .then(res => gauge.dataStore.scenarioStore.put('response.status', res.status))
+    .then(res => {
+      gauge.dataStore.scenarioStore.put('response.status', res.status)
+      if (res.ok && res.headers.get('Content-Type') && res.headers.get('Content-Type').startsWith('application/json')) {
+        return res.json().then(body => {
+          gauge.dataStore.scenarioStore.put('response.body', body)
+        })
+      }
+    })
 })
 
 step("Response status is <status>", async (status) => {
   const responseStatus = gauge.dataStore.scenarioStore.get('response.status')
   assert(responseStatus == status, `Expected response status ${status} but was ${responseStatus}`)
+})
+
+step("Response body has property <property> with value <value>", async (property, value) => {
+  const body = gauge.dataStore.scenarioStore.get('response.body')
+  const resolvedProperty = resolveProperty(body, property)
+  const parsedValue = parseValue(value)
+  try {
+    assertDeep(resolvedProperty, parsedValue)
+  } catch (e) {
+    assert(false, `Expected body property ${property} to be ${value} but: ${e}`)
+  }
 })
 
 const btoa = text => Buffer.from(text).toString('base64')
@@ -302,4 +325,24 @@ step("Fetched database with entry <index> has no property <property>", async (in
   assert(database && database.data && database.data.length >= +index, `Expected to have a database`)
   const entry = database.data[+index]
   assert(entry && !entry[property], `Expected emptry property ${property} but was ${entry[property]}`)
+})
+
+step("Post user event to tag <id> with <tag>", async (id, tag) => {
+  const ids = id.split(',')
+  const baseUuid = 'xxxxxxxx-xxxx-4xxx-xxxx-xxxxxxxxxxxx'
+  const event = {
+    id: baseUuid.replace(/[x]/g, (_, pos) => ids[0][pos % ids[0].length]),
+    type: 'userAction',
+    targetIds: ids,
+    actions: tag.split(',').map(t => { return { action: tag.startsWith('-') ? 'removeTag' : 'addTag', value: tag.replace(/^-/, '') } }),
+    date: '2023-11-08T07:48:57.248+01:00'
+  }
+  fetchFacade('/api/events', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(event)
+  })
 })
