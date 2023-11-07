@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- common: Detect raw image files from Gopro, Nicon, Olympus, Samsung, Sony
 - extractor: Custom image preview size for heic files
 - cli: Keep config env for run import
 
