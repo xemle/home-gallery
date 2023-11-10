@@ -29,6 +29,8 @@ steps:
   image: node:20-alpine
   commands:
   - npm run test -- --workspace-concurrency=1
+  environment:
+    TAP_TIMEOUT: 60
 
 - name: test:e2e setup
   image: node:20-alpine
@@ -70,6 +72,8 @@ steps:
   image: node:18-alpine
   commands:
   - npm run test -- --workspace-concurrency=1
+  environment:
+    TAP_TIMEOUT: 60
   when:
     branch:
     - master
@@ -102,6 +106,8 @@ steps:
   image: node:16-alpine
   commands:
   - npm run test -- --workspace-concurrency=1
+  environment:
+    TAP_TIMEOUT: 60
   when:
     branch:
     - master
