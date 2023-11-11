@@ -15,6 +15,15 @@ const sortBy = valueFn => (a, b) => {
   return result
 }
 
+function shuffle(array_init) {
+    array = array_init.slice(0)
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array
+}
+
 const orderRules = [
   {
     type: 'sortKey',
@@ -44,9 +53,15 @@ const orderRules = [
 const matchRule = (rule, ast) => (!rule.type || rule.type == ast.type) && (!rule.keys || rule.keys.includes(ast.value))
 
 const orderBy = (entries, ast) => {
+
+
   const orderByAst = ast.orderBy
   if (!orderByAst) {
     return entries
+  }
+ 
+  if (ast.orderBy.value == 'srandom') {
+      return shuffle(entries)
   }
 
   const match = orderRules.find(rule => matchRule(rule, orderByAst))
