@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extractor: Set video file extension for custom ffmpeg args
 - Update node LTS to v20
 
+### Fixed
+
+- query: Fix random sort order
+
 ## [1.13.3] - 2023-11-07
 
 ### Fixed
