@@ -1,67 +1,58 @@
-const sortBy = valueFn => (a, b) => {
+const sortBy = (valueFn, direction = -1) => (a, b) => {
   const aValue = valueFn(a)
   const bValue = valueFn(b)
   let result
   if (aValue == bValue) {
     // fallback order by date if values are the same or both are falsy
-    result = a.date < b.date ? -1 : 1
+    result = a.date < b.date ? direction : -direction
   } else if (aValue && bValue) {
-    result = aValue < bValue ? -1 : 1
+    result = aValue < bValue ? direction : -direction
   } else if (aValue) {
-    result = 1
+    result = -direction
   } else if (bValue) {
-    result = -1
+    result = direction
   }
   return result
 }
 
-function shuffle(array_init) {
-    array = array_init.slice(0)
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array
-}
+const sortDirection = (ast, defaultDirection) => ast.direction === false ? defaultDirection || -1 : (ast.direction == 'asc' ? -1 : 1)
 
 const orderRules = [
   {
     type: 'sortKey',
     keys: ['date', 'updated', 'duration', 'width', 'height'],
-    defaultDirection: -1,
-    sort: ast => sortBy(v => v[ast.value] || 0)
+    sort: (entries, ast) => entries.sort(sortBy(v => v[ast.value] || 0, sortDirection(ast, 1)))
   },
   {
     type: 'sortKey',
     keys: ['filesize'],
     defaultDirection: -1,
-    sort: () => sortBy(v => v.files ? v.files[0].size : 0)
+    sort: (entries, ast) => entries.sort(sortBy(v => v.files ? v.files[0].size : 0, sortDirection(ast, -1)))
   },
   {
     type: 'sortKey',
     keys: ['random'],
-    sort: () => sortBy(() => Math.random())
+    sort: (entries) => {
+      for (let i = entries.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [entries[j], entries[i]] = [entries[i], entries[j]]
+      }
+      return entries
+    }
   },
   {
     type: 'countSortFn',
     keys: ['files', 'tags', 'faces', 'objects'],
-    defaultDirection: -1,
-    sort: ast => sortBy(v => v[ast.value] ? v[ast.value].length : 0)
+    sort: (entries, ast) => entries.sort(sortBy(v => v[ast.value]?.length || 0, sortDirection(ast, 1)))
   },
 ]
 
 const matchRule = (rule, ast) => (!rule.type || rule.type == ast.type) && (!rule.keys || rule.keys.includes(ast.value))
 
 const orderBy = (entries, ast) => {
-
-
   const orderByAst = ast.orderBy
   if (!orderByAst) {
     return entries
-  }
- 
-  if (ast.orderBy.value == 'srandom') {
-      return shuffle(entries)
   }
 
   const match = orderRules.find(rule => matchRule(rule, orderByAst))
@@ -69,11 +60,7 @@ const orderBy = (entries, ast) => {
     return entries
   }
 
-  const sortFn = match.sort(orderByAst)
-  const direction = orderByAst.direction === false ? match.defaultDirection || 1 : (orderByAst.direction == 'asc' ? 1 : -1)
-  entries.sort((a, b) => sortFn(a, b) * direction)
-
-  return entries
+  return match.sort(entries, orderByAst)
 }
 
 module.exports = {
