@@ -253,6 +253,7 @@ t.test('order by', async t => {
   t.same(await execQuery('year >= 2021 order by updated'), ['1223', '0987'], 'by updated')
   t.same(await execQuery('order by updated asc'), ['6718', '0987', '1223', '1234'], 'by updated asc')
   t.same(await execQuery('order by updated desc'), ['1234', '1223', '0987', '6718'], 'by updated desc')
+  t.resolves(execQuery('order by random'), 'by random')
 
   t.same(await execQuery('order by count(files)'), ['0987', '1223', '1234', '6718'], 'by count files')
   t.same(await execQuery('order by count(tags)'), ['1223', '1234', '0987', '6718'], 'by count tags')
