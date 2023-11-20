@@ -65,7 +65,7 @@ const menu = {
       if (command == 'main') {
         return command
       }
-	  const { config } = options
+      const { config } = options
       let sources = config.sources.filter(source => !source.offline)
       if (sources.length > 1) {
         const indices = await runner('selectSources', config)
@@ -77,7 +77,7 @@ const menu = {
         incrementalUpdate: command == 'increment',
         smallFiles: command == 'initialSmall'
       }
-	  const allOptions = { ...options, importOptions }
+      const allOptions = { ...options, importOptions }
       await importSources(sources, allOptions)
       return 'main'
     }
