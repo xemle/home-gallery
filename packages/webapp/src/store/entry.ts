@@ -1,5 +1,6 @@
 export interface Entry {
   id: string
+  hash: string
   shortId: string
   type: string
   date: string

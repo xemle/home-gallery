@@ -31,6 +31,7 @@ export const fetchAll = async (limits, onChunk) => {
   let limitIndex = 0;
   let offset = 0;
   const MAX_CHUNK_DURATION = 3 * 1000
+  const t0 = Date.now()
 
   const increaseLimit = (offset, limit, chunkStart) => {
     const chunkDuration = Date.now() - chunkStart
@@ -65,7 +66,11 @@ export const fetchAll = async (limits, onChunk) => {
       });
   }
 
+  console.log(`Fetching all entries by database chunks`)
   return Promise.all([next(), next()])
+    .then(() => {
+      console.log(`Fetched all entries in ${Date.now() - t0}ms`)
+    })
 }
 
 export const getEvents = () => fetchJsonWorker(`api/events.json`)

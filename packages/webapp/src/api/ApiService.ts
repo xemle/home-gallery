@@ -46,11 +46,42 @@ export const eventStream = () => {
   }
 }
 
-export const syncOfflineDatabase = async (db: OfflineDatabase, onChunk) => {
+const createOnEntriesDefer = (onEntries, defer = 500) => {
+  const knownHashes = {}
+  let newEntries: Entry[] = []
+  let last = Date.now()
+
+  return {
+    onEntry(entry) {
+      if (knownHashes[entry.hash]) {
+        return
+      }
+      knownHashes[entry.hash] = true
+      newEntries.push(entry)
+      const now = Date.now()
+      if (now - last > defer) {
+        onEntries(newEntries)
+        newEntries = []
+        last = now
+      }
+    },
+    flush() {
+      onEntries(newEntries)
+      newEntries = []
+      last = Date.now()
+  }
+  }
+}
+
+export const syncOfflineDatabase = async (db: OfflineDatabase, onEntries) => {
+  const t0 = Date.now()
+
+  const onEntriesDefer = createOnEntriesDefer(onEntries)
+
   const fetchMissingTrees = async (hashes: string[], concurrentFetch = 4) => {
     const missingHashes = await db.getMissingTrees(hashes)
     if (missingHashes.length) {
-      const trees = await Promise.all(missingHashes.slice(0, concurrentFetch).map(hash => getTree(hash)))
+      const trees = await Promise.all(missingHashes.splice(0, concurrentFetch).map(hash => getTree(hash)))
       db.updateTrees(trees)
       const treeHashes = trees.reduce((result, tree) => {
         result.push(...tree.data.filter(t => t.type == 'tree').map(t => t.hash))
@@ -60,9 +91,9 @@ export const syncOfflineDatabase = async (db: OfflineDatabase, onChunk) => {
         result.push(...tree.data.filter(t => t.type != 'tree').map(t => t.entry))
         return result
       }, [])
-      console.log(`Fetched ${entries.length} entries for offline database`)
-      onChunk(entries)
-      return fetchMissingTrees([...missingHashes.slice(concurrentFetch), ...treeHashes])
+      entries.forEach(onEntriesDefer.onEntry)
+      console.log(`Fetched ${treeHashes.length} trees and ${entries.length} entries for offline database`)
+      return fetchMissingTrees([...missingHashes, ...treeHashes], concurrentFetch)
     }
   }
 
@@ -70,9 +101,6 @@ export const syncOfflineDatabase = async (db: OfflineDatabase, onChunk) => {
     const t0 = Date.now()
     let treeCount: number = 0
     const missingHashes: string[] = []
-    let entries: Entry[] = []
-    let lastOnChunk = Date.now()
-    const onChunkDefer = 250
     await db.walkTree(root.hash, {
       beforeTree(hash, tree) {
         treeCount++
@@ -84,16 +112,10 @@ export const syncOfflineDatabase = async (db: OfflineDatabase, onChunk) => {
         return false
       },
       onEntry(entry) {
-        entries.push(entry)
-        const now = Date.now()
-        if (now - lastOnChunk > onChunkDefer) {
-          onChunk(entries)
-          entries = []
-          lastOnChunk = now
-        }
+        onEntriesDefer.onEntry(entry)
       }
     })
-    onChunk(entries)
+    onEntriesDefer.flush()
     console.log(`Found ${missingHashes.length} from ${treeCount} trees out of sync in ${Date.now() - t0}ms`)
     if (missingHashes.length) {
       console.log(`Fetching ${missingHashes.length} missing tree objects`)
@@ -102,9 +124,13 @@ export const syncOfflineDatabase = async (db: OfflineDatabase, onChunk) => {
     }
   }
 
+  console.log(`Syncing database entries with offline database...`)
   const root = await getTree('root')
   return syncTrees(root)
     .then(() => db.setRoot(root))
+    .then(() => {
+      console.log(`Synced all entries with offline database in ${Date.now() - t0}ms`)
+    })
 }
 
 export const purgeOfflineDatabase = async (db: OfflineDatabase) => {

@@ -22,7 +22,7 @@ import { Tags } from './tags/Tags';
 import { Map } from './map';
 import { MediaView } from './single/MediaView';
 import { useAppConfig } from './utils/useAppConfig'
-import { loadDatabase as loadOfflineDatabase, OfflineDatabase } from './offline'
+import { loadDatabase, OfflineDatabase } from './offline'
 import { applyEvents } from "@home-gallery/events";
 
 export const Root = () => {
@@ -44,11 +44,14 @@ export const Main = () => {
           console.log(`Could not fetch intitial events: ${e}`);
         })
 
-      const onChunk = entries => {
+      const onEntries = entries => {
+        if (!entries.length) {
+          return
+        }
         addEntries(entries.map(mapEntriesForBrowser))
       }
 
-      onChunk(appConfig.entries)
+      onEntries(appConfig.entries)
       eventBus.addEventListener('userAction', event => addEvents([event]))
 
       const onDatabaseReloaded = cb => {
@@ -58,22 +61,21 @@ export const Main = () => {
             cb()
           }
         })
-
-      }
-      const syncDatabase = (db: OfflineDatabase) => {
-        return syncOfflineDatabase(db, onChunk)
-          .then(() => {
-            console.log(`Load entries via offline database`)
-            reapplyEvents()
-            onDatabaseReloaded(() => syncOfflineDatabase(db, onChunk))
-          })
-          .then(() => purgeOfflineDatabase(db))
       }
 
-      const loadLegacyDatabase = () => {
+      const loadOfflineDatabase = async () => {
+        const db = await loadDatabase()
+        await syncOfflineDatabase(db, onEntries)
+        reapplyEvents()
+        onDatabaseReloaded(() => syncOfflineDatabase(db, onEntries))
+        await purgeOfflineDatabase(db)
+      }
+
+      const loadLegacyDatabase = async () => {
         const chunkLimits = [1000, 2000, 4000, 8000, 16000, 32000];
-        onDatabaseReloaded(() => fetchAll(chunkLimits, onChunk))
-        fetchAll(chunkLimits, onChunk)
+        onDatabaseReloaded(() => fetchAll(chunkLimits, onEntries))
+        fetchAll(chunkLimits, onEntries)
+          .catch(err => console.log(`Failed to fetch entries by database chunks: ${err}`))
       }
 
       if (appConfig.disabledServerEvents) {
@@ -87,7 +89,6 @@ export const Main = () => {
         loadLegacyDatabase()
       } else {
         loadOfflineDatabase()
-          .then(syncDatabase)
           .catch(err => {
             console.log(`Failed to load entries via offline database: ${err}. Use fallback`, err)
             loadLegacyDatabase()
