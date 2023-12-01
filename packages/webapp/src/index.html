@@ -93,7 +93,9 @@
     <script defer src="App.js" type="text/javascript"></script>
     <script>
       const isLocal = ['127.0.0.1', 'localhost'].includes(location.hostname)
-      const disabledFeatures = (window.__homeGallery || {}).disabled || []
+      const config = (window.__homeGallery || {})
+      const searchParams = new URLSearchParams(location.search?.substring(1))
+      const disabledFeatures = [...(config.disabled || []), ...searchParams.getAll('disabled')]
 
       if (!('serviceWorker' in navigator) || isLocal || disabledFeatures.includes('pwa')) {
         return

@@ -71,8 +71,9 @@ function createApp(config) {
   app.get('/api/database', readDatabase);
   app.get('/api/events', readEvents);
 
+  const disabled = config?.webapp?.disabled || []
   app.use(webapp(webappDir, req => ({
-    disabled: !!req.user ? ['pwa'] : [],
+    disabled: !!req.user ? [...disabled, 'pwa'] : disabled,
     entries: getFirstEntries(50)
   }), {
     basePath: config.server.basePath || '/',

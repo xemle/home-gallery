@@ -152,6 +152,17 @@ sources:
   #basePath: /
   #watchSources: true
 
+#
+# Webapp configuration
+#
+#webapp:
+  # Disabled webapp features
+  #disabled:
+    #- edit
+    #- serverEvents
+    #- pwa
+    #- offlineDatabase
+
 logger:
   # Currently console and file loggers are available
   - type: console
