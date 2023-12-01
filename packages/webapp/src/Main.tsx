@@ -76,19 +76,22 @@ export const Main = () => {
         fetchAll(chunkLimits, onChunk)
       }
 
-      if (!appConfig.disabledServerEvents) {
+      if (appConfig.disabledServerEvents) {
+        console.log('Feature event stream is disabled')
+      } else {
         eventStream()
       }
       fetchEvents()
-      if (!appConfig.disabledOfflineDatabase) {
+      if (appConfig.disabledOfflineDatabase) {
+        console.log('Feature offline database is disabled')
+        loadLegacyDatabase()
+      } else {
         loadOfflineDatabase()
           .then(syncDatabase)
           .catch(err => {
             console.log(`Failed to load entries via offline database: ${err}. Use fallback`, err)
             loadLegacyDatabase()
           })
-      } else {
-        loadLegacyDatabase()
       }
     }, []);
 

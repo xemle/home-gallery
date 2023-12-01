@@ -98,6 +98,7 @@
       const disabledFeatures = [...(config.disabled || []), ...searchParams.getAll('disabled')]
 
       if (!('serviceWorker' in navigator) || isLocal || disabledFeatures.includes('pwa')) {
+        console.log('Feature PWA is disabled')
         return
       }
       const worker = new URL('service-worker.js', document.baseURI || '/').href;

@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 const defaultConfig = {
   entries: [],
   /**
@@ -17,6 +15,9 @@ const defaultConfig = {
 export const useAppConfig = () => {
   const injectedConfig = window['__homeGallery'] || {};
   const result = {...defaultConfig, ...injectedConfig}
+
+  const searchParams = new URLSearchParams(location.search?.substring(1) || '')
+  result.disabled.push(...searchParams.getAll('disabled').filter(v => !!v))
 
   result.disabled.forEach((feature: string) => {
     const name = `disabled${feature[0].toUpperCase()}${feature.slice(1)}`

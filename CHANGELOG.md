@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- webapp: Disable features by query parameter
 - server: Add configuration to disable webapp features
 
 ## [1.14.1] - 2023-11-20
