@@ -123,14 +123,14 @@ const menu = {
           sources = sources.filter(source => indices.indexOf(source.index) >= 0)
         }
         console.log('Debugging extractor: Adjust concurrent, skip and limit parameter to your need. Add --print-entry parameter to fine tune')
-        await extract(config, sources, {
+        await extract(sources, {...options,
           concurrent: 1,
           skip: 0,
           limit: 0
         });
       } else if (command === 'createDatabase') {
         console.log('Rebuild database')
-        await createDatabase(config, config.sources, {});
+        await createDatabase(config.sources, options);
       } else {
         return 'main'
       }
