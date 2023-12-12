@@ -41,5 +41,13 @@ Tags: extractor
 * Storage has no entry "image-preview-800.jpg" for "e3e4ce1"
 * Storage has entry "objects.json" for "e3e4ce1"
 
+## Extract with concurrent one
+
+* Add file "index/images/DJI_0035.640.JPG"
+* Add file "index/images/IMG_20190807_105328.jpg"
+* Create index
+* Extract files with args "--concurrent 1"
+* Storage has entry "image-preview-128.jpg" for "2e17e23"
+* Storage has entry "image-preview-128.jpg" for "e3e4ce1"
 ___
 * Stop server

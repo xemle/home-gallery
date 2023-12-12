@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- extractor: Fix debugging with concurrent one
 - cli: Fix interactive debug tasks
 
 ## [1.14.2] - 2023-12-02

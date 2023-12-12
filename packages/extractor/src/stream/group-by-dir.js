@@ -1,9 +1,10 @@
 const path = require('path');
 const { group } = require('@home-gallery/stream');
 
-const groupByDir = () => group({
+const groupByDir = (maxCount = 0) => group({
   keyFn: (entry) => path.dirname(entry.filename),
-  eager: true
+  eager: true,
+  maxCount
 });
 
 module.exports = {

@@ -96,7 +96,7 @@ const extractData = async (options) => {
       exif(storage, extractor),
       ffprobe(storage, extractor),
 
-      groupByDir(),
+      groupByDir(stream.concurrent),
       groupSidecars(),
       flatten(),
       // images grouped by sidecars in a dir ordered by file size
@@ -117,6 +117,7 @@ const extractData = async (options) => {
       video(storage, extractor, config),
       //.pipe(videoFrames(storageDir, videoFrameCount))
 
+      each(entry => stream.printEntry && log.debug(`Processed entry #${stream.skip + stream.processed} ${entry}`)),
       releaseEntry,
       each(() => stream.processed++),
       processIndicator({onTick: ({diff, lastTime}) => log.info(lastTime, `Processed ${stream.processed} entries (#${stream.skip + stream.processed}, +${diff}, processing ${stream.processing - stream.processed} and queued ${stream.queued - stream.processing} entries)`)}),
