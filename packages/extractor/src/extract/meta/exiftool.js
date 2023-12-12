@@ -9,7 +9,7 @@ const exifSuffix = 'exif.json';
 
 const exifTypes = ['image', 'rawImage', 'video', 'meta']
 
-const initExiftool = config => {
+const initExiftool = async config => {
   const exiftoolOptions = {
     taskTimeoutMillis: 5000
   }
@@ -18,7 +18,20 @@ const initExiftool = config => {
     exiftoolOptions.exiftoolPath = getNativeCommand('exiftool')
   }
 
-  return new ExifTool(exiftoolOptions)
+  return new Promise((resolve, reject) => {
+    const exiftool = new ExifTool(exiftoolOptions)
+    if (!exiftool) {
+      return reject(new Error(`Could not initiate exiftool with options: ${JSON.stringify(exiftoolOptions)}`))
+    }
+    exiftool.version()
+      .then(version => {
+        log.debug(`Use exiftool version ${version}`)
+        resolve(exiftool)
+      })
+      .catch(err => {
+        return reject(new Error(`Failed to read exiftool version: ${err}`))
+      })
+   })
 }
 
 function exif(storage, {exiftool}) {

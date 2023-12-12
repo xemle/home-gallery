@@ -39,6 +39,7 @@ const createImageResizerAsync = promisify(createImageResizer)
 const byNumberDesc = (a, b) => b - a
 
 const createExtractor = async (config) => {
+  const exiftool = await initExiftool(config)
   const imageResizer = await createImageResizerAsync(config)
   const ffmpegPath = getFfmpegPath(config)
   const ffprobePath = getFprobePath(config)
@@ -48,7 +49,7 @@ const createExtractor = async (config) => {
   return {
     ffprobePath,
     ffmpegPath,
-    exiftool: initExiftool(config),
+    exiftool,
     imagePreviewSizes,
     imageResizer,
     videoFrameExtractor
