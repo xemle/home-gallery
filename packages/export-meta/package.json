@@ -33,6 +33,6 @@
     "@home-gallery/database": "file:../database",
     "@home-gallery/events": "file:../events",
     "@home-gallery/logger": "file:../logger",
-    "exiftool-vendored": "^24.1.0"
+    "exiftool-vendored": "^24.2.0"
   }
 }
