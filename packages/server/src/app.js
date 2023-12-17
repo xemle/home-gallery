@@ -45,7 +45,7 @@ function createApp(config) {
   app.use(cors());
   app.use(compression({ filter: shouldCompress }))
 
-  app.use(skipIf(express.static(webappDir), isIndex))
+  app.use(skipIf(express.static(webappDir, {maxAge: '1h'}), isIndex))
 
   app.use(getAuthMiddleware(config))
 

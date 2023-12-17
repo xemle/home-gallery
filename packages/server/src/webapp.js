@@ -21,6 +21,7 @@ const injectStateMiddleware = (indexFile, getState, {basePath, injectRemoteConso
       data = data.replace('window.__homeGallery={}', `window.__homeGallery=${JSON.stringify(getState(req))}`)
       res.set({
         'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-store, no-cache',
         'Content-Length': data.length,
       })
       res.send(data);

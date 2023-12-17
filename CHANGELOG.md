@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- server: Fix cache header for static public files
 - extractor: Fail gracefully on missing perl dependency
 
 ## [1.14.3] - 2023-12-12
