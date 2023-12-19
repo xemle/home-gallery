@@ -194,7 +194,7 @@ const watchSources = async (sources, options) => {
   log.info(`Run import in watch mode. Start watching source dirs for file changes: ${sourceDirs.join(', ')}`)
   const usePolling = watchPollInterval > 0
   const chokidarOptions = {
-    followSymlinks: false,
+    followSymlinks: true,
     ignoreInitial: true,
     ignorePermissionErrors: true,
     usePolling,
