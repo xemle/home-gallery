@@ -22,7 +22,7 @@ function readFileStats(dir, files, cb) {
     }
 
     const filename = path.join(dir, file);
-    fs.lstat(filename, (err, stat) => {
+    fs.stat(filename, (err, stat) => {
       if (hasError) {
         return;
       } else if (err) {
