@@ -19,10 +19,10 @@
 #   configDir: '{baseDir}/.config/home-gallery'
 # configDir is replaced to '~/.config/home-gallery' and than to '$HOME/.config/home-gallery'
 #
-# Variables are baseDir, configDir, configPrefix, cacheDir and dir in sources
+# Variables are overwritten by environment variables
 #
-# Variables baseDir, configDir, configPrefix and cacheDir are overwritten by environment
-# variables GALLERY_BASE_DIR, GALLERY_CONFIG_DIR, GALLERY_CONFIG_PREFIX, GALLERY_CACHE_DIR
+# Variables are baseDir, configDir, configPrefix, cacheDir and dir in sources
+# or environment variables GALLERY_BASE_DIR, GALLERY_CONFIG_DIR, GALLERY_CONFIG_PREFIX, GALLERY_CACHE_DIR
 
 #
 # General
@@ -90,7 +90,7 @@ sources:
   #apiServer:
   #  url: https://api.home-gallery.org
   #  timeout: 30
-  #  concurrent: 5,
+  #  concurrent: 5
   #  disable:
   #    - similarDetection
   #    - objectDetection

@@ -160,6 +160,10 @@ const command = {
     }
 
     const migrateConfig = (config) => {
+      // for version <= v1.4.1 apiServer was a string for api server url
+      if (typeof config.extractor?.apiServer == 'string') {
+        config.extractor.apiServer = { url: config.extractor.apiServer }
+      }
       if (config.extractor?.geoAddressLanguage) {
         config.extractor.geoReverse.addressLanguage = config.extractor?.geoAddressLanguage
       }

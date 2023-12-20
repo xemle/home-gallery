@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - index: Follow symbolic links
 
+### Fixed
+
+- cli: Env overwrites api server config settings
+
 ## [1.14.4] - 2023-12-17
 
 ### Fixed

@@ -83,10 +83,14 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imagePreviewSuffi
 const noop = () => through((entry, _, cb) => cb(null, entry))
 
 const logPublicApiPrivacyHint = (config) => {
-  const apiServerUrl = config?.extractor?.apiServer?.url
-  if (apiServerUrl.startsWith(PUBLIC_API_SERVER)) {
-    log.warn(`You are using the public api server ${apiServerUrl}. Please read its documentation at ${DOCUMENATION_URL} for privacy concerns`)
+  const {url, timeout, concurrent} = config?.extractor?.apiServer
+
+  if (url?.startsWith(PUBLIC_API_SERVER)) {
+    log.warn(`You are using the public api server ${url}. Please read its documentation at ${DOCUMENATION_URL} for privacy concerns`)
+  } else {
+    log.debug(`Use api server ${url}`)
   }
+  log.trace(`Use api server with ${concurrent} concurrent connections and timeout of ${timeout}s`)
 
   return noop()
 }

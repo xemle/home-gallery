@@ -50,30 +50,10 @@ const extract = async (sources, options) => {
     return;
   }
   const args = ['extract'];
-  const extractor = options.config.extractor || {};
   sources.forEach(source => args.push('--index', source.index));
-
-  args.push('--storage', options.config.storage.dir)
-
-  if (extractor.apiServer) {
-    // for version <= v1.4.1 apiServer was a string for api server url
-    const apiServer = typeof extractor.apiServer == 'object' ? extractor.apiServer : { url: `${extractor.apiServer}` }
-    apiServer.url && args.push('--api-server', apiServer.url)
-    apiServer.timeout && args.push('--api-server-timeout', apiServer.timeout)
-    apiServer.concurrent && args.push('--api-server-concurrent', apiServer.concurrent)
-  }
-
-  extractor.geoAddressLanguage && ['--geo-address-language'].concat(extractor.geoAddressLanguage).forEach(v => args.push(v))
-
-  const excludes = extractor.excludes || [];
-  excludes.forEach(exclude => args.push('--exclude', exclude))
-
-  if (Array.isArray(extractor.useNative)) {
-    args.push('--use-native', ...extractor.useNative)
-  }
+  options.journal && args.push('--journal', options.journal)
 
   options.checksumFrom && args.push('--checksum-from', options.checksumFrom)
-  options.journal && args.push('--journal', options.journal)
   if (options.concurrent) {
     args.push('--concurrent', options.concurrent)
     args.push('--skip', options.skip || 0)
