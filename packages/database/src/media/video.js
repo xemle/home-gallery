@@ -15,10 +15,15 @@ const isRotated = videoStream => {
   return [-90, 90].includes(displayMatrix?.rotation)
 }
 
-const handleRotation = (videoStream, result) => {
-  if (isRotated(videoStream) && hasSize(videoStream)) {
+const handleWidthHeight = (videoStream, result) => {
+  if (!hasSize(videoStream)) {
+    return result
+  } else if (isRotated(videoStream)) {
     result.width = videoStream.height
     result.height = videoStream.width
+  } else {
+    result.width = videoStream.width
+    result.height = videoStream.height
   }
 }
 
@@ -34,7 +39,7 @@ const getVideo = (entry) => {
   const videoStream = streams.find(s => s.codec_type == 'video')
 
   handleDuration(videoStream, result)
-  handleRotation(videoStream, result)
+  handleWidthHeight(videoStream, result)
 
   return result
 }

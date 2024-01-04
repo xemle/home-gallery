@@ -44,7 +44,7 @@ t.test('video', async t => {
     t.match(video.duration, 85, 'duration should be rounded')
   })
 
-  t.test('no side data', async t => {
+  t.test('get width and height', async t => {
     const entry = {
       type: 'video',
       meta: {
@@ -61,8 +61,8 @@ t.test('video', async t => {
     }
 
     const video = getVideo(entry)
-    t.type(video.width, 'undefined', 'width should be undefined')
-    t.type(video.height, 'undefined', 'height should be undefined')
+    t.type(video.width, 1920, 'width should be 1920')
+    t.type(video.height, 1080, 'height should be 1080')
   })
 
   t.test('180 rotation', async t => {
@@ -88,8 +88,8 @@ t.test('video', async t => {
     }
 
     const video = getVideo(entry)
-    t.type(video.width, 'undefined', 'width should be undefined on 180 degree rotation')
-    t.type(video.height, 'undefined', 'height should be undefined on 180 degree rotation')
+    t.type(video.width, 1920, 'width should be 1920 on 180 degree rotation')
+    t.type(video.height, 1080, 'height should be 1080 on 180 degree rotation')
   })
 
   t.test('rotation ccw', async t => {
