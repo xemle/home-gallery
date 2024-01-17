@@ -7,7 +7,7 @@ import { useEntryStore } from '../store/entry-store';
 
 
 export const Tags = () => {
-  const escapeSearchValue = value => /[\s]/.test(value) ? `"${value}"` : value
+  const escapeSearchValue = value => /[\s+]/.test(value) ? `"${value}"` : value
 
   const searchLink = (value) => {
     let query = `tag:${escapeSearchValue(value)}`

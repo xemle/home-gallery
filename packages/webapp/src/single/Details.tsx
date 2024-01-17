@@ -19,7 +19,7 @@ export const Details = ({entry, dispatch}) => {
     dispatch({type: 'search', query})
   }
 
-  const escapeSearchValue = value => /[\s]/.test(value) ? `"${value}"` : value
+  const escapeSearchValue = value => /[\s+]/.test(value) ? `"${value}"` : value
 
   const queryTerm = (key, value, op?) => {
     let query
