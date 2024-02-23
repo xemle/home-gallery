@@ -108,6 +108,11 @@ export const MediaView = () => {
     navigate(`/view/${shortId}`, {state: {index, listLocation}});
   }
 
+  const viewNeighbour = (index: number) => {
+    const { shortId } = entries[index]
+    navigate(`/view/${shortId}`, {state: {index, listLocation}, replace: true});
+  }
+
   const dispatch = (action: any) => {
     const { type } = action
     let prevNextMatch = type.match(/(prev|next)(-(\d+))?/)
@@ -118,7 +123,7 @@ export const MediaView = () => {
       const offset = prevNextMatch[3] ? +prevNextMatch[3] : 1
       const negate = prevNextMatch[1] == 'prev' ? -1 : 1
       const i = Math.min(entries.length - 1, Math.max(0, index + (negate * offset)))
-      viewEntry(i)
+      viewNeighbour(i)
     } else if (type === 'similar' && current?.similarityHash) {
       navigate(`/similar/${current.shortId}`);
     } else if (type === 'toggleDetails') {
