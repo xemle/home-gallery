@@ -105,7 +105,7 @@ export const MediaView = () => {
 
   const viewEntry = (index: number) => {
     const { shortId } = entries[index]
-    navigate(`/view/${shortId}`, {state: {index, listLocation}});
+    navigate(`/view/${shortId}`, {state: {index, listLocation}, replace: true});
   }
 
   const dispatch = (action: any) => {
