@@ -200,7 +200,7 @@ export const Details = ({entry, dispatch}) => {
             <div>
               <p className="inline-flex flex-wrap gap-2">
                 {entry.tags.map(tag => (
-                  <a className="px-2 py-1 text-gray-300 bg-gray-800 rounded hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer" onClick={() => dispatchSearch(`tag:${tag}`)} title={`Search for tag ${tag}`}>{tag}</a>
+                  <a className="px-2 py-1 text-gray-300 bg-gray-800 rounded hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer" onClick={() => dispatchSearch(`${queryTerm("tag", tag)}`)} title={`Search for tag ${tag}`}>{tag}</a>
                 ))}
                 {!appConfig.disabledEdit && (
                   <a className="flex items-center gap-2 px-2 py-1 text-gray-500 bg-transparent border border-gray-700 rounded group inset-1 hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer active:bg-gray-600" onClick={editTags} title={`Edit single tags`}>
