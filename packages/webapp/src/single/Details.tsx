@@ -5,6 +5,7 @@ import * as icons from '@fortawesome/free-solid-svg-icons'
 
 import { humanizeDuration, humanizeBytes, formatDate } from "../utils/format";
 import { useTagDialog } from "../dialog/use-tag-dialog";
+import { useNavigate } from "react-router-dom";
 import { addTags } from '../api/ApiService';
 import { Tag } from "../api/models";
 import { useAppConfig } from "../utils/useAppConfig";
@@ -12,6 +13,8 @@ import { classNames } from "../utils/class-names";
 
 export const Details = ({entry, dispatch}) => {
   const appConfig = useAppConfig()
+  const navigate = useNavigate();
+
   const {openDialog, setDialogVisible} = useTagDialog()
 
   if (!entry) {
@@ -40,9 +43,18 @@ export const Details = ({entry, dispatch}) => {
     return <a className="text-gray-300 break-all rounded hover:cursor-pointer hover:bg-gray-600 hover:text-gray-200" key={query} onClick={() => dispatchSearch(query)} title={`Search for '${query}'`}>{text}</a>
   }
 
+  const navLink = (text, query) => {
+    return <a className="text-gray-300 break-all rounded hover:cursor-pointer hover:bg-gray-600 hover:text-gray-200" key={query} onClick={() => navigate(query)} title={`Search for '${query}'`}>{text}</a>
+  }
+
   const simpleSearchLink = (text, key?, value?) => {
     let query = queryTerm(key || text, value)
     return searchLink(text, query)
+  }
+
+  const selectFace = (text, shortId, faceNo) => {
+    console.log(`Search for face ${faceNo} of ${shortId}`);
+    return navLink(text, `/faces/${shortId}/${faceNo}`);
   }
 
   const joinReducer = c => (prev, cur) => prev.length ? [prev, c, cur] : [cur]
@@ -193,6 +205,8 @@ export const Details = ({entry, dispatch}) => {
               </div>
             </div>
           )}
+
+          {/* Tags */}
           <div className="flex">
             <div className="flex-shrink-0 w-8">
               <FontAwesomeIcon icon={icons.faTags} className="text-gray-300"/>
@@ -200,7 +214,7 @@ export const Details = ({entry, dispatch}) => {
             <div>
               <p className="inline-flex flex-wrap gap-2">
                 {entry.tags.map(tag => (
-                  <a className="px-2 py-1 text-gray-300 bg-gray-800 rounded hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer" onClick={() => dispatchSearch(`${queryTerm("tag", tag)}`)} title={`Search for tag ${tag}`}>{tag}</a>
+                  <a className="px-2 py-1 text-gray-300 bg-gray-800 rounded hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer" onClick={() => dispatchSearch(`${queryTerm("tag", tag)}`)} title={`Search for tag: ${tag}`}>{tag}</a>
                 ))}
                 {!appConfig.disabledEdit && (
                   <a className="flex items-center gap-2 px-2 py-1 text-gray-500 bg-transparent border border-gray-700 rounded group inset-1 hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer active:bg-gray-600" onClick={editTags} title={`Edit single tags`}>
@@ -211,6 +225,8 @@ export const Details = ({entry, dispatch}) => {
               </p>
             </div>
           </div>
+
+          {/* Make */}
           <div className="flex">
             <div className="flex-shrink-0 w-8">
               <FontAwesomeIcon icon={icons.faCamera} className="text-gray-300"/>
@@ -232,6 +248,8 @@ export const Details = ({entry, dispatch}) => {
               <p>ISO {entry.iso}, Aperture {entry.aperture}</p>
             </div>
           </div>
+
+          {/* Objects */}
           {entry.objects.length > 0 && (
             <div className="flex">
               <div className="flex-shrink-0 w-8">
@@ -244,14 +262,16 @@ export const Details = ({entry, dispatch}) => {
               </div>
             </div>
           )}
+
+          {/* Faces */}
           {entry.faces.length > 0 && (
             <div className="flex">
               <div className="flex-shrink-0 w-8">
                 <FontAwesomeIcon icon={icons.faUser} className="text-gray-300"/>
               </div>
               <div>
-                <p className="inline-flex flex-wrap gap-2">{entry.faces.map(face => (
-                  <span>{face.gender} (~{face.age.toFixed()}y)</span>
+                <p className="inline-flex flex-wrap gap-2">{entry.faces.map((face, i) => (
+                  <span>{selectFace(face.gender, entry.shortId, i)} (~{face.age.toFixed()}y)</span>
                 ))}</p>
               </div>
             </div>
