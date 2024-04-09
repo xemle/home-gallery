@@ -31,8 +31,8 @@ const applyEventAction = <T extends Taggable>(data: T, action: EventAction): boo
 }
 
 const isSubIdsValid = (event: Event) => {
-  if(!event.tagretSubIds) return true;
-  if(event.tagretSubIds.length == event.targetIds.length) return true;
+  if(!event.subtargetCoords) return true;
+  if(event.subtargetCoords.length == event.targetIds.length) return true;
   return false;
 }
 
