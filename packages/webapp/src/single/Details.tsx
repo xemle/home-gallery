@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as icons from '@fortawesome/free-solid-svg-icons'
 
@@ -43,21 +42,10 @@ export const Details = ({ entry, dispatch }) => {
     return <a className="text-gray-300 break-all rounded hover:cursor-pointer hover:bg-gray-600 hover:text-gray-200" key={query} onClick={() => dispatchSearch(query)} title={`Search for '${query}'`}>{text}</a>
   }
 
-  const navLink = (text, query) => {
-    return <a className="text-gray-300 break-all rounded hover:cursor-pointer hover:bg-gray-600 hover:text-gray-200" key={query} onClick={() => navigate(query)} title={`Search for '${query}'`}>{text}</a>
-  }
-
   const simpleSearchLink = (text, key?, value?) => {
     let query = queryTerm(key || text, value)
     return searchLink(text, query)
   }
-
-  const selectFace = (text, shortId, faceNo) => {
-    console.log(`Search for face ${faceNo} of ${shortId}`);
-    return navLink(text, `/faces/${shortId}/${faceNo}`);
-  }
-
-  const joinReducer = c => (prev, cur) => prev.length ? [prev, c, cur] : [cur]
 
   const sepSpan = sep => {
     return (

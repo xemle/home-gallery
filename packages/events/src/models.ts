@@ -3,6 +3,7 @@ export interface Event {
   id: string;
   date?: string;
   targetIds: string[];
+  tagretSubIds?: string[];
   actions: EventAction[];
 }
 
