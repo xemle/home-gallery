@@ -67,7 +67,7 @@ export const MediaViewImage = (props) => {
       }
       return (
         <div key={i} className='absolute flex items-start border border-pink-700 rounded group hover:bg-pink-900/15 hover:cursor-pointer' style={style} onClick={() => selectFace(shortId, i)}>
-          <span className="px-2 text-pink-700 rounded-br group-hover:bg-pink-700 group-hover:text-gray-200">{face.gender} ~{face.age}y</span>
+          <span className="px-2 text-pink-700 rounded-br group-hover:bg-pink-700 group-hover:text-gray-200">{face.faceTag}</span>
         </div>
       );
     }))

@@ -58,21 +58,27 @@ export const Years = () => {
               <a className="inline-flex items-center justify-center gap-2 p-4 text-gray-500 hover:text-gray-300 hover:bg-gray-700 hover:cursor-pointer"
                 onClick={() => navigate(`/years/${year}`)}>
                 <FontAwesomeIcon icon={icons.faPhotoFilm} />
-                <span>{count} <span className="max-sm:hidden">all</span></span>
+                <span>{count}
+                {/* <span className="max-sm:hidden">all</span> */}
+                </span>
               </a>
             }
             {images > 0 &&
               <a className="inline-flex items-center justify-center gap-2 p-4 text-gray-500 hover:text-gray-300 hover:bg-gray-700 hover:cursor-pointer"
                 onClick={() => navigate(`/years/${year}?q=type:image`)}>
                 <FontAwesomeIcon icon={icons.faImage} />
-                <span>{images} <span className="max-sm:hidden">images</span></span>
+                <span>{images}
+                {/* <span className="max-sm:hidden">images</span> */}
+                </span>
               </a>
             }
             {videos > 0 &&
               <a className="inline-flex items-center justify-center gap-2 p-4 text-gray-500 hover:text-gray-300 hover:bg-gray-700 hover:cursor-pointer"
                 onClick={() => navigate(`/years/${year}?q=type:video`)}>
                 <FontAwesomeIcon icon={icons.faVideo} />
-                <span>{videos} <span className="max-sm:hidden">videos</span></span>
+                <span>{videos}
+                {/* <span className="max-sm:hidden">videos</span> */}
+                </span>
               </a>
             }
           </li>

@@ -7,7 +7,7 @@ import { humanizeDuration, humanizeBytes, formatDate } from "../utils/format";
 import { useTagDialog } from "../dialog/use-tag-dialog";
 import { useNavigate } from "react-router-dom";
 import { addTags } from '../api/ApiService';
-import { Tag } from "../api/models";
+import { Tag, FaceTag } from "../api/models";
 import { useAppConfig } from "../utils/useAppConfig";
 import { classNames } from "../utils/class-names";
 
@@ -15,7 +15,7 @@ export const Details = ({ entry, dispatch }) => {
   const appConfig = useAppConfig()
   const navigate = useNavigate();
 
-  const { openDialog, setDialogVisible } = useTagDialog()
+  const { openTagsDialog, setTagsDialogVisible, openFaceTagsDialog, setFaceTagsDialogVisible } = useTagDialog()
 
   if (!entry) {
     return (<></>)
@@ -111,24 +111,46 @@ export const Details = ({ entry, dispatch }) => {
 
   const origTags: Tag[] = (entry.tags || []).map(name => ({ name, remove: false }))
 
-  const onSubmit = ({ tags }: { tags: Tag[] }) => {
+  const origFaceTags: FaceTag[] = (entry.faces || []).map((face, i) => ({ name: face.faceTag, remove: false, descriptorIndex: i }))
+
+  const onTagsSubmit = ({ tags }: { tags: Tag[] }) => {
     const tagNames = tags.map(({ name }) => name)
     const origTagNames = entry.tags || []
     const tagActions = origTagNames.filter(name => !tagNames.includes(name)).map(name => ({ name, remove: true }))
     tagActions.push(...tagNames.filter(name => !origTagNames.includes(name)).map(name => ({ name, remove: false })))
     if (tagActions.length) {
       addTags([entry.id], tagActions).then(() => {
-        setDialogVisible(false);
+        setTagsDialogVisible(false);
       })
     } else {
-      setDialogVisible(false);
+      setTagsDialogVisible(false);
+    }
+
+    return false;
+  }
+
+  const onFaceTagsSubmit = ({ tags }: { tags: FaceTag[] }) => {
+    const tagNames = tags.map(({ name }) => name)
+    const origTagNames = entry.tags || []
+    const tagActions = origTagNames.filter(name => !tagNames.includes(name)).map(name => ({ name, remove: true }))
+    tagActions.push(...tagNames.filter(name => !origTagNames.includes(name)).map(name => ({ name, remove: false })))
+    if (tagActions.length) {
+      addTags([entry.id], tagActions).then(() => {
+        setFaceTagsDialogVisible(false);
+      })
+    } else {
+      setFaceTagsDialogVisible(false);
     }
 
     return false;
   }
 
   const editTags = () => {
-    openDialog({ initialTags: origTags, onSubmit })
+    openTagsDialog({ initialTags: origTags,initialFaceTags: origFaceTags, onTagsSubmit , onFaceTagsSubmit})
+  }
+
+  const editFaceTags = () => {
+    openFaceTagsDialog({ initialTags: origTags,initialFaceTags: origFaceTags, onTagsSubmit , onFaceTagsSubmit})
   }
 
   return (
@@ -289,11 +311,11 @@ export const Details = ({ entry, dispatch }) => {
                 ))} */}
 
                   {entry.faces.map((face, i) => (
-                    <a className="px-2 py-1 text-gray-300 bg-gray-800 rounded hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer" onClick={() => navigate(`/faces/${entry.shortId}/${i}`)} title={`Search for person: ${face.gender} (${face.age.toFixed()}y)`}>{face.gender} ({~face.age.toFixed()}y)</a>
+                    <a className="px-2 py-1 text-gray-300 bg-gray-800 rounded hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer" onClick={() => navigate(`/faces/${entry.shortId}/${i}`)} title={`Search for person: ${face.faceTag}`}>{face.faceTag}</a>
                   ))}
 
                   {!appConfig.disabledEdit && (
-                    <a className="flex items-center gap-2 px-2 py-1 text-gray-500 bg-transparent border border-gray-700 rounded group inset-1 hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer active:bg-gray-600" onClick={editTags} title={`Edit single tags`}>
+                    <a className="flex items-center gap-2 px-2 py-1 text-gray-500 bg-transparent border border-gray-700 rounded group inset-1 hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer active:bg-gray-600" onClick={editFaceTags} title={`Edit face tags`}>
                       <FontAwesomeIcon icon={icons.faPen} className="text-gray-500 group-hover:text-gray-300" />
                       {/* <span>Edit tags</span> */}
                     </a>

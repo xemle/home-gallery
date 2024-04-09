@@ -1,34 +1,34 @@
 import { useReducer } from "react"
 
-import { Tag } from "../api/models"
+import { FaceTag } from "../api/models"
 import { TagSuggestion, getSuggestions } from "./suggestion"
 
-export interface TagDialogState {
-  inputValue: string,
-  tags: Tag[]
+export interface FaceTagDialogState {
+  current: number
+  faceTags: FaceTag[]
   allTags: string[]
   suggestions: TagSuggestion[]
   showSuggestions: boolean
 }
 
-export const initialState: TagDialogState = {
-  inputValue: '',
-  tags: [],
+export const initialState: FaceTagDialogState = {
+  current: 0,
+  faceTags: [],
   allTags: [],
   suggestions: [],
   showSuggestions: false
 }
 
-export type TagAction =
- | {type: 'addTag', value: string, tail?: string}
- | {type: 'setAllTags', value: string[]}
- | {type: 'suggestTag', value: string}
- | {type: 'removeLastTag'}
- | {type: 'removeTag', value: string}
- | {type: 'toggleRemoveFlag', value: string}
- | {type: 'clearSuggentions'}
- | {type: 'nextSuggestion'}
- | {type: 'prevSuggestion'}
+export type FaceTagAction =
+ | {type: 'addFaceTag', selectedId: number, value: string, tail?: string}
+ | {type: 'setAllFaceTags', selectedIds: number[], value: string[]}
+ | {type: 'suggestFaceTag', selectedId: number, value: string}
+ | {type: 'removeLastFaceTag'}
+ | {type: 'removeFaceTag', selectedId: number, value: string}
+ | {type: 'toggleFaceTagRemoveFlag', selectedId: number, value: string}
+ | {type: 'clearFaceTagSuggentions'}
+ | {type: 'nextFaceTagSuggestion'}
+ | {type: 'prevFaceTagSuggestion'}
 
 const updateItem = <T,>(items : T[], findPredicate : (item: T, index: number, items: T[]) => boolean, updateValue : Partial<T> | ((item: T) => T)) : number => {
   const index = items.findIndex(findPredicate)
@@ -40,34 +40,23 @@ const updateItem = <T,>(items : T[], findPredicate : (item: T, index: number, it
   return index
 }
 
-export const reducer = (state: TagDialogState, action: TagAction): TagDialogState => {
+export const reducer = (state: FaceTagDialogState, action: FaceTagAction): FaceTagDialogState => {
   switch (action.type) {
-    case 'addTag': {
+    case 'addFaceTag': {
       let name = action.value.replace(/(^\s+|\s+$)/g, '')
       let remove = false
-      if (name.startsWith('-')) {
-        name = name.substring(1)
-        remove = true
-      }
+      let descriptorIndex = state.faceTags[action.selectedId].descriptorIndex;
       const tailSuggestions = {inputValue: action.tail || '', suggestions: getSuggestions(state.allTags, action.tail), showSuggestions: !!action.tail}
-      const index = state.tags.findIndex(tag => tag.name == name)
-      if (index >= 0) {
-        const toggleTag = {...state.tags[index]}
-        if (toggleTag.remove == remove) {
-          return {...state, ...tailSuggestions}
-        }
-        toggleTag.remove = remove
-        const tags = [...state.tags]
-        tags.splice(index, 1, toggleTag)
-        return {...state, tags, ...tailSuggestions}
-      }
 
-      const tags: Tag[] = [...state.tags, {name, remove}];
-      return {...state, tags, ...tailSuggestions}
+      const faceTags: FaceTag[] = [...state.faceTags, {descriptorIndex, name, remove}];
+      return {...state, faceTags, ...tailSuggestions}
     }
+/*
+
     case 'setAllTags': {
       const allTags = action.value
-      return {...state, allTags, suggestions: getSuggestions(allTags, state.inputValue)}
+      const selectedIds = action.selectedIds
+      return {...state, allTags, suggestions: getSuggestions(allTags, selectedIds)}
     }
     case 'suggestTag': {
       const suggestions = getSuggestions(state.allTags, action.value)
@@ -76,26 +65,26 @@ export const reducer = (state: TagDialogState, action: TagAction): TagDialogStat
       return {...state, inputValue: action.value, suggestions, showSuggestions: !!hasActiveSuggestion || !becomesEmpty}
     }
     case 'removeLastTag': {
-      const tags: Tag[] = [...state.tags]
-      return {...state, tags: state.tags.slice(0, state.tags.length - 1), inputValue: '', suggestions: getSuggestions(state.allTags, '')}
+      const tags: FaceTag[] = [...state.faceTags]
+      return {...state, faceTags: state.faceTags.slice(0, state.faceTags.length - 1), current: 0, suggestions: getSuggestions(state.allTags, '')}
     }
     case 'removeTag': {
-      const index = state.tags.findIndex(tag => tag.name == action.value)
+      const index = state.faceTags.findIndex(tag => tag.name == action.value)
       if (index < 0) {
         return state
       }
-      const tags = [...state.tags]
-      tags.splice(index, 1)
-      return {...state, tags}
+      const faceTags = [...state.faceTags]
+      faceTags.splice(index, 1)
+      return {...state, faceTags}
     }
     case 'toggleRemoveFlag': {
-      const tags = [...state.tags]
-      const index = updateItem(tags, item => item.name == action.value, item => {item.remove = !item.remove; return item})
+      const faceTags = [...state.faceTags]
+      const index = updateItem(faceTags, item => item.name == action.value, item => {item.remove = !item.remove; return item})
       if (index < 0) {
         return state
       }
 
-      return {...state, tags}
+      return {...state, faceTags}
     }
     case 'clearSuggentions': {
       const suggestions = [...state.suggestions]
@@ -116,10 +105,10 @@ export const reducer = (state: TagDialogState, action: TagAction): TagDialogStat
       index = (suggestions.length + index + offset) % suggestions.length
       updateItem(suggestions, (_, i) => i == index, {active: true})
       return {...state, suggestions, showSuggestions: true}
-    }
+    } */
   }
 
   return state
 }
 
-export const useTagDialogStore = (partial : Partial<TagDialogState> = {}) => useReducer(reducer, {...initialState, ...partial})
+export const useFaceTagsDialogStore = (partial : Partial<FaceTagDialogState> = {}) => useReducer(reducer, {...initialState, ...partial})

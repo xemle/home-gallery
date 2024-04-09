@@ -11,7 +11,7 @@ import { Tag } from "../api/models";
 import { RecentTags } from "./recent-tags";
 import { UsedTags } from "./used-tags";
 import { MultiTagHelp, SingleTagHelp } from "./tag-dialog-help";
-import { useDialogStore } from "./tag-dialog-store";
+import { useTagDialogStore } from "./tag-dialog-store";
 
 export type TagDialogFormData = {
   tags: Tag[];
@@ -82,7 +82,7 @@ const Dialog = ({title, submitText, onCancel, onSubmit, children}) => {
 }
 
 export const MultiTagDialog = ({onCancel, onSubmit}: TagDialogProps) => {
-  const [state, dispatch] = useDialogStore();
+  const [state, dispatch] = useTagDialogStore();
   const [showHelp, setShowHelp] = useState(false)
 
   const recentTags = useEventStore(state => state.recentTags);
@@ -127,7 +127,7 @@ export const MultiTagDialog = ({onCancel, onSubmit}: TagDialogProps) => {
 }
 
 export const SingleTagDialog = ({tags, onCancel, onSubmit}: TagDialogProps) => {
-  const [state, dispatch] = useDialogStore({tags})
+  const [state, dispatch] = useTagDialogStore({tags})
   const [showHelp, setShowHelp] = useState(false)
 
   const recentTags = useEventStore(state => state.recentTags);
