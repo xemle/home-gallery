@@ -40,8 +40,9 @@ export const getSuggestions = (allTags: string[], value: string = ''): TagSugges
   if (!needle) {
     return allTags.map(name => ({name, remove, active, matches: [], spreads: [], parts: [{pos: 0, text: name, isMatch: false}]}))
   }
-  if (needle.startsWith('-')) {
-    needle = needle.substring(1)
+
+  if (needle.startsWith('- ')) {
+    needle = needle.substring(2)
     remove = true
   }
 
