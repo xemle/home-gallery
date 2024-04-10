@@ -21,7 +21,8 @@ const containsSize = (containerWidth, containerHeight, childWidth, childHeight) 
 type ZoomableProps = {
   childWidth: number;
   childHeight: number;
-  onSwipe?: (ev: HammerInput) => void
+  onSwipe?: (ev: HammerInput) => void;
+  children?: React.JSX.Element
 }
 
 export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHeight, onSwipe, children}) => {
