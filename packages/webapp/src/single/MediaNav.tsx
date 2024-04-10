@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as icons from '@fortawesome/free-solid-svg-icons'
 
@@ -10,6 +10,9 @@ import { usePreviewSize } from "./usePreviewSize";
 import { classNames } from '../utils/class-names'
 
 export const MediaNav = ({current, prev, next, listLocation, showNavigation, dispatch}) => {
+  const [faceRects] = useState([]);
+  const [objectRects] = useState([]);
+
   const query = useSearchStore(state => state.query);
   const previewSize = usePreviewSize()
 
@@ -92,6 +95,11 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
         { query.type != 'none' &&
           <a onClick={() => dispatch({type: 'chronology'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show chronology (c)">
             <FontAwesomeIcon icon={icons.faClock} className={iconClass}/>
+          </a>
+        }
+        { (faceRects || objectRects) &&
+          <a onClick={() => dispatch({type: 'toggleRects'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show objects (o)">
+            <FontAwesomeIcon icon={icons.faUsersViewfinder} className={iconClass}/>
           </a>
         }
         { current &&
