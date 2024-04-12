@@ -5,7 +5,7 @@ import * as icons from '@fortawesome/free-solid-svg-icons'
 import { FaceTag } from "../api/models";
 import { classNames } from '../utils/class-names'
 import { toKey } from "../utils/toKey";
-import { TagSuggestion } from "./suggestion";
+import { TagSuggestion } from "./tag-suggestion";
 import { SuggestionList } from "./suggestion-list";
 
 const TagView = ({tag, withRemove, dispatch}: {tag: FaceTag, withRemove: boolean, dispatch}) => {

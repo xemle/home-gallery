@@ -1,13 +1,13 @@
 import { useReducer } from "react"
 
 import { FaceTag } from "../api/models"
-import { TagSuggestion, getSuggestions } from "./suggestion"
+import { FaceTagSuggestion, getSuggestions } from "./face-tag-suggestion"
 
 export interface FaceTagDialogState {
   current: number
   faceTags: FaceTag[]
   allTags: string[]
-  suggestions: TagSuggestion[]
+  suggestions: FaceTagSuggestion[]
   showSuggestions: boolean
 }
 
@@ -45,10 +45,10 @@ export const reducer = (state: FaceTagDialogState, action: FaceTagAction): FaceT
     case 'addFaceTag': {
       let name = action.value.replace(/(^\s+|\s+$)/g, '')
       let remove = false
-      let descriptorIndex = state.faceTags[action.selectedId].descriptorIndex;
+      let rect = state.faceTags[action.selectedId].rect;
       const tailSuggestions = {inputValue: action.tail || '', suggestions: getSuggestions(state.allTags, action.tail), showSuggestions: !!action.tail}
 
-      const faceTags: FaceTag[] = [...state.faceTags, {descriptorIndex, name, remove}];
+      const faceTags: FaceTag[] = [...state.faceTags, {rect, name, remove}];
       return {...state, faceTags, ...tailSuggestions}
     }
 /*

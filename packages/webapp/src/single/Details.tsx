@@ -5,7 +5,7 @@ import * as icons from '@fortawesome/free-solid-svg-icons'
 import { humanizeDuration, humanizeBytes, formatDate } from "../utils/format";
 import { useTagDialog } from "../dialog/use-tag-dialog";
 import { useNavigate } from "react-router-dom";
-import { addTags } from '../api/ApiService';
+import { addTags, addFaceTags } from '../api/ApiService';
 import { Tag, FaceTag } from "../api/models";
 import { useAppConfig } from "../utils/useAppConfig";
 import { classNames } from "../utils/class-names";
@@ -97,9 +97,17 @@ export const Details = ({ entry, dispatch }) => {
     )
   }
 
-  const origTags: Tag[] = (entry.tags || []).map(name => ({ name, remove: false }))
+  const initialTags: Tag[] = (entry.tags || []).map(name => ({ name, remove: false }))
 
-  const origFaceTags: FaceTag[] = (entry.faces || []).map((face, i) => ({ name: face.faceTag, remove: false, descriptorIndex: i }))
+  const initialFaceTags: FaceTag[] = (entry.faces || []).map((face) => ({
+    name: face.faceTag,
+    rect: {
+      x: +face.x,
+      y: +face.y,
+      width: +face.width,
+      height: +face.height
+    }
+  }))
 
   const onTagsSubmit = ({ tags }: { tags: Tag[] }) => {
     const tagNames = tags.map(({ name }) => name)
@@ -117,13 +125,27 @@ export const Details = ({ entry, dispatch }) => {
     return false;
   }
 
-  const onFaceTagsSubmit = ({ tags }: { tags: FaceTag[] }) => {
-    const tagNames = tags.map(({ name }) => name)
-    const origTagNames = entry.tags || []
-    const tagActions = origTagNames.filter(name => !tagNames.includes(name)).map(name => ({ name, remove: true }))
-    tagActions.push(...tagNames.filter(name => !origTagNames.includes(name)).map(name => ({ name, remove: false })))
-    if (tagActions.length) {
-      addTags([entry.id], tagActions).then(() => {
+  const onFaceTagsSubmit = ({ faceTags }: { faceTags: FaceTag[] }) => {
+    const contains = (faceTag: FaceTag, allTags: FaceTag[]) => {
+      return allTags.filter(tag => tag.name == faceTag.name
+        && tag.rect.x == faceTag.rect.x
+        && tag.rect.x == faceTag.rect.x
+        && tag.rect.x == faceTag.rect.x
+        && tag.rect.x == faceTag.rect.x
+      ).length > 0;
+    }
+
+    const faceTagActions = initialFaceTags.filter(tag => !contains(tag, faceTags))
+      .map(tag => ({ name: tag.name, rect: tag.rect, remove: true }))
+
+    faceTagActions.push(...faceTags.filter(tag => !contains(tag, initialFaceTags))
+      .map(tag => ({ name: tag.name, rect: tag.rect, remove: false })))
+
+    console.log(initialFaceTags);
+    console.log(faceTags);
+    console.log(faceTagActions);
+    if (faceTagActions.length) {
+      addFaceTags([entry.id], faceTagActions).then(() => {
         setFaceTagsDialogVisible(false);
       })
     } else {
@@ -134,11 +156,11 @@ export const Details = ({ entry, dispatch }) => {
   }
 
   const editTags = () => {
-    openTagsDialog({ initialTags: origTags,initialFaceTags: origFaceTags, onTagsSubmit , onFaceTagsSubmit})
+    openTagsDialog({ initialTags, onTagsSubmit })
   }
 
   const editFaceTags = () => {
-    openFaceTagsDialog({ initialTags: origTags,initialFaceTags: origFaceTags, onTagsSubmit , onFaceTagsSubmit})
+    openFaceTagsDialog({ initialFaceTags, onFaceTagsSubmit })
   }
 
   return (

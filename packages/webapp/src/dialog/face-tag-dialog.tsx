@@ -12,15 +12,14 @@ import { RecentTags } from "./recent-tags";
 import { UsedTags } from "./used-tags";
 import { MultiTagHelp, SingleTagHelp } from "./face-tag-dialog-help";
 import { useFaceTagsDialogStore } from "./face-tag-dialog-store";
-import { stat } from "fs";
 
 export type FaceTagDialogProps = {
   faceTags?: FaceTag[]
   onCancel: () => void;
-  onSubmit: ({tags}: {tags: FaceTag[]}) => void;
+  onSubmit: ({faceTags}: {faceTags: FaceTag[]}) => void;
 }
 
-const useAllTags = () => {
+const useAllFaceTags = () => {
   const allEntries = useEntryStore(state => state.allEntries)
   const selectedIds = useEditModeStore(state => state.selectedIds)
 
@@ -78,32 +77,79 @@ const Dialog = ({title, submitText, onCancel, onSubmit, children}) => {
   )
 }
 
-export const SingleFaceTagDialog = ({faceTags, onCancel, onSubmit}: FaceTagDialogProps) => {
-  const [state, dispatch] = useFaceTagsDialogStore({faceTags})
+export const MultiFaceTagDialog = ({onCancel, onSubmit}: FaceTagDialogProps) => {
+  const [state, dispatch] = useFaceTagsDialogStore()
   const [showHelp, setShowHelp] = useState(false)
 
   const recentTags = useEventStore(state => state.recentFaceTags);
-  const [allTags] = useAllTags()
+  const [allFaceTags] = useAllFaceTags()
 
   const faceTag = state.faceTags[state.current];
 
-  /*
   useEffect(() => {
-    dispatch({type: 'setAllFaceTags', value: allTags})
-  }, [allTags]) */
+    dispatch({type: 'setAllFaceTags', value: allFaceTags.map(t => t.name).sort(), selectedIds:[]})
+  }, [allFaceTags])
   
 
   const getFinalTags = () => {
     const tags = [...state.faceTags]
     if (faceTag.name.length) {
-      tags.push({name: faceTag.name, remove: false, descriptorIndex: faceTag.descriptorIndex})
+      tags.push({name: faceTag.name, remove: false, rect: faceTag.rect})
     }
     return tags
   }
 
   const submitHandler = (event) => {
     event.preventDefault();
-    onSubmit({ tags: getFinalTags() });
+    onSubmit({ faceTags: getFinalTags() });
+  }
+
+  return (
+    <Dialog title='Edit face tags' submitText={'Save Tags'} onSubmit={submitHandler} onCancel={onCancel} >
+      <div className="flex flex-col gap-2">
+        <label htmlFor="tags" className="flex items-center content-center gap-1">
+          <span className="text-gray-400">Add Tags</span>
+          <a className="w-6 h-6 ml-1 hover:cursor-pointer" onClick={() => setShowHelp(show => !show)} title="Show help for face tag input"><FontAwesomeIcon icon={icons.faQuestionCircle} className="text-gray-500 hover:text-gray-300"/></a>
+        </label>
+        <MultiTagHelp show={showHelp} setShow={setShowHelp} />
+        {state.faceTags.map((tag, i) =>(
+          <div className="flex flex-row items-center justify-start w-full gap-2 px-2 py-1">
+          <img height={100} width={100}></img>
+          <FaceTagInput tag={tag} withRemove={false} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={""} />
+          </div>
+        ))}
+        <RecentTags tags={recentTags} dispatch={dispatch} />
+        <UsedTags title="Most used tags:" tags={allFaceTags} initialCount={5} dispatch={dispatch} />
+      </div>
+    </Dialog>
+  )
+}
+
+export const SingleFaceTagDialog = ({faceTags, onCancel, onSubmit}: FaceTagDialogProps) => {
+  const [state, dispatch] = useFaceTagsDialogStore({faceTags})
+  const [showHelp, setShowHelp] = useState(false)
+
+  const recentTags = useEventStore(state => state.recentFaceTags);
+  const [allFaceTags] = useAllFaceTags()
+
+  const faceTag = state.faceTags[state.current];
+
+  useEffect(() => {
+    dispatch({type: 'setAllFaceTags', value: allFaceTags.map(t => t.name).sort(), selectedIds:[]})
+  }, [allFaceTags])
+  
+
+  const getFinalTags = () => {
+    const tags = [...state.faceTags]
+    if (faceTag.name.length) {
+      tags.push({name: faceTag.name, remove: false, rect: faceTag.rect})
+    }
+    return tags
+  }
+
+  const submitHandler = (event) => {
+    event.preventDefault();
+    onSubmit({ faceTags: getFinalTags() });
   }
 
   return (
@@ -121,7 +167,7 @@ export const SingleFaceTagDialog = ({faceTags, onCancel, onSubmit}: FaceTagDialo
           </div>
         ))}
         <RecentTags tags={recentTags} dispatch={dispatch} />
-        <UsedTags title="Most used tags:" tags={allTags} initialCount={5} dispatch={dispatch} />
+        <UsedTags title="Most used tags:" tags={allFaceTags} initialCount={5} dispatch={dispatch} />
       </div>
     </Dialog>
   )

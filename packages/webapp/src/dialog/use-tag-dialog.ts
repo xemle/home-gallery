@@ -1,9 +1,9 @@
 import * as React from "react";
 
-import { TagDialogContext } from './tag-dialog-provider'
+import { DialogContext } from './dialog-provider'
 
 export const useTagDialog = () => {
-  const context = React.useContext(TagDialogContext)
+  const context = React.useContext(DialogContext)
   if (context == undefined) {
     throw new Error('useTagDialog must be used within a UserProvider')
   }

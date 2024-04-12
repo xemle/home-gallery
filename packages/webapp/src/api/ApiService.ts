@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Event, EventAction } from '@home-gallery/events'
 import { pushEvent as pushEventApi, eventStream as eventStreamApi, ServerEventListener, getTree, mapEntriesForBrowser } from './api';
 import { UnsavedEventHandler } from './UnsavedEventHandler';
-import { Tag } from './models';
+import { FaceTag, Tag } from './models';
 import { Entry } from "../store/entry";
 import { OfflineDatabase } from '../offline'
 import { EventBus } from './EventBus';
@@ -18,9 +18,28 @@ const tagToAction = (tag: Tag): EventAction => {
   }
 }
 
+const faceTagToAction = (tag: FaceTag): EventAction => {
+  if (tag.remove) {
+    return {action: 'removeFaceTag', value: {name:tag.name, rect:tag.rect}}
+  } else {
+    return {action: 'addFaceTag', value: {name:tag.name, rect:tag.rect}}
+  }
+}
+
 export const addTags = async (entryIds: string[], tags: Tag[]) => {
   const actions = tags.map(tagToAction);
   const event: Event = {type: 'userAction', id: uuidv4(), targetIds: entryIds, actions };
+  return pushEvent(event);
+}
+
+export const addFaceTags = async (entryIds: string[], faceTags: FaceTag[]) => {
+  const actions = faceTags.map(faceTagToAction);
+  const event: Event = {
+    type: 'userAction', 
+    id: uuidv4(), 
+    targetIds: entryIds,
+    actions 
+  };
   return pushEvent(event);
 }
 

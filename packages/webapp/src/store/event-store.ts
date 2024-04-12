@@ -4,6 +4,7 @@ import { applyEvents, Event, EventAction } from '@home-gallery/events'
 
 import { Entry } from './entry'
 import { useEntryStore } from './entry-store'
+import { FaceTag } from '../api/models'
 
 
 const lruAdd = (list: string[], item: string, size: number = 50) => {
@@ -29,7 +30,7 @@ const getEventFaceTags = events => events
   .filter(event => event.type == 'userAction')
   .map(event => event.actions.filter(a => a.action == 'addFaceTag'))
   .reduce((all, actions) => all.concat(actions), [])
-  .map(action => action.value)
+  .map(action => action.value.name)
 
 
 export interface EventStore {
