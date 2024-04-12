@@ -89,7 +89,7 @@ export const MultiFaceTagDialog = ({onCancel, onSubmit}: FaceTagDialogProps) => 
   useEffect(() => {
     dispatch({type: 'setAllFaceTags', value: allFaceTags.map(t => t.name).sort(), selectedIds:[]})
   }, [allFaceTags])
-  
+
 
   const getFinalTags = () => {
     const tags = [...state.faceTags]
@@ -114,12 +114,12 @@ export const MultiFaceTagDialog = ({onCancel, onSubmit}: FaceTagDialogProps) => 
         <MultiTagHelp show={showHelp} setShow={setShowHelp} />
         {state.faceTags.map((tag, i) =>(
           <div className="flex flex-row items-center justify-start w-full gap-2 px-2 py-1">
-          <img height={100} width={100}></img>
+          <img height={100} width={100} alt='avatar'></img>
           <FaceTagInput tag={tag} withRemove={false} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={""} />
+          <RecentTags tags={recentTags} dispatch={dispatch} />
+          <UsedTags title="Most used tags:" tags={allFaceTags} initialCount={5} dispatch={dispatch} />
           </div>
         ))}
-        <RecentTags tags={recentTags} dispatch={dispatch} />
-        <UsedTags title="Most used tags:" tags={allFaceTags} initialCount={5} dispatch={dispatch} />
       </div>
     </Dialog>
   )
@@ -137,7 +137,7 @@ export const SingleFaceTagDialog = ({faceTags, onCancel, onSubmit}: FaceTagDialo
   useEffect(() => {
     dispatch({type: 'setAllFaceTags', value: allFaceTags.map(t => t.name).sort(), selectedIds:[]})
   }, [allFaceTags])
-  
+
 
   const getFinalTags = () => {
     const tags = [...state.faceTags]
@@ -162,12 +162,12 @@ export const SingleFaceTagDialog = ({faceTags, onCancel, onSubmit}: FaceTagDialo
         <SingleTagHelp show={showHelp} setShow={setShowHelp} />
         {state.faceTags.map((tag, i) =>(
           <div className="flex flex-row items-center justify-start w-full gap-2 px-2 py-1">
-          <img height={100} width={100}></img>
+          <img height={100} width={100} alt='avatar'></img>
           <FaceTagInput tag={tag} withRemove={false} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={""} />
+          <RecentTags tags={recentTags} dispatch={dispatch} />
+          <UsedTags title="Most used tags:" tags={allFaceTags} initialCount={5} dispatch={dispatch} />
           </div>
         ))}
-        <RecentTags tags={recentTags} dispatch={dispatch} />
-        <UsedTags title="Most used tags:" tags={allFaceTags} initialCount={5} dispatch={dispatch} />
       </div>
     </Dialog>
   )

@@ -26,7 +26,7 @@ export type FaceTagAction =
  | {type: 'removeLastFaceTag'}
  | {type: 'removeFaceTag', selectedId: number, value: string}
  | {type: 'toggleFaceTagRemoveFlag', selectedId: number, value: string}
- | {type: 'clearFaceTagSuggentions'}
+ | {type: 'clearFaceTagSuggestions'}
  | {type: 'nextFaceTagSuggestion'}
  | {type: 'prevFaceTagSuggestion'}
 
@@ -49,26 +49,24 @@ export const reducer = (state: FaceTagDialogState, action: FaceTagAction): FaceT
       const tailSuggestions = {inputValue: action.tail || '', suggestions: getSuggestions(state.allTags, action.tail), showSuggestions: !!action.tail}
 
       const faceTags: FaceTag[] = [...state.faceTags, {rect, name, remove}];
-      return {...state, faceTags, ...tailSuggestions}
-    }
-/*
-
-    case 'setAllTags': {
+      return {...state, faceTags, ...tailSuggestions};
+    } /*
+    case 'setAllFaceTags': {
       const allTags = action.value
       const selectedIds = action.selectedIds
       return {...state, allTags, suggestions: getSuggestions(allTags, selectedIds)}
     }
-    case 'suggestTag': {
+    case 'suggestFaceTag': {
       const suggestions = getSuggestions(state.allTags, action.value)
       const hasActiveSuggestion = state.suggestions.find(suggestion => suggestion.active)
       const becomesEmpty = state.inputValue.replace(/(^\s*-?|\s+$)/g, '').length && !(action.value || '').replace(/(^\s*-?|\s+$)/g, '').length
       return {...state, inputValue: action.value, suggestions, showSuggestions: !!hasActiveSuggestion || !becomesEmpty}
     }
-    case 'removeLastTag': {
+    case 'removeLastFaceTag': {
       const tags: FaceTag[] = [...state.faceTags]
       return {...state, faceTags: state.faceTags.slice(0, state.faceTags.length - 1), current: 0, suggestions: getSuggestions(state.allTags, '')}
     }
-    case 'removeTag': {
+    case 'removeFaceTag': {
       const index = state.faceTags.findIndex(tag => tag.name == action.value)
       if (index < 0) {
         return state
@@ -77,7 +75,7 @@ export const reducer = (state: FaceTagDialogState, action: FaceTagAction): FaceT
       faceTags.splice(index, 1)
       return {...state, faceTags}
     }
-    case 'toggleRemoveFlag': {
+    case 'toggleFaceTagRemoveFlag': {
       const faceTags = [...state.faceTags]
       const index = updateItem(faceTags, item => item.name == action.value, item => {item.remove = !item.remove; return item})
       if (index < 0) {
@@ -86,22 +84,22 @@ export const reducer = (state: FaceTagDialogState, action: FaceTagAction): FaceT
 
       return {...state, faceTags}
     }
-    case 'clearSuggentions': {
+    case 'clearFaceTagSuggestions': {
       const suggestions = [...state.suggestions]
       updateItem(suggestions, item => item.active, {active: false})
       return {...state, suggestions, showSuggestions: false}
     }
-    case 'nextSuggestion':
-    case 'prevSuggestion': {
+    case 'nextFaceTagSuggestion':
+    case 'prevFaceTagSuggestion': {
       const suggestions = [...state.suggestions]
       if (!suggestions.length) {
         return state
       }
       let index = updateItem(suggestions, item => item.active, {active: false})
       if (index < 0) {
-        index = action.type == 'nextSuggestion' ? -1 : suggestions.length
+        index = action.type == 'prevFaceTagSuggestion' ? -1 : suggestions.length
       }
-      const offset = action.type == 'nextSuggestion' ? 1 : -1
+      const offset = action.type == 'prevFaceTagSuggestion' ? 1 : -1
       index = (suggestions.length + index + offset) % suggestions.length
       updateItem(suggestions, (_, i) => i == index, {active: true})
       return {...state, suggestions, showSuggestions: true}

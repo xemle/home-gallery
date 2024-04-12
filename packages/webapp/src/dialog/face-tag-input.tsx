@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, ChangeEvent, FunctionComponent, KeyboardEvent, useRef } from "react";
+import { ChangeEvent, FunctionComponent, KeyboardEvent, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as icons from '@fortawesome/free-solid-svg-icons'
 
@@ -17,7 +17,7 @@ const TagView = ({tag, withRemove, dispatch}: {tag: FaceTag, withRemove: boolean
             <span className="flex items-center justify-center px-2 py-1 pr-0">
               <FontAwesomeIcon icon={tag.remove ? icons.faMinus : icons.faPlus} />
             </span>
-            <span className="px-2 py-1 pr-1" onClick={() => dispatch({ type: 'toggleFacetagRemoveFlag', value: tag.name })} title={`Click to ${tag.remove ? 'add tag to media' : 'remove tag from media'}`}>{tag.name}</span>
+            <span className="px-2 py-1 pr-1" onClick={() => dispatch({ type: 'toggleFaceTagRemoveFlag', value: tag.name })} title={`Click to ${tag.remove ? 'add tag to media' : 'remove tag from media'}`}>{tag.name}</span>
           </>
         )}
         { !withRemove && (
@@ -59,10 +59,10 @@ export const FaceTagInput : FunctionComponent<FaceTagInputProps> = ({value, tag,
     } else if (ev.key == 'Backspace' && value.length == 0) {
       return dispatch({type: 'removeLastFaceTag'})
     } else if (ev.key == 'Escape') {
-      return dispatch({type: 'clearFaceTagSuggentions'})
+      return dispatch({type: 'clearFaceTagSuggestions'})
     } else if (ev.key == 'ArrowDown') {
       ev.preventDefault()
-      return dispatch({type: 'nextFacetagSuggestion'})
+      return dispatch({type: 'nextFaceTagSuggestion'})
     } else if (ev.key == 'ArrowUp') {
       ev.preventDefault()
       return dispatch({type: 'prevFaceTagSuggestion'})
@@ -90,7 +90,7 @@ export const FaceTagInput : FunctionComponent<FaceTagInputProps> = ({value, tag,
       <div className="relative">
         <div ref={ref} className="flex flex-row flex-wrap items-center justify-start w-full gap-2 px-2 py-1 bg-gray-800 border rounded border-bg-gray-700">
           <TagView tag={tag} withRemove={withRemove} dispatch={dispatch} />
-          { !tag && 
+          { !tag &&
           <input className="flex-1 py-1 text-gray-300 bg-transparent border-0 focus:border-transparent focus:ring-0 focus:outline-none" id="tags" ref={input => input && input.focus()} value={value} placeholder='Create or add tag' onKeyDown={handleKeyDown} onChange={handleChange}/>
           }
           </div>

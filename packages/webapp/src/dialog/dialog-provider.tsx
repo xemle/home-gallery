@@ -15,11 +15,6 @@ export type FaceTagsConfig = {
   onFaceTagsSubmit: ({ faceTags }: { faceTags: FaceTag[] }) => void;
 }
 
-export type DialogConfig = {
-  tagsConfig?: TagsConfig;
-  faceTagsConfig?: FaceTagsConfig;
-}
-
 const initialTagsConfig: TagsConfig = {
   initialTags: [],
   onTagsSubmit: () => false,
