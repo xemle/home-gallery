@@ -24,11 +24,6 @@ const createConfig = async argv => {
   return initConfig(configFile, sourceConfigFile, source)
 }
 
-const getConfigEnv = options => {
-  const { configFile, autoConfigFile } = options
-  return !autoConfigFile && configFile ? {GALLERY_CONFIG: configFile} : {}
-}
-
 const runServer = options => {
   log.info(`Starting server`)
   return startServer(options)
@@ -78,7 +73,7 @@ const command = {
       (yargs) => yargs,
       (argv) => load(argv.config, true)
           .then(configOptions => {
-            runServer({...configOptions, configEnv: getConfigEnv(configOptions)})
+            runServer(configOptions)
           })
           .then(() => log.info(`Have a good day...`))
           .catch(err => log.error(err, `Error: ${err}`))
@@ -132,7 +127,6 @@ const command = {
           .then((configOptions) => {
             const options = {
               ...configOptions,
-              configEnv: getConfigEnv(configOptions),
               initialImport: argv.initial,
               incrementalUpdate: argv.update,
               smallFiles: argv.smallFiles,
