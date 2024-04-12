@@ -1,3 +1,4 @@
+import * as React from "react";
 import { ChangeEvent, FunctionComponent, KeyboardEvent, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as icons from '@fortawesome/free-solid-svg-icons'
