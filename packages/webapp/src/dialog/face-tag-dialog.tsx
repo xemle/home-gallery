@@ -8,10 +8,9 @@ import { useEntryStore } from '../store/entry-store'
 import { useEditModeStore } from '../store/edit-mode-store'
 import { FaceTagInput } from "./face-tag-input";
 import { FaceTag } from "../api/models";
-import { RecentTags } from "./recent-tags";
-import { UsedTags } from "./used-tags";
 import { MultiTagHelp, SingleTagHelp } from "./face-tag-dialog-help";
 import { useFaceTagsDialogStore } from "./face-tag-dialog-store";
+import {SimilarTags} from "./face-tags-similar";
 
 export type FaceTagDialogProps = {
   faceTags?: FaceTag[]
@@ -114,10 +113,9 @@ export const MultiFaceTagDialog = ({onCancel, onSubmit}: FaceTagDialogProps) => 
         <MultiTagHelp show={showHelp} setShow={setShowHelp} />
         {state.faceTags.map((tag, i) =>(
           <div className="flex flex-row items-center justify-start w-full gap-2 px-2 py-1">
-          <img height={100} width={100} alt='avatar'></img>
-          <FaceTagInput tag={tag} withRemove={false} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={""} />
-          <RecentTags tags={recentTags} dispatch={dispatch} />
-          <UsedTags title="Most used tags:" tags={allFaceTags} initialCount={5} dispatch={dispatch} />
+            <img height={100} width={100} alt='avatar'></img>
+            <FaceTagInput tag={tag} withRemove={false} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={""} />
+            <SimilarTags tags={recentTags} dispatch={dispatch} />
           </div>
         ))}
       </div>
@@ -162,10 +160,9 @@ export const SingleFaceTagDialog = ({faceTags, onCancel, onSubmit}: FaceTagDialo
         <SingleTagHelp show={showHelp} setShow={setShowHelp} />
         {state.faceTags.map((tag, i) =>(
           <div className="flex flex-row items-center justify-start w-full gap-2 px-2 py-1">
-          <img height={100} width={100} alt='avatar'></img>
-          <FaceTagInput tag={tag} withRemove={false} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={""} />
-          <RecentTags tags={recentTags} dispatch={dispatch} />
-          <UsedTags title="Most used tags:" tags={allFaceTags} initialCount={5} dispatch={dispatch} />
+            <img height={100} width={100} alt='avatar'></img>
+            <FaceTagInput tag={tag} withRemove={false} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={""} />
+            <SimilarTags tags={recentTags} dispatch={dispatch} />
           </div>
         ))}
       </div>

@@ -1,10 +1,9 @@
 import { create } from 'zustand'
 
-import { applyEvents, Event, EventAction } from '@home-gallery/events'
+import { applyEvents, Event} from '@home-gallery/events'
 
 import { Entry } from './entry'
 import { useEntryStore } from './entry-store'
-import { FaceTag } from '../api/models'
 
 
 const lruAdd = (list: string[], item: string, size: number = 50) => {
@@ -59,7 +58,7 @@ const getRecentTags = (events: Event[], recentTags: string[]) => {
   return recentTags
 }
 
-const getRecentFacetags = (events: Event[], recentFaceTags: string[]) => {
+const getRecentFaceTags = (events: Event[], recentFaceTags: string[]) => {
   getEventFaceTags(events).forEach(tag => lruAdd(recentFaceTags, tag))
   return recentFaceTags
 }
@@ -75,7 +74,7 @@ export const useEventStore = create<EventStore>((set) => ({
     }
     _applyEvents(events)
     const allEvents = [...state.events, ...events]
-    return {...state, events: allEvents, recentTags: getRecentTags(allEvents, []), recentFaceTags: getRecentFacetags(allEvents, [])}
+    return {...state, events: allEvents, recentTags: getRecentTags(allEvents, []), recentFaceTags: getRecentFaceTags(allEvents, [])}
   }),
   reapplyEvents: () => set((state) => {
     _applyEvents(state.events)
