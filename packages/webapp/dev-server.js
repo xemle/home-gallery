@@ -9,7 +9,8 @@ const HOST = process.env.HOST || '127.0.0.1'
 const PORT = process.env.PORT || 1234
 const API_PROXY = process.env.API_PROXY || 'http://127.0.0.1:3000'
 
-const baseDir = 'dist'
+const distDir = 'dist'
+const indexFile = path.resolve('src', 'index.html')
 
 const app = express()
 
@@ -30,9 +31,17 @@ app.use(
 );
 
 app.set('etag', 'weak')
-app.use(express.static(baseDir))
+app.use(express.static(path.resolve('src', 'public')))
+app.use((req, resp, next) => {
+  if (req.url == '/' || req.url == '/index.html') {
+    resp.sendFile(indexFile)
+  } else {
+    next()
+  }
+})
+app.use(express.static(distDir))
 app.get('*', (_, response) => {
-  response.sendFile(path.resolve(baseDir, 'index.html'))
+  response.sendFile(indexFile)
 });
 
 // Run your Express server
@@ -52,4 +61,5 @@ const livereloadServer = livereload.createServer({}, err => {
     console.log(`Live reload server is listening on port 35729`)
   }
 })
-livereloadServer.watch(baseDir)
+livereloadServer.watch(distDir)
+livereloadServer.watch(path.resolve('src', 'index.html'))
