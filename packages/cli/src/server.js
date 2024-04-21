@@ -1,5 +1,3 @@
-const { load, mapArgs } = require('./config');
-
 const log = require('@home-gallery/logger')('cli.server');
 
 const mapUsers = users => {
@@ -108,10 +106,11 @@ const command = {
   },
   handler: (argv) => {
     const { startServer, webappDir } = require('@home-gallery/server');
+    const { load, mapArgs, validatePaths } = require('./config');
 
     const ensureLeadingSlash = url => url.startsWith('/') ? url : '/' + url
 
-    const mapping = {
+    const argvMapping = {
       host: 'server.host',
       port: 'server.port',
       storage: 'storage.dir',
@@ -129,7 +128,8 @@ const command = {
 
     const run = async (argv) => {
       const options = await load(argv.config, false, argv.autoConfig)
-      mapArgs(argv, options.config, mapping)
+      mapArgs(argv, options.config, argvMapping)
+      validatePaths(options.config, ['database.file', 'events.file', 'storage.dir'])
 
       return new Promise((resolve, reject) => {
         startServer(options, (err, server) => {
