@@ -37,6 +37,11 @@ const command = {
         alias: 'c',
         describe: 'Configuration files'
       },
+      'auto-config': {
+        boolean: true,
+        default: true,
+        describe: 'Search for configuration on common configuration directories'
+      },
       storage: {
         alias: 's',
         describe: 'Storage directory'
@@ -123,7 +128,7 @@ const command = {
     }
 
     const run = async (argv) => {
-      const options = await load(argv.config, false)
+      const options = await load(argv.config, false, argv.autoConfig)
       mapArgs(argv, options.config, mapping)
 
       return new Promise((resolve, reject) => {

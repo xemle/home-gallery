@@ -46,6 +46,11 @@ const command = {
         alias: 'c',
         describe: 'Configuration file'
       },
+      'auto-config': {
+        boolean: true,
+        default: true,
+        describe: 'Search for configuration on common configuration directories'
+      },
     })
     .command(
       'init',
@@ -71,7 +76,7 @@ const command = {
       'server',
       'Start the webserver',
       (yargs) => yargs,
-      (argv) => load(argv.config, true)
+      (argv) => load(argv.config, true, argv.autoConfig)
           .then(configOptions => {
             runServer(configOptions)
           })

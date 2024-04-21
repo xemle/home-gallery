@@ -6,9 +6,9 @@ const { findConfig } = require('./find-config')
 const { readConfig } = require('./read')
 const { validateConfig } = require('./validate')
 
-const load = async (file, required = true) => {
-  const foundConfig = false
-  if (!file) {
+const load = async (file, required = true, autoConfig = true) => {
+  let foundConfig = false
+  if (!file && autoConfig) {
     foundConfig = await findConfig().catch(() => false)
   }
   const autoConfigFile = foundConfig && (!file || path.resolve(file) == path.resolve(foundConfig))

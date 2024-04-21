@@ -74,6 +74,11 @@ const command = {
         alias: 'c',
         describe: 'Configuration file'
       },
+      'auto-config': {
+        boolean: true,
+        default: true,
+        describe: 'Search for configuration on common configuration directories'
+      },
     })
     .default('api-server', undefined, 'https://api.home-gallery.org')
     .default('api-server-timeout', undefined, '30')
@@ -168,7 +173,7 @@ const command = {
     }
 
     const run = async (argv) => {
-      const options = await load(argv.config, false)
+      const options = await load(argv.config, false, argv.autoConfig)
 
       mapArgs(argv, options.config, argvMapping)
       setDefaults(options.config)
