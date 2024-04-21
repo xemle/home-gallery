@@ -2,7 +2,7 @@ const { pipeline } = require('stream');
 
 const log = require('@home-gallery/logger')('extractor');
 
-const { promisify } = require('@home-gallery/common');
+const { fileFilter, promisify } = require('@home-gallery/common');
 const { readStreams } = require('@home-gallery/index');
 
 const { concurrent, each, filter, limit, purge, memoryIndicator, processIndicator, skip, flatten } = require('@home-gallery/stream');
@@ -33,6 +33,7 @@ const { video } = require('./extract/video/video');
 const videoPoster = require('./extract/video/video-poster');
 const { createVideoFrameExtractor } = require('./extract/video/video-frame-extractor');
 
+const fileFilterAsync = promisify(fileFilter);
 const readStreamsAsync = promisify(readStreams)
 const createImageResizerAsync = promisify(createImageResizer)
 
@@ -58,11 +59,12 @@ const createExtractor = async (config) => {
 }
 const extractData = async (options) => {
   const { config } = options
-  const { indexFilenames, journal, fileFilterFn, minChecksumDate } = config.sources
-  const entryStream = await readStreamsAsync(indexFilenames, journal)
+  const { files, journal, minChecksumDate } = config.fileIndex
+  const entryStream = await readStreamsAsync(files, journal)
 
   const storage = createStorage(config.storage.dir)
   const extractor = await createExtractor(config)
+  const fileFilterFn = await fileFilterAsync(config.extractor.excludes, config.extractor.excludeFromFile)
 
   const stream = {
     concurrent: 0,

@@ -70,6 +70,10 @@ sources:
 # Extractor settings
 #
 #extractor:
+  # excludes:
+  #   - *.xmp
+  #   - *.svg
+  # excludeFromFile: '{configDir}/excludes'
   # Preview image settings
   #image:
   #  previewSizes: [1920, 1280, 800, 320, 128]

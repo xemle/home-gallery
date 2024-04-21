@@ -91,8 +91,16 @@ const getMissingPaths = (config, paths = []) => {
   return missing
 }
 
+const validatePaths = (config, requiredPaths) => {
+  const missingPaths = getMissingPaths(config, requiredPaths)
+  if (missingPaths.length) {
+    throw new Error(`Missing config paths ${missingPaths.join(', ')}`)
+  }
+}
+
 module.exports = {
   mapArgs,
   mapConfig,
-  getMissingPaths
+  getMissingPaths,
+  validatePaths
 }

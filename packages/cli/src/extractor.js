@@ -1,5 +1,3 @@
-const { load, mapArgs, getMissingPaths } = require('./config');
-
 const log = require('@home-gallery/logger')('cli.extract')
 
 const command = {
@@ -77,7 +75,6 @@ const command = {
         describe: 'Configuration file'
       },
     })
-    .demandOption(['index'])
     .default('api-server', undefined, 'https://api.home-gallery.org')
     .default('api-server-timeout', undefined, '30')
     .default('api-server-concurrent', undefined, '5')
@@ -91,8 +88,7 @@ const command = {
   },
   handler: (argv) => {
     const extract = require('@home-gallery/extractor');
-    const { fileFilter, promisify } = require('@home-gallery/common');
-    const fileFilterAsync = promisify(fileFilter)
+    const { load, mapArgs, validatePaths } = require('./config');
 
     const isNotUndefined = value => typeof value != 'undefined'
     const hasArrayValues = values => values.filter(isNotUndefined).length > 0
@@ -100,11 +96,13 @@ const command = {
 
     const minMaxRange = (min, value, max) => Math.max(min, Math.min(max, value))
 
-    const mapping = {
-      index: 'sources.indexFilenames',
-      checksumFrom: 'sources.minChecksumDate',
-      journal: 'sources.journal',
+    const argvMapping = {
+      index: 'fileIndex.files',
+      checksumFrom: 'fileIndex.minChecksumDate',
+      journal: 'fileIndex.journal',
       storage: 'storage.dir',
+      exclude: 'extractor.excludes',
+      excludeFromFile: 'extractor.excludeFromFile',
       apiServer: 'extractor.apiServer.url',
       apiServerTimeout: {path: 'extractor.apiServer.timeout', map: value => minMaxRange(1, value, 300)},
       apiServerConcurrent: {path: 'extractor.apiServer.concurrent', map: value => minMaxRange(1, value, 20)},
@@ -116,10 +114,6 @@ const command = {
       geoServer: 'extractor.geoReverse.url',
       geoAddressLanguage: {path: 'extractor.geoReverse.addressLanguage', test: hasArrayValues, map: splitArrayValues},
     }
-
-    const requiredPaths = [
-      'storage.dir'
-    ]
 
     const extractorDefaults = {
       stream: {
@@ -147,7 +141,11 @@ const command = {
       },
     }
 
-    const setDefaults = config => {
+    const setDefaults = (config) => {
+      config.fileIndex = {
+        files: config.sources?.filter(s => !s.offline).map(s => s.index),
+        ...config.fileIndex
+      }
       config.extractor = {
         ...extractorDefaults,
         ...config.extractor,
@@ -172,16 +170,11 @@ const command = {
     const run = async (argv) => {
       const options = await load(argv.config, false)
 
-      mapArgs(argv, options.config, mapping)
-      options.config.sources.fileFilterFn = await fileFilterAsync(argv.exclude, argv['exclude-from-file'])
-
-      const missingPaths = getMissingPaths(options.config, requiredPaths)
-      if (missingPaths.length) {
-        throw new Error(`Missing config paths ${missingPaths.join(', ')}`)
-      }
-
+      mapArgs(argv, options.config, argvMapping)
       setDefaults(options.config)
       migrateConfig(options.config)
+      validatePaths(options.config, ['fileIndex.files', 'storage.dir'])
+
       return extract(options)
     }
 
