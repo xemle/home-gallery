@@ -21,7 +21,11 @@ const getIndexRootMap = async (indices) => {
 }
 
 const exportMeta = async (options = {}) => {
-  const { indices, database, events, changesAfter, dryRun } = options
+  const indices = options.config.fileIndex.files
+  const database = options.config.database.file
+  const events = options.config.events.file
+
+  const { changesAfter, dryRun } = options.config.exportMeta
 
   const entries = await getMetadataEntries(database, events, changesAfter)
   if (!entries.length) {

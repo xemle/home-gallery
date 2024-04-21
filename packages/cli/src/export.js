@@ -130,25 +130,40 @@ const command = {
         .demandOption(['index', 'database']),
       (argv) => {
         const { exportMeta } = require('@home-gallery/export-meta')
+        const { load, mapArgs, validatePaths } = require('./config')
 
-        const options = {
-          indices: argv.index,
-          database: argv.database,
-          events: argv.events,
-          changesAfter: argv.changesAfter,
-          dryRun: argv.dryRun
+        const mapping = {
+          index: 'fileIndex.files',
+          database: 'database.file',
+          events: 'events.file',
+
+          changesAfter: 'exportMeta.changesAfter',
+          dryRun: 'exportMeta.dryRun'
         }
 
-        const run = async (options) => {
+        const setDefaults = (config) => {
+          config.fileIndex = {
+            files: config.sources?.filter(s => !s.offline).map(s => s.index),
+            ...config.fileIndex
+          }
+        }
+
+        const run = async () => {
+          const options = await load(argv.config, false, argv.autoConfig)
+
+          mapArgs(argv, options.config, mapping)
+          setDefaults(options.config)
+          validatePaths(options.config, ['fileIndex.files', 'database.file', 'events.file'])
+
           return exportMeta(options)
         }
 
-        log.info(`Exporting meta data to sidecar files${options.dryRun? ' in dry run mode' : ''}`)
+        log.info(`Exporting meta data to sidecar files${argv.dryRun? ' in dry run mode' : ''}`)
         const t0 = Date.now();
-        run(options)
+        run()
           .then((updatedFiles) => {
             if (updatedFiles.length) {
-              log.info(t0, `Exported meta data to ${updatedFiles.length} sidecar files${options.dryRun? ' (dry run)' : ''}`)
+              log.info(t0, `Exported meta data to ${updatedFiles.length} sidecar files${argv.dryRun? ' (dry run)' : ''}`)
             } else {
               log.info(t0, `No new meta data exported`)
             }
