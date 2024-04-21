@@ -71,11 +71,6 @@ const createDatabase = async (sources, options) => {
     args.push('--journal', options.journal)
   }
 
-  const storage = options.config.storage || {}
-  args.push('--storage', storage.dir, '--database', options.config.database.file);
-  const excludes = storage.excludes || [];
-  excludes.forEach(exclude => args.push('--exclude', exclude))
-
   const maxMemory = options.config.database?.maxMemory || 2048;
   const nodeArgs = maxMemory ? [`--max-old-space-size=${maxMemory}`] : [];
   await pm.runCli(args, {env: options.configEnv, terminateTimeout: 2000, nodeArgs});

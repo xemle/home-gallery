@@ -5,10 +5,19 @@ const command = {
   describe: 'Database commands',
   builder: (yargs) => {
     return yargs.option({
+      config: {
+        alias: 'c',
+        describe: 'Configuration file'
+      },
+      'auto-config': {
+        boolean: true,
+        default: true,
+        describe: 'Search for configuration on common configuration directories'
+      },
       database: {
         alias: 'd',
         describe: 'Database filename'
-      }
+      },
     })
     .command(
       ['create', '$0'],
@@ -37,31 +46,55 @@ const command = {
             string: true,
             describe: 'Journal id'
           }
-        })
-        .demandOption(['index', 'storage', 'database']),
+        }),
       (argv) => {
-        const { fileFilter } = require('@home-gallery/common')
         const { buildDatabase } = require('@home-gallery/database')
         const { promisify } = require('@home-gallery/common')
+        const { load, mapArgs, validatePaths } = require('./config')
 
-        const fileFilterAsync = promisify(fileFilter)
         const buildDatabaseAsync = promisify(buildDatabase)
 
-        const run = async () => {
-          const t0 = Date.now();
-          const fileFilterFn = await fileFilterAsync(argv.exclude, argv['exclude-from-file'])
-          const options = {
-            fileFilterFn,
-            journal: argv.journal,
-            supportedTypes: ['image', 'rawImage', 'video'],
-            updated: new Date().toISOString()
-          }
-
-          const database = await buildDatabaseAsync(argv.index, argv.storage, argv.database, options)
-          log.info(t0, `Build catalog database ${argv.database} with ${database.data.length} entries`)
+        const argvMapping = {
+          index: 'fileIndex.files',
+          journal: 'fileIndex.journal',
+          storage: 'storage.dir',
+          database: 'database.file',
+          exclude: 'database.excludes',
+          excludeFromFile: 'database.excludeFromFile',
         }
 
+        const databaseDefaults = {
+          supportedTypes: ['image', 'rawImage', 'video'],
+          updated: new Date().toISOString()
+        }
+
+        const setDefaults = (config) => {
+          const withOfflineSources = !config.fileIndex?.journal
+          config.fileIndex = {
+            files: config.sources?.filter(s => withOfflineSources || !s.offline).map(s => s.index),
+            ...config.fileIndex
+          }
+          config.database = {
+            ...databaseDefaults,
+            ...config.database,
+          }
+        }
+
+        const run = async() => {
+          const options = await load(argv.config, false, argv.autoConfig)
+
+          mapArgs(argv, options.config, argvMapping)
+          setDefaults(options.config)
+          validatePaths(options.config, ['fileIndex.files', 'storage.dir', 'database.file'])
+
+          return buildDatabaseAsync(options)
+        }
+
+        const t0 = Date.now();
         run()
+          .then(database => {
+            log.info(t0, `Created database with ${database.data.length} entries`)
+          })
           .catch(err => {
             if (err?.code == 'ENOCHANGE') {
               return log.info(`Database unchanged: ${err?.message}`)

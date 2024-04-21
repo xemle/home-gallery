@@ -1,9 +1,9 @@
-const { pipeline } = require('stream');
+const { pipeline } = require('stream/promises');
 
 const log = require('@home-gallery/logger')('database.build');
 const { readStreams } = require('@home-gallery/index');
-
-const { memoryIndicator, processIndicator, filter, flatten, sort, toList } = require('@home-gallery/stream');
+const { fileFilter, promisify } = require('@home-gallery/common')
+const { memoryIndicator, processIndicator, filter, flatten, sort, toList, write } = require('@home-gallery/stream');
 
 const mapToDatabaseEntry = require('./stream/map-database-entry');
 const readStorageData = require('./stream/read-storage-data');
@@ -17,9 +17,15 @@ const { groupEntriesById } = require('./merge/entry-group')
 
 const { writeDatabase } = require('./database');
 
-const createEntries = (entryStream, storageDir, options, cb) => {
-  const { fileFilterFn, supportedTypes, updated } = options;
-  pipeline(
+const fileFilterAsync = promisify(fileFilter);
+
+const createEntries = async (entryStream, options) => {
+  const storageDir = options.config.storage.dir;
+  const { supportedTypes, updated, excludes, excludeFromFile } = options.config.database;
+  const fileFilterFn = await fileFilterAsync(excludes, excludeFromFile)
+
+  let result
+  await pipeline(
     entryStream,
     filter(entry => entry.fileType === 'f' && entry.sha1sum && entry.size > 0),
     filter(entry => fileFilterFn(entry.filename)),
@@ -36,9 +42,10 @@ const createEntries = (entryStream, storageDir, options, cb) => {
     processIndicator({name: 'map to media'}),
     memoryIndicator({intervalMs: 30 * 1000}),
     toList(),
-    sort(entry => entry.date, true).on('data', entries => cb(null, entries)),
-    err => err && cb(err)
+    sort(entry => entry.date, true),
+    write(entries => result = entries),
   );
+  return result;
 }
 
 const writeFullDatabase = (entries, databaseFilename, cb) => {
@@ -57,26 +64,30 @@ const writeFullDatabase = (entries, databaseFilename, cb) => {
   });
 }
 
-function build(indexFilenames, storageDir, databaseFilename, options, cb) {
-  const { journal, updated } = options;
+function build(options, cb) {
+  const indexFilenames = options.config.fileIndex.files;
+  const journal = options.config.fileIndex.journal;
+
+  const databaseFilename = options.config.database.file;
+  const updated = options.config.database.updated;
   readStreams(indexFilenames, journal, (err, entryStream) => {
     if (err) {
       return cb(err);
     }
     const t0 = Date.now()
-    createEntries(entryStream, storageDir, options, (err, entries) => {
-      if (err) {
+    createEntries(entryStream, options)
+      .then(entries => {
+        log.info(t0, `Created ${entries.length} database entries`)
+
+        if (journal) {
+          mergeFromJournal(indexFilenames, journal, databaseFilename, entries, updated, cb)
+        } else {
+          writeFullDatabase(entries, databaseFilename, cb)
+        }
+      }).catch(err => {
         log.error(`Could not build database: ${err}`);
         return cb(err);
-      }
-      log.info(t0, `Created ${entries.length} database entries`)
-
-      if (journal) {
-        mergeFromJournal(indexFilenames, journal, databaseFilename, entries, updated, cb)
-      } else {
-        writeFullDatabase(entries, databaseFilename, cb)
-      }
-    })
+      })
   })
 }
 
