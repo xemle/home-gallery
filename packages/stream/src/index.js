@@ -16,6 +16,7 @@ const sort = require('./sort');
 const { throttle, throttleAsync } = require('./throttle');
 const toList = require('./to-list');
 const through = require('./through');
+const write = require('./write');
 
 module.exports = {
   concurrent,
@@ -36,5 +37,6 @@ module.exports = {
   throttle,
   throttleAsync,
   toList,
-  through
+  through,
+  write
 }

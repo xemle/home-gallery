@@ -1,10 +1,11 @@
-const { Readable, pipeline } = require('stream')
+const { Readable } = require('stream')
+const { pipeline } = require('stream/promises')
 
 const log = require('@home-gallery/logger')('export.meta')
 
 const { promisify } = require('@home-gallery/common')
 const { readIndexHead } = require('@home-gallery/index')
-const { filter, toList } = require('@home-gallery/stream')
+const { filter, toList, write } = require('@home-gallery/stream')
 
 const { getMetadataEntries } = require('./entries')
 const { createMetadataWriter } = require('./meta')
@@ -31,15 +32,15 @@ const exportMeta = async (options = {}) => {
   const rootMap = await getIndexRootMap(indices)
   const hasBaseDir = entry => rootMap[entry.files[0]?.index]
 
-  return new Promise((resolve, reject) => {
-    pipeline(
-      Readable.from(entries),
-      filter(hasBaseDir),
-      createMetadataWriter(rootMap, dryRun),
-      toList().on('data', entries => resolve(entries)),
-      err => err && reject(err)
-    )
-  })
+  let result
+  await pipeline(
+    Readable.from(entries),
+    filter(hasBaseDir),
+    createMetadataWriter(rootMap, dryRun),
+    toList(),
+    write(data => result = data)
+  )
+  return result
 }
 
 module.exports = {
