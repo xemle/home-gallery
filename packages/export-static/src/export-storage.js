@@ -52,20 +52,20 @@ const entryToString = entry => {
   return `${entry.id.substr(7)}:${firstFile.indexName}:${firstFile.filename}`
 }
 
-const exportStorage = (database, storageDir, outputDirectory, basePath, cb) => {
-  if (!outputDirectory) {
+const exportStorage = (database, storageDir, dir, basePath, cb) => {
+  if (!dir) {
     const date = formatDate();
-    outputDirectory = `home-gallery-export-${date}`
+    dir = `home-gallery-export-${date}`
   }
 
-  const directory = path.join(outputDirectory, basePath, 'files');
+  const directory = path.join(dir, basePath, 'files');
   const t0 = Date.now();
   const entries = database.data;
   let i = 0;
   const next = () => {
     if (i === entries.length) {
       log.info(t0, `Exported ${entries.length} entries`);
-      return cb(null, database, outputDirectory, basePath);
+      return cb(null, database, dir, basePath);
     }
 
     const entry = entries[i++];

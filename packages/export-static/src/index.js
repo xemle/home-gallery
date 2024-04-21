@@ -42,14 +42,14 @@ const exportBuilder = (databaseFilename, storageDir, options, cb) => {
     (callback) => buildDatabase(databaseFilename, options.eventsFilename, options.query, callback),
     (database, callback) => cleanupDatabase(database, callback),
     (database, callback) => exportStorage(database, storageDir, options.outputDirectory, options.basePath, callback),
-    (database, outputDirectory, basePath, callback) => writeDatabase(database, outputDirectory, basePath, callback),
-    (database, outputDirectory, basePath, callback) => copyWebapp(database, outputDirectory, basePath, callback),
-    (database, outputDirectory, basePath, callback) => injectState(database, outputDirectory, basePath, options.disabledEdit, callback),
-    (outputDirectory, basePath, callback) => setBasePath(outputDirectory, basePath, callback),
-    (outputDirectory, callback) => createArchive(outputDirectory, options.archiveFilename, callback),
-    (outputDirectory, archiveFilename, callback) => deleteDirectory(outputDirectory, options.keep, archiveFilename, callback)
-  ], (err, outputDirectory, archiveFilename) => {
-    cb(err, outputDirectory, archiveFilename);
+    (database, dir, basePath, callback) => writeDatabase(database, dir, basePath, callback),
+    (database, dir, basePath, callback) => copyWebapp(database, dir, basePath, callback),
+    (database, dir, basePath, callback) => injectState(database, dir, basePath, options.disabledEdit, callback),
+    (dir, basePath, callback) => setBasePath(dir, basePath, callback),
+    (dir, callback) => createArchive(dir, options.archiveFilename, callback),
+    (dir, archiveFile, callback) => deleteDirectory(dir, options.keep, archiveFile, callback)
+  ], (err, dir, archiveFile) => {
+    cb(err, dir, archiveFile);
   })
 }
 

@@ -6,10 +6,10 @@ const { forEach } = require('@home-gallery/common');
 
 const copyFile = require('./copy-file');
 
-const copyWebapp = (database, outputDirectory, basePath, cb) => {
+const copyWebapp = (database, dir, basePath, cb) => {
   const t0 = Date.now();
   const srcDir = path.resolve(__dirname, 'public');
-  const dstDir = path.join(outputDirectory, basePath)
+  const dstDir = path.join(dir, basePath)
   glob('**/*', {
     cwd: srcDir,
     dot: true
@@ -24,7 +24,7 @@ const copyWebapp = (database, outputDirectory, basePath, cb) => {
         return cb(err);
       }
       log.info(t0, `Copied webapp sources to ${dstDir}`);
-      cb(null, database, outputDirectory, basePath);
+      cb(null, database, dir, basePath);
     })
   })
 }
