@@ -50,7 +50,7 @@ const getAllValidIdMap = async (databaseFilename, indexFilenames) => {
   let validIdMap = getValidIdMapFromDatabase(database)
   log.debug(t0, `Found ${Object.keys(validIdMap).length} valid storage ids from ${database.data.length} entries`)
 
-  if (!indexFilenames.length) {
+  if (!indexFilenames?.length) {
     return validIdMap
   }
 
@@ -107,8 +107,8 @@ const createDirFilter = (stats) => {
   }
 }
 
-const createRemoveFile = (validIdMap, stats, options) => {
-  const unlinkFn = options.dryRun ? () => Promise.resolve(true) : fs.unlink
+const createRemoveFile = (validIdMap, stats, purgeOptions) => {
+  const unlinkFn = purgeOptions.dryRun ? () => Promise.resolve(true) : fs.unlink
   let lastLog = Date.now()
 
   return async (base, dir, file, fileStat, depth) => {
@@ -121,7 +121,7 @@ const createRemoveFile = (validIdMap, stats, options) => {
 
     const now = Date.now()
     if (now - lastLog > 10 * 1000) {
-      log.info(lastLog, `Processed ${stats.files} files and removed ${stats.removedFiles} orphan files (${humanize(stats.removedFileSize)}) at ~${(100 * stats.level0Dirs / stats.level0TotalDirs).toFixed(1)}% of storage${options.dryRunSuffix}`)
+      log.info(lastLog, `Processed ${stats.files} files and removed ${stats.removedFiles} orphan files (${humanize(stats.removedFileSize)}) at ~${(100 * stats.level0Dirs / stats.level0TotalDirs).toFixed(1)}% of storage${purgeOptions.dryRunSuffix}`)
       lastLog = now
     }
 
@@ -143,11 +143,14 @@ const createRemoveFile = (validIdMap, stats, options) => {
   }
 }
 
-const purgeOrphanFiles = async (storageDir, databaseFilename, indexFilenames, options) => {
-  options.dryRunSuffix = options.dryRun ? ' (dry-run)' : ''
-  log.info(`Removing orphan files in storage directory ${storageDir}${options.dryRunSuffix}`)
+const purgeOrphanFiles = async (options) => {
+  const purgeOptions = {
+    dryRun: options.config.storage.dryRun,
+    dryRunSuffix: options.config.storage.dryRun ? ' (dry-run)' : ''
+  }
+  log.info(`Removing orphan files in storage directory ${options.config.storage.dir}${purgeOptions.dryRunSuffix}`)
 
-  const validIdMap = await getAllValidIdMap(databaseFilename, indexFilenames)
+  const validIdMap = await getAllValidIdMap(options.config.database.file, options.config.fileIndex?.files)
 
   const stats = {
     level0TotalDirs: 0,
@@ -160,10 +163,10 @@ const purgeOrphanFiles = async (storageDir, databaseFilename, indexFilenames, op
   }
 
   let t0 = Date.now()
-  log.debug(`Walking storage diretory in ${storageDir}`)
-  await walk(storageDir, '', {
+  log.debug(`Walking storage diretory in ${options.config.storage.dir}`)
+  await walk(options.config.storage.dir, '', {
     onFileFilter: createDirFilter(stats),
-    onFile: createRemoveFile(validIdMap, stats, options),
+    onFile: createRemoveFile(validIdMap, stats, purgeOptions),
     maxDepth: 2
   })
   log.info(t0, `Checked ${stats.directories} directories and ${stats.files} files (${humanize(stats.fileSize)}). Removed ${stats.removedFiles} orphan files (${humanize(stats.removedFileSize)})${options.dryRunSuffix}`)

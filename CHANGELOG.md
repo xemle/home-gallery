@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- cli: Read settings from config for most commands
 - database: Read settings from config
 
 ### Fixed
