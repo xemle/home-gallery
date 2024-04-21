@@ -58,7 +58,7 @@ const exportStorage = (database, storageDir, dir, basePath, cb) => {
     dir = `home-gallery-export-${date}`
   }
 
-  const directory = path.join(dir, basePath, 'files');
+  const filesDir = path.join(dir, basePath, 'files');
   const t0 = Date.now();
   const entries = database.data;
   let i = 0;
@@ -69,7 +69,7 @@ const exportStorage = (database, storageDir, dir, basePath, cb) => {
     }
 
     const entry = entries[i++];
-    exportEntry(entry, storageDir, directory, () => {
+    exportEntry(entry, storageDir, filesDir, () => {
       if (i % 200 === 0) {
         process.nextTick(next);
       } else {

@@ -5,6 +5,15 @@ const command = {
   describe: 'Export commands',
   builder: (yargs) => {
     return yargs.option({
+      config: {
+        alias: 'c',
+        describe: 'Configuration file'
+      },
+      'auto-config': {
+        boolean: true,
+        default: true,
+        describe: 'Search for configuration on common configuration directories'
+      },
       database: {
         alias: 'd',
         describe: 'Database filename'
@@ -12,7 +21,7 @@ const command = {
       events: {
         alias: 'e',
         describe: 'Events filename'
-      }
+      },
     })
     .command(
       ['static', '$0'],
@@ -56,24 +65,44 @@ const command = {
         })
         .demandOption(['storage', 'database']),
       (argv) => {
-        const { exportBuilder } = require('../../export-static/dist');
-        const options = {
-          eventsFilename: argv.events,
-          outputDirectory: argv.output,
-          basePath: argv['base-path'],
-          archiveFilename: argv.file,
-          keep: argv.keep,
-          query: argv.query,
-          disabledEdit: !argv.edit
+        const { exportBuilder } = require('@home-gallery/export-static')
+        const { load, mapArgs, validatePaths } = require('./config')
+        const { promisify } = require('@home-gallery/common')
+
+        const asyncExportBuilder = promisify(exportBuilder)
+
+        const argvMapping = {
+          database: 'database.file',
+          events: 'events.file',
+          storage: 'storage.dir',
+
+          output: 'export.dir',
+          basePath: 'export.basePath',
+          file: 'export.archiveFile',
+          keep: 'export.keepDir',
+          query: 'export.query',
+          edit: {path: 'export.disableEdit', map: v => !v},
         }
+
+        const run = async() => {
+          const options = await load(argv.config, false, argv.autoConfig)
+
+          mapArgs(argv, options.config, argvMapping)
+          validatePaths(options.config, ['database.file', 'storage.dir', 'export.dir'])
+
+          return asyncExportBuilder(options)
+        }
+
         const t0 = Date.now();
-        exportBuilder(argv.database, argv.storage, options, (err, outputDirectory, archiveFilename) => {
-          if (err) {
+        run()
+          .then((dir, archiveFile) => {
+            log.info(t0, `Created export to ${archiveFile ? archiveFile : dir}`);
+          })
+          .catch(err => {
             log.error(`Export failed: ${err}`);
-          } else {
-            log.info(t0, `Created export to ${archiveFilename ? archiveFilename : outputDirectory}`);
-          }
-        });
+            process.exit(1)
+          })
+
       }
     )
     .command(

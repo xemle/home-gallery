@@ -37,17 +37,23 @@ const buildDatabaseImmutableFacade = (databaseFilename, eventsFilename, query, c
   })
 }
 
-const exportBuilder = (databaseFilename, storageDir, options, cb) => {
+const exportBuilder = (options, cb) => {
+  const databaseFile = options.config.database.file
+  const eventFile = options.config.events.file
+  const storageDir = options.config.storage.dir
+
+  const exportOptions = options.config.export
+
   waterfall([
-    (callback) => buildDatabase(databaseFilename, options.eventsFilename, options.query, callback),
+    (callback) => buildDatabase(databaseFile, eventFile, exportOptions.query, callback),
     (database, callback) => cleanupDatabase(database, callback),
-    (database, callback) => exportStorage(database, storageDir, options.outputDirectory, options.basePath, callback),
+    (database, callback) => exportStorage(database, storageDir, exportOptions.dir, exportOptions.basePath, callback),
     (database, dir, basePath, callback) => writeDatabase(database, dir, basePath, callback),
     (database, dir, basePath, callback) => copyWebapp(database, dir, basePath, callback),
-    (database, dir, basePath, callback) => injectState(database, dir, basePath, options.disabledEdit, callback),
+    (database, dir, basePath, callback) => injectState(database, dir, basePath, exportOptions.disabledEdit, callback),
     (dir, basePath, callback) => setBasePath(dir, basePath, callback),
-    (dir, callback) => createArchive(dir, options.archiveFilename, callback),
-    (dir, archiveFile, callback) => deleteDirectory(dir, options.keep, archiveFile, callback)
+    (dir, callback) => createArchive(dir, exportOptions.archiveFile, callback),
+    (dir, archiveFile, callback) => deleteDirectory(dir, exportOptions.keepDir, archiveFile, callback)
   ], (err, dir, archiveFile) => {
     cb(err, dir, archiveFile);
   })
