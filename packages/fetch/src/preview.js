@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
-const { Readable, pipeline } = require('stream')
+const { Readable } = require('stream')
+const { pipeline } = require('stream/promises')
 
 const log = require('@home-gallery/logger')('fetch.preview')
 const { parallel, purge } = require('@home-gallery/stream')
@@ -30,7 +31,10 @@ const getPreviewFiles = (remoteDatabase, localDatabase, downloadAll) => {
   return remoteFiles
 }
 
-const downloadPreviewFiles = async (serverUrl, previewFiles, storageDir, insecure, forceDownload) => {
+/**
+ * @param {import('./types').Remote} remote
+ */
+const downloadPreviewFiles = async (remote, previewFiles, storageDir) => {
   if (!previewFiles.length) {
     log.info(`No missing files to download`)
     return
@@ -39,7 +43,7 @@ const downloadPreviewFiles = async (serverUrl, previewFiles, storageDir, insecur
   let fetchFileCount = 0
 
   const test = (file, cb) => {
-    if (forceDownload) {
+    if (remote.forceDownload) {
       return cb(true)
     }
     fs.access(path.join(storageDir, file), (fs.constants || fs).F_OK, err => {
@@ -51,7 +55,7 @@ const downloadPreviewFiles = async (serverUrl, previewFiles, storageDir, insecur
     })
   }
 
-  const task = (file, cb) => fetchFile(serverUrl, file, storageDir, { insecure })
+  const task = (file, cb) => fetchFile(remote, file, storageDir)
     .then(() => {
       fetchFileCount++
       cb()
@@ -61,24 +65,22 @@ const downloadPreviewFiles = async (serverUrl, previewFiles, storageDir, insecur
       cb(err)
     })
 
-  log.info(`Fetching ${previewFiles.length} files from ${serverUrl}${forceDownload ? ' (forced)' : ''}`)
+  log.debug(`Fetching ${previewFiles.length} files from remote ${remote.url}${remote.forceDownload ? ' (forced)' : ''}`)
   const t0 = Date.now()
-  return new Promise((resolve, reject) => {
-    pipeline(
-      Readable.from(previewFiles),
-      parallel({ test, task, concurrent: 10 }),
-      purge(),
-      err => err ? reject(err) : resolve()
-    )
-  }).then(() => {
-    log.info(t0, `Fetched ${fetchFileCount} files from ${serverUrl}`)
-  })
+  await pipeline(
+    Readable.from(previewFiles),
+    parallel({ test, task, concurrent: 10 }),
+    purge(),
+  )
+  log.info(t0, `Fetched ${fetchFileCount} files from remote ${remote.url}`)
 }
 
-const handlePreviews = async (serverUrl, remoteDatabase, localDatabase, storageDir, options) => {
-  const { insecure, downloadAll, forceDownload } = options
-  const previewFiles = getPreviewFiles(remoteDatabase, localDatabase, downloadAll)
-  await downloadPreviewFiles(serverUrl, previewFiles, storageDir, insecure, forceDownload)
+/**
+ * @param {import('./types').Remote} remote
+ */
+const handlePreviews = async (remote, remoteDatabase, localDatabase, storageDir) => {
+  const previewFiles = getPreviewFiles(remoteDatabase, localDatabase, remote.downloadAll)
+  await downloadPreviewFiles(remote, previewFiles, storageDir)
 }
 
 module.exports = {

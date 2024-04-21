@@ -6,14 +6,12 @@ const { runCli, runCliAsync, killChildProcess, getDatabaseFilename, getStorageDi
 const fetchProcesses = {}
 
 step("Use file space <space>", async (space) => {
-  const baseDirOrig = gauge.dataStore.scenarioStore.get('baseDirOrig')
+  let baseDirOrig = gauge.dataStore.scenarioStore.get('baseDirOrig')
   if (!baseDirOrig) {
-    const baseDir = gauge.dataStore.scenarioStore.get('baseDir')
-    gauge.dataStore.scenarioStore.put('baseDirOrig', baseDir)
-    gauge.dataStore.scenarioStore.put('baseDir', path.join(baseDir, space) )
-  } else {
-    gauge.dataStore.scenarioStore.put('baseDir', path.join(baseDirOrig, space) )
+    baseDirOrig = gauge.dataStore.scenarioStore.get('baseDir')
+    gauge.dataStore.scenarioStore.put('baseDirOrig', baseDirOrig)
   }
+  gauge.dataStore.scenarioStore.put('baseDir', path.join(baseDirOrig, space) )
 })
 
 const fetchArgs = (args = []) => {

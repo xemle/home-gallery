@@ -26,33 +26,48 @@ const mergeAndFilterDatabase = async (database, events, query) => {
   return filterDatabaseByQuery(appliedDatabase, query)
 }
 
-const fetch = async (options = {}) => {
-  const { serverUrl, databaseFile, storageDir, eventFile, query, deleteLocal, requireEvents } = options
-  log.info(`Fetch local and remote database`)
+/**
+ * @param {import('./types').Remote} remote
+ */
+const fetch = async (remote, options = {}) => {
+  const database = options.config?.database || {}
+  const events = options.config?.events || {}
+  const storage = options.config?.storage || {}
+
+  log.info(`Reading local and fetching remote database`)
   const [remoteDatabase, remoteEvents, localDatabase] = await Promise.all([
-    fetchDatabase(serverUrl, options),
-    fetchEvents(serverUrl, options).catch(handleEventError(requireEvents)),
-    readDatabase(databaseFile)
+    fetchDatabase(remote),
+    fetchEvents(remote).catch(handleEventError(events.required)),
+    readDatabase(database.file)
   ])
 
-  const remoteFilteredDatabase = await mergeAndFilterDatabase(remoteDatabase, remoteEvents, query)
-  await handlePreviews(serverUrl, remoteFilteredDatabase, localDatabase, storageDir, options)
-  await handleEvents(remoteEvents, eventFile).catch(err => {
+  const remoteFilteredDatabase = await mergeAndFilterDatabase(remoteDatabase, remoteEvents, remote.query)
+  await handlePreviews(remote, remoteFilteredDatabase, localDatabase, storage.dir)
+  await handleEvents(remoteEvents, events.file).catch(err => {
     log.warn(`Failed to merge events: ${err}. Skip events`)
   })
-  await mergeDatabase(remoteFilteredDatabase, localDatabase, databaseFile, deleteLocal)
+  await mergeDatabase(remoteFilteredDatabase, localDatabase, database.file, remote.deleteLocal)
 }
 
-const fetchRemote = async (serverUrl, options) => {
+
+/**
+ * @param {import('./types').Remote} remote
+ * @param {import('./types').FetchOption} options
+ */
+const fetchRemote = async (remote, options) => {
   const [database, events] = await Promise.all([
-    fetchDatabase(serverUrl, options),
-    fetchEvents(serverUrl, options).catch(handleEventError(options?.requireEvents))
+    fetchDatabase(remote),
+    fetchEvents(remote).catch(handleEventError(options?.requireEvents))
   ])
 
-  return mergeAndFilterDatabase(database, events, options?.query)
+  return mergeAndFilterDatabase(database, events, options?.query || remote?.query)
 }
 
-const fetchWatchFacade = async (options) => {
+/**
+ * @param {import('./types').Remote} remote
+ * @param {*} options
+ */
+const fetchWatchFacade = async (remote, options) => {
   let hasNewDatabase = false
   let isFetching = false
   let fetchOnReconnect = false
@@ -64,10 +79,10 @@ const fetchWatchFacade = async (options) => {
     isFetching = true
     hasNewDatabase = false
     const t0 = Date.now()
-    return fetch(options)
-      .then(() => log.info(t0, `Fetched remote from ${options.serverUrl}`))
+    return fetch(remote, options)
+      .then(() => log.info(t0, `Fetched remote from ${remote.url}`))
       .catch(err => {
-        log.error(err, `Failed to fetch from remote ${options.serverUrl}: ${err}`)
+        log.error(err, `Failed to fetch from remote ${remote.url}: ${err}`)
         return Promise.reject(err)
       })
       .finally(() => {
@@ -98,9 +113,9 @@ const fetchWatchFacade = async (options) => {
   }
 
   return new Promise((resolve, reject) => {
-    if (options.watch) {
-      log.info(`Fetch remote in watch mode from ${options.serverUrl}`)
-      connectEventStream(options.serverUrl, { insecure: options.insecure }, onEvent)
+    if (remote.watch) {
+      log.info(`Fetch remote in watch mode from ${remote.url}`)
+      connectEventStream(remote, onEvent)
       doFetch().catch(err => {
         log.warn(err, `Failed to fetch remote ${err}. Retry fetch on reconnection`)
         fetchOnReconnect = true

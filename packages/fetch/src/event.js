@@ -14,7 +14,7 @@ const applyEventsFacade = (database, events) => {
 
 const handleEvents = async (remoteEvents, eventFile) => {
   const t0 = Date.now()
-  if (!remoteEvents.data.length) {
+  if (!remoteEvents.data?.length) {
     log.info(t0, `Remote has no events. Skip event merge`)
     return
   }

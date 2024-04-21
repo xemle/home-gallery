@@ -78,8 +78,13 @@ const extractMedia = (entries, maxPreviewSize, baseUrl) => {
 }
 
 const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure, random, reverse, delay, maxPreviewSize} = {}) => {
+  const remote = {
+    url: serverUrl,
+    insecure,
+    query,
+  }
   const [database, device] = await Promise.all([
-    fetchRemote(serverUrl, {query, insecure}),
+    fetchRemote(remote),
     scanFirst(10 * 1000)
   ])
 
