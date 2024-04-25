@@ -28,3 +28,10 @@ export const getGeo = (entry) => {
   const allGeo = allEntries.reduce((geo, entry) => geo || getExifGeo(entry.meta?.exif), false)
   return allGeo ? allGeo : {}
 }
+
+export const geoLocationMapper = {
+  name: 'geoLocationMapper',
+  mapEntry(entry, media) {
+    return {...media, ...getGeo(entry)}
+  }
+}

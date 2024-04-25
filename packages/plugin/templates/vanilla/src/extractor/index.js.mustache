@@ -1,0 +1,37 @@
+export class {{ className }}Extractor {
+  name = '{{ camelName }}Extractor'
+  phase = '{{ modules.extractor.phase }}'
+
+  constructor(manager) {
+    this.manager = manager
+    this.log = manager.createLogger('plugin.{{ camelName }}.extractor')
+    this.pluginConfig = manager.getConfig().plugin?.{{ camelName }} || {}
+  }
+
+  async create(context) {
+    // plugins can provide properties or functions on the context
+    const { storage } = context
+
+    // Read property from plugin's configuration for customization
+    const property = this.pluginConfig.property || 'defaultValue'
+    const created = new Date().toISOString()
+    const plugin = '{{ name }}'
+
+    this.log.trace(`Creating ${plugin} extractor task`)
+
+    const suffix = '{{ dashName }}.json'
+    const taskLog = this.log
+    return {
+      test(entry) {
+        // Execute task if the storage file is not present
+        return !storage.hasFile(entry, suffix)
+      },
+      async task(entry) {
+        taskLog.debug(`Processing ${entry}`)
+        const data = { created, plugin, property }
+        // Write plugin data to storage. Data can be a buffer, string or object
+        return storage.writeFile(entry, suffix, data)
+      }
+    }
+  }
+}

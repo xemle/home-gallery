@@ -1,0 +1,17 @@
+{
+  "files": [
+    "build.js",
+    "src/index.ts.mustache",
+    "src/factory.ts.mustache",
+    "package.json.mustache",
+    "README.md.mustache"
+  ],
+  "modules": {
+    "extractor": [
+      "src/extractor/index.ts.mustache"
+    ],
+    "database": [
+      "src/database/index.ts.mustache"
+    ]
+  }
+}

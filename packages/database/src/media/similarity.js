@@ -17,12 +17,20 @@ const browserEncoder = values => {
   return atob(bytes)
 }
 
-export const getSimilarityHash = entry => {
+const getSimilarityHash = entry => {
   const embeddings = getEntryMetaByKey(entry, 'similarityEmbeddings')
   if (!embeddings || !embeddings.data || !embeddings.data.length) {
-    return {}
+    return false
   }
-  return {
-    similarityHash: browserEncoder(embeddings.data)
+  return browserEncoder(embeddings.data)
+}
+
+export const similarityMapper = {
+  name: 'similarityMapper',
+  mapEntry(entry, media) {
+    const similarityHash = getSimilarityHash(entry)
+    if (similarityHash) {
+      media.similarityHash = similarityHash
+    }
   }
 }

@@ -9,7 +9,7 @@ const firstFrameSuffix = 'video-frame-001.jpg';
 const framePatternSuffix = 'video-frame-%00i.jpg';
 
 export function videoFrames(storage, videoFrameExtractor, frameCount) {
-  const test = entry => entry.type === 'video' && storage.hasEntryFile(entry, videoPreviewSuffix) && !storage.hasEntryFile(entry, firstFrameSuffix);
+  const test = entry => entry.type === 'video' && storage.hasFile(entry, videoPreviewSuffix) && !storage.hasFile(entry, firstFrameSuffix);
 
   const task = (entry, cb) => {
     const videoPreview = storage.getEntryFilename(entry, videoPreviewSuffix);

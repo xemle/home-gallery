@@ -1,0 +1,34 @@
+import { TPluginManager, TExtractorContext, TExtractorEntry } from '@home-gallery/types'
+
+export class {{ className }}Extractor {
+  name = '{{ camelName }}Extractor'
+  phase = '{{ modules.extractor.phase }}'
+  manager: TPluginManager
+  pluginConfig: any
+
+  constructor(manager: TPluginManager) {
+    this.manager = manager
+    this.pluginConfig = this.manager.getConfig().plugin?.{{ camelName }} || {}
+  }
+
+  async create(context: TExtractorContext, config: any) {
+    const { storage } = context
+    const suffix = '{{ dashName }}.json'
+
+    const created = new Date().toISOString()
+    const plugin = '{{ name }}'
+
+    const log = this.manager.createLogger('plugin.{{ camelName }}.extractor')
+    log.debug(`Creating ${plugin} extractor`)
+
+    return {
+      test(entry: TExtractorEntry) {
+        return !storage.hasFile(entry, suffix)
+      },
+      async task(entry: TExtractorEntry) {
+        log.debug(`Processing ${entry}`)
+        return storage.writeFile(entry, suffix, { created, plugin })
+      }
+    }
+  }
+}

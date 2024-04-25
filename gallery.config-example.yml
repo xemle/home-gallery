@@ -175,6 +175,31 @@ sources:
     #- pwa
     #- offlineDatabase
 
+#
+# Plugin settings
+#
+#pluginManager:
+  # Directories to load. Each folder entry for or dir is handled as plugin
+  #dirs:
+    # First directory is default directory for plugin creation
+    #- plugins
+  # List of dedicated plugin files
+  #plugins:
+    #- pluginFile
+  #disabled:
+    #- acmePlugin
+  #disabledExtractors:
+    #- acmeExtractor
+  #disabledDatabaseMappers:
+    #- acmeMapper
+
+# Plugin settings
+#plugin:
+  # Plugin name
+  #acme:
+    # Plugin setting
+    #prop: value
+
 logger:
   # Currently console and file loggers are available
   - type: console

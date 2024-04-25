@@ -1,0 +1,16 @@
+{
+  "files": [
+    "src/index.js.mustache",
+    "src/factory.js.mustache",
+    "package.json.mustache",
+    "README.md.mustache"
+  ],
+  "modules": {
+    "extractor": [
+      "src/extractor/index.js.mustache"
+    ],
+    "database": [
+      "src/database/index.js.mustache"
+    ]
+  }
+}

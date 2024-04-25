@@ -10,6 +10,7 @@ export const loggerOptions = {
     describe: 'Console log level'
   },
   'log-json-format': {
+    alias: 'J',
     boolean: true,
     describe: 'Log output format in json'
   },

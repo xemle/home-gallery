@@ -10,7 +10,7 @@ export const DEFAULT_PRINTABLE = NUMBERS + UPPER_CHARS + LOWER_CHARS
 export const createRandomString = (len = 7, chars = DEFAULT_PRINTABLE) => {
   let result = ''
   while (result.length < len) {
-    const rnd = (Math.random() * chars.length).toFixed()
+    const rnd = Math.floor(Math.random() * chars.length)
     result += chars[rnd]
   }
   return result

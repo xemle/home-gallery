@@ -1,6 +1,6 @@
 import { getEntryMetaByKey } from './utils.js'
 
-export const getFaces = (entry, minScore) => {
+const getFaces = (entry, minScore) => {
   const faces = getEntryMetaByKey(entry, 'faces')
   if (!faces) {
     return [];
@@ -29,4 +29,11 @@ export const getFaces = (entry, minScore) => {
         descriptor: Object.values(face.descriptor).map(value => +(value).toFixed(4))
       }
     })
+}
+
+export const faceMapper = {
+  name: 'faceMapper',
+  mapEntry(entry, media) {
+    media.faces = getFaces(entry, 0.7)
+  }
 }

@@ -1,0 +1,29 @@
+import { TStorageEntry, TDatabaseEntry, TLogger } from '@home-gallery/types'
+
+export class {{ className }}DatabaseMapper {
+  name = '{{ camelName }}Mapper'
+  order = 1
+  manager: TPluginManager
+  log: TLogger
+  pluginConfig: any
+
+  constructor(manager: TPluginManager) {
+    this.manager = manager
+    this.log = this.manager.createLogger('plugin.{{ camelName }}.database')
+    this.pluginConfig = this.manager.getConfig().plugin?.{{ camelName }} || {}
+  }
+
+  mapEntry(entry: TStorageEntry, media: TDatabaseEntry) {
+    this.log.info(`Map database entry: ${entry}`)
+
+    {{#modules.extractor}}
+    // Use somehow the data from the extractor task
+    media.plugin.{{ camelName }} = entry.meta.{{ camelName }}
+    {{/modules.extractor}}
+    {{^modules.extractor}}
+    // Add some data
+    media.plugin.{{ camelName }} = '{{name}}'
+    {{/modules.extractor}}
+  }
+
+}
