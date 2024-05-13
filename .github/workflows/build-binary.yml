@@ -44,8 +44,8 @@ jobs:
       - name: Install packages
         id: install
         run: |
-          rm -rf packages/api-server packages/styleguide
-          node scripts/disable-dependency.js api-server styleguide
+          rm -rf packages/api-server
+          node scripts/disable-dependency.js api-server
           npm install --force
 
       - name: Build packages

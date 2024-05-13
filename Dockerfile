@@ -9,7 +9,7 @@ COPY packages /build/packages/
 COPY scripts /build/scripts/
 WORKDIR /build
 
-RUN node scripts/disable-dependency.js api-server styleguide && \
+RUN node scripts/disable-dependency.js api-server && \
   if [[ -n "$NO_SHARP" || "$TARGETPLATFORM" == "linux/arm/v6" || "$TARGETPLATFORM" == "linux/arm/v7" ]]; then node scripts/disable-dependency.js --prefix=packages/extractor sharp ; fi && \
   npm install
 
