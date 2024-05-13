@@ -52,7 +52,7 @@ const command = {
 
         const setDefaults = (config) => {
           if (!config.fileIndex?.files) {
-            const files = config.sources.map(source => source.index);
+            const files = config.sources?.map(source => source.index) || [];
             config.fileIndex = {
               ...config.fileIndex,
               files
