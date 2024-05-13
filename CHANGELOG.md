@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- docker: Raise node version v20
 - webapp: No browser history for singe media navigation
 - webapp: search tags with blanks in Detail
 
