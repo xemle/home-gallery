@@ -38,7 +38,7 @@ const createIndex = (dir, options, cb) => {
     return true;
   }, (err) => {
     if (err) {
-      log.err(`Could not read files in ${dir}: ${err}`);
+      log.error(`Could not read files in ${dir}: ${err}`);
       return cb(err);
     } 
     log.info(t0, `Read ${entries.length} files in ${dir}`);
