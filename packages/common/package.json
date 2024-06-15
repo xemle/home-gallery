@@ -28,7 +28,10 @@
   },
   "exports": {
     ".": {
-      "node": "./dist/node.js",
+      "node": {
+        "import": "./dist/node-import-wrapper.mjs",
+        "require": "./dist/node.js"
+      },
       "browser": "./dist/index.js"
     }
   },
