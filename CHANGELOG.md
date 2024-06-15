@@ -5,12 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.15.1] - 2024-06-15
 
 ### Added
 
 - cli: Read settings from config for most commands
 - database: Read settings from config
+
+### Changed
+
+- docker: Disable armv6 and armv7 builds due github build failures
 
 ### Fixed
 
