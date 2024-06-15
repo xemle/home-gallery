@@ -1,4 +1,8 @@
-const log = require('@home-gallery/logger')('cli.fetch')
+import Logger from '@home-gallery/logger'
+
+import { load, mapArgs, validatePaths } from './config/index.js'
+
+const log = Logger('cli.fetch')
 
 const command = {
   command: 'fetch',
@@ -66,9 +70,6 @@ const command = {
     .demandOption(['url', 'storage', 'database', 'events'])
   },
   handler: (argv) => {
-    const { fetch } = require('@home-gallery/fetch');
-    const { load, mapArgs, validatePaths } = require('./config')
-
     const argvMapping = {
       url: 'remote.url',
       insecure: 'remote.insecure',
@@ -94,6 +95,8 @@ const command = {
     }
 
     const run = async () => {
+      const { fetch } = await import('@home-gallery/fetch');
+
       const t0 = Date.now();
       const options = await load(argv.config, false, argv.autoConfig)
 
@@ -116,4 +119,4 @@ const command = {
   }
 }
 
-module.exports = command;
+export default command;

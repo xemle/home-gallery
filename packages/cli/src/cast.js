@@ -1,4 +1,6 @@
-const log = require('@home-gallery/logger')('cli.cast')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('cli.cast')
 
 const command = {
   command: 'cast',
@@ -57,7 +59,6 @@ const command = {
     .demandOption(['server-url'])
   },
   handler: (argv) => {
-    const { cast } = require('@home-gallery/cast');
     const options = {
       serverUrl: argv.url,
       query: argv.query,
@@ -71,7 +72,8 @@ const command = {
       maxPreviewSize: argv.maxPreviewSize
     }
     const t0 = Date.now();
-    cast(options)
+    import('@home-gallery/cast')
+      .then(cast => cast(options))
       .then(() => {
         log.info(t0, `Cast from gallery ${options.serverUrl}`)
       })
@@ -82,4 +84,4 @@ const command = {
   }
 }
 
-module.exports = command;
+export default command;

@@ -1,11 +1,11 @@
-const fs = require('fs/promises')
-const path = require('path')
-const YAML = require('yaml')
+import fs from 'fs/promises'
+import path from 'path'
+import YAML from 'yaml'
 
-const { expandConfigDefaults } = require('./expand-defaults')
-const { resolveConfig } = require('./resolve-config')
+import { expandConfigDefaults } from './expand-defaults.js'
+import { resolveConfig } from './resolve-config.js'
 
-const readConfig = async (configFile, env) => {
+export const readConfig = async (configFile, env) => {
   const isYaml = configFile.match(/\.ya?ml$/i);
   const isJson = configFile.match(/\.json$/i);
   if (!isYaml && !isJson) {
@@ -18,7 +18,7 @@ const readConfig = async (configFile, env) => {
   return readData(raw, isYaml, path.dirname(configFile), env)
 }
 
-const readData = (raw, isYaml, baseDir, env) => {
+export const readData = (raw, isYaml, baseDir, env) => {
   const config = parseConfig(raw, isYaml)
 
   expandConfigDefaults(config, env)
@@ -27,10 +27,4 @@ const readData = (raw, isYaml, baseDir, env) => {
   return config
 }
 
-const parseConfig = (raw, isYaml) => isYaml ? YAML.parse(raw) : JSON.parse(raw)
-
-module.exports = {
-  readConfig,
-  readData,
-  parseConfig
-}
+export const parseConfig = (raw, isYaml) => isYaml ? YAML.parse(raw) : JSON.parse(raw)

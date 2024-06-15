@@ -1,6 +1,6 @@
-const create = require('./create-update')
-const stats = require('./stats')
-const journal = require('./journal')
+import create from './create-update.js'
+import stats from './stats.js'
+import journal from './journal.js'
 
 const command = {
   command: 'index',
@@ -13,4 +13,4 @@ const command = {
   }
 }
 
-module.exports = command
+export default command

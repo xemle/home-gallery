@@ -1,4 +1,6 @@
-const log = require('@home-gallery/logger')('cli.index.update')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('cli.index.update')
 
 const command = {
   command: ['$0', 'create', 'update'],
@@ -65,29 +67,52 @@ const command = {
     .demandOption(['index', 'directory'])
   },
   handler: (argv) => {
-    const { update, matcherFns } = require('@home-gallery/index');
+    const run = async () => {
+      const { update, matcherFns } = await import('@home-gallery/index');
 
-    const options = {
-      checksum: argv.checksum,
-      exclude: argv.exclude,
-      excludeFromFile: argv['exclude-from-file'],
-      excludeIfPresent: argv['exclude-if-present'],
-      dryRun: argv['dry-run'],
-      matcherFn: matcherFns[argv.m] || matcherFns['size-ctime-inode'],
-      maxFilesize: argv.maxFilesize,
-      keepKnownFiles: argv.keepKnown,
-      addLimits: argv.addLimits,
-      journal: argv.journal
-    }
-    update(argv.directory, argv.index, options, (err, _, limitExceeded) => {
-      if (err && err.code == 'EUSERABORT') {
-        log.warn(`Index creation aborted: ${err}`)
-      } else if (err) {
-        log.error(err, `Failed to create index: ${err}`)
+      const options = {
+        checksum: argv.checksum,
+        exclude: argv.exclude,
+        excludeFromFile: argv['exclude-from-file'],
+        excludeIfPresent: argv['exclude-if-present'],
+        dryRun: argv['dry-run'],
+        matcherFn: matcherFns[argv.m] || matcherFns['size-ctime-inode'],
+        maxFilesize: argv.maxFilesize,
+        keepKnownFiles: argv.keepKnown,
+        addLimits: argv.addLimits,
+        journal: argv.journal
       }
-      process.exit(err ? 2 : (limitExceeded ? 1 : 0))
-    })
+
+      return new Promise((resolve, reject) => {
+        update(argv.directory, argv.index, options, (err, _, limitExceeded) => {
+          if (err) {
+            reject(err)
+          }
+
+          resolve(limitExceeded)
+          return limitExceeded
+        })
+      })
+    }
+
+    run()
+      .then(limitExceeded => {
+        if (limitExceeded) {
+          log.info(`Index created and file limit exceeded`)
+          process.exit(1)
+        } else {
+          log.info(`Index created`)
+        }
+      })
+      .catch(err => {
+        if (err && err.code == 'EUSERABORT') {
+          log.warn(`Index creation aborted: ${err}`)
+        } else if (err) {
+          log.error(err, `Failed to create index: ${err}`)
+        }
+        process.exit(2)
+      })
   }
 }
 
-module.exports = command
+export default command

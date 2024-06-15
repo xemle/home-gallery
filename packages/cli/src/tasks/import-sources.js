@@ -1,8 +1,11 @@
-const chokidar = require('chokidar')
+import chokidar from 'chokidar'
 
-const { CliProcessManager } = require('../utils/cli-process-manager')
+import Logger from '@home-gallery/logger'
 
-const log = require('@home-gallery/logger')('cli.task.import')
+import { CliProcessManager } from '../utils/cli-process-manager.js'
+
+const log = Logger('cli.task.import')
+
 const pm = new CliProcessManager()
 
 const updateIndex = async (source, options) => {
@@ -44,7 +47,7 @@ const deleteJournals = async (sources, options) => {
   }
 }
 
-const extract = async (sources, options) => {
+export const extract = async (sources, options) => {
   if (!sources.length) {
     log.warn(`Sources list is empty. No files to extract`);
     return;
@@ -63,7 +66,7 @@ const extract = async (sources, options) => {
   await pm.runCli(args, {env: options.configEnv})
 }
 
-const createDatabase = async (sources, options) => {
+export const createDatabase = async (sources, options) => {
   const args = ['database', 'create'];
 
   sources.forEach(source => args.push('--index', source.index));
@@ -101,7 +104,7 @@ const generateJournal = () => {
   return `${pad2(now.getUTCMonth() + 1)}${pad2(now.getUTCDate())}-${generateId(4)}`
 }
 
-const importSources = async (sources, options) => {
+export const importSources = async (sources, options) => {
   let processing = true
   const { initialImport, incrementalUpdate } = options
   const withJournal = initialImport || incrementalUpdate
@@ -155,7 +158,7 @@ const batchImport = async (sources, options) => {
   log.debug(t0, `Import of online sources finished`)
 }
 
-const watchSources = async (sources, options) => {
+export const watchSources = async (sources, options) => {
   const { watch, watchDelay, watchMaxDelay, watchPollInterval, importOnWatchStart } = options
   if (!watch) {
     return batchImport(sources, options)
@@ -288,11 +291,4 @@ const watchSources = async (sources, options) => {
 
     process.on('SIGUSR1', () => log.info(`File watcher status: ${isInitializing ? 'initializing' : (isImporting ? 'importing' : 'idle')}`))
   })
-}
-
-module.exports = {
-  importSources,
-  watchSources,
-  extract,
-  createDatabase
 }

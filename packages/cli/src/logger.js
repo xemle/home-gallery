@@ -1,8 +1,8 @@
-const logger = require('@home-gallery/logger')
+import logger from '@home-gallery/logger'
 
-const { load } = require('./config')
+import { load } from './config/index.js'
 
-const loggerOptions = {
+export const loggerOptions = {
   'log-level': {
     alias: 'l',
     type: 'string',
@@ -27,7 +27,7 @@ const loggerOptions = {
 
 const addFileLogger = async (file, level = 'debug') => new Promise(resolve => logger.addFile(file, level, resolve))
 
-const loggerMiddleware = async (argv) => {
+export const loggerMiddleware = async (argv) => {
   const logMessages = []
   const enabledLoggers = []
 
@@ -77,9 +77,4 @@ const loggerMiddleware = async (argv) => {
 
   const log = logger('cli.logger')
   logMessages.forEach(msg => log.trace(msg))
-}
-
-module.exports = {
-  loggerOptions,
-  loggerMiddleware
 }

@@ -1,10 +1,11 @@
-const path = require('path')
-const { Select, MultiSelect } = require('enquirer');
-const YAML = require('yaml')
+import path from 'path'
+import enquirer from 'enquirer';
+const { Select, MultiSelect } = enquirer
+import YAML from 'yaml'
 
-const { importSources, extract, createDatabase, startServer, exportMeta } = require('../tasks')
+import { importSources, extract, createDatabase, startServer, exportMeta } from '../tasks/index.js'
 
-const menu = {
+export const menu = {
   main: {
     prompt: () => new Select({
       message: 'Gallery main menu',
@@ -138,7 +139,7 @@ const menu = {
   }
 }
 
-const runner = (name, options, ...args) => {
+export const runner = (name, options, ...args) => {
   const item = menu[name]
   return item.prompt(options, ...args)
     .then(command => {
@@ -154,4 +155,3 @@ const runner = (name, options, ...args) => {
     })
 }
 
-module.exports = { menu, runner }

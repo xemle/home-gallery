@@ -1,6 +1,6 @@
-const { ProcessManager } = require('@home-gallery/common')
+import { ProcessManager } from '@home-gallery/common'
 
-const { spawnCli } = require('./spawn-cli')
+import { spawnCli } from './spawn-cli.js'
 
 const defaultOptions = {
   env: {},
@@ -8,7 +8,7 @@ const defaultOptions = {
   nodeArgs: [],
 }
 
-class CliProcessManager extends ProcessManager {
+export class CliProcessManager extends ProcessManager {
   constructor() {
     super()
     process.once('SIGINT', () => this.stopped = true)
@@ -27,8 +27,4 @@ class CliProcessManager extends ProcessManager {
       child.once('error', reject)
     })
   }
-}
-
-module.exports = {
-  CliProcessManager
 }

@@ -1,5 +1,5 @@
-const { useEnvDefaults } = require('./env')
-const { mapConfig } = require('./map-args')
+import { useEnvDefaults } from './env.js'
+import { mapConfig } from './map-args.js'
 
 const defaultVars = {
   baseDir: '~',
@@ -18,7 +18,7 @@ const keyValueToProps = (keyName, valueName) => {
   }
 }
 
-const expandConfigDefaults = (config, env) => {
+export const expandConfigDefaults = (config, env) => {
   const vars = {...defaultVars}
   useEnvDefaults(vars, env)
   Object.entries(vars).forEach(([key, value]) => config[key] = config[key] || value)
@@ -69,8 +69,4 @@ const expandConfigDefaults = (config, env) => {
   }
 
   return mapConfig(config, mappings)
-}
-
-module.exports = {
-  expandConfigDefaults
 }

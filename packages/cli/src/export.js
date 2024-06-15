@@ -1,4 +1,8 @@
-const log = require('@home-gallery/logger')('cli.export')
+import Logger from '@home-gallery/logger'
+
+import { load, mapArgs, validatePaths } from './config/index.js'
+
+const log = Logger('cli.export')
 
 const command = {
   command: 'export',
@@ -65,12 +69,6 @@ const command = {
         })
         .demandOption(['storage', 'database']),
       (argv) => {
-        const { exportBuilder } = require('@home-gallery/export-static')
-        const { load, mapArgs, validatePaths } = require('./config')
-        const { promisify } = require('@home-gallery/common')
-
-        const asyncExportBuilder = promisify(exportBuilder)
-
         const argvMapping = {
           database: 'database.file',
           events: 'events.file',
@@ -85,11 +83,15 @@ const command = {
         }
 
         const run = async() => {
+          const { exportBuilder } = await import('@home-gallery/export-static')
+          const { promisify } = await import('@home-gallery/common')
+
           const options = await load(argv.config, false, argv.autoConfig)
 
           mapArgs(argv, options.config, argvMapping)
           validatePaths(options.config, ['database.file', 'storage.dir', 'export.dir'])
 
+          const asyncExportBuilder = promisify(exportBuilder)
           return asyncExportBuilder(options)
         }
 
@@ -129,9 +131,6 @@ const command = {
         })
         .demandOption(['index', 'database']),
       (argv) => {
-        const { exportMeta } = require('@home-gallery/export-meta')
-        const { load, mapArgs, validatePaths } = require('./config')
-
         const mapping = {
           index: 'fileIndex.files',
           database: 'database.file',
@@ -149,6 +148,8 @@ const command = {
         }
 
         const run = async () => {
+          const { exportMeta } = await import('@home-gallery/export-meta')
+
           const options = await load(argv.config, false, argv.autoConfig)
 
           mapArgs(argv, options.config, mapping)
@@ -177,4 +178,4 @@ const command = {
   }
 }
 
-module.exports = command;
+export default command;

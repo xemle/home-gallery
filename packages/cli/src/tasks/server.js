@@ -1,11 +1,13 @@
-const { ProcessManager } = require('@home-gallery/common')
+import { ProcessManager } from '@home-gallery/common'
 
-const { spawnCli } = require('../utils/spawn-cli')
+import { spawnCli } from '../utils/spawn-cli.js'
 
-const log = require('@home-gallery/logger')('cli.task.server')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('cli.task.server')
 const pm = new ProcessManager()
 
-const startServer = async options => {
+export const startServer = async options => {
   await new Promise((resolve, reject) => {
     serverProcess = spawnCli(['server'], {env: options.configEnv})
     pm.addProcess(serverProcess, {terminateTimeout: 15 * 1000})
@@ -20,5 +22,3 @@ const startServer = async options => {
   })
   return 'exit'
 }
-
-module.exports = { startServer }
