@@ -57,7 +57,7 @@ const createExtractor = async (config) => {
   }
 
 }
-const extractData = async (options) => {
+const extract = async (options) => {
   const { config } = options
   const { files, journal, minChecksumDate } = config.fileIndex
   const entryStream = await readStreamsAsync(files, journal)
@@ -144,4 +144,6 @@ const extractData = async (options) => {
   });
 }
 
-module.exports = extractData;
+module.exports = {
+  extract
+};
