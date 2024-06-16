@@ -1,12 +1,14 @@
-const Vibrant = require('node-vibrant');
+import Vibrant from 'node-vibrant';
 
-const log = require('@home-gallery/logger')('extractor.vibrant');
+import Logger from '@home-gallery/logger'
 
-const { toPipe, conditionalTask } = require('../../stream/task');
+const log = Logger('extractor.vibrant');
+
+import { toPipe, conditionalTask } from '../../stream/task.js';
 
 const vibrantSuffix = 'vibrant.json';
 
-function vibrantColors(storage, extractor) {
+export function vibrant(storage, extractor) {
   const { imagePreviewSizes } = extractor
   const imageSize = imagePreviewSizes.filter(size => size <= 256).shift()
   if (!imageSize) {
@@ -38,5 +40,3 @@ function vibrantColors(storage, extractor) {
 
   return toPipe(conditionalTask(test, task));
 }
-
-module.exports = vibrantColors;

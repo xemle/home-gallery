@@ -1,8 +1,10 @@
-const log = require('@home-gallery/logger')('extractor.image.preview');
+import Logger from '@home-gallery/logger'
+
+const log = Logger('extractor.image.preview');
 
 const rawPreviewSuffix = 'raw-preview.jpg'
 
-const { toPipe, conditionalTask } = require('../../stream/task');
+import { toPipe, conditionalTask } from '../../stream/task.js';
 
 const fileExtension = filename => {
   const pos = filename.lastIndexOf('.')
@@ -11,9 +13,9 @@ const fileExtension = filename => {
 
 const isSupportedImage = entry => fileExtension(entry.filename).match(/(jpe?g|jpe|png|tiff?|gif|thm|webp)/)
 
-const sizeToImagePreviewSuffix = size => `image-preview-${size}.jpg`
+export const sizeToImagePreviewSuffix = size => `image-preview-${size}.jpg`
 
-function resizeImage(storage, imageResizer, entry, src, previewSizes, cb) {
+export function resizeImage(storage, imageResizer, entry, src, previewSizes, cb) {
   let calculatedSizes = [];
 
   let index = 0;
@@ -52,7 +54,7 @@ const getMaxImageSizeBy = exif => {
   return 0
 }
 
-function imagePreview(storage, extractor) {
+export function imagePreview(storage, extractor) {
   const { imageResizer, imagePreviewSizes: previewSizes } = extractor
   const defaultMaxSize = Math.max(...previewSizes)
 
@@ -78,7 +80,7 @@ function imagePreview(storage, extractor) {
   return toPipe(conditionalTask(test, task));
 }
 
-module.exports = {
+export default {
   sizeToImagePreviewSuffix,
   imagePreview,
   resizeImage

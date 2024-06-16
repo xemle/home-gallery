@@ -1,7 +1,9 @@
-const log = require('@home-gallery/logger')('extractor.video.poster');
+import Logger from '@home-gallery/logger'
 
-const { resizeImage } = require('../image/image-preview');
-const { toPipe, conditionalTask } = require('../../stream/task');
+const log = Logger('extractor.video.poster');
+
+import { resizeImage } from '../image/image-preview.js';
+import { toPipe, conditionalTask } from '../../stream/task.js';
 
 const videoPosterSuffix = 'video-poster.jpg';
 
@@ -12,7 +14,7 @@ const getMaxVideoSize = (entry, defaultSize) => {
     || defaultSize
 }
 
-function videoPoster(storage, extractor) {
+export function videoPoster(storage, extractor) {
   const { imageResizer, videoFrameExtractor, imagePreviewSizes } = extractor
   const maxPreviewSize = Math.max(...imagePreviewSizes)
 
@@ -46,5 +48,3 @@ function videoPoster(storage, extractor) {
 
   return toPipe(conditionalTask(test, task));
 }
-
-module.exports = videoPoster;

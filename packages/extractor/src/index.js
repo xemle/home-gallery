@@ -1,37 +1,39 @@
-const { pipeline } = require('stream');
+import { pipeline } from 'stream';
 
-const log = require('@home-gallery/logger')('extractor');
+import Logger from '@home-gallery/logger'
 
-const { fileFilter, promisify } = require('@home-gallery/common');
-const { readStreams } = require('@home-gallery/index');
+const log = Logger('extractor');
 
-const { concurrent, each, filter, limit, purge, memoryIndicator, processIndicator, skip, flatten } = require('@home-gallery/stream');
-const mapToStorageEntry = require('./stream/map-storage-entry');
-const readAllEntryFiles = require('./stream/read-all-entry-files');
-const { groupByDir } = require('./stream/group-by-dir');
-const { groupSidecars, ungroupSidecars } = require('./stream/group-sidecars');
-const groupByEntryFilesCacheKey = require('./stream/group-entry-files-cache');
-const { updateEntryFilesCache } = require('./stream/update-entry-files-cache');
+import { fileFilter, promisify } from '@home-gallery/common';
+import { readStreams } from '@home-gallery/index';
 
-const { createStorage } = require('./storage');
+import { concurrent, each, filter, limit, purge, memoryIndicator, processIndicator, skip, flatten } from '@home-gallery/stream';
+import { mapToStorageEntry } from './stream/map-storage-entry.js';
+import { readAllEntryFiles } from './stream/read-all-entry-files.js';
+import { groupByDir } from './stream/group-by-dir.js';
+import { groupSidecars, ungroupSidecars } from './stream/group-sidecars.js';
+import { groupByEntryFilesCacheKey } from './stream/group-entry-files-cache.js';
+import { updateEntryFilesCache } from './stream/update-entry-files-cache.js';
 
-const {initExiftool, exif, endExiftool} = require('./extract/meta/exiftool');
-const ffprobe = require('./extract/meta/ffprobe');
-const geoReverse = require('./extract/meta/geo-reverse');
+import { createStorage } from './storage.js';
 
-const embeddedRawPreview = require('./extract/image/embedded-raw-preview')
-const heicPreview = require('./extract/image/heic-preview')
-const rawPreviewExif = require('./extract/image/raw-preview-exif.js')
-const { imagePreview } = require('./extract/image/image-preview');
-const { createImageResizer } = require('./extract/image/image-resizer')
-const vibrant = require('./extract/image/vibrant');
-const { logPublicApiPrivacyHint, similarEmbeddings, objectDetection, faceDetection } = require('./extract/image/api-server');
+import {initExiftool, exif, endExiftool} from './extract/meta/exiftool.js';
+import { ffprobe } from './extract/meta/ffprobe.js';
+import { geoReverse } from './extract/meta/geo-reverse.js';
 
-const { getFfmpegPath, getFprobePath } = require('./extract/utils/ffmpeg-path')
+import { embeddedRawPreview } from './extract/image/embedded-raw-preview.js'
+import { heicPreview } from './extract/image/heic-preview.js'
+import { rawPreviewExif } from './extract/image/raw-preview-exif.js'
+import { imagePreview } from './extract/image/image-preview.js';
+import { createImageResizer } from './extract/image/image-resizer.js'
+import { vibrant } from './extract/image/vibrant.js';
+import { logPublicApiPrivacyHint, similarEmbeddings, objectDetection, faceDetection } from './extract/image/api-server.js';
 
-const { video } = require('./extract/video/video');
-const videoPoster = require('./extract/video/video-poster');
-const { createVideoFrameExtractor } = require('./extract/video/video-frame-extractor');
+import { getFfmpegPath, getFfprobePath } from './extract/utils/ffmpeg-path.js'
+
+import { video } from './extract/video/video.js';
+import { videoPoster } from './extract/video/video-poster.js';
+import { createVideoFrameExtractor } from './extract/video/video-frame-extractor.js';
 
 const fileFilterAsync = promisify(fileFilter);
 const readStreamsAsync = promisify(readStreams)
@@ -42,8 +44,8 @@ const byNumberDesc = (a, b) => b - a
 const createExtractor = async (config) => {
   const exiftool = await initExiftool(config)
   const imageResizer = await createImageResizerAsync(config)
-  const ffmpegPath = getFfmpegPath(config)
-  const ffprobePath = getFprobePath(config)
+  const ffmpegPath = await getFfmpegPath(config)
+  const ffprobePath = await getFfprobePath(config)
   const videoFrameExtractor = createVideoFrameExtractor(ffmpegPath, ffprobePath)
   const imagePreviewSizes = (config?.extractor?.image?.previewSizes || [1920, 1280, 800, 320, 128]).sort(byNumberDesc)
 
@@ -57,7 +59,8 @@ const createExtractor = async (config) => {
   }
 
 }
-const extract = async (options) => {
+
+export const extract = async (options) => {
   const { config } = options
   const { files, journal, minChecksumDate } = config.fileIndex
   const entryStream = await readStreamsAsync(files, journal)
@@ -65,6 +68,8 @@ const extract = async (options) => {
   const storage = createStorage(config.storage.dir)
   const extractor = await createExtractor(config)
   const fileFilterFn = await fileFilterAsync(config.extractor.excludes, config.extractor.excludeFromFile)
+
+  const heic = await heicPreview(storage, extractor, config)
 
   const stream = {
     concurrent: 0,
@@ -103,7 +108,7 @@ const extract = async (options) => {
       groupSidecars(),
       flatten(),
       // images grouped by sidecars in a dir ordered by file size
-      heicPreview(storage, extractor, config),
+      heic,
       embeddedRawPreview(storage, extractor),
       ungroupSidecars(),
       rawPreviewExif(storage, extractor),
@@ -143,7 +148,3 @@ const extract = async (options) => {
     );
   });
 }
-
-module.exports = {
-  extract
-};

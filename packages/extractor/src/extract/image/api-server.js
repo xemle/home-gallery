@@ -1,10 +1,12 @@
-const request = require('request');
+import request from 'request';
 
-const log = require('@home-gallery/logger')('extractor.apiEntry');
-const { through, parallel } = require('@home-gallery/stream');
+import Logger from '@home-gallery/logger'
 
-const { conditionalTask } = require('../../stream/task');
-const { sizeToImagePreviewSuffix } = require('./image-preview')
+const log = Logger('extractor.apiEntry');
+import { through, parallel } from '@home-gallery/stream';
+
+import { conditionalTask } from '../../stream/task.js';
+import { sizeToImagePreviewSuffix } from './image-preview.js'
 
 const ERROR_THRESHOLD = 5
 const PUBLIC_API_SERVER = 'https://api.home-gallery.org'
@@ -12,7 +14,7 @@ const DOCUMENATION_URL = 'https://docs.home-gallery.org'
 
 const getEntryFileBySuffixes = (storage, entry, suffixes) => suffixes.find(suffix => storage.hasEntryFile(entry, suffix));
 
-const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imagePreviewSuffixes, entrySuffix, concurrent, timeout}) => {
+export const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imagePreviewSuffixes, entrySuffix, concurrent, timeout}) => {
   let currentErrors = 0;
 
   const test = entry => {
@@ -82,7 +84,7 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imagePreviewSuffi
 
 const noop = () => through((entry, _, cb) => cb(null, entry))
 
-const logPublicApiPrivacyHint = (config) => {
+export const logPublicApiPrivacyHint = (config) => {
   const {url, timeout, concurrent} = config?.extractor?.apiServer
 
   if (url?.startsWith(PUBLIC_API_SERVER)) {
@@ -105,7 +107,7 @@ const isDisabled = (config, feature) => {
   return disable == feature
 }
 
-const similarEmbeddings = (storage, common, config) => {
+export const similarEmbeddings = (storage, common, config) => {
   if (isDisabled(config, 'similarDetection')) {
     log.info(`Disable similar detection`)
     return noop()
@@ -123,7 +125,7 @@ const similarEmbeddings = (storage, common, config) => {
   })
 }
 
-const objectDetection = (storage, common, config) => {
+export const objectDetection = (storage, common, config) => {
   if (isDisabled(config, 'objectDetection')) {
     log.info(`Disable object detection`)
     return noop()
@@ -141,7 +143,7 @@ const objectDetection = (storage, common, config) => {
   })
 }
 
-const faceDetection = (storage, common, config) => {
+export const faceDetection = (storage, common, config) => {
   if (isDisabled(config, 'faceDetection')) {
     log.info(`Disable face detection`)
     return noop()
@@ -157,12 +159,4 @@ const faceDetection = (storage, common, config) => {
     concurrent: apiServer.concurrent,
     timeout: apiServer.timeout,
   })
-}
-
-module.exports = {
-  apiServerEntry,
-  logPublicApiPrivacyHint,
-  similarEmbeddings,
-  objectDetection,
-  faceDetection
 }

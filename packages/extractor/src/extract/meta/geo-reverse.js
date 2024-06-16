@@ -1,7 +1,9 @@
-const request = require('request');
+import request from 'request';
 
-const log = require('@home-gallery/logger')('extractor.geoReverse');
-const { throttleAsync } = require('@home-gallery/stream');
+import Logger from '@home-gallery/logger'
+
+const log = Logger('extractor.geoReverse');
+import { throttleAsync } from '@home-gallery/stream';
 
 const getAcceptLanguageValue = (languages) => {
   const anyLang = '*;q=0.5';
@@ -20,7 +22,7 @@ const getAcceptLanguageValue = (languages) => {
 
 const geoReverseSuffix = 'geo-reverse.json';
 
-function geoReverse(storage, config) {
+export function geoReverse(storage, config) {
   const geoOptions = {
     url: 'https://nominatim.openstreetmap.org',
     addressLanguage: ['en', 'de'],
@@ -109,5 +111,3 @@ function geoReverse(storage, config) {
   // 1req/1s should be fine. See https://operations.osmfoundation.org/policies/nominatim/
   return throttleAsync({passThrough, task, rateLimitMs: 1000, startLimitAfterTask: true});
 }
-
-module.exports = geoReverse;

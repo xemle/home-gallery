@@ -1,8 +1,10 @@
-const ffmpeg = require('fluent-ffmpeg');
+import ffmpeg from 'fluent-ffmpeg';
 
-const log = require('@home-gallery/logger')('extractor.video.frameExtractor');
+import Logger from '@home-gallery/logger'
 
-const createVideoFrameExtractor = (ffmpegPath, ffprobePath) => {
+const log = Logger('extractor.video.frameExtractor');
+
+export const createVideoFrameExtractor = (ffmpegPath, ffprobePath) => {
   return (src, dir, filenamePattern, frameCount, cb) => {
     const t0 = Date.now();
 
@@ -26,8 +28,4 @@ const createVideoFrameExtractor = (ffmpegPath, ffprobePath) => {
         filename: filenamePattern
       });
   }
-}
-
-module.exports = {
-  createVideoFrameExtractor
 }

@@ -1,11 +1,13 @@
-const fs = require('fs');
-const ffmpeg = require('fluent-ffmpeg');
+import fs from 'fs';
+import ffmpeg from 'fluent-ffmpeg';
 
-const log = require('@home-gallery/logger')('extractor.video');
+import Logger from '@home-gallery/logger'
 
-const { toPipe, conditionalTask } = require('../../stream/task');
+const log = Logger('extractor.video');
 
-const { getVideoOptions, getFfmpegArgs } = require('./video-utils')
+import { toPipe, conditionalTask } from '../../stream/task.js';
+
+import { getVideoOptions, getFfmpegArgs } from './video-utils.js'
 
 function convertVideo(storage, entry, options, cb) {
   log.info(`Start video conversion of ${entry}`);
@@ -47,7 +49,7 @@ function convertVideo(storage, entry, options, cb) {
     .run();
 }
 
-function video(storage, extractor, config) {
+export function video(storage, extractor, config) {
   const videoOptions = getVideoOptions(extractor, config)
 
   const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, videoOptions.videoSuffix);
@@ -63,7 +65,3 @@ function video(storage, extractor, config) {
 
   return toPipe(conditionalTask(test, task));
 }
-
-module.exports = {
-  video
-};

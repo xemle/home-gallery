@@ -1,8 +1,10 @@
-const ExifTool = require('exiftool-vendored').ExifTool
+import { ExifTool } from 'exiftool-vendored'
 
-const log = require('@home-gallery/logger')('extractor.image.rawPreview')
+import Logger from '@home-gallery/logger'
 
-const { toPipe, conditionalTask } = require('../../stream/task')
+const log = Logger('extractor.image.rawPreview')
+
+import { toPipe, conditionalTask } from '../../stream/task.js'
 
 const rawPreviewSuffix = 'raw-preview.jpg'
 
@@ -22,7 +24,7 @@ const hasEmbeddedPreview = entry => {
   return !!exif.PreviewImage
 }
 
-const embeddedRawPreview = (storage, {exiftool}) => {
+export const embeddedRawPreview = (storage, {exiftool}) => {
   const test = entry => { 
     if (!rawImageTypes.includes(entry.type) || storage.hasEntryFile(entry, rawPreviewSuffix) || hasJpg(entry)) {
       return false
@@ -54,4 +56,4 @@ const embeddedRawPreview = (storage, {exiftool}) => {
   return toPipe(conditionalTask(test, task))
 }
 
-module.exports = embeddedRawPreview
+export default embeddedRawPreview

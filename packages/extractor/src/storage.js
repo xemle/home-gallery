@@ -1,7 +1,7 @@
-const path = require('path');
-const { getStoragePaths, readStorageFile, writeStorageFile, readEntryFiles, updateEntryFilesCache, getEntryFilesCacheFilename } = require('@home-gallery/storage');
+import path from 'path';
+import { getStoragePaths, readStorageFile, writeStorageFile, readEntryFiles, updateEntryFilesCache, getEntryFilesCacheFilename } from '@home-gallery/storage';
 
-const createStorage = (storageDir) => {
+export const createStorage = (storageDir) => {
 
   const buildEntryFile = (entry, suffix) => {
     const {dir, prefix} = getStoragePaths(entry.sha1sum);
@@ -48,8 +48,4 @@ const createStorage = (storageDir) => {
       updateEntryFilesCache(path.join(storageDir, cacheFilename), entries, cb)
     }
   }
-}
-
-module.exports = {
-  createStorage
 }

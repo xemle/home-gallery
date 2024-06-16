@@ -1,15 +1,17 @@
-const ExifTool = require('exiftool-vendored').ExifTool;
+import { ExifTool } from 'exiftool-vendored';
 
-const log = require('@home-gallery/logger')('extractor.image.exif');
+import Logger from '@home-gallery/logger'
 
-const { toPipe, conditionalTask } = require('../../stream/task');
-const { getNativeCommand } = require('../utils/native-command')
+const log = Logger('extractor.image.exif');
+
+import { toPipe, conditionalTask } from '../../stream/task.js';
+import { getNativeCommand } from '../utils/native-command.js'
 
 const exifSuffix = 'exif.json';
 
 const exifTypes = ['image', 'rawImage', 'video', 'meta']
 
-const initExiftool = async config => {
+export const initExiftool = async config => {
   const exiftoolOptions = {
     taskTimeoutMillis: 5000
   }
@@ -34,7 +36,7 @@ const initExiftool = async config => {
    })
 }
 
-function exif(storage, {exiftool}) {
+export function exif(storage, {exiftool}) {
   const test = entry => exifTypes.includes(entry.type) && !storage.hasEntryFile(entry, exifSuffix)
 
   const task = (entry, cb) => {
@@ -61,7 +63,7 @@ function exif(storage, {exiftool}) {
   return toPipe(conditionalTask(test, task))
 }
 
-const endExiftool = (exiftool, cb) => {
+export const endExiftool = (exiftool, cb) => {
   exiftool.end()
     .then(() => {
       log.debug(`Close exiftool`)
@@ -73,7 +75,7 @@ const endExiftool = (exiftool, cb) => {
     })
 }
 
-module.exports = {
+export default {
   initExiftool,
   exif,
   endExiftool
