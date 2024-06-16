@@ -1,6 +1,8 @@
-const fs = require('fs/promises')
+import fs from 'fs/promises'
 
-const log = require('@home-gallery/logger')('cli.config.validate')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('cli.config.validate')
 
 const assertError = (message, ...args) => { throw new Error(message, ...args) };
 
@@ -30,10 +32,6 @@ const validateSources = async sources => {
   (uniqIndexFiles.length == sources.length) || assertError(`Source index files are not unique`);
 }
 
-const validateConfig = async config => {
+export const validateConfig = async config => {
   await validateSources(config.sources)
-}
-
-module.exports = {
-  validateConfig
 }

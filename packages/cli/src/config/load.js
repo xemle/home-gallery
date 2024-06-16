@@ -1,12 +1,12 @@
-const path = require('path')
-const process = require('process')
-const os = require('os')
+import path from 'path'
+import process from 'process'
+import os from 'os'
 
-const { findConfig } = require('./find-config')
-const { readConfig } = require('./read')
-const { validateConfig } = require('./validate')
+import { findConfig } from './find-config.js'
+import { readConfig } from './read.js'
+import { validateConfig } from './validate.js'
 
-const load = async (file, required = true, autoConfig = true) => {
+export const load = async (file, required = true, autoConfig = true) => {
   let foundConfig = false
   if (!file && autoConfig) {
     foundConfig = await findConfig().catch(() => false)
@@ -36,8 +36,4 @@ const load = async (file, required = true, autoConfig = true) => {
     autoConfigFile,
     configEnv: !autoConfigFile && configFile ? {GALLERY_CONFIG: configFile} : {}
   }
-}
-
-module.exports = {
-  load
 }

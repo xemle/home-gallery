@@ -1,4 +1,6 @@
-const log = require('@home-gallery/logger')('cli.config.mapArgs')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('cli.config.mapArgs')
 
 const getSegment = (config, path, create = true) => {
   const parts = path.split('.')
@@ -38,7 +40,7 @@ const addTo = (config, path, value) => {
   log.trace(`Add ${safeStringify(value)} to config path ${path}`)
 }
 
-const mapArgs = (argv, config, mapping) => {
+export const mapArgs = (argv, config, mapping) => {
   Object.entries(mapping).forEach(([key, value]) => {
     if (typeof argv[key] == 'undefined') {
       return
@@ -62,7 +64,7 @@ const mapArgs = (argv, config, mapping) => {
   return config
 }
 
-const mapConfig = (config, mappings) => {
+export const mapConfig = (config, mappings) => {
   Object.entries(mappings).forEach(([path, value]) => {
     const [segment, name] = getSegment(config, path, false)
     if (!segment || typeof segment[name] == 'undefined') {
@@ -80,7 +82,7 @@ const mapConfig = (config, mappings) => {
   return config
 }
 
-const getMissingPaths = (config, paths = []) => {
+export const getMissingPaths = (config, paths = []) => {
   const missing = []
   paths.forEach(path => {
     const [segment, name] = getSegment(config, path, false)
@@ -91,16 +93,9 @@ const getMissingPaths = (config, paths = []) => {
   return missing
 }
 
-const validatePaths = (config, requiredPaths) => {
+export const validatePaths = (config, requiredPaths) => {
   const missingPaths = getMissingPaths(config, requiredPaths)
   if (missingPaths.length) {
     throw new Error(`Missing config paths ${missingPaths.join(', ')}`)
   }
-}
-
-module.exports = {
-  mapArgs,
-  mapConfig,
-  getMissingPaths,
-  validatePaths
 }

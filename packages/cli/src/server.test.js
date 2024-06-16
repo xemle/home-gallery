@@ -1,5 +1,5 @@
-const t = require('tap')
-const yargs = require('yargs')
+import t from 'tap'
+import yargs from 'yargs'
 
 t.test('yargs', async t => {
   t.test('explicit option is set', async t => {

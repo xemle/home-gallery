@@ -2,7 +2,10 @@
   "name": "@home-gallery/stream",
   "version": "1.0.0",
   "description": "Stream utilities for HomeGallery",
-  "main": "dist/index.js",
+  "exports": {
+    "import": "./dist/import-wrapper.mjs",
+    "require": "./dist/index.js"
+  },
   "files": [
     "dist"
   ],

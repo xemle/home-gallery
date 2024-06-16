@@ -1,4 +1,8 @@
-const log = require('@home-gallery/logger')('cli.storage')
+import Logger from '@home-gallery/logger'
+
+import { load, mapArgs, validatePaths } from './config/index.js'
+
+const log = Logger('cli.storage')
 
 const command = {
   command: 'storage',
@@ -40,9 +44,6 @@ const command = {
           },
         }),
       (argv) => {
-        const { purgeOrphanFiles } = require('@home-gallery/storage')
-        const { load, mapArgs, validatePaths } = require('./config')
-
         const argvMapping = {
           index: 'fileIndex.files',
           storage: 'storage.dir',
@@ -61,6 +62,8 @@ const command = {
         }
 
         const run = async () => {
+          const { purgeOrphanFiles } = await import('@home-gallery/storage')
+
           const options = await load(argv.config, false, argv.autoConfig)
 
           mapArgs(argv, options.config, argvMapping)
@@ -86,4 +89,4 @@ const command = {
   handler: () => false
 }
 
-module.exports = command
+export default command

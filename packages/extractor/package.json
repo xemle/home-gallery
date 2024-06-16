@@ -2,7 +2,10 @@
   "name": "@home-gallery/extractor",
   "version": "1.0.0",
   "description": "Preview and metadata extractor of HomeGallery",
-  "main": "dist/index.js",
+  "exports": {
+    "import": "./dist/import-wrapper.mjs",
+    "require": "./dist/index.js"
+  },
   "files": [
     "dist"
   ],

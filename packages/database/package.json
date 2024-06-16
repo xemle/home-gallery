@@ -2,7 +2,10 @@
   "name": "@home-gallery/database",
   "version": "1.0.0",
   "description": "HomeGallery database",
-  "main": "dist/index.js",
+  "exports": {
+    "import": "./dist/import-wrapper.mjs",
+    "require": "./dist/index.js"
+  },
   "files": [
     "dist"
   ],

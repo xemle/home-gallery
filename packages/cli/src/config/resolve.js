@@ -1,6 +1,6 @@
-const path = require('path')
+import path from 'path'
 
-const { resolveEnv } = require('./env')
+import { resolveEnv } from './env.js'
 
 const resolveKey = (obj, key) => {
   const parts = key.split('.');
@@ -45,10 +45,6 @@ const resolve = (obj, key, config, baseDir, env) => {
     })
 }
 
-const resolveAll = (obj, keys, config, baseDir, env) => {
+export const resolveAll = (obj, keys, config, baseDir, env) => {
   keys.forEach(key => resolve(obj, key, config, baseDir, env))
-}
-
-module.exports = {
-  resolveAll
 }

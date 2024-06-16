@@ -1,7 +1,9 @@
-const fs = require('fs/promises')
-const path = require('path')
+import fs from 'fs/promises'
+import path from 'path'
 
-const log = require('@home-gallery/logger')('cli.config.init')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('cli.config.init')
 
 const replace = (lines, pattern, replaceBy, deleteLines = 1) => {
   const index = lines.findIndex(line => line.match(pattern))
@@ -13,7 +15,7 @@ const replace = (lines, pattern, replaceBy, deleteLines = 1) => {
   return false
 }
 
-const setData = (data, sources) => {
+export const setData = (data, sources) => {
   if (!sources || !sources.length) {
     throw new Error(`No sources are given. Please provide source directories`)
   }
@@ -29,7 +31,7 @@ const setData = (data, sources) => {
   return lines.join('\n')
 }
 
-const initConfig = async (configFile, sourceConfigFile, sources) => {
+export const initConfig = async (configFile, sourceConfigFile, sources) => {
   if (!configFile.match(/\.ya?ml$/i)) {
     throw new Error(`Unsupported file extension for configuration initialization. Expecting a .yaml or .yml file: ${configFile}`)
   }
@@ -49,9 +51,4 @@ const initConfig = async (configFile, sourceConfigFile, sources) => {
       log.info(`Initialized configuration '${configFile}' from ${sourceConfigFile}`)
       return data
     })
-}
-
-module.exports = {
-  setData,
-  initConfig
 }

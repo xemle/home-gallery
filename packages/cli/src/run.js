@@ -1,11 +1,13 @@
-const process = require('process')
-const fs = require('fs/promises')
-const path = require('path')
+import process from 'process'
+import fs from 'fs/promises'
+import path from 'path'
 
-const log = require('@home-gallery/logger')('cli.run')
+import Logger from '@home-gallery/logger'
 
-const { initConfig, defaultConfigFile, load } = require('./config')
-const { startServer, watchSources } = require('./tasks')
+const log = Logger('cli.run')
+
+import { initConfig, defaultConfigFile, load } from './config/index.js'
+import { startServer, watchSources } from './tasks/index.js'
 
 const galleryDir = path.dirname(process.argv[1])
 
@@ -151,4 +153,4 @@ const command = {
   handler: () => false
 }
 
-module.exports = command
+export default command

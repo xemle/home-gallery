@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { mapArgs, mapConfig, getMissingPaths, validatePaths } = require('./map-args')
+import { mapArgs, mapConfig, getMissingPaths, validatePaths } from './map-args.js'
 
 t.test('mapArgs', async t => {
   t.test('empty', async t => {

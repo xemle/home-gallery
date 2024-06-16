@@ -1,6 +1,6 @@
-const { spawn } = require('@home-gallery/common')
+import { spawn } from '@home-gallery/common'
 
-const Logger = require('@home-gallery/logger')
+import Logger from '@home-gallery/logger'
 const log = Logger('cli.spawn')
 
 const nodeBin = process.argv[0]
@@ -17,7 +17,7 @@ const prettyEnv = (env = {}) => {
 
 const prettyArgs = (args = []) => args.map(v => / /.test(v) ? `"${v}"` : v).join(' ')
 
-const spawnCli = (args, options = {}, nodeArgs = []) => {
+export const spawnCli = (args, options = {}, nodeArgs = []) => {
   const runArgs = [...nodeArgs, cliScript, ...args]
   const env = {
     ...options.env,
@@ -42,8 +42,4 @@ const spawnCli = (args, options = {}, nodeArgs = []) => {
   })
 
   return child
-}
-
-module.exports = {
-  spawnCli
 }

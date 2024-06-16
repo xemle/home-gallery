@@ -1,21 +1,23 @@
 #!/usr/bin/env node
 
-const { loggerOptions, loggerMiddleware } = require('./logger')
+import { loggerOptions, loggerMiddleware } from './logger.js'
 
-const yargs = require('yargs');
-const fileIndexCli = require('./file-index');
-const extractCli = require('./extractor');
-const databaseCli = require('./database');
-const serverCli = require('./server');
-const storageCli = require('./storage');
-const exportCli = require('./export');
-const fetchCli = require('./fetch');
-const castCli = require('./cast');
-const interactiveCli = require('./interactive');
-const runCli = require('./run')
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+import fileIndexCli from './file-index/index.js';
+import extractCli from './extractor.js';
+import databaseCli from './database.js';
+import serverCli from './server.js';
+import storageCli from './storage.js';
+import exportCli from './export.js';
+import fetchCli from './fetch.js';
+import castCli from './cast.js';
+import interactiveCli from './interactive/index.js';
+import runCli from './run.js'
 
-const cli = () => {
-  yargs.usage('Usage: $0 [global options] <command> [options]')
+export const cli = () => {
+  yargs(hideBin(process.argv))
+    .usage('Usage: $0 [global options] <command> [options]')
     .env('GALLERY')
     .options(loggerOptions)
     .default('level', undefined, 'debug')
@@ -34,7 +36,5 @@ const cli = () => {
     .help()
     .alias('h', 'help')
     .epilog('(c) 2024 HomeGallery - https://home-gallery.org')
-    .argv;
+    .parse();
 }
-
-module.exports = cli;

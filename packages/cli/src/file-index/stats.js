@@ -1,4 +1,6 @@
-const log = require('@home-gallery/logger')('cli.index.stats')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('cli.index.stats')
 
 const command = {
   command: 'stats',
@@ -14,18 +16,31 @@ const command = {
     .demandOption(['index'])
   },
   handler: (argv) => {
-    const { statIndex, prettyPrint } = require('@home-gallery/index');
-  
     const indexFilename = argv.index;
-    statIndex(indexFilename, (err, stats) => {
-      if (err) {
+
+    const run = async () => {
+      const { statIndex, prettyPrint } = await import('@home-gallery/index');
+
+      return new Promise((resolve, reject) => {
+        statIndex(indexFilename, (err, stats) => {
+          if (err) {
+            return reject(err)
+          }
+          console.log(prettyPrint(stats))
+
+          resolve(stats)
+        })
+      })
+    }
+
+    run()
+      .then(() => {
+        log.trace(`Read stats from index file ${indexFilename}`)
+      })
+      .catch(err => {
         log.error(err, `Could not read file index ${indexFilename}: ${err}`);
-        return cb(err);
-      }
-      console.log(prettyPrint(stats));
-      cb(null, stats);
-    })
+      })
   }
 }
 
-module.exports = command
+export default command

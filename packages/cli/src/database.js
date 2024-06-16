@@ -1,4 +1,8 @@
-const log = require('@home-gallery/logger')('cli.database')
+import Logger from '@home-gallery/logger'
+
+import { load, mapArgs, validatePaths } from './config/index.js'
+
+const log = Logger('cli.database')
 
 const command = {
   command: 'database',
@@ -48,12 +52,6 @@ const command = {
           }
         }),
       (argv) => {
-        const { buildDatabase } = require('@home-gallery/database')
-        const { promisify } = require('@home-gallery/common')
-        const { load, mapArgs, validatePaths } = require('./config')
-
-        const buildDatabaseAsync = promisify(buildDatabase)
-
         const argvMapping = {
           index: 'fileIndex.files',
           journal: 'fileIndex.journal',
@@ -81,12 +79,16 @@ const command = {
         }
 
         const run = async() => {
+          const { buildDatabase } = await import('@home-gallery/database')
+          const { promisify } = await import('@home-gallery/common')
+
           const options = await load(argv.config, false, argv.autoConfig)
 
           mapArgs(argv, options.config, argvMapping)
           setDefaults(options.config)
           validatePaths(options.config, ['fileIndex.files', 'storage.dir', 'database.file'])
 
+          const buildDatabaseAsync = promisify(buildDatabase)
           return buildDatabaseAsync(options)
         }
 
@@ -136,14 +138,6 @@ const command = {
         .example('$0 database remove -k -q tag:good', 'Keep all entries with tag "good"')
         .demandOption(['q']),
       (argv) => {
-        const { buildDatabase } = require('@home-gallery/export-static')
-        const { writeDatabase } = require('@home-gallery/database')
-        const { promisify } = require('@home-gallery/common')
-
-        const { load, mapArgs } = require('./config')
-
-        const asyncBuildDatabase = promisify(buildDatabase)
-        const asyncWriteDatabase = promisify(writeDatabase)
 
         const mapping = {
           database: 'database.file',
@@ -151,13 +145,20 @@ const command = {
         }
 
         const run = async () => {
+          const { buildDatabase } = await import('@home-gallery/export-static')
+          const { writeDatabase } = await import('@home-gallery/database')
+          const { promisify } = await import('@home-gallery/common')
+
+          const asyncBuildDatabase = promisify(buildDatabase)
+          const asyncWriteDatabase = promisify(writeDatabase)
+
           const query = argv.keep ? argv.query : `not ( ${argv.query} )`
           const options = await load(argv.config, false)
           mapArgs(argv, options.config, mapping)
 
           const t0 = Date.now();
           log.info(`Rewriting database by ${argv.keep ? 'keeping' : 'removing'} entries with matching query '${argv.query}'`)
-          return await asyncBuildDatabase(options.config.database.file, options.config.events.file, query)
+          return asyncBuildDatabase(options.config.database.file, options.config.events.file, query)
             .then(database => {
               if (argv.dryRun) {
                 log.debug(`Skip write of database due dry run`)
@@ -180,4 +181,4 @@ const command = {
   }
 }
 
-module.exports = command;
+export default command;

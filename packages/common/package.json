@@ -27,22 +27,11 @@
     "directory": "packages/common"
   },
   "exports": {
-    "./format": {
-      "node": "./dist/format/index.js",
-      "browser": "./dist/format/index.js"
-    },
-    "./fs": {
-      "node": "./dist/fs/index.js"
-    },
-    "./os": {
-      "node": "./dist/os/index.js"
-    },
-    "./utils": {
-      "node": "./dist/utils/index.js",
-      "browser": "./dist/utils/index.js"
-    },
     ".": {
-      "node": "./dist/node.js",
+      "node": {
+        "import": "./dist/node-import-wrapper.mjs",
+        "require": "./dist/node.js"
+      },
       "browser": "./dist/index.js"
     }
   },

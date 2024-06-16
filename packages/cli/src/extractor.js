@@ -1,4 +1,8 @@
-const log = require('@home-gallery/logger')('cli.extract')
+import Logger from '@home-gallery/logger'
+
+import { load, mapArgs, validatePaths } from './config/index.js';
+
+const log = Logger('cli.extract')
 
 const command = {
   command: 'extract',
@@ -92,9 +96,6 @@ const command = {
     .default('printEntry', undefined, 'false')
   },
   handler: (argv) => {
-    const extract = require('@home-gallery/extractor');
-    const { load, mapArgs, validatePaths } = require('./config');
-
     const isNotUndefined = value => typeof value != 'undefined'
     const hasArrayValues = values => values.filter(isNotUndefined).length > 0
     const splitArrayValues = values => values.filter(isNotUndefined).map(v => v.split(',')).reduce((r, v) => r.concat(v), [])
@@ -173,6 +174,8 @@ const command = {
     }
 
     const run = async (argv) => {
+      const { extract } = await import('@home-gallery/extractor');
+
       const options = await load(argv.config, false, argv.autoConfig)
 
       mapArgs(argv, options.config, argvMapping)
@@ -194,4 +197,4 @@ const command = {
   }
 }
 
-module.exports = command;
+export default command;

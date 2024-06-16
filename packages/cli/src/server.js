@@ -1,4 +1,8 @@
-const log = require('@home-gallery/logger')('cli.server');
+import Logger from '@home-gallery/logger'
+
+import { load, mapArgs, validatePaths } from './config/index.js';
+
+const log = Logger('cli.server');
 
 const mapUsers = users => {
   return users.map(user => {
@@ -105,9 +109,6 @@ const command = {
     .default('open-browser', undefined, 'true')
   },
   handler: (argv) => {
-    const { startServer, webappDir } = require('@home-gallery/server');
-    const { load, mapArgs, validatePaths } = require('./config');
-
     const ensureLeadingSlash = url => url.startsWith('/') ? url : '/' + url
 
     const argvMapping = {
@@ -127,6 +128,8 @@ const command = {
     }
 
     const run = async (argv) => {
+      const { startServer } = await import('@home-gallery/server')
+
       const options = await load(argv.config, false, argv.autoConfig)
       mapArgs(argv, options.config, argvMapping)
       validatePaths(options.config, ['database.file', 'events.file', 'storage.dir'])
@@ -156,4 +159,4 @@ const command = {
   }
 }
 
-module.exports = command;
+export default command;
