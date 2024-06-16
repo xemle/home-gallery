@@ -1,6 +1,8 @@
-const log = require('@home-gallery/logger')('index.update');
+import Logger from '@home-gallery/logger'
 
-const { mergeIndex }  = require('./merge');
+const log = Logger('index.update');
+
+import { mergeIndex }  from './merge.js';
 
 const toMap = (values, keyFn) => values.reduce((result, value) => {
   const key = keyFn(value)
@@ -28,7 +30,7 @@ const initialChanges = entries => {
   }
 }
 
-const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
+export const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
   const t0 = Date.now();
   if (!fileEntries.length) {
     log.info(`Initiate index with ${fsEntries.length} entries`);
@@ -65,5 +67,3 @@ const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
   }
   cb(null, updatedEntries, changes);
 }
-
-module.exports = updateIndex;

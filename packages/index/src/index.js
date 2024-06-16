@@ -1,27 +1,23 @@
-const path = require('path');
+import path from 'path';
 
-const log = require('@home-gallery/logger')('index');
+import Logger from '@home-gallery/logger'
+import { promisify, callbackify } from '@home-gallery/common';
 
-const { promisify, callbackify } = require('@home-gallery/common');
-
-const readIndex = require('./read');
-const createIndex = require('./create');
-const updateIndex = require('./update');
-const writeIndex = require('./write');
-const checksum = require('./checksum');
-const { statIndex, prettyPrint } = require('./stat')
-
-const { matcherFns } = require('./merge');
-const { readIndexHead, readStream, readStreams } = require('./read-stream');
-const { createFilter } = require('./filter');
-const { getJournalFilename, createJournal, readJournal, removeJournal } = require('./journal')
-const { getIndexName } = require('./utils');
+import { readIndex } from './read.js';
+import { createIndex } from './create.js';
+import { updateIndex } from './update.js';
+import { writeIndex } from './write.js';
+import { checksum } from './checksum.js';
+import { createFilter } from './filter/index.js';
+import { createJournal, readJournal as readJournalAsync, removeJournal as removeJournalAsync } from './journal.js'
 
 const asyncReadIndex = promisify(readIndex)
 const asyncCreateIndex = promisify(createIndex)
 const asyncUpdateIndex = promisify(updateIndex)
 const asyncWriteIndex = promisify(writeIndex)
 const asyncChecksum = promisify(checksum)
+
+const log = Logger('index')
 
 const isLimitExeeded = filter => typeof filter.limitExceeded == 'function' ? filter.limitExceeded() : false
 
@@ -84,16 +80,12 @@ const asyncUpdate = async (directory, filename, options) => {
   return [updateIndex, limitExceeded]
 }
 
-module.exports = {
-  getIndexName,
-  getJournalFilename,
-  removeJournal: callbackify(removeJournal),
-  readIndexHead,
-  readStream,
-  readStreams,
-  readJournal: callbackify(readJournal),
-  update: callbackify(asyncUpdate),
-  matcherFns,
-  prettyPrint,
-  statIndex
-}
+export { getIndexName } from './utils.js';
+export { getJournalFilename } from './journal.js'
+export const removeJournal = callbackify(removeJournalAsync)
+export { readIndexHead, readStream, readStreams } from './read-stream.js';
+export const readJournal = callbackify(readJournalAsync)
+export const update = callbackify(asyncUpdate)
+export { matcherFns } from './matcher.cjs';
+export { statIndex } from './stat.js'
+export { prettyPrint } from './pretty-print.cjs'

@@ -1,8 +1,10 @@
-const path = require('path');
+import path from 'path';
 
-const log = require('@home-gallery/logger')('index.create');
+import Logger from '@home-gallery/logger'
 
-const walk = require('./walker');
+const log = Logger('index.create');
+
+import { walkDir } from './walker.js';
 
 const createFilesMapper = (excludeIfPresent) => {
   if (!excludeIfPresent) {
@@ -17,10 +19,10 @@ const createFilesMapper = (excludeIfPresent) => {
   }
 }
 
-const createIndex = (dir, options, cb) => {
+export const createIndex = (dir, options, cb) => {
   const entries = [];
   const t0 = Date.now();
-  walk(dir, createFilesMapper(options.excludeIfPresent), (filename, stat) => {
+  walkDir(dir, createFilesMapper(options.excludeIfPresent), (filename, stat) => {
     const relativeFilename = path.relative(dir, filename);
     if (!options.filter(relativeFilename, stat)) {
       return false;
@@ -45,5 +47,3 @@ const createIndex = (dir, options, cb) => {
     cb(null, entries);
   });
 }
-
-module.exports = createIndex;

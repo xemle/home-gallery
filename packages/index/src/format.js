@@ -1,4 +1,4 @@
-const { humanize } = require('@home-gallery/common')
+import { humanize } from '@home-gallery/common'
 
 const pad = (v, l, c) => {
   v = '' + v
@@ -10,11 +10,11 @@ const pad = (v, l, c) => {
   return v
 }
 
-const percent = (current, total, precision) => (100 * current / total).toFixed(precision || 1) + '%'
+export const percent = (current, total, precision) => (100 * current / total).toFixed(precision || 1) + '%'
 
-const bps = (bytes, startTime) => humanize(bytes / Math.max(0.001, (Date.now() - startTime) / 1000)) + '/s'
+export const bps = (bytes, startTime) => humanize(bytes / Math.max(0.001, (Date.now() - startTime) / 1000)) + '/s'
 
-const humanizeDuration = duration => {
+export const humanizeDuration = duration => {
   if (duration <= 0) {
     return '0ms'
   } else if (duration < 800) {
@@ -37,18 +37,11 @@ const humanizeDuration = duration => {
   }
 }
 
-const remainingTime = (startTime, current, total) => {
+export const remainingTime = (startTime, current, total) => {
   if (!total || total < current) {
     return '0s'
   }
   const elapsedTime = Math.max(0, Date.now() - startTime)
   const estimatedTotalTime = elapsedTime / (current / total)
   return estimatedTotalTime - elapsedTime
-}
-
-module.exports = {
-  percent,
-  bps,
-  humanizeDuration,
-  remainingTime
 }

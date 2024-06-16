@@ -1,4 +1,4 @@
-const createFilterChain = (filters) => {
+export const createFilterChain = (filters) => {
   if (!filters.length) {
     return () => true
   }
@@ -11,8 +11,4 @@ const createFilterChain = (filters) => {
     }
     return true
   }
-}
-
-module.exports = {
-  createFilterChain
 }

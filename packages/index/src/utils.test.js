@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { byDirDescFileAsc } = require('./utils')
+import { byDirDescFileAsc } from './utils.js'
 
 t.test('Test descending dir', t => {
   let data = [

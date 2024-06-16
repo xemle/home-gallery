@@ -1,10 +1,10 @@
-const fs = require('fs');
+import fs from 'fs';
 
-const { writeJsonGzip } = require('@home-gallery/common');
+import { writeJsonGzip } from '@home-gallery/common';
 
-const { byDirDescFileAsc } = require('./utils');
+import { byDirDescFileAsc } from './utils.js';
 
-const writeIndex = (filename, index, cb) => {
+export const writeIndex = (filename, index, cb) => {
   index.created = new Date().toISOString();
   index.data.sort(byDirDescFileAsc);
   const tmp = `${filename}.tmp`;
@@ -15,5 +15,3 @@ const writeIndex = (filename, index, cb) => {
     fs.rename(tmp, filename, err => cb(err, err ? null : index));
   });
 }
-
-module.exports = writeIndex;
