@@ -1,8 +1,10 @@
-const log = require('@home-gallery/logger')('database.mergeJournal');
-const { getIndexName, getJournalFilename, readJournal } = require('@home-gallery/index');
+import Logger from '@home-gallery/logger'
 
-const { mergeEntries } = require('./merge-entry')
-const { initDatabase, readDatabase, writeDatabase } = require('../database')
+const log = Logger('database.mergeJournal');
+import { getIndexName, getJournalFilename, readJournal } from '@home-gallery/index';
+
+import { mergeEntries } from './merge-entry.cjs'
+import { initDatabase, readDatabase, writeDatabase } from '../database/index.js'
 
 const readJournals = (indexFilenames, journal, cb) => {
   let i = 0;
@@ -44,7 +46,7 @@ const diffCount = (newData, oldData) => {
   return `${sign}${diff}`
 }
 
-const mergeFromJournal = (indexFilenames, journal, databaseFilename, entries, updated, cb) => {
+export const mergeFromJournal = (indexFilenames, journal, databaseFilename, entries, updated, cb) => {
   readJournals(indexFilenames, journal, (err, journals) => {
     if (err) {
       return cb(err)
@@ -80,8 +82,4 @@ const mergeFromJournal = (indexFilenames, journal, databaseFilename, entries, up
       });
     })
   })
-}
-
-module.exports = {
-  mergeFromJournal
 }

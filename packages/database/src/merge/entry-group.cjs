@@ -1,6 +1,8 @@
-const log = require('@home-gallery/logger')('database.entry-group')
+const Logger = require('@home-gallery/logger')
 
-const { uniqBy, toMultiValueMap } = require('./utils')
+const log = Logger('database.entry-group')
+
+const { uniqBy, toMultiValueMap } = require('./utils.cjs')
 
 const hasFirstShorterFilename = (a, b) => a.files[0].filename <= b.files[0].filename
 
@@ -137,6 +139,6 @@ const groupEntriesById = (newEntries, entries = []) => {
 }
 
 module.exports = {
-  groupEntriesById,
-  mergeGroups
+  mergeGroups,
+  groupEntriesById
 }

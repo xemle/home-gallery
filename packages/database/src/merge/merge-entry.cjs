@@ -1,7 +1,9 @@
-const log = require('@home-gallery/logger')('database.merge')
+const Logger = require('@home-gallery/logger')
 
-const { mergeGroups, groupEntriesById } = require('./entry-group')
-const { toMultiKeyMap, fileToString, entryToString, uniqBy } = require('./utils')
+const log = Logger('database.merge')
+
+const { mergeGroups, groupEntriesById } = require('./entry-group.cjs')
+const { toMultiKeyMap, fileToString, entryToString, uniqBy } = require('./utils.cjs')
 
 const getFileKey = file => `${file.index}:${file.filename}`
 

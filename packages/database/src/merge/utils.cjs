@@ -42,9 +42,9 @@ const uniqBy = fn => {
 }
 
 module.exports = {
-  entryToString,
-  fileToString,
-  toMultiKeyMap,
+  uniqBy,
   toMultiValueMap,
-  uniqBy
+  toMultiKeyMap,
+  fileToString,
+  entryToString,
 }

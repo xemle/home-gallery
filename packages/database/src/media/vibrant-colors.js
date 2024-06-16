@@ -1,8 +1,8 @@
-const colorConvert = require('color-convert')
+import colorConvert from 'color-convert'
 
-const { getEntryMetaByKey } = require('./utils')
+import { getEntryMetaByKey } from './utils.js'
 
-const getVibrantColors = entry => {
+export const getVibrantColors = entry => {
   const vibrant = getEntryMetaByKey(entry, 'vibrant')
   if (!vibrant) {
     return []
@@ -11,8 +11,4 @@ const getVibrantColors = entry => {
     .map(k => (vibrant[k] || {}).rgb)
     .filter(v => !!v)
     .map(rgb => `#${colorConvert.rgb.hex(...rgb)}`)
-}
-
-module.exports = {
-  getVibrantColors
 }

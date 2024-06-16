@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { getVideo } = require('./video')
+import { getVideo } from './video.js'
 
 t.test('video', async t => {
   t.test('no video entry', async t => {

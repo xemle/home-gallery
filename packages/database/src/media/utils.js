@@ -1,6 +1,8 @@
-const log = require('@home-gallery/logger')('database.media.utils')
+import Logger from '@home-gallery/logger'
 
-const getEntryMetaByKey = (entry, key) => {
+const log = Logger('database.media.utils')
+
+export const getEntryMetaByKey = (entry, key) => {
   if (!entry.meta) {
     log.warn(`Meta data is missing for entry ${entry}`)
     return false
@@ -19,7 +21,7 @@ const getEntryMetaByKey = (entry, key) => {
   return false
 }
 
-const getAllEntryMetaByKey = (entry, key) => {
+export const getAllEntryMetaByKey = (entry, key) => {
   const result = []
   if (entry.meta && entry.meta[key]) {
     result.push(entry.meta[key])
@@ -34,7 +36,7 @@ const getAllEntryMetaByKey = (entry, key) => {
   return result
 }
 
-const reduceMeta = (entry, key, reduceFn, initValue) => {
+export const reduceMeta = (entry, key, reduceFn, initValue) => {
   const allMeta = getAllEntryMetaByKey(entry, key)
   return allMeta.reduce(reduceFn, initValue)
 }
@@ -45,7 +47,7 @@ const getBasename = filename => filename.substring(0, filename.lastIndexOf('.'))
 //   [img_1234.dng, img_1234.jpg, img_1234.jpg.xmp, img_1234.xmp, img_1234.dng.xmp]
 // Get meta sidecars by basename than by filesize of its main file:
 //   [img_1234.xmp, img_1234.dng.xmp, img_1234.jpg.xmp]
-function getMetaEntries(entry) {
+export function getMetaEntries(entry) {
   if (!entry.sidecars?.length) {
     return []
   }
@@ -76,7 +78,7 @@ function getMetaEntries(entry) {
   }, [])
 }
 
-const toArray = value => {
+export const toArray = value => {
   if (Array.isArray(value)) {
     return value
   } else if (value) {
@@ -84,12 +86,4 @@ const toArray = value => {
   } else {
     return []
   }
-}
-
-module.exports = {
-  getEntryMetaByKey,
-  getAllEntryMetaByKey,
-  reduceMeta,
-  getMetaEntries,
-  toArray
 }

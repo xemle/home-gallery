@@ -1,4 +1,4 @@
-const { reduceMeta, toArray } = require('./utils')
+import { reduceMeta, toArray } from './utils.js'
 
 const addUniqValues = (result, values) => toArray(values).forEach(value => {
   if (!result.includes(value)) {
@@ -6,7 +6,7 @@ const addUniqValues = (result, values) => toArray(values).forEach(value => {
   }
 })
 
-const getTags = entry => {
+export const getTags = entry => {
   const reduceFn = (tags, exif) => {
     addUniqValues(tags, exif.TagList)
     addUniqValues(tags, exif.HierarchicalSubject)
@@ -16,8 +16,4 @@ const getTags = entry => {
   }
 
   return reduceMeta(entry, 'exif', reduceFn, []).map(value => '' + value).sort()
-}
-
-module.exports = {
-  getTags
 }

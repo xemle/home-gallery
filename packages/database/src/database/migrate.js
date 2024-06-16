@@ -1,10 +1,12 @@
-const log = require('@home-gallery/logger')('database.migrate')
+import Logger from '@home-gallery/logger'
 
-const { getMajorMinor, HeaderType } = require('./header')
+const log = Logger('database.migrate')
 
-const { createHash, serialize } = require('@home-gallery/common')
+import { getMajorMinor, HeaderType } from './header.cjs'
 
-const migrate = (database, cb) => {
+import { createHash, serialize } from '@home-gallery/common'
+
+export const migrate = (database, cb) => {
   let majorMinor
   try {
     majorMinor = getMajorMinor(database.type)
@@ -25,8 +27,4 @@ const migrate = (database, cb) => {
   }
   database.type = HeaderType
   cb(null, database)
-}
-
-module.exports = {
-  migrate
 }

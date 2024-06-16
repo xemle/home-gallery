@@ -1,6 +1,6 @@
-const { getEntryMetaByKey } = require('./utils')
+import { getEntryMetaByKey } from './utils.js'
 
-const getObjects = (entry, minScore) => {
+export const getObjects = (entry, minScore) => {
   const objects = getEntryMetaByKey(entry, 'objects')
   if (!objects) {
     return []
@@ -18,8 +18,4 @@ const getObjects = (entry, minScore) => {
         class: object.class
       }
     })
-}
-
-module.exports = {
-  getObjects
 }

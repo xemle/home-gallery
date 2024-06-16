@@ -1,9 +1,9 @@
-const { readJsonGzip } = require('@home-gallery/common');
+import { readJsonGzip } from '@home-gallery/common';
 
-const { HeaderType, isDatabaseTypeCompatible } = require('./header')
-const { migrate } = require('./migrate')
+import { HeaderType, isDatabaseTypeCompatible } from './header.cjs'
+import { migrate } from './migrate.js'
 
-function readDatabase(filename, cb) {
+export function readDatabase(filename, cb) {
   readJsonGzip(filename, (err, database) => {
     if (err) {
       return cb(err);
@@ -14,7 +14,7 @@ function readDatabase(filename, cb) {
   });
 }
 
-const initDatabase = (entries) => {
+export const initDatabase = (entries) => {
   return {
     type: HeaderType,
     created: new Date().toISOString(),
@@ -22,7 +22,7 @@ const initDatabase = (entries) => {
   }
 }
 
-const readOrCreateDatabase = (filename, cb) => {
+export const readOrCreateDatabase = (filename, cb) => {
   readDatabase(filename, (err, database) => {
     if (err && err.code == 'ENOENT') {
       cb(null, initDatabase([]))
@@ -31,9 +31,3 @@ const readOrCreateDatabase = (filename, cb) => {
     }
   })
 }
-
-module.exports = {
-  initDatabase,
-  readDatabase,
-  readOrCreateDatabase
-};

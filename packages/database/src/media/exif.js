@@ -1,6 +1,8 @@
-const log = require('@home-gallery/logger')('database.media.exif')
+import Logger from '@home-gallery/logger'
 
-const { getEntryMetaByKey } = require('./utils')
+const log = Logger('database.media.exif')
+
+import { getEntryMetaByKey } from './utils.js'
 
 const getFractionNumber = (exif, prop) => {
   let result = {}
@@ -45,7 +47,7 @@ const widthHeight = (entry, exif) => {
   return [width, height]
 }
 
-const getExif = (entry) => {
+export const getExif = (entry) => {
   const exif = getEntryMetaByKey(entry, 'exif')
   if (!exif) {
     return {}
@@ -77,8 +79,4 @@ const getExif = (entry) => {
     orientation: exif.Orientation || 1,
     whiteBalance: exif.WhiteBalance
   }, getExposerTime(), getShutterSpeed())
-}
-
-module.exports = {
-  getExif
 }

@@ -1,9 +1,9 @@
-const fs = require('fs');
+import fs from 'fs';
 
-const { writeJsonGzip, writeSafe } = require('@home-gallery/common');
-const { initDatabase } = require('./read-database')
+import { writeJsonGzip, writeSafe } from '@home-gallery/common';
+import { initDatabase } from './read-database.js'
 
-const writeDatabase = (filename, entries, cb) => {
+export const writeDatabase = (filename, entries, cb) => {
   const database = initDatabase(entries);
 
   const tmp = `${filename}.tmp`;
@@ -15,7 +15,7 @@ const writeDatabase = (filename, entries, cb) => {
   });
 }
 
-const writeDatabasePlain = (filename, entries, cb) => {
+export const writeDatabasePlain = (filename, entries, cb) => {
   const database = initDatabase(entries);
   const data = JSON.stringify(database);
 
@@ -27,5 +27,3 @@ const writeDatabasePlain = (filename, entries, cb) => {
     fs.rename(tmp, filename, err => cb(err, err ? null : database));
   });
 }
-
-module.exports = { writeDatabase, writeDatabasePlain } ;
