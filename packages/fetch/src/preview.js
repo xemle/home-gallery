@@ -1,12 +1,14 @@
-const fs = require('fs')
-const path = require('path')
-const { Readable } = require('stream')
-const { pipeline } = require('stream/promises')
+import fs from 'fs'
+import path from 'path'
+import { Readable } from 'stream'
+import { pipeline } from 'stream/promises'
 
-const log = require('@home-gallery/logger')('fetch.preview')
-const { parallel, purge } = require('@home-gallery/stream')
+import Logger from '@home-gallery/logger'
 
-const { fetchFile } = require('./api')
+const log = Logger('fetch.preview')
+import { parallel, purge } from '@home-gallery/stream'
+
+import { fetchFile } from './api.js'
 
 const getPreviewFiles = (remoteDatabase, localDatabase, downloadAll) => {
   const t0 = Date.now()
@@ -76,13 +78,9 @@ const downloadPreviewFiles = async (remote, previewFiles, storageDir) => {
 }
 
 /**
- * @param {import('./types').Remote} remote
+ * @param {import('./types.js').Remote} remote
  */
-const handlePreviews = async (remote, remoteDatabase, localDatabase, storageDir) => {
+export const handlePreviews = async (remote, remoteDatabase, localDatabase, storageDir) => {
   const previewFiles = getPreviewFiles(remoteDatabase, localDatabase, remote.downloadAll)
   await downloadPreviewFiles(remote, previewFiles, storageDir)
-}
-
-module.exports = {
-  handlePreviews
 }

@@ -14,5 +14,3 @@
  * @prop {boolean} [requireEvents] If true the event file must exists
  * @prop {boolean} [query] Query
  */
-
-module.exports = {};

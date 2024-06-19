@@ -1,8 +1,10 @@
-const EventEmitter = require('events')
-const http = require('http')
-const https = require('https')
+import EventEmitter from 'events'
+import http from 'http'
+import https from 'https'
 
-const log = require('@home-gallery/logger')('fetch.eventstream')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('fetch.eventstream')
 
 const parseEvent = data => {
   const lines = data.toString().split('\n').filter(line => !!line)
@@ -17,7 +19,7 @@ const parseEvent = data => {
   return event
 }
 
-class EventSource extends EventEmitter {
+export class EventSource extends EventEmitter {
   connected = false
 
   constructor (url, options = {}) {
@@ -65,8 +67,4 @@ class EventSource extends EventEmitter {
   disconnect() {
     this.emit('destroy')
   }
-}
-
-module.exports = {
-  EventSource
 }
