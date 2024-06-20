@@ -23,7 +23,6 @@ import { Map } from './map';
 import { MediaView } from './single/MediaView';
 import { useAppConfig } from './utils/useAppConfig'
 import { loadDatabase, OfflineDatabase } from './offline'
-import { applyEvents } from "@home-gallery/events";
 
 export const Root = () => {
   return (

@@ -61,6 +61,7 @@ const hotkeysToAction = {
   'end': 'last',
   'esc': 'list',
   'i': 'toggleDetails',
+  'o': 'toggleRects',
   's': 'similar',
   'c': 'chronology',
   't': 'toggleNavigation',
@@ -77,11 +78,13 @@ export const MediaView = () => {
   const entries = useEntryStore(state => state.entries);
   const lastIndex = useSingleViewStore(state => state.lastIndex);
   const showDetails = useSingleViewStore(state => state.showDetails);
+  const showRects = useSingleViewStore(state => state.showRects);
   const showNavigation = useSingleViewStore(state => state.showNavigation);
   const setLastId = useSingleViewStore(state => state.setLastId);
   const setLastIndex = useSingleViewStore(state => state.setLastIndex);
   const search = useSearchStore(state => state.search);
   const setShowDetails = useSingleViewStore(actions => actions.setShowDetails);
+  const setShowRects = useSingleViewStore(actions => actions.setShowRects);
   const setShowNavigation = useSingleViewStore(actions => actions.setShowNavigation);
 
   const [hideNavigation, setHideNavigation] = useState(false)
@@ -123,6 +126,8 @@ export const MediaView = () => {
       navigate(`/similar/${current.shortId}`);
     } else if (type === 'toggleDetails') {
       setShowDetails(!showDetails);
+    } else if (type === 'toggleRects') {
+      setShowRects(!showRects);
     } else if (type === 'toggleNavigation') {
       setShowNavigation(!showNavigation);
     } else if (type == 'first' && entries.length) {
@@ -177,7 +182,7 @@ export const MediaView = () => {
     dispatch({type: 'list'})
   }
 
-  console.log('Media object', current, showDetails);
+  console.log('Media object:', current, 'showDetails:', showDetails, 'showRects:', showRects);
 
   return (
     <>
@@ -190,7 +195,7 @@ export const MediaView = () => {
               }
               {isImage &&
                 <Zoomable key={key} childWidth={current.width} childHeight={current.height} onSwipe={onSwipe}>
-                  <MediaViewImage key={key} media={current} next={next} prev={prev} showDetails={showDetails}/>
+                  <MediaViewImage key={key} media={current} next={next} prev={prev} showRects={showRects}/>
                 </Zoomable>
               }
               {isVideo &&
