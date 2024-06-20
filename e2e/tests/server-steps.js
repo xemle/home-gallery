@@ -61,7 +61,7 @@ const startServer = async (args = []) => {
   }
   gauge.dataStore.scenarioStore.put('serverUrl', url)
 
-  return waitFor(() => fetchFacade(''), 10 * 1000).catch(e => {throw new Error(`Could not start server with args: ${args.join(' ')}. Error ${e}`)})
+  return waitFor(() => fetchFacade('/favicon.ico'), 10 * 1000).catch(e => {throw new Error(`Could not start server with args: ${args.join(' ')}. Error ${e}`)})
 }
 
 step("Start server", startServer)

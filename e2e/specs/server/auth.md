@@ -8,6 +8,9 @@ Tags: server,auth
 ## Deny database
 
 * Start server with args "--user admin:admin --rule deny:all"
+* Set user "admin" with password "admin"
+* Wait for database
+* Set anonymous user
 * Server has file "/favicon.ico"
 * Request file "/api/database.json"
 * Response status is "401"
@@ -16,6 +19,7 @@ Tags: server,auth
 
 * Start server with args "--user admin:admin --rule deny:all"
 * Set user "admin" with password "admin"
+* Wait for database
 * Request file "/api/database.json"
 * Response status is "200"
 
@@ -23,6 +27,7 @@ Tags: server,auth
 
 * Start server with args "--user admin:admin --rule deny:all"
 * Set user "admin" with password "admin"
+* Wait for database
 * Request file "/api/database.json"
 * Wait for log entry with key "req.user" and value "admin"
 * Log has entry with key "req.headers.authorization" and value "*** (masked value)"
@@ -31,12 +36,15 @@ Tags: server,auth
 
 * Start server with args "--user admin:{SHA}0DPiKuNIrrVmD8IUCuw1hQxNqZc= --rule deny:all"
 * Set user "admin" with password "admin"
+* Wait for database
 * Request file "/api/database.json"
 * Response status is "200"
 
 ## Deny database with invalid credentials
 
 * Start server with args "--user admin:admin --rule deny:all"
+* Set user "admin" with password "admin"
+* Wait for database
 * Set user "admin" with password "other"
 * Request file "/api/database.json"
 * Response status is "401"
