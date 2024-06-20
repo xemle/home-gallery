@@ -1,7 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { createTags, mergeTags, isSame, hasWriteableTags } = require('./meta')
-const exp = require('constants')
+import { createTags, mergeTags, isSame, hasWriteableTags } from './meta.js'
 
 t.test('createTags', async t => {
   t.test('basic', async t => {

@@ -2,9 +2,10 @@
   "name": "@home-gallery/export-meta",
   "version": "1.0.0",
   "description": "Export metadata to xmp sidecar files",
+  "type": "module",
   "exports": {
-    "import": "./dist/import-wrapper.mjs",
-    "require": "./dist/index.js"
+    "import": "./dist/index.js",
+    "require": "./dist/require-wrapper.cjs"
   },
   "files": [
     "dist"

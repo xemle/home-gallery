@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { selectSidecar } = require('./sidecar')
+import { selectSidecar } from './sidecar.js'
 
 t.test('selectSidecar', async t => {
   t.test('empty files', async t => {
