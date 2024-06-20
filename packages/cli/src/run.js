@@ -146,7 +146,10 @@ const command = {
             return runImport(options)
           })
           .then(() => log.info(`Import command completed`))
-          .catch(err => log.error(err, `Error: ${err}`))
+          .catch(err => {
+            log.error(err, `Error: ${err}`)
+            process.exit(1)
+          })
       )
     .demandCommand()
   },
