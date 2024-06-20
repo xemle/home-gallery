@@ -86,21 +86,21 @@ export const MobileNavBar = ({disableEdit = false, showDialog}) => {
 
 export const NavBar = ({disableEdit = false}) => {
   const [ deviceType ] = useDeviceType();
-  const { setDialogVisible, openDialog } = useTagDialog()
+  const { setTagsDialogVisible, openTagsDialog } = useTagDialog()
 
   const selectedIds = useEditModeStore(state => state.selectedIds);
 
-  const onSubmit = ({tags} : {tags: Tag[]}) => {
+  const onTagsSubmit = ({tags} : {tags: Tag[]}) => {
     const entryIds = Object.entries(selectedIds).filter(([_, selected]) => selected).map(([id]) => id)
     addTags(entryIds, tags).then(() => {
-      setDialogVisible(false);
+      setTagsDialogVisible(false);
     })
 
     return false;
   }
 
   const showDialog = () => {
-    openDialog({onSubmit})
+    openTagsDialog({onTagsSubmit})
   }
 
   return (

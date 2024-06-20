@@ -7,6 +7,7 @@ const getFaces = (entry, minScore) => {
   }
 
   const { width, height, data } = faces;
+
   return data
     .filter(face => face.alignedRect.score >= minScore)
     .map(face => {
@@ -18,9 +19,11 @@ const getFaces = (entry, minScore) => {
         .map(v => v.expression)
         .slice(0, 2)
 
+      const gender = face.genderProbability > 0.7 ? face.gender : 'unknown';
+      const age = +face.age.toFixed(1);
+
       return {
-        age: +face.age.toFixed(1),
-        gender: face.genderProbability > 0.7 ? face.gender : 'unknown',
+        faceTag: Boolean(face.faceTag) ? face.faceTag : `${gender} (${age}y)`,
         expressions,
         x: +(box.x / width).toFixed(3),
         y: +(box.y / height).toFixed(3),

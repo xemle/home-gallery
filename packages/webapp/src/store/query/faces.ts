@@ -2,7 +2,21 @@ import { Entry } from '../entry'
 
 import { uniqBy } from './utils'
 
-const euclideanDistance = (a, b) => {
+const euclideanDistance = (arr1: number[] | Float32Array, arr2: number[] | Float32Array) => {
+  if (arr1.length !== arr2.length)
+    throw new Error('euclideanDistance: arr1.length !== arr2.length')
+
+  const desc1 = Array.from(arr1)
+  const desc2 = Array.from(arr2)
+
+  return Math.sqrt(
+      desc1
+          .map((val, i) => val - desc2[i])
+          .reduce((res, diff) => res + Math.pow(diff, 2), 0)
+  )
+}
+
+const euclideanDistance_old = (a, b) => {
   const max = Math.min(a.length, b.length)
   let result = 0
   for (let i = 0; i < max; i++) {

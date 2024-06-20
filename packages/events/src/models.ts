@@ -8,7 +8,19 @@ export interface Event {
 
 export interface EventAction {
   action: string;
-  value: string;
+  value: string|FaceTag;
+}
+
+export interface FaceTag {
+  name: string;
+  rect: Rect;
+}
+
+export interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 export type EventListener = (event: Event) => void;

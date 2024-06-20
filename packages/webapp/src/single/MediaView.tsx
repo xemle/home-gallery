@@ -21,7 +21,7 @@ import { Details } from './Details';
 import { Zoomable } from "./Zoomable";
 import useBodyDimensions from "../utils/useBodyDimensions";
 import { classNames } from '../utils/class-names'
-import { SingleTagDialogProvider } from "../dialog/tag-dialog-provider";
+import { SingleTagDialogProvider } from "../dialog/dialog-provider";
 
 const findEntryIndex = (location, entries, id) => {
   if (location.state?.index && entries[location.state.index]?.id.startsWith(id)) {
@@ -61,6 +61,7 @@ const hotkeysToAction = {
   'end': 'last',
   'esc': 'list',
   'i': 'toggleDetails',
+  'o': 'toggleRects',
   's': 'similar',
   'c': 'chronology',
   't': 'toggleNavigation',
@@ -77,11 +78,13 @@ export const MediaView = () => {
   const entries = useEntryStore(state => state.entries);
   const lastIndex = useSingleViewStore(state => state.lastIndex);
   const showDetails = useSingleViewStore(state => state.showDetails);
+  const showRects = useSingleViewStore(state => state.showRects);
   const showNavigation = useSingleViewStore(state => state.showNavigation);
   const setLastId = useSingleViewStore(state => state.setLastId);
   const setLastIndex = useSingleViewStore(state => state.setLastIndex);
   const search = useSearchStore(state => state.search);
   const setShowDetails = useSingleViewStore(actions => actions.setShowDetails);
+  const setShowRects = useSingleViewStore(actions => actions.setShowRects);
   const setShowNavigation = useSingleViewStore(actions => actions.setShowNavigation);
 
   const [hideNavigation, setHideNavigation] = useState(false)
@@ -105,7 +108,7 @@ export const MediaView = () => {
 
   const viewEntry = (index: number) => {
     const { shortId } = entries[index]
-    navigate(`/view/${shortId}`, {state: {index, listLocation}, replace: true});
+    navigate(`/view/${shortId}`, { state: { index, listLocation }, replace: true });
   }
 
   const dispatch = (action: any) => {
@@ -123,6 +126,8 @@ export const MediaView = () => {
       navigate(`/similar/${current.shortId}`);
     } else if (type === 'toggleDetails') {
       setShowDetails(!showDetails);
+    } else if (type === 'toggleRects') {
+      setShowRects(!showRects);
     } else if (type === 'toggleNavigation') {
       setShowNavigation(!showNavigation);
     } else if (type == 'first' && entries.length) {
@@ -130,9 +135,9 @@ export const MediaView = () => {
     } else if (type == 'last' && entries.length) {
       viewEntry(entries.length - 1)
     } else if (type == 'list') {
-      navigate(`${listLocation.pathname}${listLocation.search ? encodeUrl(listLocation.search) : ''}`, {state: {id: current?.id}});
+      navigate(`${listLocation.pathname}${listLocation.search ? encodeUrl(listLocation.search) : ''}`, { state: { id: current?.id } });
     } else if (type == 'chronology') {
-      search({type: 'none'});
+      search({ type: 'none' });
       navigate('/');
     } else if (type == 'play') {
       setHideNavigation(true);
@@ -141,15 +146,15 @@ export const MediaView = () => {
     } else if (type == 'search') {
       navigate(`/search/${encodeUrl(action.query)}`);
     } else if (type == 'map') {
-      navigate(`/map?lat=${current.latitude.toFixed(5)}&lng=${current.longitude.toFixed(5)}&zoom=14`, {state: {listLocation}})
+      navigate(`/map?lat=${current.latitude.toFixed(5)}&lng=${current.longitude.toFixed(5)}&zoom=14`, { state: { listLocation } })
     }
   }
 
   const onSwipe = (ev) => {
     if (ev.direction === Hammer.DIRECTION_LEFT) {
-      dispatch({type: 'next'})
+      dispatch({ type: 'next' })
     } else if (ev.direction === Hammer.DIRECTION_RIGHT) {
-      dispatch({type: 'prev'})
+      dispatch({ type: 'prev' })
     }
   }
 
@@ -159,7 +164,7 @@ export const MediaView = () => {
       const found = keys.find(key => handler.key == key)
       if (found) {
         console.log(`Catch hotkey ${found} for ${hotkeysToAction[hotkey]}`)
-        dispatch({type: hotkeysToAction[hotkey]})
+        dispatch({ type: hotkeysToAction[hotkey] })
         return true
       }
     })
@@ -170,44 +175,44 @@ export const MediaView = () => {
 
   const mediaVanishes = index < 0 && lastIndex >= 0 && entries.length > 0
   if (mediaVanishes) {
-    dispatch({type: 'index', index: lastIndex})
+    dispatch({ type: 'index', index: lastIndex })
   }
   const listBecomesEmpty = entries.length == 0 && lastIndex >= 0
   if (listBecomesEmpty) {
-    dispatch({type: 'list'})
+    dispatch({ type: 'list' })
   }
 
-  console.log('Media object', current, showDetails);
+  console.log('Media object:', current, 'showDetails:', showDetails, 'showRects:', showRects);
 
   return (
     <>
-      <SingleTagDialogProvider>
+      <SingleTagDialogProvider >
         <div className="flex flex-col w-screen md:flex-row h-dvh">
-          <div className={classNames('w-full', {'h-1/2 flex-shrink-0 md:flex-shrink md:h-full': showDetails, 'h-full': !showDetails})}>
+          <div className={classNames('w-full', { 'h-1/2 flex-shrink-0 md:flex-shrink md:h-full': showDetails, 'h-full': !showDetails })}>
             <div className="relative w-full h-full overflow-hidden">
               {!hideNavigation &&
-                <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} dispatch={dispatch} />
+                <MediaNav current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} dispatch={dispatch} />
               }
               {isImage &&
                 <Zoomable key={key} childWidth={current.width} childHeight={current.height} onSwipe={onSwipe}>
-                  <MediaViewImage key={key} media={current} next={next} prev={prev} showDetails={showDetails}/>
+                  <MediaViewImage key={key} media={current} next={next} prev={prev} showRects={showRects} />
                 </Zoomable>
               }
               {isVideo &&
-                <MediaViewVideo key={key} media={current} next={next} prev={prev} dispatch={dispatch}/>
+                <MediaViewVideo key={key} media={current} next={next} prev={prev} dispatch={dispatch} />
               }
               {isUnknown &&
-                <MediaViewUnknownType key={key} media={current} next={next} prev={prev}/>
+                <MediaViewUnknownType key={key} media={current} next={next} prev={prev} />
               }
             </div>
           </div>
-          { showDetails &&
+          {showDetails &&
             <div className="md:flex-shrink-0 md:w-90">
               <Details entry={current} dispatch={dispatch} />
             </div>
           }
         </div>
-      </SingleTagDialogProvider>
+      </SingleTagDialogProvider >
     </>
   )
 }

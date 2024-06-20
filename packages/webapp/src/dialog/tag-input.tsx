@@ -5,7 +5,7 @@ import * as icons from '@fortawesome/free-solid-svg-icons'
 import { Tag } from "../api/models";
 import { classNames } from '../utils/class-names'
 import { toKey } from "../utils/toKey";
-import { TagSuggestion } from "./suggestion";
+import { TagSuggestion } from "./tag-suggestion";
 import { SuggestionList } from "./suggestion-list";
 
 const TagList = ({tags, withRemove, dispatch}: {tags: Tag[], withRemove: boolean, dispatch}) => {

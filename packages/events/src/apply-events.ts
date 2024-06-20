@@ -1,6 +1,23 @@
-import { Event, EventAction } from './models';
+import { random } from 'lodash';
+import { Event, EventAction, FaceTag, Rect } from './models';
 
 import { Taggable } from './taggable';
+
+const defaultRect: Rect = {
+  x: -1,
+  y: -1,
+  width: -1,
+  height: -1
+}
+
+const findFace = (faces: any[], rect: Rect) => {
+  return faces.findIndex((face) =>
+    face.x == rect.x
+    && face.y == rect.y
+    && face.width == rect.width
+    && face.height == rect.height
+  )
+}
 
 const applyEventAction = <T extends Taggable>(data: T, action: EventAction): boolean => {
   let changed = false;
@@ -9,8 +26,8 @@ const applyEventAction = <T extends Taggable>(data: T, action: EventAction): boo
       if (!data.tags) {
         data.tags = [];
       }
-      if (data.tags.indexOf(action.value) < 0) {
-        data.tags.push(action.value);
+      if (data.tags.indexOf(action.value as string) < 0) {
+        data.tags.push(action.value as string);
         changed = true;
       }
       break;
@@ -19,9 +36,33 @@ const applyEventAction = <T extends Taggable>(data: T, action: EventAction): boo
       if (!data.tags || !data.tags.length) {
         return false;
       }
-      const index = data.tags.indexOf(action.value);
+      const index = data.tags.indexOf(action.value as string);
       if (index >= 0) {
         data.tags.splice(index, 1);
+        changed = true;
+      }
+      break;
+    }
+
+    case 'addFaceTag': {
+      if (!data.faces || !data.faces.length) {
+        return false;
+      }
+
+      const faceIdx = findFace(data.faces, (action.value as FaceTag).rect)
+      if (faceIdx >= 0) {
+        data.faces[faceIdx].faceTag = (action.value as FaceTag).name;
+        changed = true;
+      }
+      break;
+    }
+    case 'removeFaceTag': {
+      if (!data.faces || !data.faces.length) {
+        return false;
+      }
+      const faceIdx = findFace(data.faces, (action.value as FaceTag).rect)
+      if (faceIdx >= 0) {
+        data.faces[faceIdx].faceTag = `unknown (${random(0, 1000)})`;
         changed = true;
       }
       break;
@@ -31,7 +72,9 @@ const applyEventAction = <T extends Taggable>(data: T, action: EventAction): boo
 }
 
 const isValidEvent = (event: Event) => {
-  return event.type == 'userAction' && event.targetIds?.length && event.actions?.length
+  return event.type == 'userAction'
+    && event.targetIds?.length
+    && event.actions?.length
 }
 
 const applyEventDate = (entry: Taggable, event: Event) => {
@@ -42,7 +85,7 @@ const applyEventDate = (entry: Taggable, event: Event) => {
   }
 }
 
-type EntryIdMap = {[key: string]: Taggable[]}
+type EntryIdMap = { [key: string]: Taggable[] }
 
 const idMapReducer = (result: EntryIdMap, entry: Taggable) => {
   const id = entry.id

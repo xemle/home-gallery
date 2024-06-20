@@ -1,7 +1,9 @@
 .cache
+.idea
 .vscode
 .nyc_output
 .tap
+bin
 build
 bundle-debug.log
 data

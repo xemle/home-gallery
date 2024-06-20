@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { applyEvents, Event, EventAction } from '@home-gallery/events'
+import { applyEvents, Event} from '@home-gallery/events'
 
 import { Entry } from './entry'
 import { useEntryStore } from './entry-store'
@@ -25,9 +25,17 @@ const getEventTags = events => events
   .reduce((all, actions) => all.concat(actions), [])
   .map(action => action.value)
 
+const getEventFaceTags = events => events
+  .filter(event => event.type == 'userAction')
+  .map(event => event.actions.filter(a => a.action == 'addFaceTag'))
+  .reduce((all, actions) => all.concat(actions), [])
+  .map(action => action.value.name)
+
+
 export interface EventStore {
   events: Event[]
   recentTags: string[]
+  recentFaceTags: string[]
 
   addEvents: (events: Event[]) => void
   reapplyEvents: () => void
@@ -48,11 +56,17 @@ const _applyEvents = (events: Event[]) => {
 const getRecentTags = (events: Event[], recentTags: string[]) => {
   getEventTags(events).forEach(tag => lruAdd(recentTags, tag))
   return recentTags
-}    
+}
+
+const getRecentFaceTags = (events: Event[], recentFaceTags: string[]) => {
+  getEventFaceTags(events).forEach(tag => lruAdd(recentFaceTags, tag))
+  return recentFaceTags
+}
 
 export const useEventStore = create<EventStore>((set) => ({
   events: [],
   recentTags: [],
+  recentFaceTags: [],
 
   addEvents: (events: Event[]) => set((state) => {
     if (!events.length) {
@@ -60,7 +74,7 @@ export const useEventStore = create<EventStore>((set) => ({
     }
     _applyEvents(events)
     const allEvents = [...state.events, ...events]
-    return {...state, events: allEvents, recentTags: getRecentTags(allEvents, [])}
+    return {...state, events: allEvents, recentTags: getRecentTags(allEvents, []), recentFaceTags: getRecentFaceTags(allEvents, [])}
   }),
   reapplyEvents: () => set((state) => {
     _applyEvents(state.events)

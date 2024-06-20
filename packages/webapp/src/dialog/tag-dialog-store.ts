@@ -1,7 +1,7 @@
 import { useReducer } from "react"
 
 import { Tag } from "../api/models"
-import { TagSuggestion, getSuggestions } from "./suggestion"
+import { TagSuggestion, getSuggestions } from "./tag-suggestion"
 
 export interface TagDialogState {
   inputValue: string,
@@ -122,4 +122,4 @@ export const reducer = (state: TagDialogState, action: TagAction): TagDialogStat
   return state
 }
 
-export const useDialogStore = (partial : Partial<TagDialogState> = {}) => useReducer(reducer, {...initialState, ...partial})
+export const useTagDialogStore = (partial : Partial<TagDialogState> = {}) => useReducer(reducer, {...initialState, ...partial})

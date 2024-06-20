@@ -6,24 +6,19 @@ import * as icons from '@fortawesome/free-solid-svg-icons'
 import { useEventStore } from '../store/event-store'
 import { useEntryStore } from '../store/entry-store'
 import { useEditModeStore } from '../store/edit-mode-store'
-import { TagInput } from "./tag-input";
-import { Tag } from "../api/models";
-import { RecentTags } from "./recent-tags";
-import { UsedTags } from "./used-tags";
-import { MultiTagHelp, SingleTagHelp } from "./tag-dialog-help";
-import { useTagDialogStore } from "./tag-dialog-store";
+import { FaceTagInput } from "./face-tag-input";
+import { FaceTag } from "../api/models";
+import { MultiTagHelp, SingleTagHelp } from "./face-tag-dialog-help";
+import { useFaceTagsDialogStore } from "./face-tag-dialog-store";
+import {SimilarTags} from "./face-tags-similar";
 
-export type TagDialogFormData = {
-  tags: Tag[];
-}
-
-export type TagDialogProps = {
-  tags?: Tag[]
+export type FaceTagDialogProps = {
+  faceTags?: FaceTag[]
   onCancel: () => void;
-  onSubmit: (data: TagDialogFormData) => void;
+  onSubmit: ({faceTags}: {faceTags: FaceTag[]}) => void;
 }
 
-const useAllTags = () => {
+const useAllFaceTags = () => {
   const allEntries = useEntryStore(state => state.allEntries)
   const selectedIds = useEditModeStore(state => state.selectedIds)
 
@@ -31,20 +26,20 @@ const useAllTags = () => {
     const allTags = {}
     const selectedTags = {}
     allEntries.forEach(entry => {
-      if (!entry.tags?.length) {
+      if (!entry.faces?.length) {
         return
       }
       const isSelected: boolean = !!selectedIds[entry.id]
-      entry.tags.forEach((tag: string) => {
-        if (!allTags[tag]) {
-          allTags[tag] = 1
+      entry.faces.forEach((face, i) => {
+        if (!allTags[face.faceTag]) {
+          allTags[face.faceTag] = 1
         } else {
-          allTags[tag]++
+          allTags[face.faceTag]++
         }
-        if (isSelected && !selectedTags[tag]) {
-          selectedTags[tag] = 1
+        if (isSelected && !selectedTags[face.faceTag]) {
+          selectedTags[face.faceTag] = 1
         } else if (isSelected) {
-          selectedTags[tag]++
+          selectedTags[face.facetag]++
         }
       })
     })
@@ -81,86 +76,95 @@ const Dialog = ({title, submitText, onCancel, onSubmit, children}) => {
   )
 }
 
-export const MultiTagDialog = ({onCancel, onSubmit}: TagDialogProps) => {
-  const [state, dispatch] = useTagDialogStore();
+export const MultiFaceTagDialog = ({onCancel, onSubmit}: FaceTagDialogProps) => {
+  const [state, dispatch] = useFaceTagsDialogStore()
   const [showHelp, setShowHelp] = useState(false)
 
-  const recentTags = useEventStore(state => state.recentTags);
-  const selectedIds = useEditModeStore(state => state.selectedIds)
+  const recentTags = useEventStore(state => state.recentFaceTags);
+  const [allFaceTags] = useAllFaceTags()
 
-  const [allTags, selectedTags] = useAllTags()
+  const faceTag = state.faceTags[state.current];
 
   useEffect(() => {
-    dispatch({type: 'setAllTags', value: allTags.map(tag => tag.name).sort()})
-  }, [allTags])
+    dispatch({type: 'setAllFaceTags', value: allFaceTags.map(t => t.name).sort(), selectedIds:[]})
+  }, [allFaceTags])
 
-  const selectedIdCount = useMemo(() => Object.entries(selectedIds).filter(([_, selected]) => selected).length, [selectedIds])
 
   const getFinalTags = () => {
-    const tags = [...state.tags]
-    if (state.inputValue.length) {
-      tags.push({name: state.inputValue, remove: false})
+    const tags = [...state.faceTags]
+    if (faceTag.name.length) {
+      tags.push({name: faceTag.name, remove: false, rect: faceTag.rect})
     }
     return tags
   }
 
   const submitHandler = (event) => {
     event.preventDefault();
-    onSubmit({ tags: getFinalTags() });
+    onSubmit({ faceTags: getFinalTags() });
   }
 
   return (
-    <Dialog title={`Edit tags of ${selectedIdCount} selected media`} submitText={'Add Tags'} onSubmit={submitHandler} onCancel={onCancel} >
+    <Dialog title='Edit face tags' submitText={'Save Tags'} onSubmit={submitHandler} onCancel={onCancel} >
       <div className="flex flex-col gap-2">
         <label htmlFor="tags" className="flex items-center content-center gap-1">
           <span className="text-gray-400">Add Tags</span>
-          <a className="w-6 h-6 ml-1 hover:cursor-pointer" onClick={() => setShowHelp(show => !show)} title="Show help for tag input"><FontAwesomeIcon icon={icons.faQuestionCircle} className="text-gray-500 hover:text-gray-300"/></a>
+          <a className="w-6 h-6 ml-1 hover:cursor-pointer" onClick={() => setShowHelp(show => !show)} title="Show help for face tag input"><FontAwesomeIcon icon={icons.faQuestionCircle} className="text-gray-500 hover:text-gray-300"/></a>
         </label>
         <MultiTagHelp show={showHelp} setShow={setShowHelp} />
-        <TagInput tags={state.tags} withRemove={true} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={state.inputValue} />
-        <RecentTags tags={recentTags} dispatch={dispatch} />
-        <UsedTags title="Tags of selected media:" tags={selectedTags} initialCount={15} dispatch={dispatch} />
-        <UsedTags title="Most used tags:" tags={allTags} initialCount={5} dispatch={dispatch} />
+        {state.faceTags.map((tag, i) =>(
+          <div className="flex flex-row items-center justify-start w-full gap-2 px-2 py-1">
+            <img height={100} width={100} alt='avatar'></img>
+            <FaceTagInput tag={tag} withRemove={false} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={""} />
+            <SimilarTags tags={recentTags} dispatch={dispatch} />
+          </div>
+        ))}
       </div>
     </Dialog>
   )
 }
 
-export const SingleTagDialog = ({tags, onCancel, onSubmit}: TagDialogProps) => {
-  const [state, dispatch] = useTagDialogStore({tags})
+export const SingleFaceTagDialog = ({faceTags, onCancel, onSubmit}: FaceTagDialogProps) => {
+  const [state, dispatch] = useFaceTagsDialogStore({faceTags})
   const [showHelp, setShowHelp] = useState(false)
 
-  const recentTags = useEventStore(state => state.recentTags);
-  const [allTags] = useAllTags()
+  const recentTags = useEventStore(state => state.recentFaceTags);
+  const [allFaceTags] = useAllFaceTags()
+
+  const faceTag = state.faceTags[state.current];
 
   useEffect(() => {
-    dispatch({type: 'setAllTags', value: allTags.map(tag => tag.name).sort()})
-  }, [allTags])
+    dispatch({type: 'setAllFaceTags', value: allFaceTags.map(t => t.name).sort(), selectedIds:[]})
+  }, [allFaceTags])
+
 
   const getFinalTags = () => {
-    const tags = [...state.tags]
-    if (state.inputValue.length) {
-      tags.push({name: state.inputValue, remove: false})
+    const tags = [...state.faceTags]
+    if (faceTag.name.length) {
+      tags.push({name: faceTag.name, remove: false, rect: faceTag.rect})
     }
     return tags
   }
 
   const submitHandler = (event) => {
     event.preventDefault();
-    onSubmit({ tags: getFinalTags() });
+    onSubmit({ faceTags: getFinalTags() });
   }
 
   return (
-    <Dialog title='Edit media tags' submitText={'Save Tags'} onSubmit={submitHandler} onCancel={onCancel} >
+    <Dialog title='Edit face tags' submitText={'Save Tags'} onSubmit={submitHandler} onCancel={onCancel} >
       <div className="flex flex-col gap-2">
         <label htmlFor="tags" className="flex items-center content-center gap-1">
           <span className="text-gray-400">Add Tags</span>
-          <a className="w-6 h-6 ml-1 hover:cursor-pointer" onClick={() => setShowHelp(show => !show)} title="Show help for tag input"><FontAwesomeIcon icon={icons.faQuestionCircle} className="text-gray-500 hover:text-gray-300"/></a>
+          <a className="w-6 h-6 ml-1 hover:cursor-pointer" onClick={() => setShowHelp(show => !show)} title="Show help for face tag input"><FontAwesomeIcon icon={icons.faQuestionCircle} className="text-gray-500 hover:text-gray-300"/></a>
         </label>
         <SingleTagHelp show={showHelp} setShow={setShowHelp} />
-        <TagInput tags={state.tags} withRemove={false} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={state.inputValue} />
-        <RecentTags tags={recentTags} dispatch={dispatch} />
-        <UsedTags title="Most used tags:" tags={allTags} initialCount={5} dispatch={dispatch} />
+        {state.faceTags.map((tag, i) =>(
+          <div className="flex flex-row items-center justify-start w-full gap-2 px-2 py-1">
+            <img height={100} width={100} alt='avatar'></img>
+            <FaceTagInput tag={tag} withRemove={false} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={""} />
+            <SimilarTags tags={recentTags} dispatch={dispatch} />
+          </div>
+        ))}
       </div>
     </Dialog>
   )
