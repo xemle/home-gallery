@@ -5,6 +5,7 @@ const { Buffer } = require('buffer')
 const fs = require('fs').promises
 const http = require('http')
 const https = require('https')
+const url = require('url')
 const assert = require('assert')
 const fetch = require('node-fetch')
 const express = require('express')
@@ -183,9 +184,10 @@ const waitForEvent = async (eventPredicate) => {
 }
 
 step("Listen to server events", async () => {
-  const url = gauge.dataStore.scenarioStore.get('serverUrl')
+  const serverUrl = gauge.dataStore.scenarioStore.get('serverUrl')
 
   const onResponse = res => {
+    res.setEncoding('utf8')
     res.on('data', (data) => {
       const lines = data.toString().split('\n').filter(line => !!line)
       let event = Object.fromEntries(lines.map(line => line.split(/:\s+/)))
@@ -198,7 +200,26 @@ step("Listen to server events", async () => {
     })
   }
 
-  http.get(`${url}/api/events/stream`, onResponse)
+  const headers = gauge.dataStore.scenarioStore.get('request.headers') || {}
+  const agent = serverUrl.startsWith('https') ? insecureOption : undefined
+
+  const parsedUrl = url.parse(`${serverUrl}/api/events/stream`)
+  const options = {
+    method: 'GET',
+    protocol: parsedUrl.protocol,
+    hostname: parsedUrl.hostname,
+    port: parsedUrl.port,
+    path: parsedUrl.path,
+    headers,
+    agent
+  }
+  const req = http.request(options, onResponse)
+
+  req.on('error', err => {
+    gauge.message(`Listen to EventStream failed: ${err}`)
+  })
+  req.end()
+
   return waitForEvent(event => event.type == 'pong')
 })
 
@@ -260,6 +281,12 @@ const btoa = text => Buffer.from(text).toString('base64')
 step("Set user <user> with password <password>", async (user, password) => {
   const headers = gauge.dataStore.scenarioStore.get('request.headers') || {}
   headers['Authorization'] = `Basic ${btoa(user + ':' + password)}`
+  gauge.dataStore.scenarioStore.put('request.headers', headers)
+})
+
+step("Set anonymous user", async () => {
+  const headers = gauge.dataStore.scenarioStore.get('request.headers') || {}
+  delete headers['Authorization']
   gauge.dataStore.scenarioStore.put('request.headers', headers)
 })
 
