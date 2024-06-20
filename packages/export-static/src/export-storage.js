@@ -1,9 +1,11 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const log = require('@home-gallery/logger')('export.storage');
+import Logger from '@home-gallery/logger'
 
-const copyFile = require('./copy-file');
+const log = Logger('export.storage');
+
+import { copyFile } from './copy-file.js';
 
 const exportEntry = (entry, storageDir, directory, cb) => {
   let i = 0;
@@ -52,7 +54,7 @@ const entryToString = entry => {
   return `${entry.id.substr(7)}:${firstFile.indexName}:${firstFile.filename}`
 }
 
-const exportStorage = (database, storageDir, dir, basePath, cb) => {
+export const exportStorage = (database, storageDir, dir, basePath, cb) => {
   if (!dir) {
     const date = formatDate();
     dir = `home-gallery-export-${date}`
@@ -81,5 +83,3 @@ const exportStorage = (database, storageDir, dir, basePath, cb) => {
 
   next();
 }
-
-module.exports = exportStorage;

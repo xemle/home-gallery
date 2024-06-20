@@ -1,12 +1,16 @@
-const path = require('path');
-const glob = require('glob');
+import path from 'path';
+import glob from 'glob';
+import { fileURLToPath } from 'url'
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
-const log = require('@home-gallery/logger')('export.copy.webapp');
-const { forEach } = require('@home-gallery/common');
+import Logger from '@home-gallery/logger'
 
-const copyFile = require('./copy-file');
+const log = Logger('export.copy.webapp');
+import { forEach } from '@home-gallery/common';
 
-const copyWebapp = (database, dir, basePath, cb) => {
+import { copyFile } from './copy-file.js';
+
+export const copyWebapp = (database, dir, basePath, cb) => {
   const t0 = Date.now();
   const srcDir = path.resolve(__dirname, 'public');
   const dstDir = path.join(dir, basePath)
@@ -28,5 +32,3 @@ const copyWebapp = (database, dir, basePath, cb) => {
     })
   })
 }
-
-module.exports = copyWebapp;

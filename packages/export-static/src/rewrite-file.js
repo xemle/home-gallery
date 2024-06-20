@@ -1,6 +1,6 @@
-const fs = require('fs');
+import fs from 'fs';
 
-const rewriteFile = (file, rewriteFn, cb) => {
+export const rewriteFile = (file, rewriteFn, cb) => {
   fs.readFile(file, {encoding: 'utf8'}, (err, data) => {
     if (err) {
       const e = new Error(`Could not read ${file} for rewrite: ${err}`)
@@ -18,5 +18,3 @@ const rewriteFile = (file, rewriteFn, cb) => {
     })
   })
 }
-
-module.exports = rewriteFile;

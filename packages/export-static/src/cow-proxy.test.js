@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { wrapCowProxy, unwrapCowProxy } = require('./cow-proxy')
+import { wrapCowProxy, unwrapCowProxy } from './cow-proxy.js'
 
 t.test('wrapProxy with object', async t => {
   t.test('boolean', async t => {

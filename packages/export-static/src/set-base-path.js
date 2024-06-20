@@ -1,12 +1,14 @@
-const path = require('path');
+import path from 'path';
 
-const log = require('@home-gallery/logger')('export.webapp.basePath');
+import Logger from '@home-gallery/logger'
 
-const rewriteFile = require('./rewrite-file');
+const log = Logger('export.webapp.basePath');
+
+import { rewriteFile } from './rewrite-file.js';
 
 const trimSlashes = s => s.replace(/(^\/+|\/+$)/g, '')
 
-const setBasePath = (dir, basePath, cb) => {
+export const setBasePath = (dir, basePath, cb) => {
   const trimmedBasePath = trimSlashes(basePath)
   if (!trimmedBasePath.length) {
     return cb(null, dir);
@@ -24,5 +26,3 @@ const setBasePath = (dir, basePath, cb) => {
     cb(null, dir)
   });
 }
-
-module.exports = setBasePath;
