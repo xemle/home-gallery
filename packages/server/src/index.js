@@ -30,7 +30,7 @@ const serverUrl = (port, key, cert) =>`${isHttps(key, cert) ? 'https' : 'http'}:
 
 const getConfigEnv = options => {
   const { configFile, autoConfigFile } = options
-  return !autoConfigFile ? {GALLERY_CONFIG: configFile} : {}
+  return !autoConfigFile && configFile ? {GALLERY_CONFIG: configFile} : {}
 }
 
 function startServer(options, cb) {
