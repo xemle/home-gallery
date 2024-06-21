@@ -1,22 +1,26 @@
-const os = require('os')
-const path = require('path')
-const { fetchRemote } = require('@home-gallery/fetch')
+import os from 'os'
+import path from 'path'
+import { fetchRemote } from '@home-gallery/fetch'
 
-const log = require('@home-gallery/logger')('cast')
+import Logger from '@home-gallery/logger'
 
-const { scanFirst } = require('./scanner')
-const { slideshow } = require('./player')
-const { proxy } = require('./proxy')
-const { getPreview } = require('./utils')
+const log = Logger('cast')
 
-const defaultProxyPort = 38891
+import { scanFirst } from './scanner.js'
+import { slideshow } from './player.js'
+import { proxy } from './proxy.js'
+import { getPreview } from './utils.js'
+
+export { scanFirst } from './scanner.js'
+export { slideshow } from './player.js'
+export const defaultProxyPort = 38891
 
 const getIp = () => {
   const interfaces = os.networkInterfaces()
   const ips = Object.values(interfaces)
     .reduce((r, l) => r.concat(l), [])
-    .filter(interface => interface.family == 'IPv4' && !interface.internal)
-    .map(interface => interface.address)
+    .filter(iface => iface.family == 'IPv4' && !iface.internal)
+    .map(iface => iface.address)
   log.debug(`Found IPs: ${ips.join(', ')}`)
   return ips.shift()
 }
@@ -77,7 +81,7 @@ const extractMedia = (entries, maxPreviewSize, baseUrl) => {
   }, [])
 }
 
-const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure, random, reverse, delay, maxPreviewSize} = {}) => {
+export const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure, random, reverse, delay, maxPreviewSize} = {}) => {
   const remote = {
     url: serverUrl,
     insecure,
@@ -102,11 +106,4 @@ const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure, random
   const entries = extractMedia(database.data.sort(byDate(reverse)), maxPreviewSize || 1920, baseUrl)
   log.info(`Start slideshow to device ${device.name} at ${device.host} with ${entries.length} entries`)
   await slideshow(device.host, entries, { random, delay })
-}
-
-module.exports = {
-  cast,
-  scanFirst,
-  slideshow,
-  defaultProxyPort
 }

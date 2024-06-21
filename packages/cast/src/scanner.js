@@ -1,7 +1,9 @@
 
-const mdns = require('multicast-dns')
+import mdns from 'multicast-dns'
 
-const log = require('@home-gallery/logger')('cast.dns')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('cast.dns')
 
 const isTxt = (type, data) => type == 'TXT' && Array.isArray(data)
 
@@ -41,7 +43,7 @@ const toCastDevice = additionals => {
   }
 }
 
-const scan = onDevice => {
+export const scan = onDevice => {
   const browser = mdns()
 
   const devices = []
@@ -74,7 +76,7 @@ const scan = onDevice => {
   })
 }
 
-const scanFirst = async (timeout) => {
+export const scanFirst = async (timeout) => {
   let found = false
   return new Promise((resolve, reject) => {
     let timer
@@ -94,9 +96,4 @@ const scanFirst = async (timeout) => {
       resolve(device)
     })
   })
-}
-
-module.exports = {
-  scan,
-  scanFirst
 }

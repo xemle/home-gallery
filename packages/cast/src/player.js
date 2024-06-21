@@ -1,7 +1,8 @@
-const Client                = require('castv2-client').Client;
-const DefaultMediaReceiver  = require('castv2-client').DefaultMediaReceiver;
+import { Client, DefaultMediaReceiver } from 'castv2-client';
 
-const log = require('@home-gallery/logger')('cast.player')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('cast.player')
 
 const startCast = async (host, cb) => {
   const client = new Client();
@@ -67,7 +68,7 @@ const isVideo = url => url && url.match(/\.mp4$/)
 
 const createMedia = entry => entry.type == 'video' ? createVideo(entry) : createImage(entry)
 
-const slideshow = async (host, entries, options = {}) => {
+export const slideshow = async (host, entries, options = {}) => {
   const [player] = await startCastAsync(host)
 
   let i = 0
@@ -113,8 +114,4 @@ const slideshow = async (host, entries, options = {}) => {
       next()
     }
   });
-}
-
-module.exports = {
-  slideshow
 }
