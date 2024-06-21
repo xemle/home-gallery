@@ -1,7 +1,7 @@
-const pinoHttp = require('pino-http')
-const logger = require('@home-gallery/logger')
+import pinoHttp from 'pino-http'
+import logger from '@home-gallery/logger'
 
-const loggerMiddleware = () => {
+export const loggerMiddleware = () => {
   const customMessage = log => `${log.statusCode} ${log.req.method} ${log.req.url} ${Date.now() - log[pinoHttp.startTime]}ms`
 
   return pinoHttp({
@@ -26,8 +26,4 @@ const loggerMiddleware = () => {
     customSuccessMessage: customMessage,
     customErrorMessage: (err, o) => customMessage(o)
   })
-}
-
-module.exports = {
-  loggerMiddleware
 }

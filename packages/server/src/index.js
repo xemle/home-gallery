@@ -1,19 +1,22 @@
-const open = require('open')
+import fs from 'fs';
+import http from 'http';
+import https from 'https';
+import open from 'open'
 
-const { callbackify, ProcessManager } = require('@home-gallery/common')
+import { callbackify, ProcessManager } from '@home-gallery/common'
 
-const log = require('@home-gallery/logger')('server')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('server')
 const openCb = callbackify(open)
 
-const { createApp } = require('./app')
-const { spawnCli } = require('./utils/spawn-cli')
+import { createApp } from './app.js'
+import { spawnCli } from './utils/spawn-cli.js'
 
 const isHttps = (key, cert) => key && cert
 
 function createServer(key, cert, app) {
   if (isHttps(key, cert)) {
-    const fs = require('fs');
-    const https = require('https');
     var privateKey  = fs.readFileSync(key, 'utf8');
     var certificate = fs.readFileSync(cert, 'utf8');
 
@@ -21,7 +24,6 @@ function createServer(key, cert, app) {
 
     return https.createServer(credentials, app);
   } else {
-    const http = require('http');
     return http.createServer({spdy: { plain: true, ssl: false} }, app);
   }
 }
@@ -33,7 +35,7 @@ const getConfigEnv = options => {
   return !autoConfigFile && configFile ? {GALLERY_CONFIG: configFile} : {}
 }
 
-function startServer(options, cb) {
+export function startServer(options, cb) {
   const { config } = options
 
   const pm = new ProcessManager()
@@ -77,7 +79,3 @@ function startServer(options, cb) {
   }
 
 }
-
-module.exports = {
-  startServer,
-};

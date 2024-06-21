@@ -1,6 +1,6 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
 
-const matchesUser = (userMap, username, password) => {
+export const matchesUser = (userMap, username, password) => {
   if (!username || !password || !userMap[username]) {
     return false
   }
@@ -23,16 +23,11 @@ const getTestPassword = password => {
   }
 }
 
-const users2UserMap = users => {
+export const users2UserMap = users => {
   return users.reduce((result, {username, password}) => {
     result[username] = {
       testPassword: getTestPassword(password)
     }
     return result
   }, {})
-}
-
-module.exports = {
-  users2UserMap,
-  matchesUser
 }

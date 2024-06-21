@@ -29,7 +29,7 @@ const getNetwork = value => {
   return [networkPrefix, networkMask]
 }
 
-const isWhitelistIp = (rules, ip) => {
+export const isWhitelistIp = (rules, ip) => {
   const n = ip2int(ip)
   for (const rule of rules) {
     if (rule.value == 'all' || (rule.networkMask & n) == rule.networkPrefix) {
@@ -39,7 +39,7 @@ const isWhitelistIp = (rules, ip) => {
   return true
 }
 
-const rules2WhitelistRules = rules => {
+export const rules2WhitelistRules = rules => {
   return rules.map(({type, value}) => {
     const [networkPrefix, networkMask] = matchesNetwork(value) ? getNetwork(value) : 
       (value == 'localhost' ? getNetwork('127/8') : [0, -1])
@@ -52,10 +52,4 @@ const rules2WhitelistRules = rules => {
   })
 }
 
-const defaultIpWhitelistRules = [{type: 'allow', value: '127/8'}, {type: 'deny', value: 'all'}]
-
-module.exports = {
-  rules2WhitelistRules,
-  defaultIpWhitelistRules,
-  isWhitelistIp
-}
+export const defaultIpWhitelistRules = [{type: 'allow', value: '127/8'}, {type: 'deny', value: 'all'}]

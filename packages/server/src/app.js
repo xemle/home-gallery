@@ -1,20 +1,23 @@
-const path = require('path');
-const express = require('express');
-const compression = require('compression');
-const cors = require('cors');
-const bodyParser = require('body-parser');
+import path from 'path';
+import express from 'express';
+import compression from 'compression';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import { fileURLToPath } from 'url'
 
-const { loggerMiddleware } = require('./logger-middleware')
-const { EventBus } = require('./eventbus');
-const databaseApi = require('./api/database');
-const treeApi = require('./api/database/tree');
-const eventsApi = require('./api/events');
-const webapp = require('./webapp');
-const { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } = require('./auth')
-const { isIndex, skipIf } = require('./utils')
+import { loggerMiddleware } from './logger-middleware.js'
+import { EventBus } from './eventbus.js';
+import { databaseApi } from './api/database/index.js';
+import { treeApi } from './api/database/tree/index.js';
+import { eventsApi } from './api/events/index.js';
+import { webapp } from './webapp.js';
+import { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
+import { isIndex, skipIf } from './utils.js'
+import { debugApi } from './api/debug/index.js'
 
 const eventbus = new EventBus()
 
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const webappDir = path.join(__dirname, 'public')
 
 function shouldCompress (req, res) {
@@ -34,7 +37,7 @@ const getAuthMiddleware = config => {
   return (req, _, next) => next()
 }
 
-function createApp(config) {
+export function createApp(config) {
 
   const app = express();
   app.disable('x-powered-by')
@@ -63,8 +66,8 @@ function createApp(config) {
   app.get('/api/database/tree/:hash', readTree);
 
   if (config.server.remoteConsoleToken) {
-    const debugApi = require('./api/debug')({remoteConsoleToken: config.server?.remoteConsoleToken})
-    app.post('/api/debug/console', debugApi.console);
+    const { console } = debugApi({remoteConsoleToken: config.server?.remoteConsoleToken})
+    app.post('/api/debug/console', console);
   }
 
   // deprecated
@@ -84,8 +87,4 @@ function createApp(config) {
     app,
     initDatabase
   }
-}
-
-module.exports = {
-  createApp
 }

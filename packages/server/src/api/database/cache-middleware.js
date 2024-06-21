@@ -1,6 +1,6 @@
-const mcache = require('memory-cache');
+import mcache from 'memory-cache';
 
-function cache(duration) {
+export function cache(duration) {
   const currentCache = new mcache.Cache();
 
   // credits to https://medium.com/the-node-js-collection/simple-server-side-cache-for-express-js-with-node-js-45ff296ca0f0
@@ -28,5 +28,3 @@ function cache(duration) {
 
   return { middleware, clear };
 }
-
-module.exports = { cache };

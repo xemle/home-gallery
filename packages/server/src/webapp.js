@@ -1,9 +1,11 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const log = require('@home-gallery/logger')('server.webapp')
+import Logger from '@home-gallery/logger'
 
-const { useIf, isIndex } = require('./utils')
+const log = Logger('server.webapp')
+
+import { useIf, isIndex } from './utils.js'
 
 const injectStateMiddleware = (indexFile, getState, {basePath, injectRemoteConsole}) => {
   return (req, res) => {
@@ -29,7 +31,7 @@ const injectStateMiddleware = (indexFile, getState, {basePath, injectRemoteConso
   }
 }
 
-const app = (webappDir, getState, options) => {
+export const webapp = (webappDir, getState, options) => {
   const indexFile = path.resolve(webappDir, 'index.html')
   const injectState = injectStateMiddleware(indexFile, getState, options)
   return [
@@ -37,5 +39,3 @@ const app = (webappDir, getState, options) => {
     (_, res) => res.sendFile(indexFile)
   ];
 }
-
-module.exports = app;

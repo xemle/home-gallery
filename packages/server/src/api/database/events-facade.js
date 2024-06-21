@@ -1,14 +1,10 @@
-const { applyEvents: applyEventsOrig } = require('@home-gallery/events')
-const { createHash, serialize } = require('@home-gallery/common')
+import { applyEvents as applyEventsOrig } from '@home-gallery/events'
+import { createHash, serialize } from '@home-gallery/common'
 
-const applyEvents = (database, events) => {
+export const applyEvents = (database, events) => {
   const changedEntries = applyEventsOrig(database.data, events)
   changedEntries.forEach(entry => {
     entry.hash = createHash(serialize(entry, ['hash', 'appliedEventIds']))
   })
   return changedEntries
-}
-
-module.exports = {
-  applyEvents
 }
