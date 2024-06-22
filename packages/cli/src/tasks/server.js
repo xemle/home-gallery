@@ -9,7 +9,7 @@ const pm = new ProcessManager()
 
 export const startServer = async options => {
   await new Promise((resolve, reject) => {
-    serverProcess = spawnCli(['server'], {env: options.configEnv})
+    const serverProcess = spawnCli(['server'], {env: options.configEnv})
     pm.addProcess(serverProcess, {terminateTimeout: 15 * 1000})
 
     serverProcess.once('SIGINT', () => {

@@ -44,7 +44,7 @@ const command = {
 
     run()
       .then(() => {
-        log.info(err, `Removed journal ${journal} from file index ${indexFilename}`)
+        log.info(`Removed journal ${journal} from file index ${indexFilename}`)
       })
       .catch(err => {
         log.warn(err, `Could not remove journal ${journal} from file index ${indexFilename}: ${err}`)
