@@ -1,6 +1,6 @@
 import { readJsonGzip } from '@home-gallery/common';
 
-import { HeaderType, isDatabaseTypeCompatible } from './header.cjs'
+import { HeaderType, isDatabaseTypeCompatible } from './header.js'
 import { migrate } from './migrate.js'
 
 export function readDatabase(filename, cb) {

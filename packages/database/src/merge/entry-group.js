@@ -1,8 +1,8 @@
-const Logger = require('@home-gallery/logger')
+import Logger from '@home-gallery/logger'
+
+import { uniqBy, toMultiValueMap } from './utils.js'
 
 const log = Logger('database.entry-group')
-
-const { uniqBy, toMultiValueMap } = require('./utils.cjs')
 
 const hasFirstShorterFilename = (a, b) => a.files[0].filename <= b.files[0].filename
 
@@ -87,7 +87,7 @@ const findGroupChanges = entry2newEntry => entry2newEntry
     return result
   }, {})
 
-const mergeGroups = (entry2newEntry, entries) => {
+export const mergeGroups = (entry2newEntry, entries) => {
   const changedEntries = copyGroupIds(entry2newEntry)
 
   const groupId2newGroupId = findGroupChanges(entry2newEntry)
@@ -112,7 +112,7 @@ const mergeGroups = (entry2newEntry, entries) => {
   return changedEntries
 }
 
-const groupEntriesById = (newEntries, entries = []) => {
+export const groupEntriesById = (newEntries, entries = []) => {
   const changedEntries = []
   const id2entries = toMultiValueMap(entries)
   toMultiValueMap(newEntries, id2entries)
@@ -136,9 +136,4 @@ const groupEntriesById = (newEntries, entries = []) => {
     .forEach(entry => removeGroupId(entry, getGroupIdForId(entry)) && changedEntries.push(entry))
 
   return changedEntries
-}
-
-module.exports = {
-  mergeGroups,
-  groupEntriesById
 }

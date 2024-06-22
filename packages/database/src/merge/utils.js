@@ -1,8 +1,8 @@
-const entryToString = entry => `${entry.id.slice(0, 7)}`
+export const entryToString = entry => `${entry.id.slice(0, 7)}`
 
-const fileToString = file => `${file.id.slice(0, 7)}:${file.index}:${file.filename}`
+export const fileToString = file => `${file.id.slice(0, 7)}:${file.index}:${file.filename}`
 
-const toMultiKeyMap = (values, keysFn) => values.reduce((result, value) => {
+export const toMultiKeyMap = (values, keysFn) => values.reduce((result, value) => {
   const keys = keysFn(value)
   if (!keys) {
     return result
@@ -16,7 +16,7 @@ const toMultiKeyMap = (values, keysFn) => values.reduce((result, value) => {
   return result
 }, {})
 
-const toMultiValueMap = (entries, initialValue = {}, keyFn = e => e.id) => {
+export const toMultiValueMap = (entries, initialValue = {}, keyFn = e => e.id) => {
   entries.forEach(entry => {
     const key = keyFn(entry)
     if (initialValue[key]) {
@@ -28,7 +28,7 @@ const toMultiValueMap = (entries, initialValue = {}, keyFn = e => e.id) => {
   return initialValue
 }
 
-const uniqBy = fn => {
+export const uniqBy = fn => {
   const keys = {}
 
   return value => {
@@ -39,12 +39,4 @@ const uniqBy = fn => {
     }
     return false
   }
-}
-
-module.exports = {
-  uniqBy,
-  toMultiValueMap,
-  toMultiKeyMap,
-  fileToString,
-  entryToString,
 }

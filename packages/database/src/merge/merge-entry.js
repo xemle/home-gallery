@@ -1,9 +1,10 @@
-const Logger = require('@home-gallery/logger')
+import Logger from '@home-gallery/logger'
+
+import { mergeGroups, groupEntriesById } from './entry-group.js'
+import { toMultiKeyMap, fileToString, entryToString, uniqBy } from './utils.js'
 
 const log = Logger('database.merge')
 
-const { mergeGroups, groupEntriesById } = require('./entry-group.cjs')
-const { toMultiKeyMap, fileToString, entryToString, uniqBy } = require('./utils.cjs')
 
 const getFileKey = file => `${file.index}:${file.filename}`
 
@@ -131,7 +132,7 @@ const removeMissingNewEntries = (entries, newEntries, file2Entry) => {
   removeFilesFromEntries(entryOnlyFiles, file2Entry)
 }
 
-const mergeEntries = (entries, newEntries, removedFiles, updated, deleteMissingNewEntries = false) => {
+export const mergeEntries = (entries, newEntries, removedFiles, updated, deleteMissingNewEntries = false) => {
   const file2Entry = toMultiKeyMap(entries, getEntryFileKeys)
   const validNewEntries = getValidNewEntries(newEntries, file2Entry)
 
@@ -152,8 +153,4 @@ const mergeEntries = (entries, newEntries, removedFiles, updated, deleteMissingN
   const mergedEntries = validEntries.concat(validNewEntries)
   mergedEntries.sort((a, b) => a.date > b.date ? -1 : 1)
   return [mergedEntries, validNewEntries, changedEntriesByTimestamp]
-}
-
-module.exports = {
-  mergeEntries
 }

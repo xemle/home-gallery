@@ -2,7 +2,7 @@ import Logger from '@home-gallery/logger'
 
 const log = Logger('database.migrate')
 
-import { getMajorMinor, HeaderType } from './header.cjs'
+import { getMajorMinor, HeaderType } from './header.js'
 
 import { createHash, serialize } from '@home-gallery/common'
 

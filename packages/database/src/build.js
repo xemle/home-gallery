@@ -15,7 +15,7 @@ import { groupSidecarFiles } from './stream/group-sidecar-files.js';
 import { mapMedia as mapToMedia } from './media/map-media.js';
 
 import { mergeFromJournal } from './merge/merge-journal.js';
-import { groupEntriesById } from './merge/entry-group.cjs'
+import { groupEntriesById } from './merge/entry-group.js'
 
 import { writeDatabase } from './database/index.js';
 

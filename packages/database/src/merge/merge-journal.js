@@ -1,10 +1,10 @@
 import Logger from '@home-gallery/logger'
-
-const log = Logger('database.mergeJournal');
 import { getIndexName, getJournalFilename, readJournal } from '@home-gallery/index';
 
-import { mergeEntries } from './merge-entry.cjs'
+import { mergeEntries } from './merge-entry.js'
 import { initDatabase, readDatabase, writeDatabase } from '../database/index.js'
+
+const log = Logger('database.mergeJournal');
 
 const readJournals = (indexFilenames, journal, cb) => {
   let i = 0;
