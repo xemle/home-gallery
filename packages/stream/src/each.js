@@ -1,6 +1,6 @@
-const through = require('./through');
+import { through } from './through.js';
 
-function each(fn) {
+export function each(fn) {
   return through(function (entry, _, cb) {
     fn(entry);
     this.push(entry);
@@ -8,5 +8,3 @@ function each(fn) {
   });
 
 }
-
-module.exports = each;

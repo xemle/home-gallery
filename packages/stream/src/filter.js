@@ -1,6 +1,6 @@
-const through = require('./through');
+import { through } from './through.js';
 
-function filter(predicate) {
+export function filter(predicate) {
   return through(function (entry, _, cb) {
     if (predicate(entry)) {
       this.push(entry);
@@ -9,5 +9,3 @@ function filter(predicate) {
   });
 
 }
-
-module.exports = filter;

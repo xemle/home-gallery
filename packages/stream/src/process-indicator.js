@@ -1,7 +1,9 @@
-const through = require('./through');
-const log = require('@home-gallery/logger')('stream.pipe');
+import { through } from './through.js';
+import Logger from '@home-gallery/logger'
 
-function processIndicator({name, intervalMs, totalFn, onTick, logLevel}) {
+const log = Logger('stream.pipe');
+
+export function processIndicator({name, intervalMs, totalFn, onTick, logLevel}) {
   name = name || '';
   intervalMs = intervalMs || 1000 * 10;
 
@@ -34,5 +36,3 @@ function processIndicator({name, intervalMs, totalFn, onTick, logLevel}) {
   });
 
 }
-
-module.exports = processIndicator;

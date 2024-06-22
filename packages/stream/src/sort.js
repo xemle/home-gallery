@@ -1,6 +1,6 @@
-const through = require('./through');
+import { through } from './through.js';
 
-const sort = (valueFn, reverse) => {
+export const sort = (valueFn, reverse) => {
   const sortValue = reverse ? -1 : 1;
   return through(function (entry, _, cb) {
     if (Array.isArray(entry)) {
@@ -10,5 +10,3 @@ const sort = (valueFn, reverse) => {
     cb();
   });
 }
-
-module.exports = sort;

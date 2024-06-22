@@ -1,6 +1,6 @@
-const { Transform } = require('stream')
+import { Transform } from 'stream'
 
-const parseJson = () => {
+export const parseJson = () => {
   const chunks = [];
   return Transform({
     objectMode: true,
@@ -24,5 +24,3 @@ const parseJson = () => {
     }
   });
 }
-
-module.exports = parseJson;

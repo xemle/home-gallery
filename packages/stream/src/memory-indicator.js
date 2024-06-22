@@ -1,7 +1,9 @@
-const through = require('./through');
-const log = require('@home-gallery/logger')('stream.memory');
+import { through } from './through.js';
+import Logger from '@home-gallery/logger'
 
-function memoryIndicator({name, intervalMs}) {
+const log = Logger('stream.memory');
+
+export function memoryIndicator({name, intervalMs}) {
   intervalMs = intervalMs || 1000 * 10;
 
   let lastOutput = false;
@@ -22,5 +24,3 @@ function memoryIndicator({name, intervalMs}) {
   });
 
 }
-
-module.exports = memoryIndicator;

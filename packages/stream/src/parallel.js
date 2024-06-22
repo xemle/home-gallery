@@ -1,6 +1,6 @@
-const through = require('./through');
+import { through } from './through.js';
 
-const parallel = ({testSync, test, task, concurrent}) => {
+export const parallel = ({testSync, test, task, concurrent}) => {
   let runningTasks = 0;
   const queue = [];
 
@@ -68,5 +68,3 @@ const parallel = ({testSync, test, task, concurrent}) => {
   });
 
 }
-
-module.exports = parallel;
