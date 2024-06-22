@@ -2,7 +2,7 @@ import os from 'os'
 import fs from 'fs/promises'
 import yaml from 'yaml'
 
-import { isString, isArray, toList, isObject } from './utils'
+import { isString, isArray, toList, isObject } from './utils.js'
 
 export interface Target {
   platform: string,

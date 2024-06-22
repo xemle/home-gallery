@@ -1,8 +1,10 @@
 import fs from 'fs/promises'
 import path from 'path'
 import t from 'tap'
+import { fileURLToPath } from 'url'
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
-import { Package } from './Package'
+import { Package } from './Package.js'
 
 const testDir = path.resolve(__dirname, '..', 'test')
 

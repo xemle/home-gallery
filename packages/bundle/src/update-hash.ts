@@ -1,8 +1,8 @@
 import fs from 'fs/promises'
 import path from 'path'
 
-import { logger } from './log'
-import { hash } from './hash'
+import { logger } from './log.js'
+import { hash } from './hash.js'
 
 const log = logger('updateHash');
 

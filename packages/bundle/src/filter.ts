@@ -1,8 +1,8 @@
 import globToRegExp from 'glob-to-regexp'
 
-import { logger } from './log'
-import { PlatformArch, Pattern } from './config'
-import { toList } from './utils'
+import { logger } from './log.js'
+import { PlatformArch, Pattern } from './config.js'
+import { toList } from './utils.js'
 
 const log = logger('filter')
 

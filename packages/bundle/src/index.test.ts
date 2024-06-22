@@ -5,9 +5,12 @@ import path from 'path'
 import os from 'os'
 import { extract } from 'tar-stream'
 import { createGunzip } from 'zlib'
+import { fileURLToPath } from 'url'
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
-import { bundle, BundleOptions } from './index'
-import { BundleConfig, extendConfig } from './config'
+import { bundle, BundleOptions } from './index.js'
+import type { BundleConfig } from './config.js'
+import { extendConfig } from './config.js'
 
 const getSimpleDate = () => new Date().toISOString().replace(/[-:]/g, '').replace('T', '-').substring(4, 15)
 

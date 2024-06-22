@@ -1,8 +1,8 @@
 import fs from 'fs/promises'
 import path from 'path'
 
-import { logger } from './log'
-import { Package } from './Package'
+import { logger } from './log.js'
+import { Package } from './Package.js'
 
 const log = logger('packageResolver')
 

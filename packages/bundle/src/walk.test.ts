@@ -1,8 +1,11 @@
 import path from 'path'
 import t from 'tap'
 
-import { walkDir } from './walk'
+import { walkDir } from './walk.js'
 import picomatch from 'picomatch'
+
+import { fileURLToPath } from 'url'
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 const dir = path.resolve(__dirname, '..', 'test', 'walk')
 

@@ -4,8 +4,8 @@ import path from 'path'
 import { createGzip } from 'zlib'
 import tar from 'tar-fs'
 
-import { FilterFunction } from './filter'
-import { logger } from './log'
+import { FilterFunction } from './filter.js'
+import { logger } from './log.js'
 
 export interface MapFunction {
   (name: string): string
