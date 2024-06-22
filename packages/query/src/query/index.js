@@ -1,12 +1,12 @@
-const { traverseAst, stringifyAst } = require('../ast')
-const { cmpFilter } = require('./cmp-filter')
-const { cmpFnFilter } = require('./cmp-fn-filter')
-const { existsFnFilter } = require('./exists-filter')
-const { inListFilter } = require('./in-list-filter')
-const { allInFilter } = require('./all-in-filter')
-const { valueFilter } = require('./value-filter')
-const { orderBy } = require('./order-by')
-const { numericKeys, rangeKeys, textKeys, aliases } = require('./keys')
+import { traverseAst, stringifyAst } from '../ast/index.js'
+import { cmpFilter } from './cmp-filter.js'
+import { cmpFnFilter } from './cmp-fn-filter.js'
+import { existsFnFilter } from './exists-filter.js'
+import { inListFilter } from './in-list-filter.js'
+import { allInFilter } from './all-in-filter.js'
+import { valueFilter } from './value-filter.js'
+import { orderBy } from './order-by.js'
+export { numericKeys, rangeKeys, textKeys, aliases } from './keys.js'
 
 const defaultOptions = {
   textFn: v => JSON.stringify(v).toLowerCase(),
@@ -15,7 +15,7 @@ const defaultOptions = {
   }
 }
 
-const execQuery = (entries, ast, options, cb) => {
+export const execQuery = (entries, ast, options, cb) => {
   const mergedOptions = {...defaultOptions, ...options};
 
   try {
@@ -49,11 +49,3 @@ const addFilter = (ast, options) => {
     default: ast.filter = () => true; options.unknownExpressionHandler(ast, options)
   }
 }
-
-module.exports = {
-  execQuery,
-  numericKeys,
-  rangeKeys,
-  textKeys,
-  aliases
-};

@@ -13,7 +13,7 @@ const existsFnFilters = [
   },
 ]
 
-const existsFnFilter = (ast, options) => {
+export const existsFnFilter = (ast, options) => {
   const filter = existsFnFilters.find(cmpFn => matchExistsFnFilter(cmpFn, ast))
   if (filter) {
     return filter.filter(ast, options)
@@ -22,7 +22,3 @@ const existsFnFilter = (ast, options) => {
 }
 
 const matchExistsFnFilter = (existsFn, ast) => existsFn.keys.includes(ast.key)
-
-module.exports = {
-  existsFnFilter
-}

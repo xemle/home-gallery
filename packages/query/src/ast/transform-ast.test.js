@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { transformAst, cmpAst, valueAst } = require('./transform-ast')
+import { transformAst, cmpAst, valueAst } from './transform-ast.js'
 
 t.only('Simple', async t => {
   const ast = {

@@ -1,8 +1,9 @@
 {
   "name": "@home-gallery/query",
   "version": "1.0.0",
-  "description": "User events",
-  "main": "dist/index.js",
+  "description": "Search query",
+  "type": "module",
+  "exports": "./dist/index.js",
   "files": [
     "dist"
   ],

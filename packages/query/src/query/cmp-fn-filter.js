@@ -1,5 +1,5 @@
-const { matchNumber } = require('./utils')
-const { matchCmpFilter, compare } = require('./cmp-filter')
+import { matchNumber } from './utils.js'
+import { matchCmpFilter, compare } from './cmp-filter.js'
 
 const cmpFnFilters = [
   {
@@ -11,7 +11,7 @@ const cmpFnFilters = [
   }
 ]
 
-const cmpFnFilter = (ast, options) => {
+export const cmpFnFilter = (ast, options) => {
   const filter = cmpFnFilters.find(cmpFn => matchCmpFnFilter(cmpFn, ast))
   if (filter) {
     return filter.filter(ast, options)
@@ -20,7 +20,3 @@ const cmpFnFilter = (ast, options) => {
 }
 
 const matchCmpFnFilter = (cmpFn, ast) => cmpFn.fns.includes(ast.fn) && matchCmpFilter(cmpFn, ast)
-
-module.exports = {
-  cmpFnFilter
-}

@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { createStringifyEntryCache } = require('./stringify-entry-cache')
+import { createStringifyEntryCache } from './stringify-entry-cache.js'
 
 t.test('Test cache on duplicated ids', async t => {
   const cache = createStringifyEntryCache()

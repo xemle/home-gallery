@@ -1,6 +1,6 @@
-const { toLower } = require('./utils')
+import { toLower } from './utils.js'
 
-const inListFilter = (ast, options) => {
+export const inListFilter = (ast, options) => {
   if (ast.key == 'tags') {
     const values = ast.value.map(v => toLower(v.value))
     return v => v.tags?.length ? v.tags.find(tag => values.includes(toLower(tag))) : false
@@ -9,6 +9,3 @@ const inListFilter = (ast, options) => {
   }
 }
 
-module.exports = {
-  inListFilter
-}

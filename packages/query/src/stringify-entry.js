@@ -1,7 +1,7 @@
 const uniq = (v, i, a) => a.indexOf(v) === i;
 const flatten = (r, v) => r.concat(v);
 
-const stringifyEntry = entry => {
+export const stringifyEntry = entry => {
   return [
     entry.id.substring(0, 10),
     entry.type,
@@ -20,8 +20,4 @@ const stringifyEntry = entry => {
   .concat((entry.faces || []).map(face => `${Math.trunc(face.age / 10) * 10}s`).reduce(flatten, []).filter(uniq))
   .join(' ')
   .toLowerCase()
-}
-
-module.exports = {
-  stringifyEntry
 }

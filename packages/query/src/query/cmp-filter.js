@@ -1,5 +1,5 @@
-const { dateKeys } = require('./keys')
-const { toLower, matchNumber, matchFloat, matchDate, getDateByKey, dirname, basename, ext } = require('./utils')
+import { dateKeys } from './keys.js'
+import { toLower, matchNumber, matchFloat, matchDate, getDateByKey, dirname, basename, ext } from './utils.js'
 
 const cmpFilters = [
   {
@@ -92,7 +92,7 @@ const cmpFilters = [
   },
 ]
 
-const cmpFilter = (ast, options) => {
+export const cmpFilter = (ast, options) => {
   const filter = cmpFilters.find(filter => matchCmpFilter(filter, ast))
   if (filter) {
     return filter.filter(ast, options)
@@ -100,11 +100,11 @@ const cmpFilter = (ast, options) => {
   return options.unknownExpressionHandler(ast, options)
 }
 
-const matchCmpFilter = (cmp, ast) => (!cmp.keys || cmp.keys.includes(ast.key)) &&
+export const matchCmpFilter = (cmp, ast) => (!cmp.keys || cmp.keys.includes(ast.key)) &&
   (!cmp.ops || cmp.ops.includes(ast.op)) &&
   (!cmp.matchValue || cmp.matchValue(ast.value.value))
 
-const compare = (valueFn, op, right) => v => {
+export const compare = (valueFn, op, right) => v => {
   const value = valueFn(v)
   if (op == '=') {
     return value == right
@@ -125,7 +125,7 @@ const compare = (valueFn, op, right) => v => {
   }
 }
 
-const listCompare = (valuesFn, op, right, valueMapFn = v => toLower(v)) => {
+export const listCompare = (valuesFn, op, right, valueMapFn = v => toLower(v)) => {
   return v => {
     const values = valuesFn(v)
     if (!values) {
@@ -193,11 +193,4 @@ const bytes = {
     const factor = m[3] ? units[m[3].toLowerCase()] : 1
     return +m[1] * factor
   }
-}
-
-module.exports = {
-  matchCmpFilter,
-  compare,
-  listCompare,
-  cmpFilter
 }
