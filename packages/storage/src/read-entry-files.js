@@ -1,11 +1,13 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const log = require('@home-gallery/logger')('storage.entryFile');
+import Logger from '@home-gallery/logger'
 
-const { readDir } = require('@home-gallery/common');
-const getStoragePaths = require('./storage-path');
-const getMetaKeyName = require('./meta-file-key');
+const log = Logger('storage.entryFile');
+
+import { readDir } from '@home-gallery/common';
+import { getStoragePaths } from './storage-path.js';
+import { getMetaKeyName } from './meta-file-key.js';
 
 function readJsonFile(filename, cb) {
   fs.readFile(filename, {encoding: 'utf8'}, (err, buf) => {
@@ -47,7 +49,7 @@ function readJsonFiles(storageDir, filenames, cb) {
   })
 }
 
-function readEntryFiles(entry, storageDir, cb) {
+export function readEntryFiles(entry, storageDir, cb) {
   const {dir, prefix} = getStoragePaths(entry.sha1sum);
 
   readDir(path.join(storageDir, dir), (err, files) => {
@@ -71,5 +73,3 @@ function readEntryFiles(entry, storageDir, cb) {
     })
   });
 }
-
-module.exports = readEntryFiles;

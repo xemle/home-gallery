@@ -1,6 +1,6 @@
-const { readJsonGzip, writeJsonGzip } = require('@home-gallery/common');
+import { readJsonGzip, writeJsonGzip } from '@home-gallery/common';
 
-function create() {
+export function createEntryFilesCache() {
   return {
     type: 'entryFilesCache',
     version: 1,
@@ -9,29 +9,29 @@ function create() {
   }
 }
 
-function read(cacheFilename, cb) {
+export function readEntryFilesCache(cacheFilename, cb) {
   readJsonGzip(cacheFilename, cb);
 }
 
-function readOrCreate(cacheFilename, cb) {
-  read(cacheFilename, (err, data) => {
+export function readOrCreateEntryFilesCache(cacheFilename, cb) {
+  readEntryFilesCache(cacheFilename, (err, data) => {
     if (err && err.code === 'ENOENT') {
-      return cb(null, create());
+      return cb(null, createEntryFilesCache());
     }
     cb(err, data);
   })
 }
 
-function write(cacheFilename, data, cb) {
+export function writeEntryFilesCache(cacheFilename, data, cb) {
   writeJsonGzip(cacheFilename, {...data, ...{created: new Date().toISOString()}}, cb);
 }
 
-function update(cacheFilename, entries, cb) {
+export function updateEntryFilesCache(cacheFilename, entries, cb) {
   if (!entries.length) {
     return cb(null, { entries });
   }
 
-  readOrCreate(cacheFilename, (err, data) => {
+  readOrCreateEntryFilesCache(cacheFilename, (err, data) => {
     if (err) {
       return cb(err);
     }
@@ -40,14 +40,6 @@ function update(cacheFilename, entries, cb) {
       data.entries[sha1sum] = { files, meta };
     });
 
-    write(cacheFilename, data, cb);
+    writeEntryFilesCache(cacheFilename, data, cb);
   });
 }
-
-module.exports = {
-  createEntryFilesCache: create,
-  readEntryFilesCache: read,
-  readOrCreateEntryFilesCache: readOrCreate,
-  writeEntryFilesCache: write,
-  updateEntryFilesCache: update
-};

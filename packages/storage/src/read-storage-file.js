@@ -1,8 +1,6 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-function readStorageFile(storageDir, entryFile, cb) {
+export function readStorageFile(storageDir, entryFile, cb) {
   fs.readFile(path.join(storageDir, entryFile), cb);
 }
-
-module.exports = readStorageFile;
