@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const createHash = require('./hash')
+import { createHash } from './hash.js'
 
 t.test('createHash', async t => {
   t.test('basic', async t => {

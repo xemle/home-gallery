@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import Logger from '@home-gallery/logger'
 
 const log = Logger('index.checksum');
-import { humanize } from '@home-gallery/common';
+import { humanizeBytes as humanize } from '@home-gallery/common';
 import { bps, percent, remainingTime, humanizeDuration } from './format.js'
 
 const createByteProgressLog = (totalBytes, intervalMs) => {

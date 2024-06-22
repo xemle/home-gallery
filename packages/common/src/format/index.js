@@ -1,9 +1,3 @@
-const formatDate = require('./format-date')
-const humanizeBytes = require('./humanize-bytes')
-const humanizeDuration = require('./humanize-duration')
-
-module.exports = {
-  formatDate,
-  humanizeBytes,
-  humanizeDuration,
-}
+export { formatDate } from './format-date.js'
+export { humanizeBytes } from './humanize-bytes.js'
+export { humanizeDuration } from './humanize-duration.js'

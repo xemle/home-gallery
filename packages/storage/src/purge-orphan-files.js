@@ -5,7 +5,7 @@ import Logger from '@home-gallery/logger'
 
 const log = Logger('storage.purge');
 
-import { readJsonGzip, promisify, humanize } from '@home-gallery/common';
+import { readJsonGzip, promisify, humanizeBytes as humanize } from '@home-gallery/common';
 
 import { getEntryFilesCacheId } from './entry-files-cache-file.js'
 

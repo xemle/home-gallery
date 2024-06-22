@@ -17,7 +17,7 @@ const convertExcludes = (excludes, target = {}) => {
   return target
 }
 
-const serialize = (o, excludes = {}) => {
+export const serialize = (o, excludes = {}) => {
   if (typeof o == 'undefined' || o === null) {
     return 'null'
   } else if (Array.isArray(o)) {
@@ -36,5 +36,3 @@ const serialize = (o, excludes = {}) => {
     return JSON.stringify(o)
   }
 }
-
-module.exports = serialize

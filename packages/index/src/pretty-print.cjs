@@ -1,4 +1,4 @@
-const { humanize } = require('@home-gallery/common')
+const { humanizeBytes: humanize } = require('@home-gallery/common')
 
 function perCent(value, max) {
   return (100 * value / max).toFixed(1)

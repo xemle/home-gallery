@@ -1,4 +1,4 @@
-import { humanize } from '@home-gallery/common'
+import { humanizeBytes as humanize } from '@home-gallery/common'
 
 const pad = (v, l, c) => {
   v = '' + v

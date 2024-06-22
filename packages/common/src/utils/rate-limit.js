@@ -1,4 +1,4 @@
-const rateLimit = (fn, interval) => {
+export const rateLimit = (fn, interval) => {
   let last = 0
   return (...args) => {
     const now = Date.now()
@@ -9,5 +9,3 @@ const rateLimit = (fn, interval) => {
     return fn(...args)
   }
 }
-
-module.exports = rateLimit

@@ -1,7 +1,6 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
 
-function mkdirp(dir, cb) {
+export function mkdirp(dir, cb) {
   fs.stat(dir, (err, stat) => {
     if (err) {
       if (err.code === 'ENOENT') {
@@ -16,5 +15,3 @@ function mkdirp(dir, cb) {
     cb();
   })
 }
-
-module.exports = mkdirp;
