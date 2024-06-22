@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "File indexer for HomeGallery",
   "type": "module",
-  "exports": {
-    "import": "./dist/index.js",
-    "require": "./dist/require-wrapper.cjs"
-  },
+  "exports": "./dist/index.js",
   "files": [
     "dist"
   ],

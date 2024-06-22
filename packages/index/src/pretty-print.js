@@ -1,4 +1,4 @@
-const { humanizeBytes: humanize } = require('@home-gallery/common')
+import { humanizeBytes as humanize } from '@home-gallery/common'
 
 function perCent(value, max) {
   return (100 * value / max).toFixed(1)
@@ -13,7 +13,7 @@ function spaces(count) {
 }
 
 // type, count (%), size (%)
-function prettyPrint(stats) {
+export function prettyPrint(stats) {
   const table = [];
   table.push(['type', 'count', '', 'size', '']);
   table.push(['directories:', stats.directories, '', '', '']);
@@ -44,8 +44,4 @@ function prettyPrint(stats) {
       }
     }).join('  ');
   }).join('\n');
-}
-
-module.exports = {
-  prettyPrint
 }

@@ -1,4 +1,4 @@
-const matcherFns = {
+export const matcherFns = {
   size: (fileEntry, fsEntry) => {
     if (fileEntry.size === fsEntry.size &&
       fileEntry.fileType === fsEntry.fileType) {
@@ -23,8 +23,4 @@ const matcherFns = {
     }
     return false;
   }
-}
-
-module.exports = {
-  matcherFns
 }

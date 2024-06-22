@@ -86,6 +86,6 @@ export const removeJournal = callbackify(removeJournalAsync)
 export { readIndexHead, readStream, readStreams } from './read-stream.js';
 export const readJournal = callbackify(readJournalAsync)
 export const update = callbackify(asyncUpdate)
-export { matcherFns } from './matcher.cjs';
+export { matcherFns } from './matcher.js';
 export { statIndex } from './stat.js'
-export { prettyPrint } from './pretty-print.cjs'
+export { prettyPrint } from './pretty-print.js'
