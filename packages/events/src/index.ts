@@ -1,2 +1,2 @@
-export { applyEvents } from './apply-events';
-export * from './models';
+export { applyEvents } from './apply-events.js';
+export * from './models.js';

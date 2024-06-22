@@ -2,10 +2,11 @@ import { PathLike } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 
-import { Event } from './models';
-import { createHeader } from './header';
+import { Event } from './models.js';
+import { createHeader } from './header.js';
 
-const log = require('@home-gallery/logger')('events.append')
+import Logger from '@home-gallery/logger'
+const log = Logger('events.append')
 
 const stringifyNdJson = (value: any) => JSON.stringify(value) + '\n'
 
