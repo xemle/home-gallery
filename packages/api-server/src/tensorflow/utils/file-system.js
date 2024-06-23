@@ -1,10 +1,10 @@
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
 
-const { toArrayBuffer } = require('./io-utils');
+import { toArrayBuffer } from './io-utils.js';
 
 // source https://github.com/tensorflow/tfjs/blob/73a09c2357aeb2c258f7d6a52eecb341d40c9939/tfjs-node/src/io/file_system.ts
-const loadJSONModel = async (modelPath) => {
+export const loadJSONModel = async (modelPath) => {
   console.log(`Loading model from ${modelPath}`);
   const data = await fs.readFile(modelPath, 'utf-8');
   const modelJSON = JSON.parse(data);
@@ -46,5 +46,3 @@ const loadWeights = async (weightsManifest, modelPath) => {
   }
   return [weightSpecs, toArrayBuffer(buffers)];
 }
-
-module.exports = { loadJSONModel } ;

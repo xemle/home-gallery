@@ -1,10 +1,10 @@
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
 
-const { loadJSONModel } = require('./file-system');
-const downloadModel = require('./download-model');
+import { loadJSONModel } from './file-system.js';
+import { downloadModel } from './download-model.js';
 
-const loadCachedModel = async ({ url, cacheDir, queryParams }) => {
+export const loadCachedModel = async ({ url, cacheDir, queryParams }) => {
   const cachedModel = path.join(cacheDir, 'model.json');
   return fs.access(cachedModel)
     .catch(() => {
@@ -14,5 +14,3 @@ const loadCachedModel = async ({ url, cacheDir, queryParams }) => {
     .then(() => loadJSONModel(cachedModel))
     .catch(e => console.log(`Could not load model from cache dir ${cacheDir}: ${e}`))
 }
-
-module.exports = loadCachedModel;

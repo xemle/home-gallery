@@ -1,7 +1,7 @@
-const { spawn } = require('child_process')
-const fetch = require('node-fetch')
+import { spawn } from 'child_process'
+import fetch from 'node-fetch'
 
-const runCli = (command, args = [], options = {}, onExit = () => true) => {
+export const runCli = (command, args = [], options = {}, onExit = () => true) => {
   const env = {
     ...process.env,
     ...options.env
@@ -30,11 +30,11 @@ const runCli = (command, args = [], options = {}, onExit = () => true) => {
 
 const delayAsync = async (delay = 0) => new Promise(resolve => setTimeout(resolve, delay))
 
-const waitFor = async (fn, retryDelay = 0) => {
+export const waitFor = async (fn, retryDelay = 0) => {
   return fn().catch(() => delayAsync(retryDelay).then(() => waitFor(fn, retryDelay)))
 }
 
-const waitForUrl = (url, retryDelay = 125) => {
+export const waitForUrl = (url, retryDelay = 125) => {
   return waitFor(() => {
     const controller = new AbortController()
     const timer = setTimeout(() => {
@@ -54,10 +54,4 @@ const waitForUrl = (url, retryDelay = 125) => {
       throw e
     })
   }, retryDelay)
-}
-
-module.exports = {
-  runCli,
-  waitFor,
-  waitForUrl
 }

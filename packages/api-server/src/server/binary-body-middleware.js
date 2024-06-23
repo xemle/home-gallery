@@ -1,6 +1,6 @@
 const ERROR_PAYLOAD_TO_LARGE = 413;
 
-const binaryBodyMiddleware = (maxBytes) => {
+export const binaryBodyMiddleware = (maxBytes) => {
   return (req, res, next) => {
     const chunks = [];
     let totalChunkBytes = 0;
@@ -27,5 +27,3 @@ const binaryBodyMiddleware = (maxBytes) => {
       })
   }
 }
-
-module.exports = binaryBodyMiddleware;

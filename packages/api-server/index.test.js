@@ -1,9 +1,8 @@
-const { spawn } = require('child_process')
-const t = require('tap')
-const fetch = require('node-fetch')
-const fs = require('fs/promises')
+import t from 'tap'
+import fetch from 'node-fetch'
+import fs from 'fs/promises'
 
-const { runCli, waitForUrl } = require('./test-utils')
+import { runCli, waitForUrl } from './test-utils.js'
 
 t.test('API Server', async t => {
   let child
