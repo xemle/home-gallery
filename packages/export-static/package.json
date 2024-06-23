@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "Create static gallery export of HomeGallery",
   "type": "module",
-  "exports": {
-    "import": "./dist/index.js",
-    "require": "./dist/require-wrapper.js"
-  },
+  "exports": "./dist/index.js",
   "files": [
     "dist"
   ],
