@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Use ESM instead of CommonJS
+
 ### Fixed
 
 - server: Fix env for missing config file arg
