@@ -1,6 +1,6 @@
-const pretty = require('pino-pretty')
+import pretty from 'pino-pretty'
 
-const { colorFns } = require('./utils/colors')
+import { colorFns } from './utils/colors.js'
 
 const levels = {
   '10': 'trace',
@@ -64,8 +64,6 @@ const createStream = () => {
   })
 }
 
-const createPrettyStream = (rootLogger, level) => {
+export const createPrettyStream = (rootLogger, level) => {
   rootLogger.add({level, stream: createStream()})
 }
-
-module.exports = createPrettyStream

@@ -1,4 +1,4 @@
-class Splitter {
+export class Splitter {
   buf = ''
   end = 0
 
@@ -23,4 +23,3 @@ class Splitter {
   }
 }
 
-module.exports = Splitter

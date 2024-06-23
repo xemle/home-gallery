@@ -1,5 +1,5 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
 
 const createStream = (filename, cb) => {
   const createWriteStream = () => cb(null, fs.createWriteStream(filename, {flags: 'a'}))
@@ -24,7 +24,7 @@ const createStream = (filename, cb) => {
   })
 }
 
-const createFileStream = (rootLogger, filename, level, cb) => {
+export const createFileStream = (rootLogger, filename, level, cb) => {
   createStream(filename, (err, stream) => {
     if (err && cb) {
       cb(err)
@@ -36,5 +36,3 @@ const createFileStream = (rootLogger, filename, level, cb) => {
     }
   })
 }
-
-module.exports = createFileStream

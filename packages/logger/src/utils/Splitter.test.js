@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const Splitter = require('./Splitter')
+import { Splitter } from './Splitter.js'
 
 t.test('Init', async t => {
   const splitter = new Splitter()

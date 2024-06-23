@@ -1,4 +1,4 @@
-const chalk = require('chalk')
+import chalk from 'chalk'
 
 // credits to TJ Holowaychuk <tj@vision-media.ca> from debug package
 // for color values and hash algorithm
@@ -53,8 +53,4 @@ const color256Fns = Object.assign({}, color16Fns, {
   moduleColorFn: module => chalk.ansi256(colors256[moduleHash(module) % colors256.length]).bold,
 })
 
-const colorFns = !chalk.supportsColor ? colorNoneFns : (chalk.supportsColor.level < 2 ? color16Fns : color256Fns)
-
-module.exports = {
-  colorFns
-}
+export const colorFns = !chalk.supportsColor ? colorNoneFns : (chalk.supportsColor.level < 2 ? color16Fns : color256Fns)

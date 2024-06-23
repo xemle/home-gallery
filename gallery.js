@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
-const logger = require('@home-gallery/logger')
-logger() // Initiate root logger
+const run = async () => {
+  const { Logger } = await import('@home-gallery/logger')
+  Logger() // Initiate root logger
+  const { cli } = await import('@home-gallery/cli')
+  cli()
+}
 
 if (require.main === module) {
-  import('@home-gallery/cli')
-    .then(({ cli })=> cli())
+  run()
 }

@@ -1,10 +1,10 @@
 "use strict";
-const pino = require('pino')
+import pino from 'pino'
 
-const createPrettyStream = require('./pretty-stream')
-const createFileStream = require('./file-stream')
-const createJsonStream = require('./json-stream')
-const mergeLogStream = require('./merge-log-stream')
+import { createPrettyStream } from './pretty-stream.js'
+import { createFileStream } from './file-stream.js'
+import { createJsonStream } from './json-stream.js'
+import { mergeLogStream } from './merge-log-stream.js'
 
 let instance;
 
@@ -79,4 +79,7 @@ Object.assign(Logger, {
   mergeLog: (readable) => instance && mergeLogStream(instance, readable),
 })
 
-module.exports = Logger
+export {
+  Logger
+}
+export default Logger
