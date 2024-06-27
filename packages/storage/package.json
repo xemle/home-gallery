@@ -2,10 +2,8 @@
   "name": "@home-gallery/storage",
   "version": "1.0.0",
   "description": "Preview and metadata storage of HomeGallery",
-  "exports": {
-    "import": "./dist/import-wrapper.mjs",
-    "require": "./dist/index.js"
-  },
+  "type": "module",
+  "exports": "./dist/index.js",
   "files": [
     "dist"
   ],

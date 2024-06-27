@@ -1,14 +1,3 @@
-const { traverseAst } = require('./traverse-ast')
-const { stringifyAst } = require('./stringify-ast')
-const { transformAst, orAst, andAst, cmpAst, valueAst, aliasKey } = require('./transform-ast')
-
-module.exports = {
-  traverseAst,
-  transformAst,
-  orAst,
-  andAst,
-  cmpAst,
-  valueAst,
-  aliasKey,
-  stringifyAst
-}
+export { traverseAst } from './traverse-ast.js'
+export { stringifyAst } from './stringify-ast.js'
+export { transformAst, orAst, andAst, cmpAst, valueAst, aliasKey } from './transform-ast.js'

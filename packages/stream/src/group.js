@@ -1,6 +1,6 @@
-const through = require('./through');
+import { through } from './through.js';
 
-function group({keyFn, eager, maxCount}) {
+export function group({keyFn, eager, maxCount}) {
   let groups = {};
   let lastKey = false;
   let count = 0
@@ -35,5 +35,3 @@ function group({keyFn, eager, maxCount}) {
   });
 
 }
-
-module.exports = group;

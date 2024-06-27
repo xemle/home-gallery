@@ -1,6 +1,6 @@
-const { spawn } = require('child_process')
+import { spawn as spawnOrig} from 'child_process'
 
-const rateLimit = require('../utils/rate-limit')
+import { rateLimit } from '../utils/index.js'
 
 const spawnDefaults = { shell: false, windowsHide: true, stdio: ['pipe', 'pipe', 'inherit'] }
 
@@ -24,22 +24,17 @@ const forwardSignal = (child, signal) => {
   child.on('exit', () => process.off(signal, forward))
 }
 
-const spawnCommand = (command, args = [], options = {}) => {
+export const spawn = (command, args = [], options = {}) => {
   const env = {...process.env, ...options.env}
-  const child = spawn(command, args, {...spawnDefaults, ...options, env})
+  const child = spawnOrig(command, args, {...spawnDefaults, ...options, env})
   forwardSignal(child, 'SIGINT')
   return child
 }
 
-const run = async (command, args = [], options = {}) => {
+export const run = async (command, args = [], options = {}) => {
   return new Promise((resolve, reject) => {
-    const cmd = spawnCommand(command, args, options)
+    const cmd = spawn(command, args, options)
     cmd.once('exit', (code) => code == 0 ? resolve(code) : reject(code))
     cmd.once('err', reject)
   })
-}
-
-module.exports = {
-  spawn: spawnCommand,
-  run
 }

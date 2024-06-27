@@ -1,9 +1,11 @@
-const { Buffer } = require('buffer')
-const { spawn } = require('child_process')
+import { Buffer } from 'buffer'
+import { spawn } from 'child_process'
 
-const log = require('@home-gallery/logger')('extractor.image.resize')
+import Logger from '@home-gallery/logger'
 
-const { getNativeCommand } = require('../utils/native-command')
+const log = Logger('extractor.image.resize')
+
+import { getNativeCommand } from '../utils/native-command.js'
 
 const run = (command, args, cb) => {
   const t0 = Date.now()
@@ -40,12 +42,7 @@ const run = (command, args, cb) => {
 const errorResizer = (src, dst, size, cb) => cb(new Error(`Image resizer could not be initialized`))
 
 const getSharpResize = async (factoryOptions) => {
-  let sharp
-  try {
-    sharp = require('sharp')
-  } catch (e) {
-    throw new Error(`Could not load sharp`)
-  }
+  let {default: sharp} = await import('sharp')
 
   const jpgOptions = {
     quality: factoryOptions.quality,
@@ -116,7 +113,7 @@ const getConvertResize = async (factoryOptions) => {
   })
 }
 
-const createImageResizer = (config, cb) => {
+export const createImageResizer = (config, cb) => {
   const useNative = config?.extractor?.useNative || []
 
   const resizer = [
@@ -152,9 +149,4 @@ const createImageResizer = (config, cb) => {
   next()
 }
 
-const useExternalImageResizer = config => config?.extractor?.useNative?.includes('vipsthumbnail') || config?.extractor?.useNative?.includes('convert')
-
-module.exports = {
-  createImageResizer,
-  useExternalImageResizer
-}
+export const useExternalImageResizer = config => config?.extractor?.useNative?.includes('vipsthumbnail') || config?.extractor?.useNative?.includes('convert')

@@ -1,9 +1,11 @@
-const path = require('path')
+import path from 'path'
 
-const log = require('@home-gallery/logger')('export.database.write');
-const { writeDatabasePlain } = require('@home-gallery/database');
+import Logger from '@home-gallery/logger'
 
-const write = (database, dir, basePath, cb) => {
+const log = Logger('export.database.write');
+import { writeDatabasePlain } from '@home-gallery/database';
+
+export const writeDatabase = (database, dir, basePath, cb) => {
   const t0 = Date.now();
   const filename = path.join(dir, basePath, 'api', 'database.json');
   writeDatabasePlain(filename, database.data, (err) => {
@@ -15,5 +17,3 @@ const write = (database, dir, basePath, cb) => {
     cb(null, database, dir, basePath);
   })
 }
-
-module.exports = write;

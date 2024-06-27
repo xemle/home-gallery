@@ -1,4 +1,4 @@
-const createLruCache = (keyFn, loadCache, lruSize) => {
+export const lruCache = (keyFn, loadCache, lruSize) => {
   const cache = {};
   const lruKeys = [];
 
@@ -40,5 +40,3 @@ const createLruCache = (keyFn, loadCache, lruSize) => {
 
   return { getItem, clear }
 }
-
-module.exports = createLruCache;

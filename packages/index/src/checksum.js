@@ -1,10 +1,12 @@
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
 
-const log = require('@home-gallery/logger')('index.checksum');
-const { humanize } = require('@home-gallery/common');
-const { bps, percent, remainingTime, humanizeDuration } = require('./format')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('index.checksum');
+import { humanizeBytes as humanize } from '@home-gallery/common';
+import { bps, percent, remainingTime, humanizeDuration } from './format.js'
 
 const createByteProgressLog = (totalBytes, intervalMs) => {
   const startTime = Date.now()
@@ -42,7 +44,7 @@ const createSha1 = (filename, progress, cb) => {
 
 };
 
-const checksum = (index, sha1sumDate, cb) => {
+export const checksum = (index, sha1sumDate, cb) => {
   const fileEntries = index.data.filter(e => e.isFile);
   const missingChecksumEntries = fileEntries.filter(e => !e.sha1sum);
   let interrupted = false;
@@ -107,5 +109,3 @@ const checksum = (index, sha1sumDate, cb) => {
     cb(null, index, updatedEntries, interrupted);
   });
 }
-
-module.exports = checksum;

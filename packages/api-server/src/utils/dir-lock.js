@@ -1,9 +1,9 @@
-const fs = require('fs').promises;
+import fs from 'fs/promises';
 
-const exists = require('./exists');
+import { exists } from './exists.js';
 
-const SEC_MS = 1000;
-const MIN_MS = 60 * SEC_MS;
+export const SEC_MS = 1000;
+export const MIN_MS = 60 * SEC_MS;
 const POLL_INTERVAL = 5 * SEC_MS;
 
 const aquireLock = async (lock, timeout) => {
@@ -23,7 +23,7 @@ const aquireLock = async (lock, timeout) => {
 
 const releaseLock = async (lock) => fs.rmdir(lock);
 
-const dirLock = async (lockFile, timeout, cb) => {
+export const dirLock = async (lockFile, timeout, cb) => {
   // Lock download for shared directory in scaled docker environments
   const lockExists = await exists(lockFile);
   if (lockExists) {
@@ -33,5 +33,3 @@ const dirLock = async (lockFile, timeout, cb) => {
     .then(cb)
     .finally(() => releaseLock(lockFile));
 }
-
-module.exports = { dirLock, SEC_MS, MIN_MS };

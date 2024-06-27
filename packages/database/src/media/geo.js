@@ -1,4 +1,4 @@
-const { getMetaEntries } = require('./utils')
+import { getMetaEntries } from './utils.js'
 
 const getExifGeo = exif => {
   if (!exif) {
@@ -17,7 +17,7 @@ const getExifGeo = exif => {
   }
 }
 
-const getGeo = (entry) => {
+export const getGeo = (entry) => {
   const metaEntries = getMetaEntries(entry)
   const metaGeo = metaEntries.reduce((geo, entry) => geo || getExifGeo(entry.meta?.exif), false)
   if (metaGeo) {
@@ -27,8 +27,4 @@ const getGeo = (entry) => {
   const allEntries = [entry, ...(entry.sidecars || [])]
   const allGeo = allEntries.reduce((geo, entry) => geo || getExifGeo(entry.meta?.exif), false)
   return allGeo ? allGeo : {}
-}
-
-module.exports = {
-  getGeo
 }

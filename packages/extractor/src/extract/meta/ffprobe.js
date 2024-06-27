@@ -1,18 +1,19 @@
-const ffprobe = require('ffprobe');
+import ffprobeBin from 'ffprobe';
 
-const log = require('@home-gallery/logger')('extractor.video.ffprobe');
+import Logger from '@home-gallery/logger'
 
-const { getNativeCommand } = require('../utils/native-command')
-const { toPipe, conditionalTask } = require('../../stream/task');
+const log = Logger('extractor.video.ffprobe');
+
+import { toPipe, conditionalTask } from '../../stream/task.js';
 
 const ffprobeSuffix = 'ffprobe.json';
 
-function videoMeta(storage, extractor) {
+export function ffprobe(storage, extractor) {
   const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, ffprobeSuffix);
 
   const task = (entry, cb) => {
     const t0 = Date.now();
-    ffprobe(entry.src, { path: extractor.ffprobePath }, function (err, info) {
+    ffprobeBin(entry.src, { path: extractor.ffprobePath }, function (err, info) {
       if (err) {
         log.warn(err, `Could not extract video meta data from ${entry}: ${err}`);
         return cb();
@@ -31,5 +32,3 @@ function videoMeta(storage, extractor) {
 
   return toPipe(conditionalTask(test, task));
 }
-
-module.exports = videoMeta;

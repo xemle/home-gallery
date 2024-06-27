@@ -1,6 +1,8 @@
-const log = require('@home-gallery/logger')('database.media.video')
+import Logger from '@home-gallery/logger'
 
-const { getEntryMetaByKey } = require('./utils')
+const log = Logger('database.media.video')
+
+import { getEntryMetaByKey } from './utils.js'
 
 const handleDuration = (videoStream, result) => {
   if (videoStream?.duration) {
@@ -27,7 +29,7 @@ const handleWidthHeight = (videoStream, result) => {
   }
 }
 
-const getVideo = (entry) => {
+export const getVideo = (entry) => {
   if (entry.type != 'video') {
     return {}
   }
@@ -42,8 +44,4 @@ const getVideo = (entry) => {
   handleWidthHeight(videoStream, result)
 
   return result
-}
-
-module.exports = {
-  getVideo
 }

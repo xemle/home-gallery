@@ -1,6 +1,6 @@
-const { Writable } = require('stream')
+import { Writable } from 'stream'
 
-const write = (cb) => {
+export const write = (cb) => {
   return new Writable({
     objectMode: true,
     write: function(chunk, _, next) {
@@ -9,5 +9,3 @@ const write = (cb) => {
     }
   })
 }
-
-module.exports = write;

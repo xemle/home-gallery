@@ -1,4 +1,4 @@
-import { Event } from './models'
+import { Event } from './models.js'
 
 const name = 'home-gallery/events'
 const major = 1

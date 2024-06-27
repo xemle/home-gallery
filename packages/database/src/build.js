@@ -1,21 +1,23 @@
-const { pipeline } = require('stream/promises');
+import { pipeline } from 'stream/promises';
 
-const log = require('@home-gallery/logger')('database.build');
-const { readStreams } = require('@home-gallery/index');
-const { fileFilter, promisify } = require('@home-gallery/common')
-const { memoryIndicator, processIndicator, filter, flatten, sort, toList, write } = require('@home-gallery/stream');
+import Logger from '@home-gallery/logger'
 
-const mapToDatabaseEntry = require('./stream/map-database-entry');
-const readStorageData = require('./stream/read-storage-data');
-const groupByDir = require('./stream/group-by-dir');
-const groupSidecarFiles = require('./stream/group-sidecar-files');
+const log = Logger('database.build');
+import { readStreams } from '@home-gallery/index';
+import { fileFilter, promisify } from '@home-gallery/common'
+import { memoryIndicator, processIndicator, filter, flatten, sort, toList, write } from '@home-gallery/stream';
 
-const mapToMedia = require('./media/map-media');
+import { mapToDatabaseEntry } from './stream/map-database-entry.js';
+import { readStorageData } from './stream/read-storage-data.js';
+import { groupByDir } from './stream/group-by-dir.js';
+import { groupSidecarFiles } from './stream/group-sidecar-files.js';
 
-const { mergeFromJournal } = require('./merge/merge-journal');
-const { groupEntriesById } = require('./merge/entry-group')
+import { mapMedia as mapToMedia } from './media/map-media.js';
 
-const { writeDatabase } = require('./database');
+import { mergeFromJournal } from './merge/merge-journal.js';
+import { groupEntriesById } from './merge/entry-group.js'
+
+import { writeDatabase } from './database/index.js';
 
 const fileFilterAsync = promisify(fileFilter);
 
@@ -64,7 +66,7 @@ const writeFullDatabase = (entries, databaseFilename, cb) => {
   });
 }
 
-function build(options, cb) {
+export function build(options, cb) {
   const indexFilenames = options.config.fileIndex.files;
   const journal = options.config.fileIndex.journal;
 
@@ -90,5 +92,3 @@ function build(options, cb) {
       })
   })
 }
-
-module.exports = build;

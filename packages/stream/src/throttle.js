@@ -1,6 +1,6 @@
-const through = require('./through');
+import { through } from './through.js';
 
-function throttleAsync({passThrough, task, rateLimitMs, startLimitAfterTask}) {
+export function throttleAsync({passThrough, task, rateLimitMs, startLimitAfterTask}) {
   let last = 0;
   let isTaskRunning = false;
   const queue = [];
@@ -8,10 +8,10 @@ function throttleAsync({passThrough, task, rateLimitMs, startLimitAfterTask}) {
   const next = () => {
     const now = Date.now();
     const diff = now - last;
-    
+
     if (!queue.length || isTaskRunning) {
       return;
-    } 
+    }
     const {that, entry, callback} = queue[0];
     if (passThrough(entry)) {
       queue.shift();
@@ -50,18 +50,15 @@ function throttleAsync({passThrough, task, rateLimitMs, startLimitAfterTask}) {
         cb();
       }
     }
-    
+
     wait();
   });
 
 }
 
-module.exports = {
-  throttleAsync,
-  throttle: ({rateLimitMs}) => throttleAsync({
-    passThrough: () => false, 
-    task: (_, cb) => cb(),
-    rateLimitMs,
-    startLimitAfterTask: false
-  })
-};
+export const throttle = ({rateLimitMs}) => throttleAsync({
+  passThrough: () => false,
+  task: (_, cb) => cb(),
+  rateLimitMs,
+  startLimitAfterTask: false
+})

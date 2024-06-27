@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { filterEntriesByQuery, throwUnknownExpressions, ignoreUnknownExpressions } = require('./index')
+import { filterEntriesByQuery, throwUnknownExpressions, ignoreUnknownExpressions } from './index.js'
 
 const data = [
   {

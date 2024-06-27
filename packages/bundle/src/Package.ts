@@ -1,5 +1,5 @@
-import { walkDir } from './walk'
-import { defaultExcludeFileFilter, createIncludeFileFilter } from './package-file-filter'
+import { walkDir } from './walk.js'
+import { defaultExcludeFileFilter, createIncludeFileFilter } from './package-file-filter.js'
 
 export class Package {
   dir: string

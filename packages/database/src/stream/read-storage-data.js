@@ -1,7 +1,7 @@
-const { through } = require('@home-gallery/stream');
-const { readEntryFilesCached } = require('@home-gallery/storage');
+import { through } from '@home-gallery/stream';
+import { readEntryFilesCached } from '@home-gallery/storage';
 
-const readStorageData = (storageDir) => {
+export const readStorageData = (storageDir) => {
   const { readEntryFiles, clearCache } = readEntryFilesCached(storageDir);
 
   const task = (entries, cb) => {
@@ -41,5 +41,3 @@ const readStorageData = (storageDir) => {
     task(entry, done)
   }, flush);
 }
-
-module.exports = readStorageData;

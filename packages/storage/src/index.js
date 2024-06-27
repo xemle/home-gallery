@@ -1,20 +1,8 @@
-const getStoragePaths = require('./storage-path');
-const writeStorageFile = require('./write-storage-file');
-const { getEntryFilesCacheKey, getEntryFilesCacheFilename }= require('./entry-files-cache-file');
-const { updateEntryFilesCache }= require('./entry-files-cache');
-const readStorageFile = require('./read-storage-file');
-const readEntryFiles = require('./read-entry-files');
-const readEntryFilesCached = require('./read-entry-files-cached');
-const { purgeOrphanFiles } = require('./purge-orphan-files')
-
-module.exports = {
-  readEntryFiles,
-  readEntryFilesCached,
-  getStoragePaths,
-  writeStorageFile,
-  getEntryFilesCacheKey,
-  getEntryFilesCacheFilename,
-  updateEntryFilesCache,
-  readStorageFile,
-  purgeOrphanFiles
-}
+export { getStoragePaths } from './storage-path.js';
+export { writeStorageFile } from './write-storage-file.js';
+export { getEntryFilesCacheKey, getEntryFilesCacheFilename } from './entry-files-cache-file.js';
+export { updateEntryFilesCache } from './entry-files-cache.js';
+export { readStorageFile } from './read-storage-file.js';
+export { readEntryFiles } from './read-entry-files.js';
+export { readEntryFilesCached } from './read-entry-files-cached.js';
+export { purgeOrphanFiles } from './purge-orphan-files.js'

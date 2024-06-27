@@ -1,35 +1,5 @@
-const format = require('./format')
-const utils = require('./utils')
+export * as format from './format/index.js'
+export * as utils from './utils/index.js'
 
-const {
-  formatDate,
-  humanizeBytes,
-  humanizeDuration,
-} = format
-
-const {
-  callbackify,
-  debounce,
-  forEach,
-  lruCache,
-  promisify,
-  rateLimit,
-  serialize
-} = utils
-
-module.exports = {
-  format,
-    formatDate,
-    humanize: humanizeBytes,
-    humanizeBytes,
-    humanizeDuration,
-
-  utils,
-    callbackify,
-    debounce,
-    forEach,
-    lruCache,
-    promisify,
-    rateLimit,
-    serialize
-}
+export * from './format/index.js'
+export * from './utils/index.js'

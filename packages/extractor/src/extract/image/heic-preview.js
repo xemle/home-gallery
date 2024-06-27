@@ -1,12 +1,14 @@
-const { Buffer } = require('buffer')
-const fs = require('fs').promises
-const heicDecode = require('heic-decode')
+import { Buffer } from 'buffer'
+import fs from 'fs/promises'
+import heicDecode from 'heic-decode'
 
-const { promisify } = require('@home-gallery/common')
-const log = require('@home-gallery/logger')('extractor.image.heic')
-const { toPipe, conditionalTask } = require('../../stream/task')
+import { promisify } from '@home-gallery/common'
+import Logger from '@home-gallery/logger'
 
-const { useExternalImageResizer } = require('./image-resizer')
+const log = Logger('extractor.image.heic')
+import { toPipe, conditionalTask } from '../../stream/task.js'
+
+import { useExternalImageResizer } from './image-resizer.js'
 
 let sharp
 let jpegJs
@@ -77,26 +79,36 @@ const convertHeic = async (src, maxSize, dst, jpgWriter) => {
     })
 }
 
-const initJpgWriter = (config, imageResizer) => {
+const initJpgWriter = async (config, imageResizer) => {
   if (!useExternalImageResizer(config)) {
-    try {
-      sharp = require('sharp')
-      return sharpJpgWriter
-    } catch (e) {
-      log.warn(e, `Could not load sharp to write JPG`)
-    }
-  }
-  if (!sharp) {
-    jpegJs = require('jpeg-js')
-    log.warn(`Use slower jpeg-js to write JPG`)
-    return createFallbackJpgWriter(imageResizer)
+    return import('sharp')
+      .then(lib => {
+        sharp = lib.default
+        return sharpJpgWriter
+      })
+      .catch(e => {
+        log.warn(e, `Could not load sharp to write JPG`)
+        return import('jpeg-js')
+          .then(lib => {
+            jpegJs = lib
+            log.warn(`Use slower jpeg-js to write JPG`)
+            return createFallbackJpgWriter(imageResizer)
+          })
+      })
+  } else {
+    return import('jpeg-js')
+      .then(lib => {
+        jpegJs = lib
+        log.warn(`Use slower jpeg-js to write JPG`)
+        return createFallbackJpgWriter(imageResizer)
+      })
   }
 }
 
-function heicPreview(storage, extractor, config) {
+export async function heicPreview(storage, extractor, config) {
   const { imageResizer, imagePreviewSizes: previewSizes } = extractor
 
-  const jpgWriter = initJpgWriter(config, promisify(imageResizer))
+  const jpgWriter = await initJpgWriter(config, promisify(imageResizer))
 
   const test = entry => {
     if (!imageTypes.includes(entry.type) || hasJpg(entry) || storage.hasEntryFile(entry, rawPreviewSuffix)) {
@@ -128,5 +140,3 @@ function heicPreview(storage, extractor, config) {
   return toPipe(conditionalTask(test, task))
 
 }
-
-module.exports = heicPreview

@@ -1,9 +1,11 @@
-const log = require('@home-gallery/logger')('export.database.read');
-const { readDatabase } = require('@home-gallery/database');
+import Logger from '@home-gallery/logger'
 
-const read = (databaseFilename, cb) => {
+const log = Logger('export.database.read');
+import { readDatabase as requireDatabaseOrig } from '@home-gallery/database';
+
+export const readDatabase = (databaseFilename, cb) => {
   const t0 = Date.now();
-  readDatabase(databaseFilename, (err, database) => {
+  requireDatabaseOrig(databaseFilename, (err, database) => {
     if (err) {
       log.info(`Loading database ${databaseFilename} failed: ${err}`);
       return cb(err);
@@ -12,5 +14,3 @@ const read = (databaseFilename, cb) => {
     cb(null, database);
   })
 }
-
-module.exports = read;

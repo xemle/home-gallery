@@ -1,8 +1,10 @@
-const rimraf = require('rimraf');
+import rimraf from 'rimraf';
 
-const log = require('@home-gallery/logger')('export.rmdir');
+import Logger from '@home-gallery/logger'
 
-const deleteDirectory = (dir, keep, archiveFile, cb) => {
+const log = Logger('export.rmdir');
+
+export const deleteDirectory = (dir, keep, archiveFile, cb) => {
   if (keep || !archiveFile || !archiveFile.length) {
     log.info(`Keep output directory ${dir}`)
     return cb(null, dir, archiveFile);
@@ -18,5 +20,3 @@ const deleteDirectory = (dir, keep, archiveFile, cb) => {
     return cb(null, null, archiveFile)
   })
 }
-
-module.exports = deleteDirectory;

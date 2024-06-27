@@ -1,6 +1,4 @@
-const log = require('@home-gallery/logger')('server.api.database.tree.fileStore')
-
-const getPath = entry => {
+export const getPath = entry => {
   const firstFile = entry?.files?.[0]
   if (!firstFile) {
     return 'unknownPath'
@@ -55,7 +53,7 @@ const walker = (node, visitor) => {
   }
 }
 
-class FileStore {
+export class FileStore {
   root
   paths = {}
 
@@ -85,9 +83,4 @@ class FileStore {
   walk(visitor) {
     walker(this.root, visitor)
   }
-}
-
-module.exports = {
-  FileStore,
-  getPath
 }

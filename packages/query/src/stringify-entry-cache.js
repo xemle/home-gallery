@@ -1,6 +1,6 @@
-const { stringifyEntry } = require('./stringify-entry')
+import { stringifyEntry } from './stringify-entry.js'
 
-const createStringifyEntryCache = () => {
+export const createStringifyEntryCache = () => {
   let cache = new WeakMap()
 
   return {
@@ -17,8 +17,4 @@ const createStringifyEntryCache = () => {
       cache = new WeakMap()
     }
   }
-}
-
-module.exports = {
-  createStringifyEntryCache,
 }

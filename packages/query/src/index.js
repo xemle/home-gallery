@@ -1,13 +1,15 @@
-const { parse } = require('./parser');
-const { transformAst, orAst, andAst, cmpAst, valueAst, aliasKey, stringifyAst } = require('./ast')
-const { execQuery, numericKeys, rangeKeys, textKeys, aliases } = require('./query');
+import { parse } from './parser/index.js';
+import { transformAst, orAst, andAst, cmpAst, valueAst, aliasKey } from './ast/index.js'
+import { numericKeys, rangeKeys, textKeys, aliases, execQuery } from './query/index.js';
+import { stringifyEntry } from './stringify-entry.js'
 
-const { stringifyEntry } = require('./stringify-entry')
-const { createStringifyEntryCache } = require('./stringify-entry-cache')
+export { stringifyAst } from './ast/index.js'
+export { stringifyEntry } from './stringify-entry.js'
+export { createStringifyEntryCache } from './stringify-entry-cache.js'
 
-const ignoreUnknownExpressions = () => true
+export const ignoreUnknownExpressions = () => true
 
-const throwUnknownExpressions = ast => {
+export const throwUnknownExpressions = ast => {
   throw new Error(`Unknown expression ${ast.type} with key ${ast.key || 'none'} at ${ast.col}`)
 }
 
@@ -60,7 +62,7 @@ const transformRules = [
   },
 ]
 
-const filterEntriesByQuery = async (entries, query, options = {}) => {
+export const filterEntriesByQuery = async (entries, query, options = {}) => {
   if (!entries || !entries.length || !query) {
     return { entries };
   }
@@ -87,14 +89,3 @@ const filterEntriesByQuery = async (entries, query, options = {}) => {
 
   })
 }
-
-module.exports = {
-  filterEntriesByQuery,
-  ignoreUnknownExpressions,
-  throwUnknownExpressions,
-  stringifyEntry,
-  createStringifyEntryCache,
-  parse,
-  execQuery,
-  stringifyAst,
-};

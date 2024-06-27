@@ -1,20 +1,22 @@
-const { through } = require('@home-gallery/stream');
-const { serialize, createHash } = require('@home-gallery/common');
+import { through } from '@home-gallery/stream';
+import { serialize, createHash } from '@home-gallery/common';
 
-const log = require('@home-gallery/logger')('database.media')
+import Logger from '@home-gallery/logger'
 
-const { getEntryDate } = require('./date')
-const { getVibrantColors } = require('./vibrant-colors')
-const { getExif } = require('./exif')
-const { getVideo } = require('./video')
-const { getAddress } = require('./address')
-const { getGeo} = require('./geo')
-const { getTags } = require('./tags')
-const { getSimilarityHash } = require('./similarity')
-const { getObjects } = require('./objects')
-const { getFaces } = require('./faces')
-const { getFiles } = require('./files')
-const { getPreviews } = require('./previews')
+const log = Logger('database.media')
+
+import { getEntryDate } from './date.js'
+import { getVibrantColors } from './vibrant-colors.js'
+import { getExif } from './exif.js'
+import { getVideo } from './video.js'
+import { getAddress } from './address.js'
+import { getGeo} from './geo.js'
+import { getTags } from './tags.js'
+import { getSimilarityHash } from './similarity.js'
+import { getObjects } from './objects.js'
+import { getFaces } from './faces.js'
+import { getFiles } from './files.js'
+import { getPreviews } from './previews.js'
 
 const createMedia = (entry, updated) => {
   const date = getEntryDate(entry) || entry.date
@@ -50,7 +52,7 @@ const createMedia = (entry, updated) => {
   return media
 }
 
-const mapMedia = (updated) => {
+export const mapMedia = (updated) => {
   return through(function (entry, _, cb) {
     try {
       const media = createMedia(entry, updated)
@@ -61,5 +63,3 @@ const mapMedia = (updated) => {
     cb()
   })
 }
-
-module.exports = mapMedia

@@ -36,7 +36,7 @@ function toPrimaryEntry(entries) {
  *
  * Example: IMG_2635.AVI, IMG_2635.THM, IMG_2635.AVI.xmp -> group(IMG_2635)
  */
-const mapName2Sidecars = entries => {
+export const mapName2Sidecars = entries => {
   const result = {}
   entries.sort(bySize).forEach(entry => {
     const { name, ext } = parseNameExt(entry.filename)
@@ -52,14 +52,14 @@ const mapName2Sidecars = entries => {
   return result
 }
 
-const groupSidecarFiles = entries => {
+export const groupSidecarFiles = entries => {
   const name2Sidecars = mapName2Sidecars(entries)
 
   const sidecarEntries = Object.values(name2Sidecars).map(toPrimaryEntry);
   return sidecarEntries.sort(byFilename)
 }
 
-const getSidecarsByFilename = (name2sidecars, filename) => {
+export const getSidecarsByFilename = (name2sidecars, filename) => {
   const { name, ext } = parseNameExt(filename)
   const { name: name2, ext: ext2 } = parseNameExt(name)
   if (ext && name2sidecars[name]) {
@@ -70,7 +70,7 @@ const getSidecarsByFilename = (name2sidecars, filename) => {
   return false
 }
 
-const ungroupSidecarFiles = entry => {
+export const ungroupSidecarFiles = entry => {
   const result = []
   if (entry.sidecars?.length) {
     result.push(...entry.sidecars)
@@ -78,11 +78,4 @@ const ungroupSidecarFiles = entry => {
   }
   result.push(entry)
   return result.sort(byFilename)
-}
-
-module.exports = {
-  mapName2Sidecars,
-  groupSidecarFiles,
-  getSidecarsByFilename,
-  ungroupSidecarFiles
 }

@@ -1,8 +1,10 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const log = require('@home-gallery/logger')('export.copy.file');
-const { mkdir } = require('@home-gallery/common')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('export.copy.file');
+import { mkdir } from '@home-gallery/common'
 
 const cp = (src, dst, size, cb) => {
   fs.copyFile(src, dst, (err) => {
@@ -18,7 +20,7 @@ const shouldOverwrite = (srcStats, dstStats) => {
   return srcStats.size != dstStats.size;
 }
 
-const copyFile = (filename, srcDir, dstDir, cb) => {
+export const copyFile = (filename, srcDir, dstDir, cb) => {
   const src = path.join(srcDir, filename);
   const dst = path.join(dstDir, filename);
   
@@ -64,5 +66,3 @@ const copyFile = (filename, srcDir, dstDir, cb) => {
     })
   })
 }
-
-module.exports = copyFile;

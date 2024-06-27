@@ -1,11 +1,11 @@
-const fs = require('fs');
-const path = require('path');
-const zlib = require('zlib');
-const log = require('@home-gallery/logger')('common.write.jsonGzip');
+import zlib from 'zlib';
+import Logger from '@home-gallery/logger'
 
-const writeSafe = require('./write-safe');
+const log = Logger('common.write.jsonGzip');
 
-function writeJsonGzip(filename, data, cb) {
+import { writeSafe } from './write-safe.js';
+
+export function writeJsonGzip(filename, data, cb) {
   let json;
   try {
     json = JSON.stringify(data);
@@ -30,5 +30,3 @@ function writeJsonGzip(filename, data, cb) {
   });
 
 }
-
-module.exports = writeJsonGzip;

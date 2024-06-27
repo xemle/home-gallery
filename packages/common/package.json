@@ -2,7 +2,11 @@
   "name": "@home-gallery/common",
   "version": "1.0.0",
   "description": "Common library of HomeGallery",
-  "main": "dist/index.js",
+  "type":"module",
+  "exports": {
+    "node": "./dist/node.js",
+    "browser": "./dist/index.js"
+  },
   "files": [
     "dist"
   ],
@@ -25,15 +29,6 @@
     "type": "git",
     "url": "https://github.com/xemle/home-gallery.git",
     "directory": "packages/common"
-  },
-  "exports": {
-    ".": {
-      "node": {
-        "import": "./dist/node-import-wrapper.mjs",
-        "require": "./dist/node.js"
-      },
-      "browser": "./dist/index.js"
-    }
   },
   "dependencies": {
     "@home-gallery/logger": "file:../logger",

@@ -1,17 +1,19 @@
-const fs = require('fs/promises')
-const { createReadStream } = require('fs')
-const path = require('path')
-const assert = require('assert')
-const crypto = require('crypto')
-const ExifTool = require('exiftool-vendored').ExifTool;
+import fs from 'fs/promises'
+import { createReadStream } from 'fs'
+import path from 'path'
+import assert from 'assert'
+import crypto from 'crypto'
+import { ExifTool } from 'exiftool-vendored';
 
-const log = require('@home-gallery/logger')('export.meta.writer')
+import Logger from '@home-gallery/logger'
 
-const { through } = require('@home-gallery/stream')
+const log = Logger('export.meta.writer')
 
-const { findSidecar } = require('./sidecar')
+import { through } from '@home-gallery/stream'
 
-const { NewExternalSidecarError, ExternalSidecarChangeError } = require('./errors')
+import { findSidecar } from './sidecar.js'
+
+import { NewExternalSidecarError, ExternalSidecarChangeError } from './errors.js'
 
 const createSha1 = async file => {
   return new Promise((resolve, reject) => {
@@ -53,7 +55,7 @@ const findEntrySidecar = async (entry, rootMap) => {
 
 const exists = async file => fs.access(file).then(() => true).catch(() => false)
 
-const createTags = entry => {
+export const createTags = entry => {
   const tags = entry.tags || []
   return {
     'XMP-dc:Subject': tags,
@@ -74,14 +76,14 @@ const writeableTags = [
 
 const getWriteableTags = tags => pick(tags, writeableTags)
 
-const mergeTags = (orig, other = {}) => {
+export const mergeTags = (orig, other = {}) => {
   return {
     ...getWriteableTags(orig),
     ...other
   }
 }
 
-const isSame = (a, b) => {
+export const isSame = (a, b) => {
   try {
     assert.deepEqual(a, b)
     return true
@@ -90,7 +92,7 @@ const isSame = (a, b) => {
   }
 }
 
-const hasWriteableTags = (tags) => !isSame(tags, emptyTags)
+export const hasWriteableTags = (tags) => !isSame(tags, emptyTags)
 
 const createSidecar = async (entryTags, sidecar, exiftool, dryRun) => {
   if (!hasWriteableTags(entryTags)) {
@@ -135,7 +137,7 @@ const writeSidecar = async (entry, rootMap, exiftool, dryRun) => {
   }
 }
 
-const createMetadataWriter = (rootMap, dryRun) => {
+export const createMetadataWriter = (rootMap, dryRun) => {
   const exiftool = new ExifTool({taskTimeoutMillis: 5000})
 
   const endExiftool = cb => {
@@ -157,12 +159,4 @@ const createMetadataWriter = (rootMap, dryRun) => {
         cb(err)
       })
   }, endExiftool)
-}
-
-module.exports = {
-  createMetadataWriter,
-  createTags,
-  mergeTags,
-  hasWriteableTags,
-  isSame
 }

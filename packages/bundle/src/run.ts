@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
 
-import { logger } from './log'
+import { logger } from './log.js'
 
 const log = logger('run')
 

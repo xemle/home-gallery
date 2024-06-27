@@ -1,7 +1,9 @@
-const fs = require('fs');
-const archiver = require('archiver');
+import fs from 'fs';
+import archiver from 'archiver';
 
-const log = require('@home-gallery/logger')('export.archive');
+import Logger from '@home-gallery/logger'
+
+const log = Logger('export.archive');
 
 const zipOpitons = {
   zlib: {
@@ -27,7 +29,7 @@ const toHuman = (bytes) => {
   }
 }
 
-const createArchive = (dir, archiveFile, cb) => {
+export const createArchive = (dir, archiveFile, cb) => {
   if (!archiveFile) {
     return cb(null, dir, archiveFile);
   }
@@ -64,5 +66,3 @@ const createArchive = (dir, archiveFile, cb) => {
 
   archive.finalize();
 }
-
-module.exports = createArchive;

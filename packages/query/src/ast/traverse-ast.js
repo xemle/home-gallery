@@ -2,7 +2,7 @@ const singleTypes = ['query', 'not', 'paren', 'keyValue', 'cmp', 'cmpFn']
 
 const listTypes = ['or', 'and', 'terms', 'inList', 'inRange', 'allIn']
 
-const traverseAst = (ast, options) => {
+export const traverseAst = (ast, options) => {
   ast = options?.before ? options.before(ast) || ast : ast
   if (singleTypes.includes(ast.type) && ast.value) {
     ast.value = traverseAst(ast.value, options)
@@ -11,8 +11,4 @@ const traverseAst = (ast, options) => {
   }
   ast = options?.after ? options.after(ast) || ast : ast
   return ast
-}
-
-module.exports = {
-  traverseAst
 }

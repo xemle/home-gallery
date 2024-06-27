@@ -1,11 +1,9 @@
-const through = require('./through');
+import { through } from './through.js';
 
-function map(mapFunction) {
+export function map(mapFunction) {
   return through(function (entry, _, cb) {
     this.push(mapFunction(entry));
     cb();
   });
 
 }
-
-module.exports = map;

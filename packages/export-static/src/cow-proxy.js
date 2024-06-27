@@ -44,11 +44,6 @@ const createHandler = (base) => {
   }
 }
 
-const wrapCowProxy = (obj) => new Proxy(obj, createHandler(obj))
+export const wrapCowProxy = (obj) => new Proxy(obj, createHandler(obj))
 
-const unwrapCowProxy = (proxy) => proxy[$isProxy] ? proxy[$base] : proxy
-
-module.exports = {
-  wrapCowProxy,
-  unwrapCowProxy
-}
+export const unwrapCowProxy = (proxy) => proxy[$isProxy] ? proxy[$base] : proxy

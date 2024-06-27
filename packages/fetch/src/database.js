@@ -1,14 +1,16 @@
 
-const log = require('@home-gallery/logger')('fetch.database')
+import Logger from '@home-gallery/logger'
 
-const { promisify } = require('@home-gallery/common')
-const { readOrCreateDatabase, writeDatabase, mergeEntries } = require('@home-gallery/database')
-const { filterEntriesByQuery, createStringifyEntryCache } = require('@home-gallery/query')
+const log = Logger('fetch.database')
+
+import { promisify } from '@home-gallery/common'
+import { readOrCreateDatabase, writeDatabase, mergeEntries } from '@home-gallery/database'
+import { filterEntriesByQuery, createStringifyEntryCache } from '@home-gallery/query'
 
 const readOrCreateDatabaseAsync = promisify(readOrCreateDatabase)
 const writeDatabaseAsync = promisify(writeDatabase)
 
-const readDatabase = async (databaseFile) => {
+export const readDatabase = async (databaseFile) => {
   log.trace(`Reading local database from ${databaseFile}...`)
   const t0 = Date.now()
   const database = await readOrCreateDatabaseAsync(databaseFile)
@@ -16,7 +18,7 @@ const readDatabase = async (databaseFile) => {
   return database
 }
 
-const mergeDatabase = async (remoteDatabase, localDatabase, databaseFile, deleteLocal) => {
+export const mergeDatabase = async (remoteDatabase, localDatabase, databaseFile, deleteLocal) => {
   const updated = new Date().toISOString()
   const t0 = Date.now()
   const [mergedEntries, newEntries] = mergeEntries(localDatabase.data, remoteDatabase.data, [], updated, deleteLocal)
@@ -24,7 +26,7 @@ const mergeDatabase = async (remoteDatabase, localDatabase, databaseFile, delete
     .then(() => log.info(t0, `Updated database with ${newEntries.length} new entries from remote`))
 }
 
-const filterDatabaseByQuery = async (database, query) => {
+export const filterDatabaseByQuery = async (database, query) => {
   if (!query) {
     log.debug(`No query is given, skip query filtering`)
     return database
@@ -42,10 +44,4 @@ const filterDatabaseByQuery = async (database, query) => {
       log.error(err, `Could not fitler ${database.data.length} database entries with query ${query}`)
       return Promise.reject(err)
     })
-}
-
-module.exports = {
-  readDatabase,
-  mergeDatabase,
-  filterDatabaseByQuery
 }

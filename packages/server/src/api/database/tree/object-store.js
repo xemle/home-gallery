@@ -1,4 +1,4 @@
-const { createHash } = require('@home-gallery/common')
+import { createHash } from '@home-gallery/common'
 
 const createTree = (name) => ({type: 'tree', name, hash: null, files: []})
 
@@ -95,7 +95,7 @@ const walker = (store, hash, visitor, name = '') => {
   }
 }
 
-class ObjectStore {
+export class ObjectStore {
   store = {}
 
   addFileStore(fileStore, mergeCount = 0) {
@@ -117,8 +117,4 @@ class ObjectStore {
   walk(root, visitor) {
     walker(this.store, root, visitor)
   }
-}
-
-module.exports = {
-  ObjectStore
 }

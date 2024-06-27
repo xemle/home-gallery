@@ -1,6 +1,6 @@
-const { getEntryMetaByKey } = require('./utils')
+import { getEntryMetaByKey } from './utils.js'
 
-const getFaces = (entry, minScore) => {
+export const getFaces = (entry, minScore) => {
   const faces = getEntryMetaByKey(entry, 'faces')
   if (!faces) {
     return [];
@@ -29,8 +29,4 @@ const getFaces = (entry, minScore) => {
         descriptor: Object.values(face.descriptor).map(value => +(value).toFixed(4))
       }
     })
-}
-
-module.exports = {
-  getFaces
 }

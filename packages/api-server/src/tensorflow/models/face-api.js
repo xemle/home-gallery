@@ -1,4 +1,4 @@
-const faceapi = require('@vladmandic/face-api/dist/face-api.node-cpu')
+import faceapi from '@vladmandic/face-api/dist/face-api.node-cpu.js'
 
 const toPoint = p => { return {x: p.x, y: p.y } }
 
@@ -43,7 +43,7 @@ const mapFaceToObject = face => {
   }
 }
 
-const initFaceApi = async ({ modelPath, minScore, maxResults } = {}) => {
+export const initFaceApi = async ({ modelPath, minScore, maxResults } = {}) => {
   await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
   await faceapi.nets.ageGenderNet.loadFromDisk(modelPath);
   await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);
@@ -68,5 +68,3 @@ const initFaceApi = async ({ modelPath, minScore, maxResults } = {}) => {
 
   return { faceapi, detect }
 }
-
-module.exports = initFaceApi;

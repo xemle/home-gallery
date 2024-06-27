@@ -1,14 +1,16 @@
-const { Readable } = require('stream')
-const { pipeline } = require('stream/promises')
+import { Readable } from 'stream'
+import { pipeline } from 'stream/promises'
 
-const log = require('@home-gallery/logger')('export.meta')
+import Logger from '@home-gallery/logger'
 
-const { promisify } = require('@home-gallery/common')
-const { readIndexHead } = require('@home-gallery/index')
-const { filter, toList, write } = require('@home-gallery/stream')
+const log = Logger('export.meta')
 
-const { getMetadataEntries } = require('./entries')
-const { createMetadataWriter } = require('./meta')
+import { promisify } from '@home-gallery/common'
+import { readIndexHead } from '@home-gallery/index'
+import { filter, toList, write } from '@home-gallery/stream'
+
+import { getMetadataEntries } from './entries.js'
+import { createMetadataWriter } from './meta.js'
 
 const readIndexHeadAsync = promisify(readIndexHead)
 
@@ -20,7 +22,7 @@ const getIndexRootMap = async (indices) => {
   return Object.fromEntries(indexHeads.map(index => [index.indexName, index.base]))
 }
 
-const exportMeta = async (options = {}) => {
+export const exportMeta = async (options = {}) => {
   const indices = options.config.fileIndex.files
   const database = options.config.database.file
   const events = options.config.events.file
@@ -46,7 +48,3 @@ const exportMeta = async (options = {}) => {
   )
   return result
 }
-
-module.exports = {
-  exportMeta
-};

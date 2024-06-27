@@ -1,8 +1,8 @@
-const t = require('tap')
+import t from 'tap'
 
-const { serialize, createHash } = require('@home-gallery/common')
+import { serialize, createHash } from '@home-gallery/common'
 
-const { FileStore } = require('./file-store')
+import { FileStore } from './file-store.js'
 
 const toEntry = (s, i) => {
   const [index, filename] = s.split(':')

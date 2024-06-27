@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { getPreview } = require('./utils')
+import { getPreview } from './utils.js'
 
 t.test('getPreview', async t => {
   t.test('basic', async t => {

@@ -1,8 +1,8 @@
-const { traverseAst } = require('./traverse-ast')
+import { traverseAst } from './traverse-ast.js'
 
 const stringifyOrderByAst = ast => ast ? `orderBy(${ast.type == 'sortKey' ? ast.value : `count(${ast.value})`}${ast.direction ? ` ${ast.direction}` : ''})` : ''
 
-const stringifyAst = ast => {
+export const stringifyAst = ast => {
   traverseAst(ast, {after: ast => {
     switch (ast.type) {
       case 'query': ast.data = [(ast.value ? ast.value.data : ''), stringifyOrderByAst(ast.orderBy)].filter(v => !!v).join(' '); break;
@@ -26,8 +26,4 @@ const stringifyAst = ast => {
     }
   }})
   return ast.data
-}
-
-module.exports = {
-  stringifyAst
 }

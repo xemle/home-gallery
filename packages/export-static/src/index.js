@@ -1,24 +1,24 @@
-const { waterfall } = require('async');
+import { waterfall } from 'async';
 
-const readDatabase = require('./read-database');
-const applyEvents = require('./apply-events');
-const applyQuery = require('./apply-query');
-const cleanupDatabase = require('./cleanup-database');
-const exportStorage = require('./export-storage');
-const writeDatabase = require('./write-database');
-const copyWebapp = require('./copy-webapp');
-const injectState = require('./inject-state');
-const setBasePath = require('./set-base-path');
-const createArchive = require('./create-archive');
-const deleteDirectory = require('./delete-directory');
-const { wrapCowProxy, unwrapCowProxy } = require('./cow-proxy');
+import { readDatabase } from './read-database.js';
+import { applyEvents } from './apply-events.js';
+import { applyQuery } from './apply-query.js';
+import { cleanupDatabase } from './cleanup-database.js';
+import { exportStorage } from './export-storage.js';
+import { writeDatabase } from './write-database.js';
+import { copyWebapp } from './copy-webapp.js';
+import { injectState } from './inject-state.js';
+import { setBasePath } from './set-base-path.js';
+import { createArchive } from './create-archive.js';
+import { deleteDirectory } from './delete-directory.js';
+import { wrapCowProxy, unwrapCowProxy } from './cow-proxy.js';
 
 const proxyMutableEntries = (database, cb) => {
   database.data = database.data.map(wrapCowProxy)
   cb(null, database)
 }
 
-const buildDatabase = (databaseFilename, eventsFilename, query, cb) => {
+const buildDatabaseWithProxy = (databaseFilename, eventsFilename, query, cb) => {
   waterfall([
     (callback) => readDatabase(databaseFilename, callback),
     (database, callback) => proxyMutableEntries(database, callback),
@@ -27,8 +27,8 @@ const buildDatabase = (databaseFilename, eventsFilename, query, cb) => {
   ], cb);
 }
 
-const buildDatabaseImmutableFacade = (databaseFilename, eventsFilename, query, cb) => {
-  buildDatabase(databaseFilename, eventsFilename, query, (err, database) => {
+export const buildDatabase = (databaseFilename, eventsFilename, query, cb) => {
+  buildDatabaseWithProxy(databaseFilename, eventsFilename, query, (err, database) => {
     if (err) {
       return cb(err)
     }
@@ -37,7 +37,7 @@ const buildDatabaseImmutableFacade = (databaseFilename, eventsFilename, query, c
   })
 }
 
-const exportBuilder = (options, cb) => {
+export const exportBuilder = (options, cb) => {
   const databaseFile = options.config.database.file
   const eventFile = options.config.events.file
   const storageDir = options.config.storage.dir
@@ -45,7 +45,7 @@ const exportBuilder = (options, cb) => {
   const exportOptions = options.config.export
 
   waterfall([
-    (callback) => buildDatabase(databaseFile, eventFile, exportOptions.query, callback),
+    (callback) => buildDatabaseWithProxy(databaseFile, eventFile, exportOptions.query, callback),
     (database, callback) => cleanupDatabase(database, callback),
     (database, callback) => exportStorage(database, storageDir, exportOptions.dir, exportOptions.basePath, callback),
     (database, dir, basePath, callback) => writeDatabase(database, dir, basePath, callback),
@@ -58,8 +58,3 @@ const exportBuilder = (options, cb) => {
     cb(err, dir, archiveFile);
   })
 }
-
-module.exports = {
-  buildDatabase: buildDatabaseImmutableFacade,
-  exportBuilder
-};

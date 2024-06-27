@@ -1,6 +1,8 @@
-const log = require('@home-gallery/logger')('export.database.cleanup');
+import Logger from '@home-gallery/logger'
 
-const cleanup = (database, cb) => {
+const log = Logger('export.database.cleanup');
+
+export const cleanupDatabase = (database, cb) => {
   const t0 = Date.now();
   const cleanEntries = database.data.map(entry => {
     delete entry.appliedEventIds;
@@ -11,5 +13,3 @@ const cleanup = (database, cb) => {
   log.info(t0, `Cleanup ${cleanEntries.length} database entries`);
   cb(null, database);
 }
-
-module.exports = cleanup;

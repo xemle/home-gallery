@@ -10,7 +10,8 @@
   "author": "Sebastian Felis <sebastian@silef.de>",
   "homepage": "https://home-gallery.org",
   "license": "MIT",
-  "main": "dist/index.js",
+  "type": "module",
+  "exports": "./dist/index.js",
   "directories": {
     "lib": "dist"
   },

@@ -1,7 +1,7 @@
-const nearley = require("nearley")
-const grammar = require("./grammar.js")
+import nearley from "nearley"
+import grammar from "./grammar.js"
 
-const parse = (text, cb) => {
+export const parse = (text, cb) => {
   const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar))
 
   try {
@@ -16,5 +16,3 @@ const parse = (text, cb) => {
     cb(new Error(`Empty results for query ${text}`))
   }
 }
-
-module.exports = { parse }

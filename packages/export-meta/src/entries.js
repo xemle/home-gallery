@@ -1,9 +1,11 @@
-const log = require('@home-gallery/logger')('export.meta.entry')
+import Logger from '@home-gallery/logger'
 
-const { promisify } = require('@home-gallery/common')
+const log = Logger('export.meta.entry')
 
-const { readDatabase } = require('@home-gallery/database')
-const { readEvents, createHeader, applyEvents } = require('@home-gallery/events')
+import { promisify } from '@home-gallery/common'
+
+import { readDatabase } from '@home-gallery/database'
+import { readEvents, createHeader, applyEvents } from '@home-gallery/events'
 
 const readDatabaseAsync = promisify(readDatabase)
 
@@ -55,7 +57,7 @@ const parseDate = s => {
   }
 }
 
-const getMetadataEntries = async (databaseFile, eventsFile, changesAfter) => {
+export const getMetadataEntries = async (databaseFile, eventsFile, changesAfter) => {
   const events = await readEventsFile(eventsFile)
   if (!events?.data?.length) {
     log.debug(`No events found for meta data export`)
@@ -77,6 +79,3 @@ const getMetadataEntries = async (databaseFile, eventsFile, changesAfter) => {
   return entries.map(entry => ({...entry, toString: entryToString}))
 }
 
-module.exports = {
-  getMetadataEntries
-}

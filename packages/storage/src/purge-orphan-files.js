@@ -1,11 +1,13 @@
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
 
-const log = require('@home-gallery/logger')('storage.purge');
+import Logger from '@home-gallery/logger'
 
-const { readJsonGzip, promisify, humanize } = require('@home-gallery/common');
+const log = Logger('storage.purge');
 
-const { getEntryFilesCacheId } = require('./entry-files-cache-file')
+import { readJsonGzip, promisify, humanizeBytes as humanize } from '@home-gallery/common';
+
+import { getEntryFilesCacheId } from './entry-files-cache-file.js'
 
 const asyncReadJsonGzip = promisify(readJsonGzip)
 
@@ -143,7 +145,7 @@ const createRemoveFile = (validIdMap, stats, purgeOptions) => {
   }
 }
 
-const purgeOrphanFiles = async (options) => {
+export const purgeOrphanFiles = async (options) => {
   const purgeOptions = {
     dryRun: options.config.storage.dryRun,
     dryRunSuffix: options.config.storage.dryRun ? ' (dry-run)' : ''
@@ -170,8 +172,4 @@ const purgeOrphanFiles = async (options) => {
     maxDepth: 2
   })
   log.info(t0, `Checked ${stats.directories} directories and ${stats.files} files (${humanize(stats.fileSize)}). Removed ${stats.removedFiles} orphan files (${humanize(stats.removedFileSize)})${options.dryRunSuffix}`)
-}
-
-module.exports = {
-  purgeOrphanFiles
 }

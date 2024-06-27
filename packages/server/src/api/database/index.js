@@ -1,13 +1,15 @@
-const log = require('@home-gallery/logger')('server.api.database');
+import Logger from '@home-gallery/logger'
 
-const { filterEntriesByQuery, createStringifyEntryCache } = require('@home-gallery/query')
-const { applyEvents } = require('./events-facade')
+const log = Logger('server.api.database');
 
-const { waitReadWatch } = require('./read-database');
-const { cache } = require('./cache-middleware');
-const { sanitizeInt } = require('./sanitize');
+import { filterEntriesByQuery, createStringifyEntryCache } from '@home-gallery/query'
+import { applyEvents } from './events-facade.js'
 
-const { sendError } = require('../error')
+import { waitReadWatch } from './read-database.js';
+import { cache } from './cache-middleware.js';
+import { sanitizeInt } from './sanitize.js';
+
+import { sendError } from '../error/index.js'
 
 const filterEntriesByQueryCb = (entries, query, stringifyEntryCache, cb) => filterEntriesByQuery(entries, query, {textFn: stringifyEntryCache.stringifyEntry}).then(({entries}) => cb(null, entries)).catch(cb)
 
@@ -16,7 +18,7 @@ const filterDatabase = (entries, query, stringifyEntryCache, cb) => query ? filt
 /**
  * @param {EventBus} eventbus
  */
-function databaseApi(eventbus, databaseFilename, getEvents) {
+export function databaseApi(eventbus, databaseFilename, getEvents) {
   let database = false;
   const databaseCache = cache(3600);
   let entryCache = {};
@@ -101,5 +103,3 @@ function databaseApi(eventbus, databaseFilename, getEvents) {
     getDatabase: () => database
   }
 }
-
-module.exports = databaseApi;

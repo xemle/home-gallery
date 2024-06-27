@@ -1,5 +1,5 @@
-const t = require('tap')
-const { rules2WhitelistRules, isWhitelistIp, defaultIpWhitelistRules } = require('./ip')
+import t from 'tap'
+import { rules2WhitelistRules, isWhitelistIp, defaultIpWhitelistRules } from './ip.js'
 
 t.test('Allow all', t => {
   const rules = rules2WhitelistRules([{type: 'allow', value: 'all'}])

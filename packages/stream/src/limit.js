@@ -1,8 +1,10 @@
-const log = require('@home-gallery/logger')('stream.limit');
+import Logger from '@home-gallery/logger'
 
-const filter = require('./filter');
+const log = Logger('stream.limit');
 
-function limit(amount) {
+import { filter } from './filter.js';
+
+export function limit(amount) {
   amount = typeof amount == 'undefined' ? 0 : +amount
   if (amount > 0) {
     log.info(`Limit stream to ${amount} entries`)
@@ -11,5 +13,3 @@ function limit(amount) {
   let count = 0;
   return filter(() => amount <= 0 || count++ < amount)
 }
-
-module.exports = limit;

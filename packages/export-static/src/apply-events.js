@@ -1,8 +1,10 @@
-const log = require('@home-gallery/logger')('export.events');
-const { readEvents } = require('@home-gallery/events');
-const { applyEvents } = require('@home-gallery/events');
+import Logger from '@home-gallery/logger'
 
-const events = (database, eventsFilename, cb) => {
+const log = Logger('export.events');
+import { readEvents } from '@home-gallery/events';
+import { applyEvents as applyEventsOrig } from '@home-gallery/events';
+
+export const applyEvents = (database, eventsFilename, cb) => {
   if (!eventsFilename) {
     return cb(null, database);
   }
@@ -19,11 +21,9 @@ const events = (database, eventsFilename, cb) => {
     log.info(t0, `Read events from ${eventsFilename} with ${events.data.length} events`);
 
     const t1 = Date.now();
-    const changedEntries = applyEvents(database.data, events.data);
+    const changedEntries = applyEventsOrig(database.data, events.data);
     log.info(t1, `Applied ${events.data.length} events to ${changedEntries.length} entries`);
 
     cb(null, database);
   })
 }
-
-module.exports = events;

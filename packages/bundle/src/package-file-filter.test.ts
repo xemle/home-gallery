@@ -1,6 +1,6 @@
 import t from 'tap'
 
-import { defaultExcludeFileFilter, createIncludeFileFilter } from './package-file-filter'
+import { defaultExcludeFileFilter, createIncludeFileFilter } from './package-file-filter.js'
 
 const filterFromPkg = (pkg: any = {}) => createIncludeFileFilter(pkg)
 

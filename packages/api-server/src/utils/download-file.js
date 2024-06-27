@@ -1,7 +1,7 @@
-const fs = require('fs');
-const fetch = require('node-fetch');
+import fs from 'fs';
+import fetch from 'node-fetch';
 
-const downloadFile = async (url, file) => {
+export const downloadFile = async (url, file) => {
   await fetch(url)
     .then(res => {
       return new Promise((resolve, reject) => {
@@ -12,5 +12,3 @@ const downloadFile = async (url, file) => {
       })
     })
 }
-
-module.exports = downloadFile;

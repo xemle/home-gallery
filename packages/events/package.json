@@ -2,7 +2,8 @@
   "name": "@home-gallery/events",
   "version": "1.0.0",
   "description": "User events",
-  "main": "dist/index.js",
+  "type": "module",
+  "export": "./dist/index.js",
   "files": [
     "dist"
   ],

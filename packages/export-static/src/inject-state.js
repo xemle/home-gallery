@@ -1,10 +1,12 @@
-const path = require('path');
+import path from 'path';
 
-const log = require('@home-gallery/logger')('export.webapp.injectState');
+import Logger from '@home-gallery/logger'
 
-const rewriteFile = require('./rewrite-file');
+const log = Logger('export.webapp.injectState');
 
-const injectState = (database, dir, basePath, disableEdit, cb) => {
+import { rewriteFile } from './rewrite-file.js';
+
+export const injectState = (database, dir, basePath, disableEdit, cb) => {
   const t0 = Date.now();
   const indexFilename = path.join(dir, basePath, 'index.html')
   rewriteFile(indexFilename, data => {
@@ -25,5 +27,3 @@ const injectState = (database, dir, basePath, disableEdit, cb) => {
     cb(null, dir, basePath)
   });
 }
-
-module.exports = injectState;

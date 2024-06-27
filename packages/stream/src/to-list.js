@@ -1,6 +1,6 @@
-const through = require('./through');
+import { through } from './through.js';
 
-const toList = () => {
+export const toList = () => {
   const list = [];
   return through(function (entry, _, cb) {
     list.push(entry);
@@ -10,5 +10,3 @@ const toList = () => {
     cb();
   });
 }
-
-module.exports = toList;

@@ -1,7 +1,10 @@
-const { rules2WhitelistRules, defaultIpWhitelistRules, isWhitelistIp } = require('./ip')
-const { users2UserMap, matchesUser } = require('./user')
+import { rules2WhitelistRules, isWhitelistIp } from './ip.js'
+export { defaultIpWhitelistRules } from './ip.js'
+import { users2UserMap, matchesUser } from './user.js'
 
-const log = require('@home-gallery/logger')('server.auth');
+import Logger from '@home-gallery/logger'
+
+const log = Logger('server.auth');
 
 const getCredentials = req => {
   if (!req.headers.authorization) {
@@ -14,7 +17,7 @@ const getCredentials = req => {
   return []
 }
 
-const augmentReqByUserMiddleware = () => (req, _, next) => {
+export const augmentReqByUserMiddleware = () => (req, _, next) => {
   const [login] = getCredentials(req)
   if (login) {
     req.user = login
@@ -22,7 +25,7 @@ const augmentReqByUserMiddleware = () => (req, _, next) => {
   next()
 }
 
-const createBasicAuthMiddleware = (users, rules) => {
+export const createBasicAuthMiddleware = (users, rules) => {
   const userMap = users2UserMap(users)
   const whitelistRules = rules2WhitelistRules(rules || [])
 
@@ -47,10 +50,4 @@ const createBasicAuthMiddleware = (users, rules) => {
     res.set('WWW-Authenticate', 'Basic realm="HomeGallery"')
     res.status(401).send('Authentication required')
   }
-}
-
-module.exports = {
-  augmentReqByUserMiddleware,
-  createBasicAuthMiddleware,
-  defaultIpWhitelistRules
 }

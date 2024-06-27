@@ -1,7 +1,7 @@
-const t = require('tap')
+import t from 'tap'
 
-const { stringifyAst } = require('../ast')
-const { parse: parseCb } = require('./index')
+import { stringifyAst } from '../ast/index.js'
+import { parse as parseCb } from './index.js'
 
 const parse = query => new Promise((resolve, reject) => {
   parseCb(query, (err, result) => err ? reject(err) : resolve(result))

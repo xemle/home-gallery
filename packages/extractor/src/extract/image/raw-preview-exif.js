@@ -1,11 +1,13 @@
-const log = require('@home-gallery/logger')('extractor.image.rawPreviewExif')
+import Logger from '@home-gallery/logger'
 
-const { toPipe, conditionalTask } = require('../../stream/task')
+const log = Logger('extractor.image.rawPreviewExif')
+
+import { toPipe, conditionalTask } from '../../stream/task.js'
 
 const rawPreviewSuffix = 'raw-preview.jpg'
 const rawPreviewExifSuffix = 'raw-preview-exif.json'
 
-const rawPreviewExif = (storage, {exiftool}) => {
+export const rawPreviewExif = (storage, {exiftool}) => {
   const test = entry => storage.hasEntryFile(entry, rawPreviewSuffix) && !storage.hasEntryFile(entry, rawPreviewExifSuffix)
 
   const task = (entry, cb) => {
@@ -29,5 +31,3 @@ const rawPreviewExif = (storage, {exiftool}) => {
 
   return toPipe(conditionalTask(test, task))
 }
-
-module.exports = rawPreviewExif

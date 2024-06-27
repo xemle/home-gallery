@@ -1,5 +1,6 @@
-const esbuild = require('esbuild');
-const glob = require('glob')
+import esbuild from 'esbuild'
+import glob from 'glob'
+
 const args = process.argv.splice(2)
 const watch = args.indexOf('--watch') >= 0
 
@@ -9,8 +10,8 @@ glob('./src/**/!(*.test.ts)', (_, files) => {
       entryPoints: files,
       sourcemap: true,
       platform: 'node',
-      target: 'es2015',
-      format: 'cjs',
+      target: 'es2020',
+      format: 'esm',
       outdir: 'dist',
       watch: watch
     }

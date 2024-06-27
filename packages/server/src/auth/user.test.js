@@ -1,5 +1,5 @@
-const t = require('tap')
-const { users2UserMap, matchesUser } = require('./user')
+import t from 'tap'
+import { users2UserMap, matchesUser } from './user.js'
 
 t.test('plain password', t => {
   const userMap = users2UserMap([{username: 'admin', password: 'admin'}])

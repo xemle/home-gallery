@@ -1,6 +1,6 @@
-const path = require('path')
+import path from 'path'
 
-const getIndexName = filename => path.basename(filename).replace(/\.[^.]+$/, '')
+export const getIndexName = filename => path.basename(filename).replace(/\.[^.]+$/, '')
 
 const unitToFactor = {
   'B': 1,
@@ -11,7 +11,7 @@ const unitToFactor = {
   'P': (1 << 30) * (1 << 20),
 }
 
-const parseFilesize = filesize => {
+export const parseFilesize = filesize => {
   const match = filesize.toUpperCase().match(/^(\d+(\.\d+)?)(([PTGMK])([B])?|[B])?$/)
   if (!match) {
     return false
@@ -41,7 +41,7 @@ const parseFilesize = filesize => {
  *  2020
  *  2020/2020-09-20
  */
-const byDirDescFileAsc = (a, b) => {
+export const byDirDescFileAsc = (a, b) => {
   const aParts = a.filename.split(path.sep)
   const bParts = b.filename.split(path.sep)
 
@@ -64,10 +64,4 @@ const byDirDescFileAsc = (a, b) => {
   }
 
   return aParts.length < bParts.length ? -1 : 1
-}
-
-module.exports = {
-  getIndexName,
-  parseFilesize,
-  byDirDescFileAsc
 }

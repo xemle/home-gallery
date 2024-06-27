@@ -1,6 +1,6 @@
-const { pipeline, Writable } = require('stream')
+import { pipeline, Writable } from 'stream'
 
-const splitStream = require('./utils/split-stream')
+import { splitStream } from './utils/split-stream.js'
 
 const logWriteable = logWrite => {
   return new Writable({
@@ -12,7 +12,7 @@ const logWriteable = logWrite => {
   })
 }
 
-const mergeLogStream = (rootLogger, readable) => {
+export const mergeLogStream = (rootLogger, readable) => {
   readable.setEncoding('utf8')
 
   pipeline(
@@ -26,5 +26,3 @@ const mergeLogStream = (rootLogger, readable) => {
     }
   )
 }
-
-module.exports = mergeLogStream

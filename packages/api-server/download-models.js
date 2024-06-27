@@ -1,7 +1,8 @@
-const { modelConfig, modelDir } = require('./src/model-config');
-const { downloadModels } = require('./src/tensorflow')
+import { getModelConfig, modelDir } from './src/model-config.js'
+import { downloadModels } from './src/tensorflow/index.js'
 
 const download = async () => {
+  const modelConfig = await getModelConfig()
   await downloadModels(modelConfig, modelDir);
 }
 

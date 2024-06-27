@@ -1,10 +1,12 @@
-const log = require('@home-gallery/logger')('server.api.database.tree');
+import Logger from '@home-gallery/logger'
 
-const { FileStore } = require('./file-store')
-const { ObjectStore } = require('./object-store');
-const { sendError } = require('../../error');
+const log = Logger('server.api.database.tree');
 
-const treeApi = (eventbus, getDatabase) => {
+import { FileStore } from './file-store.js'
+import { ObjectStore } from './object-store.js';
+import { sendError } from '../../error/index.js';
+
+export const treeApi = (eventbus, getDatabase) => {
 
   /**
    * @type {FileStore}
@@ -136,5 +138,3 @@ const treeApi = (eventbus, getDatabase) => {
     }
   }
 }
-
-module.exports = treeApi

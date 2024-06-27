@@ -1,4 +1,4 @@
-const fileTypes = {
+export const fileTypes = {
   image: 'ico,bmp,gif,png,jpg,jpeg,jpe,tif,tiff,thm,webp'.split(','),
   binImage: 'psd,xcf'.split(','),
   rawImage: 'arw,cr2,cr3,crw,dng,gpr,heic,heif,mrw,nef,nrw,orf,raf,rw2,sr2,srf,srw'.split(','),
@@ -12,7 +12,7 @@ const fileTypes = {
   bin: 'exe,dll'.split(',')
 }
 
-function getFileTypeByExtension(filename) {
+export function getFileTypeByExtension(filename) {
   const match = filename.match(/\.(\w{2,4})$/);
   if (!match) {
     return 'unknown';
@@ -29,7 +29,3 @@ function getFileTypeByExtension(filename) {
   return 'unknown';
 }
 
-module.exports = {
-  fileTypes,
-  getFileTypeByExtension
-};

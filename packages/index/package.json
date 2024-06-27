@@ -2,10 +2,8 @@
   "name": "@home-gallery/index",
   "version": "1.0.0",
   "description": "File indexer for HomeGallery",
-  "exports": {
-    "import": "./dist/import-wrapper.mjs",
-    "require": "./dist/index.js"
-  },
+  "type": "module",
+  "exports": "./dist/index.js",
   "files": [
     "dist"
   ],

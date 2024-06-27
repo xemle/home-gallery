@@ -1,10 +1,15 @@
 
-const log = require('@home-gallery/logger')('fetch')
+import Logger from '@home-gallery/logger'
 
-const { fetchDatabase, fetchEvents, connectEventStream } = require('./api')
-const { readDatabase, mergeDatabase, filterDatabaseByQuery } = require('./database')
-const { handlePreviews } = require('./preview')
-const { handleEvents, applyEvents } = require('./event')
+const log = Logger('fetch')
+
+import { fetchDatabase, fetchEvents, connectEventStream } from './api.js'
+import { readDatabase, mergeDatabase, filterDatabaseByQuery } from './database.js'
+import { handlePreviews } from './preview.js'
+import { handleEvents, applyEvents } from './event.js'
+
+export { fetchDatabase } from './api.js'
+export { readDatabase } from './database.js'
 
 const handleEventError = requireEvents => {
   return err => {
@@ -29,7 +34,7 @@ const mergeAndFilterDatabase = async (database, events, query) => {
 /**
  * @param {import('./types').Remote} remote
  */
-const fetch = async (remote, options = {}) => {
+const fetchAndMerge = async (remote, options = {}) => {
   const database = options.config?.database || {}
   const events = options.config?.events || {}
   const storage = options.config?.storage || {}
@@ -54,7 +59,7 @@ const fetch = async (remote, options = {}) => {
  * @param {import('./types').Remote} remote
  * @param {import('./types').FetchOption} options
  */
-const fetchRemote = async (remote, options) => {
+export const fetchRemote = async (remote, options) => {
   const [database, events] = await Promise.all([
     fetchDatabase(remote),
     fetchEvents(remote).catch(handleEventError(options?.requireEvents))
@@ -67,7 +72,7 @@ const fetchRemote = async (remote, options) => {
  * @param {import('./types').Remote} remote
  * @param {*} options
  */
-const fetchWatchFacade = async (remote, options) => {
+export const fetch = async (remote, options) => {
   let hasNewDatabase = false
   let isFetching = false
   let fetchOnReconnect = false
@@ -79,7 +84,7 @@ const fetchWatchFacade = async (remote, options) => {
     isFetching = true
     hasNewDatabase = false
     const t0 = Date.now()
-    return fetch(remote, options)
+    return fetchAndMerge(remote, options)
       .then(() => log.info(t0, `Fetched remote from ${remote.url}`))
       .catch(err => {
         log.error(err, `Failed to fetch from remote ${remote.url}: ${err}`)
@@ -128,11 +133,4 @@ const fetchWatchFacade = async (remote, options) => {
       doFetch().then(resolve).catch(reject)
     }
   })
-}
-
-module.exports = {
-  fetch: fetchWatchFacade,
-  fetchDatabase,
-  fetchEvents,
-  fetchRemote,
 }

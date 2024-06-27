@@ -1,7 +1,7 @@
-const fs = require('fs');
-const ignore = require('ignore');
+import fs from 'fs';
+import ignore from 'ignore';
 
-const fileFilter = (excludes, excludesFromFile, cb) => {
+export const fileFilter = (excludes, excludesFromFile, cb) => {
   if ((!excludes || !excludes.length) && !excludesFromFile) {
     return cb(null, () => true);
   }
@@ -22,5 +22,3 @@ const fileFilter = (excludes, excludesFromFile, cb) => {
     cb(null, ig.createFilter());
   })
 }
-
-module.exports = fileFilter;

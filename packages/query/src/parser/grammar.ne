@@ -1,5 +1,7 @@
+@preprocessor esmodule
+
 @{%
-const moo = require('moo')
+import moo from 'moo'
 
 const keywords = ['or', 'and', 'not', 'all', 'in', 'order', 'by', 'asc', 'desc', 'count', 'exists']
 

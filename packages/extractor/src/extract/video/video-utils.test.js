@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { getVideoStream, isPortraitVideo, fixRotatedScale, getFfmpegArgs, getVideoOptions } = require('./video-utils')
+import { getVideoStream, isPortraitVideo, fixRotatedScale, getFfmpegArgs, getVideoOptions } from './video-utils.js'
 
 t.test('getVideoStream', async t => {
   t.test('success', async t => {

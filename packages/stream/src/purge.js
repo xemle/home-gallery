@@ -1,5 +1,3 @@
-const through = require('./through');
+import { through } from './through.js';
 
-const purge = () => through((entry, _, cb) => cb())
-
-module.exports = purge;
+export const purge = () => through((entry, _, cb) => cb())

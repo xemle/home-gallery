@@ -1,6 +1,9 @@
 import path from 'path'
 import t from 'tap'
-import { PackageReolver } from './PackageResolver'
+import { fileURLToPath } from 'url'
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
+
+import { PackageReolver } from './PackageResolver.js'
 
 const testDir = path.resolve(__dirname, '..', 'test')
 

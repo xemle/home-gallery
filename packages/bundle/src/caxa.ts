@@ -3,7 +3,7 @@ import { createWriteStream, createReadStream } from 'fs'
 import path from 'path'
 import { Readable } from 'stream'
 
-import { logger } from './log'
+import { logger } from './log.js'
 
 const log = logger('caxa')
 

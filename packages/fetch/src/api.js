@@ -1,19 +1,21 @@
-const fs = require('fs/promises')
-const { createWriteStream } = require('fs')
-const path = require('path')
-const { pipeline } = require('stream/promises')
-const fetch = require('node-fetch')
-const https = require('https');
+import fs from 'fs/promises'
+import { createWriteStream } from 'fs'
+import path from 'path'
+import { pipeline } from 'stream/promises'
+import fetch from 'node-fetch'
+import https from 'https';
 
-const { promisify } = require('@home-gallery/common')
-const { isDatabaseTypeCompatible, HeaderType: DatabaseHeaderType, migrate } = require('@home-gallery/database')
-const { isEventTypeCompatible, HeaderType: EventHeaderType } = require('@home-gallery/events')
+import { promisify } from '@home-gallery/common'
+import { isDatabaseTypeCompatible, HeaderType as DatabaseHeaderType, migrate } from '@home-gallery/database'
+import { isEventTypeCompatible, HeaderType as EventHeaderType } from '@home-gallery/events'
 
 const migrateAsync = promisify(migrate)
 
-const log = require('@home-gallery/logger')('fetch.api')
+import Logger from '@home-gallery/logger'
 
-const { EventSource } = require('./event-source')
+const log = Logger('fetch.api')
+
+import { EventSource } from './event-source.js'
 
 const insecureAgent = new https.Agent({
   rejectUnauthorized: false,
@@ -36,7 +38,7 @@ const createIncompatibleError = (data, expectedType) => {
   return err
 }
 
-const fetchDatabase = async (remote) => {
+export const fetchDatabase = async (remote) => {
   const { query } = remote;
   log.debug(`Fetching database ${query ? `with query '${query}' ` : ''}from remote ${remote.url}...`)
   const t0 = Date.now()
@@ -59,7 +61,7 @@ const fetchDatabase = async (remote) => {
     })
 }
 
-const fetchEvents = async (remote) => {
+export const fetchEvents = async (remote) => {
   log.debug(`Fetching events from remote ${remote.url}...`)
   const t0 = Date.now()
   return fetch(`${remote.url}/api/events.json`, options(remote))
@@ -80,7 +82,7 @@ const fetchEvents = async (remote) => {
     })
 }
 
-const fetchFile = async (remote, file, storageDir) => {
+export const fetchFile = async (remote, file, storageDir) => {
   log.trace(`Fetching ${file} from remote ${remote.url}...`)
   const targetFilename = path.join(storageDir, file)
   const dir = path.dirname(targetFilename)
@@ -103,7 +105,7 @@ const fetchFile = async (remote, file, storageDir) => {
     .catch(err => log.warn(err, `Failed to fetch ${file} from remote ${remote.url}: ${err}. Continue`))
 }
 
-const connectEventStream = (remote, onEvent) => {
+export const connectEventStream = (remote, onEvent) => {
   const source = new EventSource(`${remote.url}/api/events/stream`, options(remote))
   let stopped = false
   let retries = 0
@@ -155,11 +157,4 @@ const connectEventStream = (remote, onEvent) => {
   })
 
   reconnect()
-}
-
-module.exports = {
-  fetchDatabase,
-  fetchEvents,
-  fetchFile,
-  connectEventStream,
 }

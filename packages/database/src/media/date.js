@@ -1,6 +1,8 @@
-const { getMetaEntries } = require('./utils')
+import { getMetaEntries } from './utils.js'
 
-const log = require('@home-gallery/logger')('database.media.date')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('database.media.date')
 
 // '0000:00:00 00:00:00' => false
 // {tzoffsetMinutes: 120, rawValue: '2004:10:19 10:34:17'} => '2004-10-19T10:34:17+02:00'
@@ -45,7 +47,7 @@ function getExifDate(entry) {
   return dateKeys.reduce((date, key) => date || parseExiftoolDate(entry, exif[key]), false)
 }
 
-function getEntryDate(entry) {
+export function getEntryDate(entry) {
   const metaEntries = getMetaEntries(entry)
   const metaDate = metaEntries.reduce((date, entry) => date || getExifDate(entry), false)
   if (metaDate) {
@@ -54,8 +56,4 @@ function getEntryDate(entry) {
 
   const allEntries = [entry, ...(entry.sidecars || [])]
   return allEntries.reduce((date, entry) => date || getExifDate(entry), false)
-}
-
-module.exports = {
-  getEntryDate
 }

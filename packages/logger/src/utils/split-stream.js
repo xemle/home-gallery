@@ -1,8 +1,8 @@
-const { Transform } = require('stream')
+import { Transform } from 'stream'
 
-const Splitter = require('./Splitter')
+import { Splitter } from './Splitter.js'
 
-const splitStream = (sep = '\n') => {
+export const splitStream = (sep = '\n') => {
   const splitter = new Splitter(sep)
   return new Transform({
     objectMode: true,
@@ -17,5 +17,3 @@ const splitStream = (sep = '\n') => {
     }
   })
 }
-
-module.exports = splitStream

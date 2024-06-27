@@ -1,9 +1,7 @@
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
 
-const exists = require('../../utils/exists');
-const { dirLock, MIN_MS } = require('../../utils/dir-lock');
-const downloadFile = require('../../utils/download-file');
+import { downloadFile, exists, dirLock, MIN_MS } from '../../utils/index.js';
 
 const getWeightPaths = async modelFile => {
   const json = await fs.readFile(modelFile, 'utf8');
@@ -35,7 +33,7 @@ const downloadModelWeights = async (url, cacheDir, queryParams, modelFile, bulkS
   await bulk(bulkSize);
 }
 
-const downloadModel = async (url, cacheDir, queryParams) => {
+export const downloadModel = async (url, cacheDir, queryParams) => {
   const modelName = 'model.json';
   const modelFile = path.join(cacheDir, modelName);
   const lockFile = path.join(cacheDir, '.LOCK');
@@ -60,4 +58,3 @@ const downloadModel = async (url, cacheDir, queryParams) => {
   })
 }
 
-module.exports = downloadModel;

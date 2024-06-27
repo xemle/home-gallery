@@ -1,5 +1,3 @@
-const fs = require('fs').promises;
+import fs from 'fs/promises';
 
-const exists = async file => fs.access(file).then(() => true, () => false);
-
-module.exports = exists;
+export const exists = async file => fs.access(file).then(() => true, () => false);

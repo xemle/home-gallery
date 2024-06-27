@@ -1,6 +1,6 @@
-const { through } = require('@home-gallery/stream');
+import { through } from '@home-gallery/stream';
 
-const toPipe = (task, flush) => {
+export const toPipe = (task, flush) => {
   return through(function (entry, _, cb) {
     const that = this;
     task(entry, () => {
@@ -16,7 +16,7 @@ const toPipe = (task, flush) => {
   });
 }
 
-const conditionalTask = (test, task) => {
+export const conditionalTask = (test, task) => {
   return (entry, cb) => {
     if (test(entry)) {
       task(entry, cb);
@@ -24,9 +24,4 @@ const conditionalTask = (test, task) => {
       cb(entry);
     }
   }
-}
-
-module.exports = {
-  toPipe,
-  conditionalTask
 }

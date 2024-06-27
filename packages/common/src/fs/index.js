@@ -1,23 +1,9 @@
-const fileFilter = require('./file-filter');
-const { fileTypes, getFileTypeByExtension } = require('./file-types');
-const sidecars = require('./sidecars');
-const mkdirp = require('./mkdirp');
-const { readDir, readDirCreate } = require('./readdir');
-const readJsonGzip = require('./read-json-gzip');
-const sha1Hex = require('./sha1-hex');
-const writeJsonGzip = require('./write-json-gzip');
-const writeSafe = require('./write-safe');
-
-module.exports = {
-  fileFilter,
-  fileTypes,
-  getFileTypeByExtension,
-  mkdirp,
-  readDir,
-  readDirCreate,
-  readJsonGzip,
-  sha1Hex,
-  sidecars,
-  writeJsonGzip,
-  writeSafe
-}
+export { fileFilter } from './file-filter.js';
+export { fileTypes, getFileTypeByExtension } from './file-types.js';
+export * as sidecars from './sidecars.js';
+export { mkdirp as mkdir } from './mkdirp.js';
+export { readDir, readDirCreate } from './readdir.js';
+export { readJsonGzip } from './read-json-gzip.js';
+export { sha1Hex } from './sha1-hex.js';
+export { writeJsonGzip } from './write-json-gzip.js';
+export { writeSafe } from './write-safe.js';

@@ -2,10 +2,8 @@
   "name": "@home-gallery/fetch",
   "version": "1.0.0",
   "description": "Fetch data from other HomeGalleries",
-  "exports": {
-    "import": "./dist/import-wrapper.mjs",
-    "require": "./dist/index.js"
-  },
+  "type": "module",
+  "exports": "./dist/index.js",
   "files": [
     "dist"
   ],
