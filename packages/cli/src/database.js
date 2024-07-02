@@ -93,7 +93,7 @@ const command = {
         }
 
         const t0 = Date.now();
-        run()
+        return run()
           .then(database => {
             log.info(t0, `Created database with ${database.data.length} entries`)
           })
@@ -171,7 +171,7 @@ const command = {
             })
         }
 
-        run()
+        return run()
           .catch(err => {
             log.error(err, `Failed to rewrite database: ${err}`)
             process.exit(1)

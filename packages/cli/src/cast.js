@@ -72,7 +72,7 @@ const command = {
       maxPreviewSize: argv.maxPreviewSize
     }
     const t0 = Date.now();
-    import('@home-gallery/cast')
+    return import('@home-gallery/cast')
       .then(cast => cast(options))
       .then(() => {
         log.info(t0, `Cast from gallery ${options.serverUrl}`)

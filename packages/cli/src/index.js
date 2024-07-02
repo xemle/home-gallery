@@ -16,7 +16,7 @@ import interactiveCli from './interactive/index.js';
 import runCli from './run.js'
 
 export const cli = () => {
-  yargs(hideBin(process.argv))
+  return yargs(hideBin(process.argv))
     .usage('Usage: $0 [global options] <command> [options]')
     .env('GALLERY')
     .options(loggerOptions)

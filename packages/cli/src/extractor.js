@@ -187,7 +187,7 @@ const command = {
     }
 
     const t0 = Date.now();
-    run(argv)
+    return run(argv)
       .then(count => {
         log.info(t0, `Extract all meta data and calculated all preview files from ${count} entries`);
       })

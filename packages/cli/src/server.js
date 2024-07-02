@@ -147,7 +147,7 @@ const command = {
       })
     }
 
-    run(argv)
+    return run(argv)
       .then(() => {
         log.info(`Server stopped`)
         process.exit(0)

@@ -74,7 +74,7 @@ const command = {
         }
 
         const t0 = Date.now();
-        run()
+        return run()
           .then(() => {
             log.info(t0, 'Purged orphan files')
           })

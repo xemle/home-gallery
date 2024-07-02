@@ -110,7 +110,7 @@ const command = {
         })
     }
 
-    run()
+    return run()
       .catch(err => {
         log.error(err, `Could not fetch from remote: ${err}`);
         process.exit(1)

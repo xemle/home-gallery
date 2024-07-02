@@ -96,7 +96,7 @@ const command = {
         }
 
         const t0 = Date.now();
-        run()
+        return run()
           .then((dir, archiveFile) => {
             log.info(t0, `Created export to ${archiveFile ? archiveFile : dir}`);
           })
@@ -161,7 +161,7 @@ const command = {
 
         log.info(`Exporting meta data to sidecar files${argv.dryRun? ' in dry run mode' : ''}`)
         const t0 = Date.now();
-        run()
+        return run()
           .then((updatedFiles) => {
             if (updatedFiles.length) {
               log.info(t0, `Exported meta data to ${updatedFiles.length} sidecar files${argv.dryRun? ' (dry run)' : ''}`)
