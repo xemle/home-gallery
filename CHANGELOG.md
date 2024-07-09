@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- database: Use stream based database reader and writer
+
 ### Changed
 
 - Use ESM instead of CommonJS

@@ -1,4 +1,6 @@
+export { compose } from './compose.js';
 export { concurrent } from './concurrent.js';
+export { createAtomicWriteStream } from './createAtomicWriteStream.js';
 export { each } from './each.js';
 export { filter } from './filter.js';
 export { flatten } from './flatten.js';
