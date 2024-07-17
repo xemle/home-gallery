@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- database: Stream based database build to reduce resouces
 - database: Rewrite database migration handling
+- database: Use stream based database reader and writer
 - Use ESM instead of CommonJS
 
 ### Fixed

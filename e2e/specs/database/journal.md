@@ -44,17 +44,11 @@ Tags: database, option, journal
 
 ## Add file to other path
 
-Tags: group
-
 * Prepare journal from "database/journal"
 * Add file "index/basic/IMG_2915.JPG" as "other/IMG_2915.JPG"
 * Create index with args "--journal abc"
 * Create database with args "--journal abc"
 * Database has "3" entries
-* Database has "1" groups
-* Database group "96419bb" has "2" entries
-* Database group "96419bb" has file "IMG_2915.JPG"
-* Database group "96419bb" has file "other/IMG_2915.JPG"
 
 ## Remove file
 

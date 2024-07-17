@@ -14,7 +14,9 @@ const log = Logger('database.readStream')
 export const createReadableStream = async (filename) => {
   const exists = await access(filename).then(() => true, () => false)
   if (!exists) {
-    throw new Error(`Database ${filename} does not exists`)
+    const err = new Error(`Database ${filename} does not exists`)
+    err.code = 'ENOENT'
+    throw err
   }
 
   const [migration, onHeader] = createMigration()

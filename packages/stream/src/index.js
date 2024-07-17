@@ -7,6 +7,7 @@ export { flatten } from './flatten.js';
 export { group } from './group.js';
 export { limit } from './limit.js';
 export { log } from './log.js';
+export { noop } from './noop.js';
 export { map } from './map.js';
 export { memoryIndicator } from './memory-indicator.js';
 export { parallel } from './parallel.js';

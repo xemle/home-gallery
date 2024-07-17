@@ -1,8 +1,10 @@
 import { through } from '@home-gallery/stream';
-import { readEntryFilesCached } from '@home-gallery/storage';
 
-export const readStorageData = (storageDir) => {
-  const { readEntryFiles, clearCache } = readEntryFilesCached(storageDir);
+/**
+ * @param {import('../storage').Storage} storage
+ * @returns {import('stream').Transform}
+ */
+export const readStorageData = (storage) => {
 
   const task = (entries, cb) => {
     let i = 0;
@@ -11,7 +13,7 @@ export const readStorageData = (storageDir) => {
         return cb();
       }
       const entry = entries[i++];
-      readEntryFiles(entry, (err, filesAndMeta) => {
+      storage.readEntryFiles(entry, (err, filesAndMeta) => {
         if (err || !filesAndMeta) {
           filesAndMeta = { files: [], meta: {}};
         }
@@ -28,7 +30,7 @@ export const readStorageData = (storageDir) => {
   };
 
   const flush = (cb) => {
-    clearCache();
+    storage.clearCache();
     cb();
   }
 

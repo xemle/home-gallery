@@ -8,6 +8,7 @@ const log = Logger('storage.purge');
 import { readJsonGzip, promisify, humanizeBytes as humanize } from '@home-gallery/common';
 
 import { getEntryFilesCacheId } from './entry-files-cache-file.js'
+import { getMediaCacheId } from './media-cache-file.js'
 
 const asyncReadJsonGzip = promisify(readJsonGzip)
 
@@ -27,6 +28,8 @@ const getValidIdMapFromDatabase = (database) => {
   const cacheIds = files.reduce((result, file) => {
     const cacheId = getEntryFilesCacheId({indexName: file.index, ...file})
     result[cacheId] = true
+    const mediaCacheId = getMediaCacheId({files: [{indexName: file.index, ...file}]})
+    result[mediaCacheId] = true
     return result
   }, {})
 

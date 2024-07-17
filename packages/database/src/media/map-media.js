@@ -39,6 +39,7 @@ const createMedia = (entry, updated) => {
     hash: '',
     type: entry.type,
     updated,
+    groupIds: [],
     date,
     files,
     previews,

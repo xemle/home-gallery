@@ -80,7 +80,6 @@ const command = {
 
         const run = async() => {
           const { buildDatabase } = await import('@home-gallery/database')
-          const { promisify } = await import('@home-gallery/common')
 
           const options = await load(argv.config, false, argv.autoConfig)
 
@@ -88,14 +87,13 @@ const command = {
           setDefaults(options.config)
           validatePaths(options.config, ['fileIndex.files', 'storage.dir', 'database.file'])
 
-          const buildDatabaseAsync = promisify(buildDatabase)
-          return buildDatabaseAsync(options)
+          return buildDatabase(options)
         }
 
         const t0 = Date.now();
         return run()
-          .then(database => {
-            log.info(t0, `Created database with ${database.data.length} entries`)
+          .then(count => {
+            log.info(t0, `Created database with ${count} entries`)
           })
           .catch(err => {
             if (err?.code == 'ENOCHANGE') {
