@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- database: Rewrite database migration handling
 - Use ESM instead of CommonJS
 
 ### Fixed

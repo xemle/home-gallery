@@ -11,7 +11,7 @@ import { pipeline } from 'stream/promises'
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const testDir = path.resolve(__dirname, '..', '..', 'test')
 
-t.test('createReadableStream', async t => {
+t.only('createReadableStream', async t => {
   t.test('basic', async t => {
     const filename = path.resolve(testDir, 'database.db')
 
@@ -35,6 +35,26 @@ t.test('createReadableStream', async t => {
 
 
     t.rejects(createReadableStream(unknownFile))
+  })
+
+  t.test('with migration', async t => {
+    const filename = path.resolve(testDir, 'database-v1.0.db')
+
+
+    const readable = await createReadableStream(filename)
+    const entries = []
+    await pipeline(
+      readable,
+      through(function(entry, _, cb) {
+        entries.push(entry)
+        cb()
+      })
+    )
+
+
+    t.same(entries.length, 2)
+    t.same(entries[0].hash, "99e61930141e8afff0d6d8c52997ec7295d62fd2")
+    t.same(entries[1].hash, "d7496b6da889280fc0c175b9b6e3a5326097d023")
   })
 })
 

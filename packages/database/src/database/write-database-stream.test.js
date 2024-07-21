@@ -7,6 +7,7 @@ import { pipeline } from 'stream/promises'
 import { Readable } from 'stream'
 
 import { through } from '@home-gallery/stream'
+import { GalleryFileType } from '@home-gallery/common'
 
 import { createReadableStream } from './read-database-stream.js'
 import { createWriteStream, createStringifyEntry } from './write-database-stream.js'
@@ -36,6 +37,8 @@ t.only('createWriteStream', async t => {
 })
 
 t.test('createStringifyEntry', async t => {
+  const databaseFileType = new GalleryFileType("home-gallery/database@1.3")
+
   t.test('basic', async t => {
     const entries = [
       {id: 'abc'},
@@ -46,7 +49,7 @@ t.test('createStringifyEntry', async t => {
     let data = ''
     await pipeline(
       Readable.from(entries),
-      createStringifyEntry(new Date('2024-07-13T22:24:36Z')),
+      createStringifyEntry(databaseFileType, new Date('2024-07-13T22:24:36Z')),
       through(function(json, enc, cb) {
         data += json
         cb()
@@ -64,7 +67,7 @@ t.test('createStringifyEntry', async t => {
     let data = ''
     await pipeline(
       Readable.from(entries),
-      createStringifyEntry(new Date('2024-07-13T22:24:36Z')),
+      createStringifyEntry(databaseFileType, new Date('2024-07-13T22:24:36Z')),
       through(function(json, enc, cb) {
         data += json
         cb()

@@ -6,6 +6,9 @@ import { through } from '@home-gallery/stream'
 
 import Logger from '@home-gallery/logger'
 
+import { getMigrationsFor, getMigrationMapper, getDatabaseFileType } from './migrate.js'
+import { GalleryFileType } from '@home-gallery/common'
+
 const log = Logger('database.readStream')
 
 export const createReadableStream = async (filename) => {
@@ -14,10 +17,13 @@ export const createReadableStream = async (filename) => {
     throw new Error(`Database ${filename} does not exists`)
   }
 
+  const [migration, onHeader] = createMigration()
+
   return pipeline(
     createReadStream(filename),
     createGunzip(),
-    createEntrySplitter(filename),
+    createEntrySplitter(filename).on('header', onHeader),
+    migration,
     // emptyErrorHandler: credits to https://medium.com/homullus/catching-errors-in-nodejs-stream-pipes-3ba9d258cc68
     function emptyErrorHandler() {}
   )
@@ -47,13 +53,13 @@ export const createEntrySplitter = (filename) => {
     data += chunk.toString('utf8')
     let pos = 0
     if (isFirstChunk) {
-      const [err, end, head] = findHeader(data)
+      const [err, end, header] = findHeader(data)
       if (err) {
         return cb(new Error(`Failed to read database header from ${filename}: ${err}`))
       } else if (end < 0) {
         return cb()
       } else {
-        stream.emit('head', head)
+        stream.emit('header', header)
         pos = end
         isFirstChunk = false
       }
@@ -206,4 +212,49 @@ const findLastEntry = (data, start = 0) => {
   } catch (e) {
     return [e]
   }
+}
+
+const createMigration = () => {
+  const databaseFileType = getDatabaseFileType()
+  let migrationMapper = entry => entry
+  let err
+
+  /**
+   * @param {DatabaseHeader} header
+   */
+  const onHeader = header => {
+    if (!databaseFileType.isCompatibleType(header.type)) {
+      throw new Error(`Incompatible database type ${header.type} for ${databaseFileType}`)
+    }
+
+    const fileType = new GalleryFileType(header.type)
+    const requiredMigrations = getMigrationsFor(fileType.semVer)
+    if (!requiredMigrations.length) {
+      return
+    }
+
+    log.debug(`Migrating database from ${fileType.semVer}`)
+    requiredMigrations.forEach(migration => {
+      log.info(`Migrate to ${migration.version}: ${migration.description}`)
+    })
+
+    migrationMapper = getMigrationMapper(requiredMigrations)
+  }
+
+  const stream = through((entry, enc, cb) => {
+    if (err) {
+      return cb(err)
+    }
+
+    let migrated
+    try {
+      migrated = migrationMapper(entry)
+    } catch (err) {
+      log.warn(err, `Failed to migrate entry ${entry}: ${err}. Skip migration`)
+      return cb(null, entry)
+    }
+    cb(null, migrated)
+  })
+
+  return [stream, onHeader]
 }

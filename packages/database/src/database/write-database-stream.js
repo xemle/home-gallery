@@ -4,7 +4,7 @@ import { createGzip } from 'zlib'
 import { through, compose, createAtomicWriteStream } from '@home-gallery/stream'
 import Logger from '@home-gallery/logger'
 
-import { HeaderType } from './header.js'
+import { getDatabaseFileType } from './migrate.js'
 
 const log = Logger('database.writeStream')
 
@@ -15,9 +15,10 @@ const log = Logger('database.writeStream')
  */
 export const createWriteStream = async (filename, created = new Date()) => {
   const fileStream = await createAtomicWriteStream(filename)
+  const databaseFileType = getDatabaseFileType()
 
   return compose(
-    createStringifyEntry(created),
+    createStringifyEntry(databaseFileType, created),
     createGzip(),
     fileStream,
     new Transform({
@@ -33,11 +34,11 @@ export const createWriteStream = async (filename, created = new Date()) => {
  * @param {Date} created
  * @returns {Transform}
  */
-export const createStringifyEntry = (created = new Date()) => {
+export const createStringifyEntry = (databaseFileType, created = new Date()) => {
   let isFirstEntry = true
 
   const headerJson = JSON.stringify({
-    type: HeaderType,
+    type: databaseFileType.toString(),
     created: created.toISOString(),
     data: []
   })
