@@ -5,11 +5,8 @@ import { pipeline } from 'stream/promises'
 import fetch from 'node-fetch'
 import https from 'https';
 
-import { promisify } from '@home-gallery/common'
-import { isDatabaseTypeCompatible, HeaderType as DatabaseHeaderType, migrate } from '@home-gallery/database'
+import { migrate } from '@home-gallery/database'
 import { isEventTypeCompatible, HeaderType as EventHeaderType } from '@home-gallery/events'
-
-const migrateAsync = promisify(migrate)
 
 import Logger from '@home-gallery/logger'
 
@@ -38,6 +35,13 @@ const createIncompatibleError = (data, expectedType) => {
   return err
 }
 
+/**
+ * @typedef {import('./types.js').RemoteDatabase} RemoteDatabase
+ */
+/**
+ * @param {import('./types.js').Remote} remote
+ * @returns {Promise<RemoteDatabase>}
+ */
 export const fetchDatabase = async (remote) => {
   const { query } = remote;
   log.debug(`Fetching database ${query ? `with query '${query}' ` : ''}from remote ${remote.url}...`)
@@ -52,12 +56,10 @@ export const fetchDatabase = async (remote) => {
       }
       return res.json()
     })
+    .then(migrate)
     .then(database => {
-      if (!isDatabaseTypeCompatible(database?.type)) {
-        throw createIncompatibleError(database, DatabaseHeaderType)
-      }
       log.info(t0, `Fetched database with ${database?.data?.length || 0} entries from remote ${remote.url}`)
-      return migrateAsync(database)
+      return database
     })
 }
 
