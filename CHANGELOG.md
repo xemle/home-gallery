@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- extractor: Fix vips thumbnail creation on relative storage dir
 - server: Fix env for missing config file arg
 
 ## [1.15.1] - 2024-06-15
