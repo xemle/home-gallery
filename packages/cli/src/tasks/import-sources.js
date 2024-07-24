@@ -1,3 +1,4 @@
+import path from 'path'
 import chokidar from 'chokidar'
 
 import Logger from '@home-gallery/logger'
@@ -167,6 +168,7 @@ export const watchSources = async (sources, options) => {
   let isImporting = false
   let isInitializing = true
   let fileChangeCount = 0
+  let sourcesQueue = []
   const sourceDirs = sources.map(source => source.dir)
 
   log.info(`Run import in watch mode. Start watching source dirs for file changes: ${sourceDirs.join(', ')}`)
@@ -188,7 +190,9 @@ export const watchSources = async (sources, options) => {
     }
     isImporting = true
     fileChangeCount = 0
-    return batchImport(sources, options)
+    const importSources = sourcesQueue.length ? sourcesQueue : sources
+    sourcesQueue = []
+    return batchImport(importSources, options)
       .then(() => {
         isImporting = false
         if (fileChangeCount > 0) {
@@ -198,6 +202,14 @@ export const watchSources = async (sources, options) => {
       })
   }
 
+  const queueSourceOf = file => {
+    const source = sources.find(source => file.startsWith(path.resolve(source.dir)))
+    if (source && !sourcesQueue.includes(source)) {
+      sourcesQueue.push(source)
+      log.debug(`Queue source ${source.dir} for next import`)
+    }
+  }
+
   const createChangeDelay = (delay, maxDelay, onChange) => {
     let firstChangeMs
     let timerId
@@ -205,13 +217,14 @@ export const watchSources = async (sources, options) => {
     const clearTimer = () => clearTimeout(timerId)
     process.once('SIGINT', clearTimer)
 
-    return (event, path) => {
+    return (event, file) => {
       if (fileChangeCount == 0) {
         firstChangeMs = Date.now()
       }
       fileChangeCount++
       const importDelay = Math.min(Math.max(0, firstChangeMs + maxDelay - Date.now()), delay)
-      log.trace(`File change detected: ${event} at ${path}. Delay import by ${importDelay}ms`)
+      log.trace(`File change detected: ${event} at ${file}. Delay import by ${importDelay}ms`)
+      queueSourceOf(path.resolve(file))
       clearTimer()
       timerId = setTimeout(() => {
         if (!fileChangeCount) {
