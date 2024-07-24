@@ -2,11 +2,11 @@ import t from 'tap'
 import path from 'path'
 import { Readable } from 'stream'
 import { fileURLToPath } from 'url'
-
-
-import { createReadableStream, createOrEmptyReadableStream, createEntrySplitter } from './read-database-stream.js'
-import { through } from '@home-gallery/stream'
 import { pipeline } from 'stream/promises'
+
+import { through } from '@home-gallery/stream'
+
+import { createReadableStream, createOrEmptyReadableStream, readDatabaseStreamed, createEntrySplitter } from './read-database-stream.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const testDir = path.resolve(__dirname, '..', '..', 'test')
@@ -75,6 +75,20 @@ t.test('createOrEmptyReadableStream', async t => {
 
 
     t.same(entries.length, ``)
+  })
+})
+
+t.only('readDatabaseStreamed', async t => {
+  t.test('basic', async t => {
+    const filename = path.resolve(testDir, 'database-v1.0.db')
+
+
+    const database = await readDatabaseStreamed(filename)
+
+
+    t.same(database.type, 'home-gallery/database@1.3.0')
+    t.same(database.created, '2024-07-10T20:07:25.084Z')
+    t.same(database.data.length, 2)
   })
 })
 

@@ -5,18 +5,16 @@ import Logger from '@home-gallery/logger'
 const log = Logger('server.api.database.read');
 
 import { debounce } from '@home-gallery/common';
-import { readDatabase } from '@home-gallery/database';
+import { readDatabaseStreamed } from '@home-gallery/database';
 import { applyEvents } from './events-facade.js'
 
 export function read(filename, cb) {
   const t0 = Date.now();
-  readDatabase(filename, (err, database) => {
-    if (err) {
-      return cb(err);
-    }
-    log.info(t0, `Read database file ${filename} with ${database.data.length} entries`);
-    cb(err, database);
-  });
+  readDatabaseStreamed(filename)
+    .then(database => {
+      log.info(t0, `Read database file ${filename} with ${database.data.length} entries`);
+      cb(null, database);
+    }, cb);
 }
 
 

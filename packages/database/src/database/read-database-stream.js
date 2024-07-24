@@ -1,8 +1,9 @@
 import { createReadStream } from 'fs'
 import { access } from 'fs/promises'
 import { pipeline, Readable } from 'stream'
+import { pipeline as pipelineAsync } from 'stream/promises'
 import { createGunzip } from 'zlib'
-import { through } from '@home-gallery/stream'
+import { through, toList, write } from '@home-gallery/stream'
 
 import Logger from '@home-gallery/logger'
 
@@ -44,6 +45,20 @@ export const createOrEmptyReadableStream = async (databaseFilename) => {
       log.info(`Database file ${databaseFilename} not found. Initialize new database`)
       return Readable.from([])
     })
+}
+
+export const readDatabaseStreamed = async (filename) => {
+  const readable = await createReadableStream(filename)
+
+  let database = {}
+
+  await pipelineAsync(
+    readable.on('header:migration', header => database = header),
+    toList(),
+    write(data => database.data = data)
+  )
+
+  return database
 }
 
 export const createEntrySplitter = (filename) => {
@@ -232,6 +247,7 @@ const createMigration = () => {
     const fileType = new GalleryFileType(header.type)
     const requiredMigrations = getMigrationsFor(fileType.semVer)
     if (!requiredMigrations.length) {
+      stream.emit('header:migration', header)
       return
     }
 
@@ -239,6 +255,10 @@ const createMigration = () => {
     requiredMigrations.forEach(migration => {
       log.info(`Migrate to ${migration.version}: ${migration.description}`)
     })
+
+    const lastVersion = requiredMigrations[requiredMigrations.length - 1].version
+    const migratedType = new GalleryFileType(`home-gallery/database@${lastVersion}`, '1.0.0')
+    stream.emit('header:migration', {...header, type: migratedType.toString()})
 
     migrationMapper = getMigrationMapper(requiredMigrations)
   }
