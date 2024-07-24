@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- server: Fix arguments to handle database read errors
 - extractor: Fix vips thumbnail creation on relative storage dir
 - server: Fix env for missing config file arg
 

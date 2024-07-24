@@ -58,7 +58,7 @@ const mergeEvents = (database, getEvents, cb) => {
   })
 }
 
-export function waitReadWatch(filename, getEvents, stringifyEntryCache, cb) {
+export function waitReadWatch(filename, getEvents, cb) {
   const onChange = () => {
     exists(filename, (err, hasFile) => {
       if (err) {
@@ -77,7 +77,7 @@ export function waitReadWatch(filename, getEvents, stringifyEntryCache, cb) {
       if (err) {
         return cb(err);
       }
-      mergeEvents(database, getEvents, stringifyEntryCache, (err, database) => {
+      mergeEvents(database, getEvents, (err, database) => {
         if (err) {
           return cb(err)
         }
