@@ -4,12 +4,11 @@ import Logger from '@home-gallery/logger'
 const log = Logger('fetch')
 
 import { fetchDatabase, fetchEvents, connectEventStream } from './api.js'
-import { readDatabase, mergeDatabase, filterDatabaseByQuery } from './database.js'
+import { mergeRemoteDatabase, filterDatabaseByQuery } from './database.js'
 import { handlePreviews } from './preview.js'
 import { handleEvents, applyEvents } from './event.js'
 
 export { fetchDatabase } from './api.js'
-export { readDatabase } from './database.js'
 
 const handleEventError = requireEvents => {
   return err => {
@@ -40,18 +39,17 @@ const fetchAndMerge = async (remote, options = {}) => {
   const storage = options.config?.storage || {}
 
   log.info(`Reading local and fetching remote database`)
-  const [remoteDatabase, remoteEvents, localDatabase] = await Promise.all([
+  const [remoteDatabase, remoteEvents] = await Promise.all([
     fetchDatabase(remote),
-    fetchEvents(remote).catch(handleEventError(events.required)),
-    readDatabase(database.file)
+    fetchEvents(remote).catch(handleEventError(events.required))
   ])
 
   const remoteFilteredDatabase = await mergeAndFilterDatabase(remoteDatabase, remoteEvents, remote.query)
-  await handlePreviews(remote, remoteFilteredDatabase, localDatabase, storage.dir)
+  await handlePreviews(remote, remoteFilteredDatabase, storage.dir)
   await handleEvents(remoteEvents, events.file).catch(err => {
     log.warn(`Failed to merge events: ${err}. Skip events`)
   })
-  await mergeDatabase(remoteFilteredDatabase, localDatabase, database.file, remote.deleteLocal)
+  await mergeRemoteDatabase(database.file, remoteFilteredDatabase, storage.dir, remote)
 }
 
 

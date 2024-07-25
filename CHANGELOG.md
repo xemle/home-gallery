@@ -7,12 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- cli: Only import changed sources in watch mode
+- database: Use stream based database reader and writer
+
 ### Changed
 
+- database: Stream based database build to reduce resouces
+- database: Rewrite database migration handling
+- database: Use stream based database reader and writer
 - Use ESM instead of CommonJS
 
 ### Fixed
 
+- server: Fix arguments to handle database read errors
+- extractor: Fix vips thumbnail creation on relative storage dir
 - server: Fix env for missing config file arg
 
 ## [1.15.1] - 2024-06-15

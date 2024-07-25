@@ -14,3 +14,15 @@
  * @prop {boolean} [requireEvents] If true the event file must exists
  * @prop {boolean} [query] Query
  */
+
+/**
+ * @typedef RemoteDatabase
+ * @prop {string} type
+ * @prop {RemoteDatabaseEntry[]} data
+ */
+/**
+ * @typedef RemoteDatabaseEntry
+ * @prop {string[]} previews
+ */
+
+export const Types = {}

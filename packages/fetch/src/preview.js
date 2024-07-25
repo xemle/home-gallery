@@ -1,40 +1,53 @@
 import fs from 'fs'
+import { access } from 'fs/promises'
 import path from 'path'
 import { Readable } from 'stream'
 import { pipeline } from 'stream/promises'
 
 import Logger from '@home-gallery/logger'
-
-const log = Logger('fetch.preview')
 import { parallel, purge } from '@home-gallery/stream'
 
 import { fetchFile } from './api.js'
 
-const getPreviewFiles = (remoteDatabase, localDatabase, downloadAll) => {
-  const t0 = Date.now()
-  const localFileMap = {}
-  if (!downloadAll) {
-    log.trace(`Collecting local files`)
-    localDatabase.data.reduce((fileMap, entry) => {
-      (entry.previews || []).forEach(file => fileMap[file] = true)
-      return fileMap
-    }, localFileMap)
-    log.debug(t0, `Found ${Object.keys(localFileMap).length} local files`)
-  }
+const log = Logger('fetch.preview')
 
-  log.trace(`Collecting remote files`)
+/**
+ * @param {import('./types.js').RemoteDatabase} remoteDatabase
+ * @returns {string[]}
+ */
+const getPreviewFiles = (remoteDatabase) => {
   const remoteFiles = remoteDatabase.data.reduce((files, entry) => {
-    const previews = (entry.previews || []).filter(file => !localFileMap[file])
+    const previews = entry.previews || []
     files.push(...previews)
     return files
   }, [])
 
-  log.debug(t0, `Found ${remoteFiles.length} remote files for download`)
   return remoteFiles
 }
 
 /**
- * @param {import('./types').Remote} remote
+ * @param {string[]} previewFiles
+ * @param {string} storageDir
+ * @returns {Promise<string[]>}
+ */
+const collectMissingPreviewFiles = async (previewFiles, storageDir) => {
+  const missingFiles = []
+
+  const t0 = Date.now()
+  for (let file of previewFiles) {
+    const missing = await access(path.resolve(storageDir, file)).then(() => false, () => true)
+    if (missing) {
+      missingFiles.push(file)
+    }
+  }
+  log.trace(t0, `Found ${missingFiles.length} missing from total ${previewFiles.length} remote preview files`)
+
+  return missingFiles
+}
+/**
+ * @param {import('./types.js').Remote} remote
+ * @param {string[]} previewFiles
+ * @param {string} storageDir
  */
 const downloadPreviewFiles = async (remote, previewFiles, storageDir) => {
   if (!previewFiles.length) {
@@ -79,8 +92,14 @@ const downloadPreviewFiles = async (remote, previewFiles, storageDir) => {
 
 /**
  * @param {import('./types.js').Remote} remote
+ * @param {import('./types.js').RemoteDatabase} remoteDatabase
+ * @param {string} storageDir
  */
-export const handlePreviews = async (remote, remoteDatabase, localDatabase, storageDir) => {
-  const previewFiles = getPreviewFiles(remoteDatabase, localDatabase, remote.downloadAll)
-  await downloadPreviewFiles(remote, previewFiles, storageDir)
+export const handlePreviews = async (remote, remoteDatabase, storageDir) => {
+  const previewFiles = getPreviewFiles(remoteDatabase, storageDir)
+  let filesToDownload = previewFiles
+  if (!remote.forceDownload) {
+    filesToDownload = await collectMissingPreviewFiles(previewFiles, storageDir)
+  }
+  await downloadPreviewFiles(remote, filesToDownload, storageDir)
 }

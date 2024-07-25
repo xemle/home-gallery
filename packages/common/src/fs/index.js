@@ -1,3 +1,4 @@
+export { createTmpFile } from './createTmpFile.js';
 export { fileFilter } from './file-filter.js';
 export { fileTypes, getFileTypeByExtension } from './file-types.js';
 export * as sidecars from './sidecars.js';

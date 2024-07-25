@@ -1,3 +1,4 @@
+import path from 'path';
 import { pipeline } from 'stream';
 
 import Logger from '@home-gallery/logger'
@@ -65,7 +66,7 @@ export const extract = async (options) => {
   const { files, journal, minChecksumDate } = config.fileIndex
   const entryStream = await readStreamsAsync(files, journal)
 
-  const storage = createStorage(config.storage.dir)
+  const storage = createStorage(path.resolve(config.storage.dir))
   const extractor = await createExtractor(config)
   const fileFilterFn = await fileFilterAsync(config.extractor.excludes, config.extractor.excludeFromFile)
 

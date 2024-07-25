@@ -6,3 +6,5 @@ export { readStorageFile } from './read-storage-file.js';
 export { readEntryFiles } from './read-entry-files.js';
 export { readEntryFilesCached } from './read-entry-files-cached.js';
 export { purgeOrphanFiles } from './purge-orphan-files.js'
+export { getMediaCacheId, getMediaCacheFilename } from './media-cache-file.js'
+export { readMediaCache, updateMediaCache } from './media-cache.js'
