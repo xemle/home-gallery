@@ -12,6 +12,10 @@ const runNpm = async (args) => {
   })
 }
 
+step("Create <type> plugin <name>", async (type, name) => {
+  return runCli(['plugin', 'create', '--dir', getPluginBaseDir(), '--name', name, '--sourceType', type, '--force']);
+})
+
 step("Create <type> plugin <name> with modules <modules>", async (type, name, modules) => {
   return runCli(['plugin', 'create', '--dir', getPluginBaseDir(), '--name', name, '--sourceType', type, '--modules', ...modules.split(/\s*,\s*/), '--force']);
 })

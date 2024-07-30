@@ -4,6 +4,9 @@ import { {{ className }}Extractor } from './extractor/index.js'
 {{#modules.database}}
 import { {{ className }}DatabaseMapper } from './database/index.js'
 {{/modules.database}}
+{{#modules.query}}
+import { {{ className }}QueryPlugin } from './query/index.js'
+{{/modules.query}}
 
 export class {{ className }}ModuleFactory {
   constructor(manager) {
@@ -14,7 +17,6 @@ export class {{ className }}ModuleFactory {
   {{#modules.extractor}}
 
   getExtractors() {
-    this.log.trace(`Create extractor tasks`)
     return [
       new {{ className }}Extractor(this.manager)
     ]
@@ -23,10 +25,17 @@ export class {{ className }}ModuleFactory {
   {{#modules.database}}
 
   getDatabaseMappers() {
-    this.log.trace(`Create database mappers`)
     return [
       new {{ className }}DatabaseMapper(this.manager)
     ]
   }
   {{/modules.database}}
+  {{#modules.query}}
+
+  getQueryPlugins() {
+    return [
+      new {{ className }}QueryPlugin(this.manager)
+    ]
+  }
+  {{/modules.query}}
 }

@@ -42,21 +42,24 @@ export function ffprobe(storage, ffprobePath) {
 }
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-export const ffprobePlugin = {
+export const ffprobePlugin = manager => ({
   name: 'ffprobe',
   phase: 'meta',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
+  async create(storage) {
+    const config = manager.getConfig()
     const ffprobePath = await getFfprobePath(config)
     const ffmpegPath = await getFfmpegPath(config)
 
+    const context = manager.getContext()
     context.ffprobePath = ffprobePath
     context.ffmpegPath = ffmpegPath
 
-    return ffprobe(context.storage, ffprobePath)
+    return ffprobe(storage, ffprobePath)
   },
-}
+})

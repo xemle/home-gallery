@@ -3,19 +3,14 @@ export const toLower = v => typeof v == 'string' ? v.toLowerCase() : '' + v
 export const getDateByKey = (date, key) => {
   switch (key) {
     case 'year':
-    case 'y':
       return +date.slice(0, 4)
     case 'month':
-    case 'm':
       return +date.slice(5, 7)
     case 'day':
-    case 'd':
       return +date.slice(8, 10)
     case 'hour':
-    case 'H':
       return +date.slice(11, 13)
     case 'minute':
-    case 'M':
       return +date.slice(14, 16)
   }
 }

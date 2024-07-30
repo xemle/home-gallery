@@ -26,7 +26,7 @@ export const getDatabaseMapper = (plugin: TPlugin, factory: TModuleFactory, disa
       log.warn(`Invalid database mapper ${databaseMapper.name} from plugin ${plugin.name}. Ignore it`)
       continue
     }
-    
+
     mapperEntries.push({
       databaseMapper,
       plugin
@@ -64,10 +64,10 @@ export const createStream = (mapperEntries: TDatabaseMapperEntry[], config: TGal
         log.warn(err, `Database mapper ${mapper.name} from plugin ${mapperEntry.plugin.name} failed: ${err}. Ignore`)
       }
     }
-    
+
     media.hash = createHash(serialize(media, 'hash'))
     cb(null, media)
-  })  
+  })
 
   return stream
 }

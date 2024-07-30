@@ -1,6 +1,6 @@
 import { Transform } from "stream";
 
-import { TExtractorContext, TExtractorEntry, TExtractorFunction, TExtractor, TExtractorStream, TExtractorTask, TPlugin, TPluginManager, TStorage, TGalleryConfig, TExtractorStreamTearDown } from "@home-gallery/types";
+import { TExtractorEntry, TExtractorFunction, TExtractor, TExtractorStream, TExtractorTask, TPlugin, TPluginManager, TStorage, TExtractorStreamTearDown } from "@home-gallery/types";
 import { through } from "@home-gallery/stream";
 import Logger from "@home-gallery/logger";
 
@@ -48,7 +48,7 @@ export class ExtractorStreamFactory {
     })
   }
 
-  async getExtractorStreamsFrom(plugin: TPlugin, extractors: TExtractor[], context: TExtractorContext): Promise<TExtractorStream[]> {
+  async getExtractorStreamsFrom(plugin: TPlugin, extractors: TExtractor[]): Promise<TExtractorStream[]> {
     if (!extractors?.length) {
       return []
     }
@@ -56,7 +56,7 @@ export class ExtractorStreamFactory {
     const config = this.manager.getConfig()
     const streams: TExtractorStream[] = []
     for (let extractor of extractors) {
-      await extractor.create(context, config)
+      await extractor.create(this.storage)
         .then(task => {
           if (task instanceof Transform) {
             const logError = (err: any) => log.warn(err, `Extractor transform task ${extractor.name} for phase ${extractor.phase} failed`)
@@ -78,10 +78,6 @@ export class ExtractorStreamFactory {
 
   async getExtractorStreams(): Promise<[TExtractorStream[], TExtractorStreamTearDown]> {
     const disabledExtractors = this.manager.getConfig().pluginManager?.disabledExtractors || []
-    const context: TExtractorContext = {
-      manager: this.manager,
-      storage: this.storage
-    }
 
     const t0 = Date.now()
     const streams = [] as TExtractorStream[]
@@ -98,7 +94,7 @@ export class ExtractorStreamFactory {
           log.info(`Disable extractor ${extractor.name} from ${plugin.plugin.name}`)
           return false
         })
-      const pluginStreams = await this.getExtractorStreamsFrom(plugin.plugin, extractors, context)
+      const pluginStreams = await this.getExtractorStreamsFrom(plugin.plugin, extractors)
       streams.push(...pluginStreams)
     }
     log.debug(t0, `Loaded ${streams.length} extractor tasks from ${this.plugins.length} plugins`)
@@ -115,7 +111,7 @@ export class ExtractorStreamFactory {
 
       const t0 = Date.now()
       for (let plugin of tearDownExtractors) {
-        await plugin.tearDown!(context)
+        await plugin.tearDown!()
           .catch(err => log.warn(err, `Failed to tear down plugin ${plugin.name}: ${err}`))
       }
       log.debug(t0, `All ${tearDownExtractors.length} extractors where teared down: ${tearDownExtractors.map(p => p.name).join(', ')}`)

@@ -6,7 +6,6 @@ import bodyParser from 'body-parser';
 import { fileURLToPath } from 'url'
 
 import { loggerMiddleware } from './logger-middleware.js'
-import { EventBus } from './eventbus.js';
 import { databaseApi } from './api/database/index.js';
 import { treeApi } from './api/database/tree/index.js';
 import { eventsApi } from './api/events/index.js';
@@ -14,8 +13,6 @@ import { webapp } from './webapp.js';
 import { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
 import { isIndex, skipIf } from './utils.js'
 import { debugApi } from './api/debug/index.js'
-
-const eventbus = new EventBus()
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const webappDir = path.join(__dirname, 'public')
@@ -37,8 +34,8 @@ const getAuthMiddleware = config => {
   return (req, _, next) => next()
 }
 
-export function createApp(config) {
-
+export function createApp(context) {
+  const { config } = context
   const app = express();
   app.disable('x-powered-by')
   app.enable('trust proxy')
@@ -55,9 +52,9 @@ export function createApp(config) {
   app.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
   app.use(bodyParser.json({limit: '1mb'}))
 
-  const { read: readEvents, push: pushEvent, stream, getEvents } = eventsApi(eventbus, config.events.file);
-  const { read: readDatabase, init: initDatabase, getFirstEntries, getDatabase } = databaseApi(eventbus, config.database.file, getEvents);
-  const { read: readTree } = treeApi(eventbus, getDatabase);
+  const { read: readEvents, push: pushEvent, stream, getEvents } = eventsApi(context, config.events.file);
+  const { read: readDatabase, init: initDatabase, getFirstEntries, getDatabase } = databaseApi(context, config.database.file, getEvents);
+  const { read: readTree } = treeApi(context, getDatabase);
 
   app.get('/api/events.json', readEvents);
   app.get('/api/events/stream', stream);
@@ -76,7 +73,7 @@ export function createApp(config) {
 
   const disabled = config?.webapp?.disabled || []
   app.use(webapp(webappDir, req => ({
-    disabled: !!req.user ? [...disabled, 'pwa'] : disabled,
+    disabled: !!req.username ? [...disabled, 'pwa'] : disabled,
     entries: getFirstEntries(50)
   }), {
     basePath: config.server.basePath || '/',

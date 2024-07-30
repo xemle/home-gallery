@@ -1,4 +1,4 @@
-import { dateKeys } from './keys.js'
+import { dateKeys } from '../ast/index.js'
 import { toLower, matchNumber, matchFloat, matchDate, getDateByKey, dirname, basename, ext } from './utils.js'
 
 const cmpFilters = [
@@ -92,12 +92,14 @@ const cmpFilters = [
   },
 ]
 
-export const cmpFilter = (ast, options) => {
+export const cmpFilter = (ast, context) => {
   const filter = cmpFilters.find(filter => matchCmpFilter(filter, ast))
   if (filter) {
-    return filter.filter(ast, options)
+    ast.filter = filter.filter(ast, context)
+  } else {
+    ast.filter = () => true
+    context.queryErrorHandler(ast, context, `Unknown cmp mapping. key=${ast.key}, op=${ast.op} or value='${ast.value?.avlue}' is unknown`)
   }
-  return options.unknownExpressionHandler(ast, options)
 }
 
 export const matchCmpFilter = (cmp, ast) => (!cmp.keys || cmp.keys.includes(ast.key)) &&

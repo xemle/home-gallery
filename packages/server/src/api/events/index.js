@@ -9,11 +9,12 @@ import { readEvents, appendEvent } from '@home-gallery/events';
 import { sendError } from '../error/index.js';
 
 /**
- * @param {EventBus} eventbus
+ * @param {import('../../types.js').TServerContext} context
  * @param {string} eventsFilename
  * @returns
  */
-export const eventsApi = (eventbus, eventsFilename) => {
+export const eventsApi = (context, eventsFilename) => {
+  const { eventbus } = context
   let clients = [];
   let events = false;
 

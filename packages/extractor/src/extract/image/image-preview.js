@@ -142,16 +142,18 @@ function imagePreview(storage, createImagePreviews, previewSizes) {
 }
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-const imagePreviewPlugin = {
+const imagePreviewPlugin = manager => ({
   name: 'imagePreview',
   phase: 'file',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
-    const { storage, imageResizer, imagePreviewSizes } = context
+  async create(storage) {
+    const context = manager.getContext()
+    const { imageResizer, imagePreviewSizes } = context
     const sizeToImagePreviewSuffix = size => `image-preview-${size}.jpg`
 
     /**
@@ -166,7 +168,7 @@ const imagePreviewPlugin = {
 
     return imagePreview(storage, createImagePreviews, imagePreviewSizes)
   },
-}
+})
 
 const plugin = toPlugin(imagePreviewPlugin, 'imagePreviewExtractor', ['metaExtractor', 'imageResizeExtractor', 'embeddedRawPreviewExtractor'])
 

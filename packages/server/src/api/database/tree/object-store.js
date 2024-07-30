@@ -2,7 +2,10 @@ import { createHash } from '@home-gallery/common'
 
 const createTree = (name) => ({type: 'tree', name, hash: null, files: []})
 
-const createFile = (file) => ({type: 'entry', name: file.name, hash: file.entry.hash, entry: file.entry})
+const createFile = (file, mapEntry) => {
+  const entry = mapEntry(file.entry)
+  return {type: 'entry', name: file.name, hash: entry.hash, entry}
+}
 
 class ObjectStoreVisitor {
   mergeCount
@@ -10,7 +13,9 @@ class ObjectStoreVisitor {
   store = {}
   paths = []
 
-  constructor(mergeCount = 0) {
+  constructor(entryFilter, mapEntry, mergeCount = 0) {
+    this.entryFilter = entryFilter
+    this.mapEntry = mapEntry
     this.mergeCount = mergeCount
   }
 
@@ -49,8 +54,11 @@ class ObjectStoreVisitor {
   }
 
   visitFile(file) {
+    if (!this.entryFilter(file.entry)) {
+      return
+    }
     const parent = this.paths[this.paths.length - 1]
-    parent.files.push(createFile(file))
+    parent.files.push(createFile(file, this.mapEntry))
   }
 
   afterDir() {
@@ -98,8 +106,8 @@ const walker = (store, hash, visitor, name = '') => {
 export class ObjectStore {
   store = {}
 
-  addFileStore(fileStore, mergeCount = 0) {
-    const visitor = new ObjectStoreVisitor(mergeCount)
+  addFileStore(fileStore, entryFilter = () => true, mapEntry = entry => entry, mergeCount = 0) {
+    const visitor = new ObjectStoreVisitor(entryFilter, mapEntry, mergeCount)
     fileStore.walk(visitor)
     walker(visitor.store, visitor.rootId, {
       beforeTree: (_, files, hash) => {

@@ -127,22 +127,27 @@ const command = {
       watchSources: {path: 'server.watchSources'}
     }
 
+    const setDefaults = (config, serverPluginFiles) => {
+      config.pluginManager = {
+        ...config.pluginManager,
+        plugins: [...serverPluginFiles, ...(config.pluginManager?.plugins || [])]
+      }
+    }
+
     const run = async (argv) => {
-      const { startServer } = await import('@home-gallery/server')
+      const { startServer, getPluginFiles } = await import('@home-gallery/server')
 
       const options = await load(argv.config, false, argv.autoConfig)
+      const serverPluginFiles = getPluginFiles()
       mapArgs(argv, options.config, argvMapping)
+      setDefaults(options.config, serverPluginFiles)
       validatePaths(options.config, ['database.file', 'events.file', 'storage.dir'])
 
-      return new Promise((resolve, reject) => {
-        startServer(options, (err, server) => {
-          if (err) {
-            return reject(err)
-          }
-          process.once('SIGINT', () => {
-            log.debug(`Stopping server`)
-            server.shutdown().then(resolve)
-          })
+      const [server, shutdown] = await startServer(options)
+      return new Promise(resolve => {
+        process.once('SIGINT', () => {
+          log.debug(`Stopping server`)
+          shutdown().then(resolve)
         })
       })
     }

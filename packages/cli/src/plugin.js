@@ -39,12 +39,12 @@ const command = {
             alias: 't',
             describe: 'Source language type',
             default: 'vanilla',
-            choices: ['vanilla', 'typescript']
+            choices: ['single', 'vanilla', 'typescript']
           },
           modules: {
             alias: 'm',
             array: true,
-            choices: ['extractor', 'database'],
+            choices: ['extractor', 'database', 'query'],
             describe: 'Plugin modules. Any set of extractor, database'
           },
           force: {
@@ -69,7 +69,7 @@ const command = {
             log.trace(`Use plugin baseDir ${config.createPlugin.baseDir}`)
           }
           if (!config.createPlugin.modules?.length) {
-            config.createPlugin.modules = ['extractor', 'database']
+            config.createPlugin.modules = ['extractor', 'database', 'query']
           }
         }
 
@@ -124,8 +124,7 @@ const command = {
             const run = async () => {
               const options = await loadManagerOptions(argv)
               const { createPluginManager } = await import('@home-gallery/plugin')
-
-              return createPluginManager(options)
+              return createPluginManager(options.config, { type: 'cliContext', plugin: {} })
             }
 
             const t0 = Date.now();
@@ -162,7 +161,7 @@ const command = {
               const { createExtractorStreams } = await import('@home-gallery/plugin')
 
               // Initiate the extractors and tear them down
-              return createExtractorStreams(options)
+              return createExtractorStreams(options.config)
                 .then(([streams, tearDown]) => tearDown().then(() => streams))
             }
 
@@ -201,7 +200,7 @@ const command = {
               const options = await loadManagerOptions(argv)
               const { createDatabaseMapperStream } = await import('@home-gallery/plugin')
 
-              return createDatabaseMapperStream(options)
+              return createDatabaseMapperStream(options.config)
             }
 
             const t0 = Date.now();
@@ -227,12 +226,14 @@ const command = {
 const loadManagerOptions = async(argv) => {
   const { getPluginFiles: getExtractorPluginFiles } = await import('@home-gallery/extractor')
   const { getPluginFiles: getDatabasePluginFiles } = await import('@home-gallery/database')
+  const { getPluginFiles: getServerPluginFiles } = await import('@home-gallery/server')
 
   const options = await load(argv.config, false, argv.autoConfig)
 
   const extractorPluginFiles = getExtractorPluginFiles()
   const databasePluginFiles = getDatabasePluginFiles()
-  log.info(`Use ${extractorPluginFiles.length} extractor and ${databasePluginFiles.length} database build in plugins`)
+  const serverPluginFiles = getServerPluginFiles()
+  log.info(`Use ${extractorPluginFiles.length} extractor, ${databasePluginFiles.length} database build and ${serverPluginFiles.length} in plugins`)
 
   const argvMapping = {
   }
@@ -243,7 +244,8 @@ const loadManagerOptions = async(argv) => {
       plugins: [
         ...extractorPluginFiles,
         ...databasePluginFiles,
-        ...config.pluginManager?.plugins
+        ...serverPluginFiles,
+        ...(config.pluginManager?.plugins || [])
       ]
     }
   }
@@ -262,6 +264,7 @@ const listPluginsLong = manager => {
   const config = manager.getConfig()
   const disabledExtractors = config.pluginManager?.disabledExtractors || []
   const disabledDatabaseMappers = config.pluginManager?.disabledDatabaseMappers || []
+  const disabledQueryPlugins = config.pluginManager?.disabledQueryPlugins || []
 
   const plugins = manager.getPlugins()
   console.log(`Plugins: ${plugins.length} available`)
@@ -294,6 +297,16 @@ const listPluginsLong = manager => {
         console.log(`  - ${mapper.name}${order != 1 ? ', order ' + order : ''}${disabled}`)
       })
     }
+
+    const queryPlugins = factory?.getQueryPlugins?.()
+    if (queryPlugins?.length) {
+      console.log(`  Query plugins${queryPlugins.length > 1 ? '(' + queryPlugins.length + ')' : ''}:`)
+      queryPlugins.forEach(query => {
+        const order = typeof query.order != 'undefined' ? query.order : 1
+        const disabled = disabledQueryPlugins.includes(query.name) ? ' (disabled)' : ''
+        console.log(`  - ${query.name}${order != 1 ? ', order ' + order : ''}${disabled}`)
+      })
+    }
   })
 }
 
@@ -306,6 +319,7 @@ const listPluginsJson = manager => {
     const factory = manager.getModuleFactoryFor(plugin.name)
     const extractors = factory?.getExtractors?.() || []
     const databaseMappers = factory?.getDatabaseMappers?.() || []
+    const queryPlugins = factory?.getQueryPlugins?.() || []
     const pluginData = {
       name: plugin,
       version: plugin.version,
@@ -320,6 +334,13 @@ const listPluginsJson = manager => {
         const order = typeof mapper.order == 'number' ? mapper.order : 1
         return {
           name: mapper.name,
+          order
+        }
+      }),
+      queryPlugins: queryPlugins.map(query => {
+        const order = typeof query.order == 'number' ? query.order : 1
+        return {
+          name: query.name,
           order
         }
       })

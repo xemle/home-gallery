@@ -31,36 +31,32 @@ export const createPlugin = async (options: any) => {
     database: {
 
     },
+    query: {
+
+    },
   }
 
-  const vars = {
+  const vars: {[key: string]: any} = {
     name: createOptions.name,
     sanitizedName: toSanitizeName(createOptions.name),
-    className: toClassName(createOptions.name),
     dashName: toDashName(createOptions.name),
     camelName: toCamelName(createOptions.name),
+    className: toClassName(createOptions.name),
     requires: createOptions.requires?.length ? createOptions.requires.map(r => `'${r}'`).join(', ') : '',
     modules: {
 
     } as any,
   }
-
-  const pluginDir = path.resolve(createOptions.baseDir, vars.sanitizedName)
-  await access(pluginDir).then(() => {
-    if (!createOptions.force) {
-      throw new Error(`Plugin directory already exists: ${pluginDir}. Use --force to overwrite it`)
-    }
-  }, () => true)
-
   const templateBase = path.resolve(templateDir, createOptions.sourceType)
   access(templateBase).catch(() => { throw new Error(`Templates for source type ${createOptions.sourceType} not found ate ${templateDir}`) })
-
   const templateConfig = await readJson(path.resolve(templateBase, 'template.config.json'))
+
+  const pluginDir = await getPluginDir(createOptions, templateConfig, vars)
 
   const files = [...templateConfig.files]
   const activeModules = createOptions.modules || Object.keys(vars.modules)
   activeModules.forEach((module: string) => {
-    files.push(...templateConfig.modules[module])
+    files.push(...(templateConfig.modules[module] || []))
     vars.modules[module] = moduleDefaults[module]
   })
 
@@ -68,7 +64,11 @@ export const createPlugin = async (options: any) => {
     const template = await fs.readFile(path.resolve(templateDir, createOptions.sourceType, file), 'utf8')
     const rendered = Mustache.render(template, vars)
 
-    const target = path.resolve(pluginDir, file.replace(/\.mustache$/, ''))
+    const resolvedName = file.replace(/\.mustache$/, '')
+      .replaceAll(/\[([^\]]+)\]/g, (_: string, varName: string) => {
+        return vars[varName] || ''
+      })
+    const target = path.resolve(pluginDir, resolvedName)
     await fs.mkdir(path.dirname(target), {recursive: true})
     await fs.writeFile(target, rendered, 'utf8')
     log.trace(`Wrote plugin file ${target}`)
@@ -77,26 +77,43 @@ export const createPlugin = async (options: any) => {
   return pluginDir
 }
 
+const getPluginDir = async (createOptions: any, templateConfig: any, vars: any) => {
+  if (!templateConfig.dir) {
+    return path.resolve(createOptions.baseDir)
+  }
+
+  const pluginDirName = templateConfig.dir.replaceAll(/\[([^\]]+)\]/g, (_: string, varName: string) => {
+    return vars[varName] || ''
+  })
+  const pluginDir = path.resolve(createOptions.baseDir, pluginDirName)
+  await access(pluginDir).then(() => {
+    if (!createOptions.force) {
+      throw new Error(`Plugin directory already exists: ${pluginDir}. Use --force to overwrite it`)
+    }
+  }, () => true)
+  return pluginDir
+}
+
 const readJson = async (file: string): Promise<any> => {
   const data = await fs.readFile(file, 'utf8')
   return JSON.parse(data)
 }
 
-const toSanitizeName = (name: string) => name.replace(/[^A-Za-z0-9]+/g, '')
-
-const toClassName = (name: string) => {
-  const sanitizedName = toSanitizeName(name)
-  return sanitizedName.charAt(0).toUpperCase() + sanitizedName.slice(1)
-}
+const toSanitizeName = (name: string) => name.replaceAll(/[^A-Za-z0-9]+/g, '-').replaceAll(/(^-+|-+$)/g, '')
 
 const toDashName = (name: string) => {
   const sanitizedName = toSanitizeName(name)
-  return sanitizedName.replaceAll(/[A-Z]+/g, (char: string, pos: number) => `${pos == 0 ? '' : '-'}${char.toLowerCase()}`)
+  return sanitizedName.replaceAll(/[A-Z]+/g, (char: string, pos: number) => `${pos == 0 ? '' : '-'}${char.toLowerCase()}`).replaceAll(/-+/g, '-')
 }
 
 const toCamelName = (name: string) => {
   const dashName = toDashName(name)
-  return dashName.replaceAll(/-[a-z]+/g, (char: string) => char.substring(1).toUpperCase())
+  return dashName.replaceAll(/-[a-z]+/g, (char: string) => char.substring(1, 2).toUpperCase() + char.substring(2))
+}
+
+const toClassName = (name: string) => {
+  const camelName = toCamelName(name)
+  return camelName.charAt(0).toUpperCase() + camelName.slice(1)
 }
 
 const readDir = async (dir: string): Promise<string[]> => {

@@ -3,6 +3,7 @@ import { Transform } from 'stream'
 import { TStorage } from './storage'
 import { TDatabaseMapper } from './database'
 import { TPluginManager, TPlugin, TExtractor, TModuleFactory } from './plugin'
+import { TQueryContext } from './query'
 
 export type TGalleryPluginManager = TPluginManager & {
   loadPlugin(file: string): Promise<void>
@@ -13,6 +14,7 @@ export type TGalleryPluginManager = TPluginManager & {
   getModuleFactoryFor(name: string): TModuleFactory | undefined
   getExtractorStreams(storage: TStorage): Promise<[TExtractorStream[], TExtractorStreamTearDown]>
   getDatabaseMapperStream(updated: string): Promise<TDatabaseMapperStream>
+  executeQuery(entries: any, query: string, context: TQueryContext): Promise<any>
 }
 
 export type TExtractorStream = {

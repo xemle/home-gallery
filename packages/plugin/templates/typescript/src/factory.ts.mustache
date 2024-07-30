@@ -6,6 +6,9 @@ import { {{ className }}Extractor } from './extractor/index.js'
 {{#modules.database}}
 import { {{ className }}DatabaseMapper } from './database/index.js'
 {{/modules.database}}
+{{#modules.query}}
+import { {{ className }}QueryPlugin } from './query/index.js'
+{{/modules.query}}
 
 export class {{ className }}ModuleFactory {
   manager: TPluginManager
@@ -33,4 +36,12 @@ export class {{ className }}ModuleFactory {
     ]
   }
   {{/modules.database}}
+  {{#modules.query}}
+
+  getQueryPlugins() {
+    return [
+      new {{ className }}QueryPlugin(this.manager)
+    ]
+  }
+  {{/modules.query}}
 }

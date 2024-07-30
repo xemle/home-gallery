@@ -117,15 +117,17 @@ async function geoReverse(storage, options) {
 }
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-const geoReversePlugin = {
+const geoReversePlugin = manager => ({
   name: 'geoReverse',
   phase: 'file',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
+  async create(storage) {
+    const config = manager.getConfig()
     const configOptions = config?.extractor?.geoReverse || {}
 
     const addressLanguage = configOptions.addressLanguage || ['en', 'de']
@@ -139,9 +141,9 @@ const geoReversePlugin = {
 
     log.debug(`Use geo server ${options.url} with languages ${addressLanguage}`)
 
-    return geoReverse(context.storage, options)
+    return geoReverse(storage, options)
   },
-}
+})
 
 const plugin = toPlugin(geoReversePlugin, 'geoAddressExtractor', ['metaExtractor'])
 

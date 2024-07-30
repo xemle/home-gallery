@@ -12,6 +12,11 @@
     ],
     "database": [
       "src/database/index.ts.mustache"
+    ],
+    "query": [
+      "src/query/astUtils.ts.mustache",
+      "src/query/index.ts.mustache"
     ]
-  }
+  },
+  "dir": "[sanitizedName]"
 }

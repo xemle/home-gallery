@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- plugin: Add query plugin (server side)
 - server: Add SHA256-salted password schema
 - plugin: Initial plugin manager (experimental)
 - cli: Only import changed sources in watch mode

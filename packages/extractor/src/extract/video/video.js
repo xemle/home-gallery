@@ -86,16 +86,19 @@ async function video(storage, videoConverter, videoSuffix) {
 }
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-const videoPlugin = {
+const videoPlugin = manager => ({
   name: 'video',
   phase: 'file',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
-    const { storage, ffmpegPath, ffprobePath } = context
+  async create(storage) {
+    const config = manager.getConfig()
+    const context = manager.getContext()
+    const { ffmpegPath, ffprobePath } = context
 
     const options = {
       previewSize: 720,
@@ -107,7 +110,7 @@ const videoPlugin = {
 
     return video(storage, videoConverter, videoSuffix)
   },
-}
+})
 
 const plugin = toPlugin(videoPlugin, 'videoExtractor', ['metaExtractor'])
 

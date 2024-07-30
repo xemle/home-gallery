@@ -1,4 +1,4 @@
-import { TPluginManager, TExtractorContext, TExtractorEntry } from '@home-gallery/types'
+import { TPluginManager, TStorage, TExtractorEntry } from '@home-gallery/types'
 
 export class {{ className }}Extractor {
   name = '{{ camelName }}Extractor'
@@ -11,15 +11,17 @@ export class {{ className }}Extractor {
     this.pluginConfig = this.manager.getConfig().plugin?.{{ camelName }} || {}
   }
 
-  async create(context: TExtractorContext, config: any) {
-    const { storage } = context
+  async create(storage: TStorage) {
+    // plugins can provide properties or functions on the context
     const suffix = '{{ dashName }}.json'
 
     const created = new Date().toISOString()
-    const plugin = '{{ name }}'
+    const value = '{{ name }}'
+    // Read property from plugin's configuration plugin.{{ camelName }}.property for customization
+    const property = this.pluginConfig.property || 'defaultValue'
 
     const log = this.manager.createLogger('plugin.{{ camelName }}.extractor')
-    log.debug(`Creating ${plugin} extractor`)
+    log.debug(`Creating {{ name }} extractor task`)
 
     return {
       test(entry: TExtractorEntry) {
@@ -27,7 +29,8 @@ export class {{ className }}Extractor {
       },
       async task(entry: TExtractorEntry) {
         log.debug(`Processing ${entry}`)
-        return storage.writeFile(entry, suffix, { created, plugin })
+        const data = { created, value, property }
+        return storage.writeFile(entry, suffix, data)
       }
     }
   }

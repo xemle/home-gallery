@@ -3,7 +3,7 @@ import { pipeline } from 'stream/promises'
 
 import Logger from '@home-gallery/logger'
 import { toList, write } from '@home-gallery/stream'
-import { TExtractorStream, TExtractorFunction, TExtractor, TPlugin, TDatabaseMapperStream, TDabaseMapperFunction, TDatabaseMapper, TExtractorEntry, TStorageEntry } from '@home-gallery/types'
+import { TExtractorStream, TExtractorFunction, TExtractor, TPlugin, TDatabaseMapperStream, TDabaseMapperFunction, TDatabaseMapper, TExtractorEntry, TStorageEntry, TQueryPlugin, TQueryAst, TQueryContext, TAst } from '@home-gallery/types'
 
 Logger.addPretty('trace')
 const log = Logger('testUtils')
@@ -63,9 +63,23 @@ export const createDatabaseMapper = (name: string, mapEntry: TDabaseMapperFuncti
   } as TDatabaseMapper
 }
 
+export const createQueryPlugin = (name: string, cmpKey: string, valueFn: (e: any) => string) => {
+  return {
+    name,
+    queryHandler(ast: TQueryAst, context: TQueryContext, reason: string) {
+      if (ast.type == 'cmp' && ast.key == cmpKey && ast.op == '=') {
+        ast.filter = (e: any) => valueFn(e) == (ast.value as TAst)?.value
+        return true
+      }
+      return false
+    }
+  } as TQueryPlugin
+}
+
 export type TTestPluginOption = {
   extractor?: TExtractor,
   mapper?: TDatabaseMapper
+  query?: TQueryPlugin
 }
 
 export const createExtractorPlugin = (name: string, fn: TExtractorFunction) => {
@@ -89,6 +103,9 @@ export const createPlugin = (name: string, option: TTestPluginOption) => {
         },
         getDatabaseMappers() {
           return option.mapper ? [option.mapper] : []
+        },
+        getQueryPlugins() {
+          return option.query ? [option.query] : []
         }
       }
     }

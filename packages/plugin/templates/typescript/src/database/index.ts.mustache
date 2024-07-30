@@ -1,4 +1,4 @@
-import { TStorageEntry, TDatabaseEntry, TLogger } from '@home-gallery/types'
+import { TPluginManager, TStorageEntry, TDatabaseEntry, TLogger } from '@home-gallery/types'
 
 export class {{ className }}DatabaseMapper {
   name = '{{ camelName }}Mapper'
@@ -17,12 +17,12 @@ export class {{ className }}DatabaseMapper {
     this.log.info(`Map database entry: ${entry}`)
 
     {{#modules.extractor}}
-    // Use somehow the data from the extractor task
+    // Add data from the plugin extractor task
     media.plugin.{{ camelName }} = entry.meta.{{ camelName }}
     {{/modules.extractor}}
     {{^modules.extractor}}
-    // Add some data
-    media.plugin.{{ camelName }} = '{{name}}'
+    // Add some plugin data to the database
+    media.plugin.{{ camelName }} = {created: new Date().toISOString(), value: '{{ name }}'}
     {{/modules.extractor}}
   }
 
