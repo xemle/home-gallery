@@ -1,0 +1,32 @@
+{{#modules.extractor}}
+import { {{ className }}Extractor } from './extractor/index.js'
+{{/modules.extractor}}
+{{#modules.database}}
+import { {{ className }}DatabaseMapper } from './database/index.js'
+{{/modules.database}}
+
+export class {{ className }}ModuleFactory {
+  constructor(manager) {
+    this.manager = manager
+    this.log = manager.createLogger('plugin.{{ camelName }}.factory')
+    this.pluginConfig = manager.getConfig().plugin?.{{ camelName }} || {}
+  }
+  {{#modules.extractor}}
+
+  getExtractors() {
+    this.log.trace(`Create extractor tasks`)
+    return [
+      new {{ className }}Extractor(this.manager)
+    ]
+  }
+  {{/modules.extractor}}
+  {{#modules.database}}
+
+  getDatabaseMappers() {
+    this.log.trace(`Create database mappers`)
+    return [
+      new {{ className }}DatabaseMapper(this.manager)
+    ]
+  }
+  {{/modules.database}}
+}

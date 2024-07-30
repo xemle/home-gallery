@@ -32,6 +32,7 @@
     "@home-gallery/common": "file:../common",
     "@home-gallery/index": "file:../index",
     "@home-gallery/logger": "file:../logger",
+    "@home-gallery/plugin": "file:../plugin",
     "@home-gallery/storage": "file:../storage",
     "@home-gallery/stream": "file:../stream",
     "exiftool-vendored": "^24.2.0",

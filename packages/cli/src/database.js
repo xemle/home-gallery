@@ -66,7 +66,7 @@ const command = {
           updated: new Date().toISOString()
         }
 
-        const setDefaults = (config) => {
+        const setDefaults = (config, basePluginFiles) => {
           const withOfflineSources = !config.fileIndex?.journal
           config.fileIndex = {
             files: config.sources?.filter(s => withOfflineSources || !s.offline).map(s => s.index),
@@ -75,16 +75,22 @@ const command = {
           config.database = {
             ...databaseDefaults,
             ...config.database,
+          },
+          config.pluginManager = {
+            ...config.pluginManager,
+            plugins: [...basePluginFiles, ...config.pluginManager?.plugins]
           }
         }
 
         const run = async() => {
-          const { buildDatabase } = await import('@home-gallery/database')
+          const { buildDatabase, getPluginFiles: getDatabasePluginFiles } = await import('@home-gallery/database')
+          const { getPluginFiles: getExtractorPluginFiles } = await import('@home-gallery/extractor');
+          const basePluginFiles = [...getExtractorPluginFiles(), ...getDatabasePluginFiles()]
 
           const options = await load(argv.config, false, argv.autoConfig)
 
           mapArgs(argv, options.config, argvMapping)
-          setDefaults(options.config)
+          setDefaults(options.config, basePluginFiles)
           validatePaths(options.config, ['fileIndex.files', 'storage.dir', 'database.file'])
 
           return buildDatabase(options)

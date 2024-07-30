@@ -1,6 +1,6 @@
 import t from 'tap'
 
-import { getVideoStream, isPortraitVideo, fixRotatedScale, getFfmpegArgs, getVideoOptions } from './video-utils.js'
+import { getVideoStream, isPortraitVideo, fixRotatedScale, getFfmpegArgs } from './video-utils.js'
 
 t.test('getVideoStream', async t => {
   t.test('success', async t => {
@@ -389,42 +389,4 @@ t.test('getFfmpegArgs', async t => {
       ]
     )
   })
-})
-
-t.test('getVideoOptions', async t => {
-  t.test('emtpy', async t => {
-    const extractor = {
-      ffprobePath: './ffprobe',
-      ffmpegPath: './ffmpeg'
-    }
-    t.match(getVideoOptions(extractor), {
-      ffprobePath: './ffprobe',
-      ffmpegPath: './ffmpeg',
-      videoSuffix: 'video-preview-720.mp4',
-    })
-  })
-
-  t.test('preview', async t => {
-    const extractor = {
-      ffprobePath: './ffprobe',
-      ffmpegPath: './ffmpeg',
-    }
-    const config = {
-      extractor: {
-        video: {
-          previewSize: 640,
-          ext: 'mov'
-        }
-      }
-    }
-
-    t.match(getVideoOptions(extractor, config), {
-      ffprobePath: './ffprobe',
-      ffmpegPath: './ffmpeg',
-      previewSize: 640,
-      ext: 'mov',
-      videoSuffix: 'video-preview-640.mov',
-    })
-  })
-
 })

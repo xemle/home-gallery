@@ -74,23 +74,3 @@ export function getFfmpegArgs(entry, options) {
 
   return ffmpegArgs.map(fixRotatedScale(isPortrait))
 }
-
-export const getVideoOptions = (extractor, config) => {
-  const { ffprobePath, ffmpegPath } = extractor
-  const options = {
-    previewSize: 720,
-    ext: 'mp4',
-    ...config?.extractor?.video
-  }
-
-  const videoSuffix = `video-preview-${options.previewSize}.${options.ext}`;
-  return {...options, videoSuffix, ffprobePath, ffmpegPath }
-}
-
-export default {
-  getVideoStream,
-  isPortraitVideo,
-  fixRotatedScale,
-  getFfmpegArgs,
-  getVideoOptions
-}

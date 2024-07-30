@@ -47,7 +47,7 @@ const widthHeight = (entry, exif) => {
   return [width, height]
 }
 
-export const getExif = (entry) => {
+const getExif = (entry) => {
   const exif = getEntryMetaByKey(entry, 'exif')
   if (!exif) {
     return {}
@@ -79,4 +79,11 @@ export const getExif = (entry) => {
     orientation: exif.Orientation || 1,
     whiteBalance: exif.WhiteBalance
   }, getExposerTime(), getShutterSpeed())
+}
+
+export const exifMapper = {
+  name: 'exifMapper',
+  mapEntry(entry, media) {
+    return {...media, ...getExif(entry)}
+  }
 }

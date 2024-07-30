@@ -6,6 +6,7 @@ build
 bundle-debug.log
 data
 dist
+dist-test
 node_modules
 *.tmp
 package-lock.json

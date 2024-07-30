@@ -1,11 +1,22 @@
+import path from 'path'
 import { Buffer } from 'buffer'
 import { spawn } from 'child_process'
 
 import Logger from '@home-gallery/logger'
 
+import { getNativeCommand } from '../utils/native-command.js'
+import { toPlugin } from '../pluginUtils.js';
+import { noop } from '@home-gallery/stream';
+
 const log = Logger('extractor.image.resize')
 
-import { getNativeCommand } from '../utils/native-command.js'
+/**
+ * @typedef {Function} ImageResizer
+ * @param {string} src
+ * @param {string} dist
+ * @param {number} size
+ * @returns {Promise<void>}
+ */
 
 const run = (command, args, cb) => {
   const t0 = Date.now()
@@ -28,18 +39,26 @@ const run = (command, args, cb) => {
       stderr: Buffer.concat(stderr).toString('utf-8')
     }
     if (code != 0) {
-      const err = new Error(`${command} exit with error code ${code}`)
+      const err = new Error(`${command} exit with exit code ${code}`)
       Object.assign(err, result)
-      log.debug(err, err.message)
       return cb(err)
     }
     log.trace(t0, `Exec: ${command} ${args.map(arg => arg.match(/[\\\/ \t\r]/) ? `'${arg}'` : arg).join(' ')} with exit code ${code}`)
     cb(null, result)
   })
-  cmd.on('err', cb)
+  cmd.on('error', cb)
 }
 
-const errorResizer = (src, dst, size, cb) => cb(new Error(`Image resizer could not be initialized`))
+const runAsync = (command, args) => new Promise((resolve, reject) => {
+  run(command, args, (err, result) => {
+    if (err) {
+      return reject(err)
+    }
+    resolve(result)
+  })
+})
+
+const errorResizer = async () => Promise.reject(new Error(`Image resizer could not be initialized`))
 
 const getSharpResize = async (factoryOptions) => {
   let {default: sharp} = await import('sharp')
@@ -51,12 +70,19 @@ const getSharpResize = async (factoryOptions) => {
     mozjpeg: true // same as {trellisQuantisation: true, overshootDeringing: true, optimiseScans: true, quantisationTable: 3}
   }
 
-  return (src, dst, size, cb) => {
-    sharp(src, {failOnError: false})
+  return (src, dst, size) => {
+    return new Promise((resolve, reject) => {
+      sharp(src, {failOnError: false})
       .rotate()
       .resize({width: size, height: size, fit: 'inside'})
       .jpeg(jpgOptions)
-      .toFile(dst, cb)
+      .toFile(dst, (err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve()
+      })
+    })
   }
 }
 
@@ -71,49 +97,47 @@ const getVipsResize = async (factoryOptions) => {
     'strip', // no meta data
   ].join(',')
 
-  return new Promise((resolve, reject) => {
-    run(vipsthumbnail, ['--vips-version'], (err, {code, stderr, stdout}) => {
-      if (err) {
-        const e = new Error(`Could not get vipsthumbnail version`)
-        Object.assign(e, {code, stderr, stdout})
-        return reject(e)
-      }
+  return runAsync(vipsthumbnail, ['--vips-version'])
+    .then(({stdout}) => {
       const version = stdout.split(' ')[1] || '8.9.0'
       const [major, minor] = version.split('.')
       if (major == 8 && minor >= 10) {
-        return resolve((src, dst, size, cb) => {
-          run(vipsthumbnail, ['-s', `${size}x${size}`, '-o', `${dst}[${vipsthumbnailJpgOptions}]`, src], cb)
-        })
+        return (src, dst, size) => {
+          const out = path.resolve(dst) // vips handles relative path differently. Use absolute filename
+          return runAsync(vipsthumbnail, ['-s', `${size}x${size}`, '-o', `${out}[${vipsthumbnailJpgOptions}]`, src])
+        }
       }
-      return resolve((src, dst, size, cb) => {
-        run(vipsthumbnail, ['-s', `${size}x${size}`, '--rotate', '--delete', '-f', `${dst}[${vipsthumbnailJpgOptions}]`, src], cb)
-      })
+      return (src, dst, size) => {
+        const out = path.resolve(dst) // vips handles relative path differently. Use absolute filename
+        return runAsync(vipsthumbnail, ['-s', `${size}x${size}`, '--rotate', '--delete', '-f', `${out}[${vipsthumbnailJpgOptions}]`, src])
+      }
     })
-  })
+    .catch(err => {
+      throw new Error(`Could not get vipsthumbnail version`, {cause: err})
+    })
 }
 
 const getConvertResize = async (factoryOptions) => {
   const convert = getNativeCommand('convert')
-  return new Promise((resolve, reject) => {
-    run(convert, ['--version'], (err, {code, stderr, stdout}) => {
-      if (err) {
-        const e = new Error(`Could not get convert version`)
-        Object.assign(e, {code, stderr, stdout})
-        return reject(e)
-      }
+
+  return runAsync(convert, ['--version'])
+    .then(({stdout}) => {
       const firstLine = stdout.split('\n').shift() || ''
       if (!firstLine.match(/ImageMagick/i)) {
-        return reject(new Error(`Unexpected version output: ${firstLine}`))
+        throw new Error(`Unexpected version output: ${firstLine}`)
       }
 
-      resolve((src, dst, size, cb) => {
-        run(convert, [src, '-auto-orient', '-resize', `${size}x${size}`, '-strip', '-quality', `${factoryOptions.quality}`, dst], cb)
-      })
+      return (src, dst, size) => {
+        return runAsync(convert, [src, '-auto-orient', '-resize', `${size}x${size}`, '-strip', '-quality', `${factoryOptions.quality}`, dst])
+      }
     })
-  })
 }
 
-export const createImageResizer = (config, cb) => {
+/**
+ * @param {object} config
+ * @returns {Promise<ImageResizer>}
+ */
+export const createImageResizer = async (config) => {
   const useNative = config?.extractor?.useNative || []
 
   const resizer = [
@@ -129,24 +153,51 @@ export const createImageResizer = (config, cb) => {
   }
 
   let index = 0
-  const next = () => {
+  const next = async () => {
     if (index == resizer.length) {
-      log.error(`Could not load an image resizser`)
-      cb(null, errorResizer)
+      log.error(`Could not load an image resizer`)
+      return errorResizer
     }
     const item = resizer[index++]
-    item.factory(factoryOptions)
+    return item.factory(factoryOptions)
       .then(imageResizer => {
         log.info(`Use ${item.name} to resize images`)
-        cb(null, imageResizer)
+        return imageResizer
       })
       .catch(err => {
         log.warn(err, `Could not load ${item.name} image resizer`)
-        next()
+        return next()
       })
   }
 
-  next()
+  return next()
 }
 
 export const useExternalImageResizer = config => config?.extractor?.useNative?.includes('vipsthumbnail') || config?.extractor?.useNative?.includes('convert')
+
+const byNumberDesc = (a, b) => b - a
+
+/**
+ * @type {import('@home-gallery/types').TExtractorPlugin}
+ */
+const imageResizerPlugin = {
+  name: 'imageResizer',
+  phase: 'meta',
+  /**
+   * @param {import('@home-gallery/types').TExtractorContext} context
+   */
+  async create(context, config) {
+    const imageResizer = await createImageResizer(config)
+    const previewSizes = config?.extractor?.image?.previewSizes || [1920, 1280, 800, 320, 128]
+
+    context.imageResizer = imageResizer
+    context.imagePreviewSizes = previewSizes.sort(byNumberDesc)
+    context.isNativeImageResizer = useExternalImageResizer(config)
+
+    return noop()
+  }
+}
+
+const plugin = toPlugin(imageResizerPlugin, 'imageResizeExtractor')
+
+export default plugin

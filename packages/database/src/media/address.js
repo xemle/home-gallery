@@ -36,7 +36,7 @@ const createAddress = (entry) => {
   return result
 }
 
-export const getAddress = (entry) => {
+const getAddress = (entry) => {
   const metaEntries = getMetaEntries(entry)
   const metaAddress = metaEntries.reduce((address, entry) => address || createAddress(entry), false)
   if (metaAddress) {
@@ -48,3 +48,9 @@ export const getAddress = (entry) => {
   return allAddress ? allAddress : {}
 }
 
+export const addressMapper = {
+  name: 'addressMapper',
+  mapEntry(entry, media) {
+    return {...media, ...getAddress(entry)}
+  }
+}

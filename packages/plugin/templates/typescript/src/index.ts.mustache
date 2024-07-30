@@ -1,0 +1,17 @@
+import { TPlugin, TPluginManager } from '@home-gallery/types'
+
+import { {{ className }}ModuleFactory } from './factory.js'
+
+const {{ className }}Plugin = {
+  name: '{{ camelName }}Plugin',
+  version: '1.0',
+  requires: [{{{ requires }}}],
+  async initialize(manager) {
+    const log = manager.createLogger('plugin.{{ camelName }}')
+    log.trace(`Initialize ${this.name} plugin`)
+
+    return new {{ className }}ModuleFactory(manager)
+  }
+}
+
+export default {{ className }}Plugin

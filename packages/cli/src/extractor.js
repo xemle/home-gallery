@@ -1,6 +1,7 @@
 import Logger from '@home-gallery/logger'
 
 import { load, mapArgs, validatePaths } from './config/index.js';
+import { expandConfigDefaults } from './config/expand-defaults.js';
 
 const log = Logger('cli.extract')
 
@@ -121,45 +122,14 @@ const command = {
       geoAddressLanguage: {path: 'extractor.geoReverse.addressLanguage', test: hasArrayValues, map: splitArrayValues},
     }
 
-    const extractorDefaults = {
-      stream: {
-        concurrent: 0,
-        skip: 0,
-        limit: 0,
-        printEntry: false
-      },
-      image: {
-        previewSizes: [1920, 1280, 800, 320, 128],
-        previewQuality: 80
-      },
-      video: {
-        previewSize: 720,
-        ext: 'mp4',
-      },
-      apiServer: {
-        url: 'https://api.home-gallery.org',
-        timeout: 30,
-        concurrent: 5
-      },
-      geoReverse: {
-        url: 'https://nominatim.openstreetmap.org',
-        addressLanguage: 'en'
-      },
-    }
-
-    const setDefaults = (config) => {
+    const setDefaults = (config, extractorPlugins) => {
       config.fileIndex = {
         files: config.sources?.filter(s => !s.offline).map(s => s.index),
         ...config.fileIndex
       }
-      config.extractor = {
-        ...extractorDefaults,
-        ...config.extractor,
-        stream: {...extractorDefaults.stream, ...config.extractor?.stream},
-        image: {...extractorDefaults.image, ...config.extractor?.image},
-        video: {...extractorDefaults.video, ...config.extractor?.video},
-        apiServer: {...extractorDefaults.apiServer, ...config.extractor?.apiServer},
-        geoReverse: {...extractorDefaults.geoReverse, ...config.extractor?.geoReverse},
+      config.pluginManager = {
+        ...config.pluginManager,
+        plugins: [...extractorPlugins, ...config.pluginManager?.plugins]
       }
     }
 
@@ -174,12 +144,14 @@ const command = {
     }
 
     const run = async (argv) => {
-      const { extract } = await import('@home-gallery/extractor');
+      const { extract, getPluginFiles } = await import('@home-gallery/extractor');
 
       const options = await load(argv.config, false, argv.autoConfig)
 
+      const extractorPlugins = getPluginFiles()
+      log.info(`Found ${extractorPlugins.length} extractor plugins`)
       mapArgs(argv, options.config, argvMapping)
-      setDefaults(options.config)
+      setDefaults(options.config, extractorPlugins)
       migrateConfig(options.config)
       validatePaths(options.config, ['fileIndex.files', 'storage.dir'])
 
@@ -189,7 +161,11 @@ const command = {
     const t0 = Date.now();
     return run(argv)
       .then(count => {
-        log.info(t0, `Extract all meta data and calculated all preview files from ${count} entries`);
+        if (count > 0) {
+          log.info(t0, `Extract all meta data and calculated all preview files from ${count} entries`);
+        } else {
+          log.warn(t0, `No entries where provided for data extraction`);
+        }
       })
       .catch(err => {
         log.error(err, `Could not extract all meta data and preview files: ${err}`);

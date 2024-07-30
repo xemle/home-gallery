@@ -1,4 +1,5 @@
 const fs = require('fs')
+const {readFile, writeFile} = require('fs/promises')
 const path = require('path')
 const { createReadStream } = require('fs')
 const net = require('net')
@@ -96,6 +97,13 @@ const getDatabaseFilename = () => getPath('config', 'database.db')
 const getEventsFilename = () => getPath('config', 'events.db')
 
 const getExportOutputDir = () => getPath('export-output')
+
+const getPluginBaseDir = () => getPath('plugins')
+
+const getPluginDir = name => {
+  const sanitizedName = name.replaceAll(/[^A-Za-z0-9]+/g, '')
+  return path.resolve(getPluginBaseDir(), sanitizedName)
+}
 
 const tree = async dir => {
   const files = await fs.promises.readdir(dir)
@@ -294,7 +302,7 @@ const assertDeep = (value, expected, path = '.') => {
       assertDeep(value[prop], expected[prop], `${prop}.`)
     }
   } else {
-    assert(value == expected, `Expected ${expected} but was ${value} in ${path}`)
+    assert(value == expected, `Expected ${expected} but was ${value} (${JSON.stringify(value)}) in ${path}`)
   }
 }
 
@@ -305,9 +313,9 @@ const resolveProperty = (value, path) => {
     const part = parts[i++]
     const [orig, name, _, index] = part.match(/^([a-zA-Z]+)(\[(\d+)\])?$/)
     if (index) {
-      return Array.isArray(value[name]) ? value[name][+index] : undefined
+      value = Array.isArray(value[name]) ? value[name][+index] : undefined
     } else {
-      return value[name]
+      value = value[part]
     }
   }
   return value
@@ -324,6 +332,52 @@ const parseValue = yamlLike => {
   return yamlLike
 }
 
+const readYaml = async filename => {
+  const yml = await readFile(filename, 'utf-8')
+  try {
+    return Yaml.parse(yml)
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+const readConfig = async () => {
+  const filename = getConfigFilename()
+  return readYaml(filename)
+}
+
+const writeConfig = async (config) => {
+  const filename = getConfigFilename()
+  writeFile(filename, Yaml.stringify(config))
+}
+
+const getSegement = (object, key) => {
+  const parts = key.split('.')
+  let segment = object
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!segment[parts[i]] || typeof segment[parts[i]] != 'object') {
+      segment[parts[i]] = {}
+    }
+    segment = segment[parts[i]]
+  }
+  return [segment, parts[parts.length - 1]]
+}
+
+const getConfigValue = async (key) => {
+  const config = await readConfig().catch(() => ({}))
+  const [segment, name] = getSegement(config, key)
+  return segment[name]
+}
+
+const setConfigValue = async (key, value) => {
+  const config = await readConfig()
+
+  const [segment, name] = getSegement(config, key)
+  segment[name] = value
+
+  await writeConfig(config)
+}
+
 module.exports = {
   addCliEnv,
   assertDeep,
@@ -337,15 +391,20 @@ module.exports = {
   getPath,
   getFilesDir,
   getConfigFilename,
+  getConfigValue,
   getIndexFilename,
   getJournalFilename,
   getStorageDir,
   getDatabaseFilename,
   getEventsFilename,
   getExportOutputDir,
+  getPluginBaseDir,
+  getPluginDir,
   tree,
+  runCommand,
   runCli,
   runCliAsync,
+  setConfigValue,
   killChildProcess,
   readIndex,
   readJournal,
@@ -353,5 +412,5 @@ module.exports = {
   resolveProperty,
   parseValue,
   dateFormat,
-  pathToPlatformPath
+  pathToPlatformPath,
 }

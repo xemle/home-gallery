@@ -1,9 +1,9 @@
+import path from 'path'
 import Logger from '@home-gallery/logger'
 
 const log = Logger('extractor.video.poster');
 
-import { resizeImage } from '../image/image-preview.js';
-import { toPipe, conditionalTask } from '../../stream/task.js';
+import { toPlugin } from '../pluginUtils.js';
 
 const videoPosterSuffix = 'video-poster.jpg';
 
@@ -14,37 +14,71 @@ const getMaxVideoSize = (entry, defaultSize) => {
     || defaultSize
 }
 
-export function videoPoster(storage, extractor) {
-  const { imageResizer, videoFrameExtractor, imagePreviewSizes } = extractor
-  const maxPreviewSize = Math.max(...imagePreviewSizes)
+/**
+ * @param {import('@home-gallery/types').TStorage} storage
+ * @param {import('../image/image-preview.js').ImagePreviewCreator} createImagePreviews
+ * @param {number[]} imagePreviewSizes
+ * @returns {import('stream').Transform}
+ */
+async function videoPoster(storage, videoFrameExtractor, createImagePreviews, imagePreviewSizes) {
+  const maxImagePreviewSize = Math.max(...imagePreviewSizes)
 
-  const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, videoPosterSuffix);
+  const test = entry => entry.type === 'video' && !storage.hasFile(entry, videoPosterSuffix);
 
-  const task = (entry, cb) => {
+  /**
+   * @param {import('@home-gallery/types').TExtractorEntry} entry
+   */
+  const task = async (entry) => {
     const t0 = Date.now();
-    const dir = storage.getEntryDirname(entry);
-    const basename = storage.getEntryBasename(entry, videoPosterSuffix);
-    videoFrameExtractor(entry.src, dir, basename, 1, (err) => {
-      if (err) {
-        log.warn(err, `Could not extract video frame from ${entry}: ${err}`)
-        return cb();
-      }
+    const src = await entry.getFile()
+    const localDir = await storage.createLocalDir()
 
-      const posterSrc = storage.getEntryFilename(entry, videoPosterSuffix);
-      const size = getMaxVideoSize(entry, maxPreviewSize)
-      const previewSizes = imagePreviewSizes.filter(previewSize => previewSize <= size)
-      resizeImage(storage, imageResizer, entry, posterSrc, previewSizes, (err, calculatedSizes) => {
-        if (err) {
-          log.warn(err, `Could not resize video frame from ${entry}: ${err}`)
-          return cb();
-        } else if (calculatedSizes.length) {
-          log.debug(t0, `Created ${calculatedSizes.length} video preview images from ${entry} with sizes of ${calculatedSizes.join(',')}`);
+    return videoFrameExtractor(src, localDir.dir, 'video-frame-%00i.jpg', 1)
+      .then(async filenames => {
+        if (!filenames.length) {
+          throw new Error(`No video frames could be extracted from ${entry}`)
         }
-        cb();
-      });
 
-    })
+        const posterSrc = path.resolve(localDir.dir, filenames[0])
+        await storage.copyFile(entry, videoPosterSuffix, posterSrc)
+
+        const size = getMaxVideoSize(entry, maxImagePreviewSize)
+        const previewSizes = imagePreviewSizes.filter(previewSize => previewSize <= size)
+        return createImagePreviews(entry, posterSrc, previewSizes)
+      })
+      .then(previewSizes => {
+        log.debug(t0, `Created ${previewSizes.length} video preview images from ${entry} with sizes of ${previewSizes.join(',')}`);
+      })
+      .catch(err => {
+        log.warn(err, `Could not extract video frame from ${entry}: ${err}`)
+      })
+      .finally(async () => {
+        return localDir?.release()
+      })
   }
 
-  return toPipe(conditionalTask(test, task));
+  return {
+    test,
+    task
+  }
 }
+
+/**
+ * @type {import('@home-gallery/types').TExtractorPlugin}
+ */
+const videoPosterPlugin = {
+  name: 'videoPoster',
+  phase: 'file',
+  /**
+   * @param {import('@home-gallery/types').TExtractorContext} context
+   */
+  async create(context, config) {
+    const { storage, videoFrameExtractor, createImagePreviews, imagePreviewSizes } = context
+
+    return videoPoster(storage, videoFrameExtractor, createImagePreviews, imagePreviewSizes)
+  },
+}
+
+const plugin = toPlugin(videoPosterPlugin, 'videoPosterExtractor', ['imagePreviewExtractor', 'videoFrameExtractor'])
+
+export default plugin

@@ -1,26 +1,32 @@
 import esbuild from 'esbuild'
-import glob from 'glob'
+import { glob } from 'glob'
 
 const args = process.argv.splice(2)
 const watch = args.indexOf('--watch') >= 0
 
-glob('./src/**/!(*.test.ts)', (_, files) => {
+async function build() {
+  const files = await glob('./src/**/*.ts', {
+    ignore: {
+      ignored: p => p.name.match(/test/)
+    }
+  })
+
   const targets = [
     {
       entryPoints: files,
       sourcemap: true,
       platform: 'node',
-      target: 'es2020',
+      target: 'es2022',
       format: 'esm',
       outdir: 'dist',
       watch: watch
     }
   ]
 
-  const catchError = e => {
-    console.error(`Build faild due ${e}`, e)
-    process.exit(1)
-  }
+  return Promise.all(targets.map(target => esbuild.build(target)))
+}
 
-  Promise.all(targets.map(target => esbuild.build(target))).catch(catchError)
+build().catch(err => {
+  console.log(`Build failed: ${err}`)
+  process.exit(1)
 })

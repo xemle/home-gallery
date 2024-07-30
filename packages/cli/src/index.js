@@ -14,6 +14,7 @@ import fetchCli from './fetch.js';
 import castCli from './cast.js';
 import interactiveCli from './interactive/index.js';
 import runCli from './run.js'
+import pluginCli from './plugin.js'
 
 export const cli = () => {
   return yargs(hideBin(process.argv))
@@ -32,6 +33,7 @@ export const cli = () => {
     .command(castCli)
     .command(interactiveCli)
     .command(runCli)
+    .command(pluginCli)
     .demandCommand()
     .help()
     .alias('h', 'help')

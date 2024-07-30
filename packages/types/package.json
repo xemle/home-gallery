@@ -1,0 +1,28 @@
+{
+  "name": "@home-gallery/types",
+  "version": "1.0.0",
+  "description": "types",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm-run-all build:types",
+    "build:types": "npx tsc -d --emitDeclarationOnly",
+    "watch": "npm-run-all -p watch:types",
+    "watch:types": "npx tsc -d --emitDeclarationOnly --watch"
+  },
+  "keywords": [
+    "HomeGallery",
+    "type"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xemle/home-gallery.git",
+    "directory": "packages/types"
+  }
+}

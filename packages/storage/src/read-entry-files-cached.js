@@ -32,12 +32,12 @@ export function readEntryFilesCached(storageDir, dirCacheSize) {
       if (err && err.code === 'ENOENT') {
         log.warn(`Entry files cache for ${entry} is missing. Read files and meta from storage`);
       } else if (err) {
-        log.warn(`Could not read entry files cache for ${entry}: ${err}. Read files and meta from storage`);
+        log.warn(err, `Could not read entry files cache for ${entry}: ${err}. Read files and meta from storage`);
       }
 
       readEntryFilesSingle(entry, storageDir, (err, filesAndMeta) => {
         if (err) {
-          log.error(`Could not read files and metadata of ${entry}: ${err}`);
+          log.error(err, `Could not read files and metadata of ${entry}: ${err}`);
           return cb(err);
         }
         cb(null, filesAndMeta);

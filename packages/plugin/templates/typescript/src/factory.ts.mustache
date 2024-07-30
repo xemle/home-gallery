@@ -1,0 +1,36 @@
+import { TPluginManager, TLogger } from '@home-gallery/types'
+
+{{#modules.extractor}}
+import { {{ className }}Extractor } from './extractor/index.js'
+{{/modules.extractor}}
+{{#modules.database}}
+import { {{ className }}DatabaseMapper } from './database/index.js'
+{{/modules.database}}
+
+export class {{ className }}ModuleFactory {
+  manager: TPluginManager
+  log: TLogger
+  pluginConfig: any
+
+  constructor(manager: TPluginManager) {
+    this.manager = manager
+    this.log = manager.createLogger('plugin.{{ camelName }}.factory')
+    this.pluginConfig = manager.getConfig().plugin?.{{ camelName }} || {}
+  }
+  {{#modules.extractor}}
+
+  getExtractors() {
+    return [
+      new {{ className }}Extractor(this.manager)
+    ]
+  }
+  {{/modules.extractor}}
+  {{#modules.database}}
+
+  getDatabaseMappers() {
+    return [
+      new {{ className }}DatabaseMapper(this.manager)
+    ]
+  }
+  {{/modules.database}}
+}

@@ -1,6 +1,6 @@
 import { getEntryMetaByKey } from './utils.js'
 
-export const getObjects = (entry, minScore) => {
+const getObjects = (entry, minScore) => {
   const objects = getEntryMetaByKey(entry, 'objects')
   if (!objects) {
     return []
@@ -18,4 +18,11 @@ export const getObjects = (entry, minScore) => {
         class: object.class
       }
     })
+}
+
+export const objectMapper = {
+  name: 'objectMapper',
+  mapEntry(entry, media) {
+    media.objects = getObjects(entry, 0.6)
+  }
 }

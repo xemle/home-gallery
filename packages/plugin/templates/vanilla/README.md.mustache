@@ -1,0 +1,37 @@
+# HomeGallery Plugin {{ className }}
+
+This is a auto generated plugin for [HomeGallery](https://home-gallery.org).
+See the [documentation](https://docs.home-gallery.org) for further details.
+
+This plugin provides modules for:
+
+{{#modules.extractor}}
+- File extractor
+{{/modules.extractor}}
+{{#modules.database}}
+- Database mapper
+{{/modules.database}}
+{{#modules.extractor}}
+
+## Extractor
+
+The extractor reads, transforms or create information of an image
+like exif data extraction (read), preview image generator (transforms)
+or GEO address reverse lookup (create).
+
+The extractor can use information from previous extractors and stores
+its raw data in the storage. Structured data should be stored as JSON
+file.
+{{/modules.extractor}}
+{{#modules.database}}
+
+## Database Mapper
+
+Based on the extracted raw data the database mapper maps different
+information to database entries which can be viewed, searched and
+filtered on the web application.
+
+The database mapper should only map important information to the
+database so that the browser can store and process all data of
+the complete gallery.
+{{/modules.database}}

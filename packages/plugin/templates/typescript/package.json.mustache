@@ -1,0 +1,27 @@
+{
+  "name": "{{ name }}",
+  "version": "1.0",
+  "description": "Plugin {{ name }} for HomeGallery",
+  "license": "MIT",
+  "type": "module",
+  "exports": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm-run-all build:js",
+    "build:js": "node build.js",
+    "clean": "rimraf dist"
+  },
+  "types": "dist/index.d.ts",
+  "dependendies": {
+    "@home-gallery/types": "1.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.2",
+    "glob": "^10.3.15",
+    "typescript": "^4.7.4",
+    "npm-run-all2": "^6.1.2",
+    "rimraf": "^5.0.7"
+  }
+}
