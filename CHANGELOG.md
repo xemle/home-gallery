@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- server: Add user based filter to customize database access
 - plugin: Add query plugin (server side)
 - server: Add SHA256-salted password schema
 - plugin: Initial plugin manager (experimental)

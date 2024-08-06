@@ -184,7 +184,7 @@ const runCommand = (command, args, options, cb) => {
   const stdoutChunks = []
   const stderrChunks = []
   const t0 = Date.now()
-  log.trace({spawn: {command, args, env: options.env, cmd: commandLine}}, `Execute command: ${[command, ...args].map(escapeWhitespace).join(' ')}`)
+  log.trace({spawn: {command, args, env: options.env, cmd: commandLine}}, `Executing command: ${[command, ...args].map(escapeWhitespace).join(' ')}`)
   const child = spawn(command, args, spawnOptions)
   child.stdout.on('data', chunk => stdoutChunks.push(chunk))
   child.stderr.on('data', chunk => stderrChunks.push(chunk))

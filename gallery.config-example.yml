@@ -156,11 +156,17 @@ sources:
   #   node -e "pw=process.argv[1]||'';sha1=require('crypto').createHash('sha1').update(pw).digest('base64');console.log('{SHA}'+sha1)" password
   #   {SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g=
   # auth:
+  #  public:
+  #    filter: 'year >= 2024 tag:public' # Database filter for non authenticated users and non whitelisted IPs
   #  users:
   #    - username: password
   #    - username: '{SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g='
   #    - username: admin
-  #      password: '{SHA256-salted}FkcbhhcHYW0DdE9u.P9Ik9MG8ldtO0fzGB+RV186vi8PZMomsya5OWC0AEiA=' // passsword
+  #      password: '{SHA256-salted}FkcbhhcHYW0DdE9u.P9Ik9MG8ldtO0fzGB+RV186vi8PZMomsya5OWC0AEiA=' # passsword
+  #      filter: '' # no database filter for admin user
+  #    - username: guest
+  #      password: '{SHA256-salted}W1jrZgK81z06YLhA.qTSmeyYtPP19ZEpGiiAyVn61nly4jqbuuGoSefzLm98=' # guest
+  #      filter: 'year >= 2019 not tag:private'
   #  rules:
   #    - allow: localhost
   #    - allow: '192.168/16'
