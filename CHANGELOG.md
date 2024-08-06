@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- server: Add SHA256-salted password schema
 - plugin: Initial plugin manager (experimental)
 - cli: Only import changed sources in watch mode
 - database: Use stream based database reader and writer

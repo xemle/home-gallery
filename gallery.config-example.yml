@@ -151,12 +151,16 @@ sources:
   # Enable basic authentication users and ip whitelist rules which require no authentication
   # First matching rule wins. Default rules are: allow: localhost and deny: all.
   # Hashed password can be generated via
+  #   node -e "pw=process.argv[1];const {createHash,randomBytes}=require('crypto');salt=randomBytes(12);hash=createHash('sha256').update(salt.toString()+pw).digest('base64');console.log('{SHA256-salted}'+salt.toString('base64')+'.'+hash)" 'password'
+  #   {SHA256-salted}FkcbhhcHYW0DdE9u.P9Ik9MG8ldtO0fzGB+RV186vi8PZMomsya5OWC0AEiA=
   #   node -e "pw=process.argv[1]||'';sha1=require('crypto').createHash('sha1').update(pw).digest('base64');console.log('{SHA}'+sha1)" password
   #   {SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g=
   # auth:
   #  users:
   #    - username: password
   #    - username: '{SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g='
+  #    - username: admin
+  #      password: '{SHA256-salted}FkcbhhcHYW0DdE9u.P9Ik9MG8ldtO0fzGB+RV186vi8PZMomsya5OWC0AEiA=' // passsword
   #  rules:
   #    - allow: localhost
   #    - allow: '192.168/16'
