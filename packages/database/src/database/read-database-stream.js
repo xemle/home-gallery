@@ -72,7 +72,7 @@ export const createEntrySplitter = (filename) => {
     if (isFirstChunk) {
       const [err, end, header] = findHeader(data)
       if (err) {
-        return cb(new Error(`Failed to read database header from ${filename}: ${err}`))
+        return cb(new Error(`Failed to read database header from ${filename}`, { cause: err }))
       } else if (end < 0) {
         return cb()
       } else {

@@ -80,7 +80,7 @@ export function databaseApi(context, databaseFilename, getEvents) {
     init: () => {
       waitReadWatch(databaseFilename, getEvents, (err, newDatabase) => {
         if (err) {
-          log.error(`Could not read database file ${databaseFilename}: ${err}`);
+          log.error(err, `Could not read database file ${databaseFilename}: ${err}`)
           return
         }
         clearCaches()
