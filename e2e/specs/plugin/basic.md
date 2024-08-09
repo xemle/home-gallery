@@ -28,26 +28,28 @@ Tags: plugin
 
 ## Create database plugin
 
-The default plugin template without extractor sets only
-a string `acme` to `plugin.acme`
-
 * Create "vanilla" plugin "acme" with modules "database"
 * Build plugin "acme"
 * Create index
 * Extract files
 * Create database
-* Database entry "2e17e23" has property "plugin.acme" with value "acme"
+* Database entry "2e17e23" has property "plugin.acme.value" with value "acme"
 
-## Create plugin with extract and database
-
-The default plugin template with extractor sets data from
-the extractor to `plugin.acme`
+## Create typescript plugin with all modules
 
 Tags: typescript
 
-* Create "typescript" plugin "acme" with modules "extractor, database"
+* Create "typescript" plugin "acme"
 * Build plugin "acme"
 * Create index
 * Extract files
 * Create database
-* Database entry "2e17e23" has property "plugin.acme.plugin" with value "acme"
+* Database entry "2e17e23" has property "plugin.acme.value" with value "acme"
+
+## Create single plugin with all modules
+
+* Create "single" plugin "acme"
+* Create index
+* Extract files
+* Create database
+* Database entry "2e17e23" has property "plugin.acme.value" with value "acme"

@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer'
 import fs from 'fs/promises'
+import path from 'path'
 import heicDecode from 'heic-decode'
 
 import Logger from '@home-gallery/logger'
@@ -183,21 +184,23 @@ export async function heicPreview(storage, imagePreviewSizes, jpgWriter) {
 }
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-const heicPlugin = {
+const heicPlugin = manager => ({
   name: 'heic',
   phase: 'raw',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
-    const { storage, imageResizer, isNativeImageResizer, imagePreviewSizes } = context
+  async create(storage) {
+    const context = manager.getContext()
+    const { imageResizer, isNativeImageResizer, imagePreviewSizes } = context
     const jpgWriter = await initJpgWriter(storage, imageResizer, isNativeImageResizer)
 
     return heicPreview(storage, imagePreviewSizes, jpgWriter)
   },
-}
+})
 
 const plugin = toPlugin(heicPlugin, 'heicPreviewExtractor', ['imageResizeExtractor'])
 

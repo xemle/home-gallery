@@ -1,6 +1,6 @@
 /* globals gauge*/
 "use strict"
-const { getFilesDir, getConfigFilename, runCli, setConfigValue } = require('../utils')
+const { getFilesDir, getConfigFilename, runCli, setConfigValue, getConfigValue } = require('../utils')
 
 step("Init config", async () => {
   await runCli(['run', 'init', '--config', getConfigFilename(), '--source', getFilesDir()])

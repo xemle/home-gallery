@@ -6,7 +6,7 @@ import { Transform } from 'stream'
 
 
 import Logger from '@home-gallery/logger'
-import { TExtractor, TExtractorEntry, TExtractorContext, TPlugin } from "@home-gallery/types";
+import { TExtractor, TExtractorEntry, TPlugin } from "@home-gallery/types";
 import { through } from '@home-gallery/stream'
 
 import { ExtractorStreamFactory } from './extractorStreamFactory.js'
@@ -43,7 +43,6 @@ t.only('StreamFactory', async t => {
   t.test('getExtractorStreamsFrom from function only', async t => {
     const manager = new PluginManager()
     const storage = new Storage(storageDir)
-    const context = { manager, storage }
 
     const streamFactory = new ExtractorStreamFactory(manager, storage, [])
 
@@ -56,7 +55,7 @@ t.only('StreamFactory', async t => {
     }
 
 
-    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [extractor], context)
+    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [extractor])
 
 
     t.same(streams.length, 1)
@@ -89,7 +88,7 @@ t.only('StreamFactory', async t => {
     }
 
 
-    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [extractor], context)
+    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [extractor])
 
 
     t.same(streams.length, 1)
@@ -125,7 +124,7 @@ t.only('StreamFactory', async t => {
     }
 
 
-    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [extractor], context)
+    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [extractor])
 
 
     const data = await testEntryStream(streams)
@@ -155,7 +154,7 @@ t.only('StreamFactory', async t => {
     }
 
 
-    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [extractor], context)
+    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [extractor])
 
 
     const data = await testEntryStream(streams)
@@ -167,7 +166,6 @@ t.only('StreamFactory', async t => {
   t.test('getExtractorStreamsFrom invalid task is skipped', async t => {
     const manager = new PluginManager({})
     const storage = new Storage(storageDir)
-    const context = { manager, storage } as TExtractorContext
 
     const streamFactory = new ExtractorStreamFactory(manager, storage, [])
 
@@ -181,7 +179,7 @@ t.only('StreamFactory', async t => {
       },
     }
 
-    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [invalidExtractor], context)
+    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [invalidExtractor])
 
 
     t.same(streams.length, 0)
@@ -216,7 +214,7 @@ t.only('StreamFactory', async t => {
     }
 
 
-    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [failingExtractor, extractor], context)
+    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [failingExtractor, extractor])
 
 
     t.same(streams.length, 1)

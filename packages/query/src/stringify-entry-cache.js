@@ -11,7 +11,9 @@ export const createStringifyEntryCache = () => {
       return cache.get(entry)
     },
     evictEntries: entries => {
-      entries.forEach(entry => cache[entry.id] = false)
+      entries
+        .filter(entry => cache.has(entry))
+        .forEach(entry => cache.delete(entry))
     },
     evictAll: () => {
       cache = new WeakMap()

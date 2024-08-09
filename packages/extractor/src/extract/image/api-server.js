@@ -102,15 +102,14 @@ const isDisabled = (config, feature) => {
 }
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-const apiServerPlugin = {
+const apiServerPlugin = manager => ({
   name: 'apiServerMessage',
   phase: 'file',
-  /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
-   */
-  async create(context, config) {
+  async create() {
+    const config = manager.getConfig()
     const {url, timeout, concurrent} = config?.extractor?.apiServer || {}
 
     if (url?.startsWith(PUBLIC_API_SERVER)) {
@@ -121,19 +120,22 @@ const apiServerPlugin = {
     log.trace(`Use api server with ${concurrent} concurrent connections and timeout of ${timeout}s`)
     return noop()
   },
-}
+})
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-const similarDetectionPlugin = {
+const similarDetectionPlugin = manager => ({
   name: 'similarDetection',
   phase: 'file',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
-    const { storage, imagePreviewSizes, sizeToImagePreviewSuffix } = context
+  async create(storage) {
+    const config = manager.getConfig()
+    const context = manager.getContext()
+    const { imagePreviewSizes, sizeToImagePreviewSuffix } = context
     if (isDisabled(config, 'similarDetection')) {
       log.info(`Disable similar detection`)
       return noop()
@@ -150,19 +152,22 @@ const similarDetectionPlugin = {
       timeout: apiServer.timeout,
     })
   },
-}
+})
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-const objectDetectionPlugin = {
+const objectDetectionPlugin = manager => ({
   name: 'objectDetection',
   phase: 'file',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
-    const { storage, imagePreviewSizes, sizeToImagePreviewSuffix } = context
+  async create(storage) {
+    const config = manager.getConfig()
+    const context = manager.getContext()
+    const { imagePreviewSizes, sizeToImagePreviewSuffix } = context
     if (isDisabled(config, 'objectDetection')) {
       log.info(`Disable object detection`)
       return noop()
@@ -179,19 +184,22 @@ const objectDetectionPlugin = {
       timeout: apiServer.timeout,
     })
   },
-}
+})
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-const faceDetectionPlugin = {
+const faceDetectionPlugin = manager => ({
   name: 'faceDetection',
   phase: 'file',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
-    const { storage, imagePreviewSizes, sizeToImagePreviewSuffix } = context
+  async create(storage) {
+    const config = manager.getConfig()
+    const context = manager.getContext()
+    const { imagePreviewSizes, sizeToImagePreviewSuffix } = context
     if (isDisabled(config, 'faceDetection')) {
       log.info(`Disable face detection`)
       return noop()
@@ -208,7 +216,7 @@ const faceDetectionPlugin = {
       timeout: apiServer.timeout,
     })
   },
-}
+})
 
 const plugin = toPlugin([apiServerPlugin, similarDetectionPlugin, objectDetectionPlugin, faceDetectionPlugin], 'aiExtractor', ['imagePreviewExtractor'])
 

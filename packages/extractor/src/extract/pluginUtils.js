@@ -1,22 +1,23 @@
 /**
- * @param {import('@home-gallery/types').TExtractorPlugin | import('@home-gallery/types').TExtractorPlugin[]} extractor
+ * @callback ExtractorFactory
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @return {import('@home-gallery/types').TExtractor}}
+ */
+/**
+ * @param {ExtractorFactory | ExtractorFactory[]} extractorFactory
  * @param {string[]} [requires]
  * @returns {import('@home-gallery/types').TPlugin}
  */
-export const toPlugin = (extractor, name, requires = []) => {
-  /**
-   * @type {import('@home-gallery/types').TPlugin}
-   */
+export const toPlugin = (extractorFactory, name, requires = []) => {
+  /** @type {import('@home-gallery/types').TPlugin} */
   const plugin = {
     name,
     version: '1.0.0',
     requires,
-    async initialize() {
-      /**
-       * @type {import('@home-gallery/types').TModuleFactory}
-       */
+    async initialize(manager) {
+      /** @type {import('@home-gallery/types').TModuleFactory} */
       const factory = {
-        getExtractors: () => Array.isArray(extractor) ? extractor : [extractor]
+        getExtractors: () => Array.isArray(extractorFactory) ? extractorFactory.map(factory => factory(manager)) : [extractorFactory(manager)]
       }
       return factory
     }

@@ -13,12 +13,14 @@ const existsFnFilters = [
   },
 ]
 
-export const existsFnFilter = (ast, options) => {
+export const existsFnFilter = (ast, context) => {
   const filter = existsFnFilters.find(cmpFn => matchExistsFnFilter(cmpFn, ast))
   if (filter) {
-    return filter.filter(ast, options)
+    ast.filter = filter.filter(ast, context)
+  } else {
+    ast.filter = () => true
+    context.queryErrorHandler(ast, context, `Unknown exists mapping. key=${ast.key} is unknown`)
   }
-  return options.unknownExpressionHandler(ast, options)
 }
 
 const matchExistsFnFilter = (existsFn, ast) => existsFn.keys.includes(ast.key)

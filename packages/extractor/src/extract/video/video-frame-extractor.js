@@ -40,15 +40,17 @@ export const createVideoFrameExtractor = (ffmpegPath, ffprobePath) => {
 }
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-const videoFramePlugin = {
+const videoFramePlugin = manager => ({
   name: 'videoFrame',
   phase: 'file',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
+  async create() {
+    const context = manager.getContext()
     const { ffmpegPath, ffprobePath } = context
 
     const videoFrameExtractor = createVideoFrameExtractor(ffmpegPath, ffprobePath)
@@ -56,7 +58,7 @@ const videoFramePlugin = {
     
     return noop()
   },
-}
+})
 
 const plugin = toPlugin(videoFramePlugin, 'videoFrameExtractor', ['metaExtractor'])
 

@@ -64,20 +64,22 @@ const embeddedRawPreview = (storage, exifTool) => {
 }
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-const embeddedRawPreviewPlugin = {
+const embeddedRawPreviewPlugin = manager => ({
   name: 'embeddedRawPreview',
   phase: 'raw',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
-    const { storage, exifTool } = context
+  async create(storage) {
+    const context = manager.getContext()
+    const { exifTool } = context
 
     return embeddedRawPreview(storage, exifTool)
   },
-}
+})
 
 const plugin = toPlugin(embeddedRawPreviewPlugin, 'embeddedRawPreviewExtractor', ['metaExtractor'])
 

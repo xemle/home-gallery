@@ -90,20 +90,23 @@ const tearDownExifTool = async (exifTool) => {
 }
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-export const exifPlugin = {
+export const exifPlugin = manager => ({
   name: 'exif',
   phase: 'meta',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
+  async create(storage) {
+    const config = manager.getConfig()
     const exifTool = await initExiftool(config)
-    context.exifTool = exifTool
-    return exif(context.storage, exifTool)
+    manager.getContext().exifTool = exifTool
+    return exif(storage, exifTool)
   },
-  async tearDown(context) {
+  async tearDown() {
+    const context = manager.getContext()
     if (!context?.exifTool) {
       return
     }
@@ -111,5 +114,4 @@ export const exifPlugin = {
     context.exifTool = null
     return tearDownExifTool(exifTool)
   }
-}
-
+})

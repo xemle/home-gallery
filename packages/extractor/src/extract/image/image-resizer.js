@@ -178,25 +178,25 @@ export const useExternalImageResizer = config => config?.extractor?.useNative?.i
 const byNumberDesc = (a, b) => b - a
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-const imageResizerPlugin = {
+const imageResizerPlugin = manager => ({
   name: 'imageResizer',
   phase: 'meta',
-  /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
-   */
-  async create(context, config) {
+  async create() {
+    const config = manager.getConfig()
     const imageResizer = await createImageResizer(config)
     const previewSizes = config?.extractor?.image?.previewSizes || [1920, 1280, 800, 320, 128]
 
+    const context = manager.getContext()
     context.imageResizer = imageResizer
     context.imagePreviewSizes = previewSizes.sort(byNumberDesc)
     context.isNativeImageResizer = useExternalImageResizer(config)
 
     return noop()
   }
-}
+})
 
 const plugin = toPlugin(imageResizerPlugin, 'imageResizeExtractor')
 

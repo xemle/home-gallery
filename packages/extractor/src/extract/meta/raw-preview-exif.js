@@ -37,17 +37,18 @@ export const rawPreviewExif = (storage, exifTool) => {
 }
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-export const rawPreviewExifPlugin = {
+export const rawPreviewExifPlugin = manager => ({
   name: 'rawPreviewExif',
   phase: 'file',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
-    const { storage, exifTool } = context
+  async create(storage) {
+    const context = manager.getContext()
 
-    return rawPreviewExif(storage, exifTool)
+    return rawPreviewExif(storage, context.exifTool)
   },
-}
+})

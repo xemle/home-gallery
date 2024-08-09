@@ -29,12 +29,12 @@ const readStreamsAsync = promisify(readStreams);
  * @returns
  */
 export const createEntries = async (indexFilenames, journal, storage, options) => {
-  const { supportedTypes, updated, excludes, excludeFromFile } = options.config.database;
+  const { supportedTypes, excludes, excludeFromFile } = options.config.database;
 
   const entryStream = await readStreamsAsync(indexFilenames, journal)
   const fileFilterFn = await fileFilterAsync(excludes, excludeFromFile)
 
-  const mapperStream =  await createDatabaseMapperStream(options)
+  const mapperStream =  await createDatabaseMapperStream(options.config)
 
   let result
   await pipeline(

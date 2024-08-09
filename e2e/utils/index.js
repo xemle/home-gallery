@@ -16,7 +16,7 @@ const galleryBinArgs = process.env.gallery_bin_args ? process.env.gallery_bin_ar
 const projectRoot = path.resolve(process.cwd(), '..')
 const testDataDir = path.join(projectRoot, process.env.gallery_data_dir || 'data')
 
-const logLevel = process.env.gallery_log_level || 'debug'
+const logLevel = process.env.GALLERY_LOG_FILE_LEVEL || process.env.GALLERY_LOG_LEVEL || process.env.gallery_log_level || 'debug'
 
 const isWindows = os.platform == 'win32'
 
@@ -123,13 +123,45 @@ const tree = async dir => {
 
 const resolveArgs = (args, vars) => [].concat(args).map(arg => arg.replace(/\{([^}]+)\}/g, (_, name) => vars[name.trim()] || ''))
 
-const appendLog = (file, data, cb) => {
-  fs.appendFile(file, JSON.stringify(data) + '\n', err => {
-    if (err) {
-      gauge.message(`Could not write cli log: ${err}`)
+const log = {
+  log(level, obj, msg) {
+    const logFile = getPath('cli.log')
+    let log = {
+      level,
+      time: new Date().toISOString(),
     }
-    cb(err)
-  })
+
+    if (typeof obj == 'number') {
+      log = {...log, duration: Date.now() - obj, msg}
+    } else if (obj instanceof Error) {
+      log = {...log, err: obj, msg}
+    } else if (typeof obj == 'object') {
+      log = {...log, ...obj, msg}
+    } else if (typeof obj == 'string') {
+      log = {...log, msg: obj}
+    }
+
+    fs.appendFile(logFile, JSON.stringify(log) + '\n', err => {
+      if (err) {
+        gauge.message(`Could not write cli log: ${err}`)
+      }
+    })
+  },
+  trace(obj, msg) {
+    this.log(10, obj, msg)
+  },
+  debug(obj, msg) {
+    this.log(20, obj, msg)
+  },
+  info(obj, msg) {
+    this.log(30, obj, msg)
+  },
+  warn(obj, msg) {
+    this.log(40, obj, msg)
+  },
+  error(obj, msg) {
+    this.log(50, obj, msg)
+  },
 }
 
 const envToString = ([key, value]) => `${key}=${value}`
@@ -152,7 +184,7 @@ const runCommand = (command, args, options, cb) => {
   const stdoutChunks = []
   const stderrChunks = []
   const t0 = Date.now()
-  const logFile = getPath('cli.log')
+  log.trace({spawn: {command, args, env: options.env, cmd: commandLine}}, `Executing command: ${[command, ...args].map(escapeWhitespace).join(' ')}`)
   const child = spawn(command, args, spawnOptions)
   child.stdout.on('data', chunk => stdoutChunks.push(chunk))
   child.stderr.on('data', chunk => stderrChunks.push(chunk))
@@ -165,21 +197,18 @@ const runCommand = (command, args, options, cb) => {
     gauge.dataStore.scenarioStore.put('commandHistory', commandHistory)
     gauge.dataStore.scenarioStore.put('lastExitCode', code)
     const spawnInfo = { env: options.env || {}, command, args, pid: child.pid, code, signal, cmd: commandLine, stdout, stderr }
-    const data = {level: 30, time: new Date(t0).toISOString(), spawn: spawnInfo, duration: Date.now() - t0, msg: `${commandLine} exited with ${code}` }
-    appendLog(logFile, data, () => {
-      if (cb) {
-        cb(code, stdout, stderr)
-      }
-    })
+    const data = {spawn: spawnInfo, duration: Date.now() - t0}
+    log.info(data, `${commandLine} exited with ${code}`)
+    if (cb) {
+      cb(code, stdout, stderr)
+    }
   })
 
   child.on('error', (err) => {
-    const data = {level: 50, time: new Date().toISOString(), error, msg: `Failed to execute command ${commandLine}: ${err.message}`}
-    appendLog(logFile, data, () => {
-      if (cb) {
-        cb(code, stdout, stderr)
-      }
-    })
+    log.error(err, `Failed to execute command ${commandLine}: ${err.message}`)
+    if (cb) {
+      cb(code, stdout, stderr)
+    }
   })
 
   return child;
@@ -400,6 +429,7 @@ module.exports = {
   getExportOutputDir,
   getPluginBaseDir,
   getPluginDir,
+  log,
   tree,
   runCommand,
   runCli,

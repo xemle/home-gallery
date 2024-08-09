@@ -10,7 +10,7 @@ const assert = require('assert')
 const fetch = require('node-fetch')
 const express = require('express')
 
-const { generateId, nextPort, waitFor, runCliAsync, killChildProcess, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase, addCliEnv, resolveProperty, parseValue, assertDeep } = require('../utils')
+const { generateId, nextPort, waitFor, runCliAsync, killChildProcess, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase, addCliEnv, resolveProperty, parseValue, assertDeep, log } = require('../utils')
 
 const serverTestHost = '127.0.0.1'
 const servers = {}
@@ -27,7 +27,16 @@ const fetchFacade = (path, options = {}) => {
 
   const headers = gauge.dataStore.scenarioStore.get('request.headers') || {}
   const agent = url.startsWith('https') ? insecureOption : {}
-  return fetch(`${url}${path || ''}`, Object.assign(options, {timeout: 500, headers: Object.assign({}, options.headers, headers)}, agent))
+  const t0 = Date.now()
+  const fetchUrl = `${url}${path || ''}`
+  return fetch(fetchUrl, Object.assign(options, {timeout: 500, headers: Object.assign({}, options.headers, headers)}, agent))
+    .then(res => {
+      const curlHeaders = Object.entries(headers).map(([key, value]) => `-H "${key}: ${value}"`).join(' ') + ' '
+      const curl = `curl ${url.startsWith('https') ? '-k ' : ''}${curlHeaders}${url}${path || ''}`
+      const data = {duration: Date.now() - t0, curl, headers}
+      log.debug(data, `Fetched ${path} with status ${res.status}`)
+      return res
+    })
 }
 
 const fetchDatabase = () => fetchFacade('/api/database.json')
@@ -332,13 +341,21 @@ step("Log has entry with key <key> and value <value>", async (key, value) => {
   assert(matches.length, `Could not find any log entry with key ${key} and value '${value}' but found ${values.map(v => `'${v}'`).join(', ')}`)
 })
 
-step("Fetch database with query <query>", async (query) => {
+const requestDatabase = async (query) => {
   return fetchFacade(`/api/database.json${query}`)
     .then(res => {
       assert(res.ok, `Could not fetch database`)
       return res.json()
     })
     .then(data => gauge.dataStore.scenarioStore.put('fetched.database', data))
+}
+
+step("Fetch database", async () => {
+  return requestDatabase('')
+})
+
+step("Fetch database with query <query>", async (query) => {
+  return requestDatabase(query)
 })
 
 step("Fetched database has <amount> entries", async (amount) => {

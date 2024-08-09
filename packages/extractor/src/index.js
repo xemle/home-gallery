@@ -32,7 +32,7 @@ export const extract = async (options) => {
   const storage = createStorage(storageDir)
   const fileFilterFn = await fileFilterAsync(config.extractor.excludes, config.extractor.excludeFromFile)
 
-  const [extractorStreams, tearDown] = await createExtractorStreams(options)
+  const [extractorStreams, tearDown] = await createExtractorStreams(options.config)
 
   log.info(`Using ${extractorStreams.length} extractor tasks`)
   const metaExtractors = extractorStreams.filter(e => e.extractor.phase == 'meta')

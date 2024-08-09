@@ -78,14 +78,13 @@ const command = {
           },
           config.pluginManager = {
             ...config.pluginManager,
-            plugins: [...basePluginFiles, ...config.pluginManager?.plugins]
+            plugins: [...basePluginFiles, ...(config.pluginManager?.plugins || [])]
           }
         }
 
         const run = async() => {
           const { buildDatabase, getPluginFiles: getDatabasePluginFiles } = await import('@home-gallery/database')
-          const { getPluginFiles: getExtractorPluginFiles } = await import('@home-gallery/extractor');
-          const basePluginFiles = [...getExtractorPluginFiles(), ...getDatabasePluginFiles()]
+          const basePluginFiles = [...getDatabasePluginFiles()]
 
           const options = await load(argv.config, false, argv.autoConfig)
 

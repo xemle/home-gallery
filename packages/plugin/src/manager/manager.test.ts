@@ -1,17 +1,15 @@
 import path from 'path'
 import t from 'tap'
 import { fileURLToPath } from 'url'
-import { Readable } from 'stream'
-import { pipeline } from 'stream/promises'
 
 import Logger from '@home-gallery/logger'
-import { toList, write } from '@home-gallery/stream'
-import { TExtractorEntry, TExtractorStream, TExtractorFunction, TExtractor, TPlugin, TStorageEntry } from '@home-gallery/types'
+import { TExtractorEntry, TStorageEntry } from '@home-gallery/types'
 
 import { PluginManager } from './manager.js'
 import { Storage } from './storage.js'
 
-import { testEntryStream, createPlugin, testDatabaseMapperStream, createDatabaseMapperPlugin, createExtractorPlugin } from './test-utils.js'
+import { testEntryStream, createPlugin, testDatabaseMapperStream, createDatabaseMapperPlugin, createExtractorPlugin, createQueryPlugin } from './test-utils.js'
+import { createQueryContext, createEntryMock } from '../query/query-test-utils.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const testDir = path.resolve(__dirname, '..', '..', 'test')
@@ -182,4 +180,38 @@ t.only('PluginManager', async t => {
     t.same(data[1].plugin?.acme, 'foo')
   })
 
+  t.test('executeQuery', async t => {
+    const queryPlugin = createQueryPlugin('acmeQuery', 'acme', (e: any) => e.plugin?.acme)
+    const plugin = createPlugin('acme', {query: queryPlugin})
+
+    const manager = new PluginManager()
+    await manager.addPlugin('dummy.file', plugin)
+    await manager.initializePlugins()
+
+    const context = createQueryContext()
+    const entries = [
+      createEntryMock('1', {plugin: {acme: 'foo'}}),
+      createEntryMock('2', {plugin: {acme: 'bar'}}),
+    ]
+
+
+    const filteredEntries = await manager.executeQuery(entries, 'acme = bar', context)
+
+
+    t.same(filteredEntries.map(e => e.id), ['2'])
+  })
+
+  t.test('executeQuery failes by unknown cmp key', async t => {
+    const manager = new PluginManager()
+    await manager.initializePlugins()
+
+    const context = createQueryContext()
+    const entries = [
+      createEntryMock('1', {plugin: {acme: 'foo'}}),
+      createEntryMock('2', {plugin: {acme: 'bar'}}),
+    ]
+
+
+    t.rejects(manager.executeQuery(entries, 'acme = bar', context))
+  })
 })

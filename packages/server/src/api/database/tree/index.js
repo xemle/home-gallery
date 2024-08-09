@@ -1,22 +1,24 @@
 import Logger from '@home-gallery/logger'
 
-const log = Logger('server.api.database.tree');
-
 import { FileStore } from './file-store.js'
 import { ObjectStore } from './object-store.js';
 import { sendError } from '../../error/index.js';
+import { createQueryContext } from '../queryContext.js';
 
-export const treeApi = (eventbus, getDatabase) => {
+const log = Logger('server.api.database.tree');
+
+/**
+ * @param {import('../../types.js').TServerContext} context
+ */
+export const treeApi = (context, getDatabase) => {
+  const { eventbus, pluginManager } = context
 
   /**
    * @type {FileStore}
    */
   let fileStore
-  /**
-   * @type {ObjectStore}
-   */
-  let objectStore
-  let rootId
+  let userObjectStores = {
+  }
 
   const buckets = [0, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000]
 
@@ -46,7 +48,7 @@ export const treeApi = (eventbus, getDatabase) => {
     log.debug({stats: {dirs, files, sizes}}, `File store has ${dirs} dirs and ${files} files`)
   }
 
-  const logObjectStoreStats = (objectStore, rootId) => {
+  const logObjectStoreStats = (objectStore, storeId, rootId) => {
     let trees = 0
     let entries = 0
     const sizes = {}
@@ -60,7 +62,7 @@ export const treeApi = (eventbus, getDatabase) => {
         entries++
       }
     })
-    log.debug({stats: {trees, entries, sizes}}, `Object store has ${trees} trees and ${entries} entries`)
+    log.debug({stats: {trees, entries, sizes}}, `Object store ${storeId} has ${trees} trees and ${entries} entries`)
   }
 
   const buildTreeStore = () => {
@@ -72,35 +74,52 @@ export const treeApi = (eventbus, getDatabase) => {
     log.debug(t0, `Build file store from ${entries.length} entries`)
   }
 
-  const buildObjectStore = () => {
+  const getEntryFilter = async (req) => {
+    const queryContext = createQueryContext(context, req)
+
+    // Execute a dummy query to retriev the queryFilter in the queryContext
+    await pluginManager.executeQuery([], '', queryContext)
+
+    const entryFilter = queryContext.queryFilter || (() => true)
+    const entryMapper = queryContext.queryMapper || (e => e)
+    return [entryFilter, entryMapper]
+  }
+
+  const getStoreId = req => req.username ? 'user:' + req.username : 'all'
+
+  const buildObjectStore = async (req) => {
     log.trace(`Building stores for offline database`)
     if (!fileStore) {
       buildTreeStore()
     }
 
     const t1 = Date.now()
-    objectStore = new ObjectStore()
-    rootId = objectStore.addFileStore(fileStore, 8000)
-    logObjectStoreStats(objectStore, rootId)
-    log.debug(t1, `Build database object store`)
+    const [entryFilter, entryMapper] = await getEntryFilter(req)
+    const objectStore = new ObjectStore()
+    const storeId = getStoreId(req)
+    const rootId = objectStore.addFileStore(fileStore, entryFilter, entryMapper, 8000)
+    logObjectStoreStats(objectStore, storeId, rootId)
+    userObjectStores[storeId] = {
+      objectStore,
+      rootId
+    }
+    log.debug(t1, `Build database object store for ${storeId}`)
   }
 
   const clearCaches = () => {
-    if (!rootId) {
+    if (!Object.keys(userObjectStores).length) {
       return
     }
     fileStore = null
-    objectStore = null
-    rootId = null
-    log.debug(`Clear database tree and object store`)
+    userObjectStores = {}
+    log.debug(`Clear database tree and object stores`)
   }
 
   const clearObjectStoreCache = () => {
-    if (!rootId) {
+    if (!Object.keys(userObjectStores).length) {
       return
     }
-    objectStore = null
-    rootId = null
+    userObjectStores = {}
     log.debug(`Clear database object store`)
   }
 
@@ -117,11 +136,13 @@ export const treeApi = (eventbus, getDatabase) => {
   })
 
   return {
-    read: (req, res) => {
+    read: async (req, res) => {
       const hashRef = req.params.hash?.replace(/\.json$/i, '')
-      if (!rootId) {
-        buildObjectStore()
+      const storeId = getStoreId(req)
+      if (!userObjectStores[storeId]?.rootId) {
+        await buildObjectStore(req)
       }
+      const { rootId, objectStore } = userObjectStores[storeId]
       const hash = hashRef == 'root' ? rootId : hashRef
       if (!hash) {
         return sendError(res, 421, `Tree reference is missing or empty`)

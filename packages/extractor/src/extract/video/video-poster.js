@@ -64,20 +64,22 @@ async function videoPoster(storage, videoFrameExtractor, createImagePreviews, im
 }
 
 /**
- * @type {import('@home-gallery/types').TExtractorPlugin}
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
  */
-const videoPosterPlugin = {
+const videoPosterPlugin = manager => ({
   name: 'videoPoster',
   phase: 'file',
   /**
-   * @param {import('@home-gallery/types').TExtractorContext} context
+   * @param {import('@home-gallery/types').TStorage} storage
    */
-  async create(context, config) {
-    const { storage, videoFrameExtractor, createImagePreviews, imagePreviewSizes } = context
+  async create(storage) {
+    const context = manager.getContext()
+    const { videoFrameExtractor, createImagePreviews, imagePreviewSizes } = context
 
     return videoPoster(storage, videoFrameExtractor, createImagePreviews, imagePreviewSizes)
   },
-}
+})
 
 const plugin = toPlugin(videoPosterPlugin, 'videoPosterExtractor', ['imagePreviewExtractor', 'videoFrameExtractor'])
 

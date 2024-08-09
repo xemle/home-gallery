@@ -43,6 +43,7 @@
   "dependencies": {
     "@home-gallery/common": "file:../common",
     "@home-gallery/stream": "file:../stream",
+    "@home-gallery/query": "file:../query",
     "mustache": "4.2.0"
   },
   "devDependencies": {

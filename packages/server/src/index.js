@@ -6,12 +6,16 @@ import open from 'open'
 import { callbackify, ProcessManager } from '@home-gallery/common'
 
 import Logger from '@home-gallery/logger'
+import { createPluginManager } from '@home-gallery/plugin'
 
 const log = Logger('server')
 const openCb = callbackify(open)
 
+import { EventBus } from './eventbus.js';
 import { createApp } from './app.js'
 import { spawnCli } from './utils/spawn-cli.js'
+
+export { getPluginFiles } from './plugins.js'
 
 const isHttps = (key, cert) => key && cert
 
@@ -28,54 +32,70 @@ function createServer(key, cert, app) {
   }
 }
 
-const serverUrl = (port, key, cert) =>`${isHttps(key, cert) ? 'https' : 'http'}://localhost:${port}`
+const serverUrl = (config) => {
+  const { port, key, cert } = config.server
+  return `${isHttps(key, cert) ? 'https' : 'http'}://localhost:${port}`
+}
 
 const getConfigEnv = options => {
   const { configFile, autoConfigFile } = options
   return !autoConfigFile && configFile ? {GALLERY_CONFIG: configFile} : {}
 }
 
-export function startServer(options, cb) {
+const shutdown = (server, processManager) => {
+  // use closeAllConnections from node >= v18.2.0
+  if (typeof server?.closeAllConnections == 'function') {
+    server.closeIdleConnections()
+    server.closeAllConnections()
+  }
+  server.close(err => {
+    if (err) {
+      log.error(err, `Failed to stop server: ${err}`)
+    }
+  });
+  return processManager.killAll('SIGINT')
+}
+
+export async function startServer(options) {
   const { config } = options
 
-  const pm = new ProcessManager()
-  const { app, initDatabase } = createApp(config)
+  const context = {
+    type: 'serverContext',
+    plugin: {},
+    config,
+    eventbus: new EventBus(),
+    processManager: new ProcessManager(),
+  }
+  const pluginManager = await createPluginManager(options.config, context)
+  context.pluginManager = pluginManager
 
-  const server = createServer(config.server.key, config.server.cert, app);
-  server.listen(config.server.port, config.server.host)
-    .on('error', err => {
-      if (err.code === 'EADDRINUSE') {
-        log.error(`Listening port ${config.server.port} is already in use!`);
-      }
-      cb(err);
-    })
-    .on('listening', () => {
-      const url = serverUrl(config.server.port, config.server.key, config.server.cert)
+  const { app, initDatabase } = createApp(context)
+
+  return new Promise((resolve, reject) => {
+    const { key, cert, port, host } = config.server
+    const server = createServer(key, cert, app);
+    server.listen(port, host)
+      .on('error', err => {
+        if (err.code === 'EADDRINUSE') {
+          log.error(`Listening port ${port} is already in use!`);
+        }
+        reject(err)
+      })
+      .on('listening', () => resolve(server))
+    }).then(async server => {
+      const { watchSources, openBrowser } = config.server
+      const url = serverUrl(config)
       log.info(`Your own Home Gallery is running at ${url}`);
       initDatabase();
-      if (config.server.watchSources) {
+      if (watchSources) {
         const watcher = spawnCli('run import --initial --update --watch'.split(' '), getConfigEnv(options))
-        pm.addProcess(watcher, 15 * 1000)
+        context.processManager.addProcess(watcher, 15 * 1000)
       }
-      if (config.server.openBrowser) {
+      if (openBrowser) {
         log.debug(`Open browser with url ${url}`)
-        return openCb(url, () => cb(null, server))
+        await open(url)
       }
-      cb(null, server);
+      return [server, () => shutdown(server, context.processManager)]
     })
-
-  server.shutdown = async () => {
-    // use closeAllConnections from node >= v18.2.0
-    if (typeof server?.closeAllConnections == 'function') {
-      server.closeIdleConnections()
-      server.closeAllConnections()
-    }
-    server.close(err => {
-      if (err) {
-        log.error(err, `Failed to stop server: ${err}`)
-      }
-    });
-    return pm.killAll('SIGINT')
-  }
 
 }

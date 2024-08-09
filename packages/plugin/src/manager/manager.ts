@@ -2,24 +2,30 @@ import fs from 'fs/promises'
 import path from 'path'
 
 import Logger from '@home-gallery/logger'
-import { TModuleFactory, TPlugin, TGalleryPluginManager, TLogger, TExtractorStream, TStorage, TGalleryConfig, TExtractorStreamTearDown, TDatabaseMapperStream, TDatabaseMapperEntry, TStorageEntry } from '@home-gallery/types'
+import { TModuleFactory, TPlugin, TGalleryPluginManager, TLogger, TExtractorStream, TStorage, TGalleryConfig, TExtractorStreamTearDown, TDatabaseMapperStream, TDatabaseMapperEntry, TStorageEntry, TQueryContext } from '@home-gallery/types'
 
 import { TPluginContext } from './types.js'
 import { resolveValid } from './load/resolve.js'
 import { resolvePackageEntry } from './load/pkg.js'
 import { ExtractorStreamFactory } from './extractorStreamFactory.js'
 import { createDatabaseMapperStream } from './databaseMapperStreamFactory.js'
+import { QueryExecutor } from '../query/queryExecutor.js'
 
 export class PluginManager implements TGalleryPluginManager {
   plugins: TPluginContext[] = []
   config: TGalleryConfig
+  context: any
   managerConfig: any
   log: TLogger
+  queryExecutor: QueryExecutor
 
-  constructor(config: TGalleryConfig = {}) {
+
+  constructor(config: TGalleryConfig = {}, context = {}) {
     this.config = config
+    this.context = context
     this.managerConfig = config.pluginManager || {}
     this.log = Logger('pluginManager')
+    this.queryExecutor = new QueryExecutor()
   }
 
   /**
@@ -27,7 +33,9 @@ export class PluginManager implements TGalleryPluginManager {
    * are subjects of change until ApiVersion 1.0 is released
    */
   getApiVersion(): string {
-    return '0.6'
+    // 0.7 - Add TPluginManager context, chanage TExtractor create() signature
+    // 0.6 - Initial
+    return '0.7'
   }
 
   getConfig(): TGalleryConfig {
@@ -36,6 +44,10 @@ export class PluginManager implements TGalleryPluginManager {
 
   createLogger(module: string): TLogger {
     return Logger(module)
+  }
+
+  getContext() {
+    return this.context
   }
 
   async importPlugin(file: string) {
@@ -168,7 +180,8 @@ export class PluginManager implements TGalleryPluginManager {
 
     const fns = [
       'getExtractors',
-      'getDatabaseMappers'
+      'getDatabaseMappers',
+      'getQueryPlugins'
     ]
 
     const foundFn = fns.filter(fn => typeof factory[fn] != 'undefined')
@@ -190,6 +203,8 @@ export class PluginManager implements TGalleryPluginManager {
       await ctx.plugin.initialize(this)
         .then(this.validateFactory)
         .then((factory: TModuleFactory) => {
+          const queryPlugins = factory.getQueryPlugins ? factory.getQueryPlugins() : []
+          this.queryExecutor.addQueryPlugins(queryPlugins)
           ctx.factory = factory
           ctx.loaded = true
         })
@@ -230,4 +245,7 @@ export class PluginManager implements TGalleryPluginManager {
     return createDatabaseMapperStream(loadedPlugins, this.getConfig(), updated)
   }
 
+  async executeQuery(entries: any, query: string, context: TQueryContext): Promise<any> {
+    return this.queryExecutor.execute(entries, query, context)
+  }
 }

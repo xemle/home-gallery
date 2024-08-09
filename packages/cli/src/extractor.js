@@ -127,9 +127,13 @@ const command = {
         files: config.sources?.filter(s => !s.offline).map(s => s.index),
         ...config.fileIndex
       }
+      // Set extractor object for CLI only options
+      config.extractor = {
+        ...config.extractor
+      }
       config.pluginManager = {
         ...config.pluginManager,
-        plugins: [...extractorPlugins, ...config.pluginManager?.plugins]
+        plugins: [...extractorPlugins, ...(config.pluginManager?.plugins || [])]
       }
     }
 

@@ -2,7 +2,8 @@
   "name": "@home-gallery/mono-repo",
   "version": "1.15.1",
   "description": "",
-  "main": "gallery.js",
+  "type": "module",
+  "export": "./gallery.js",
   "scripts": {
     "postinstall": "npm --prefix e2e install",
     "clean": "pnpm -r clean",
