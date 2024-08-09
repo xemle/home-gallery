@@ -18,7 +18,7 @@ before:
   - npm run clean
   - npm run build
   - npm install --force --no-save @ffmpeg-installer/linux-x64 @ffmpeg-installer/win32-x64 @ffmpeg-installer/darwin-x64 @ffprobe-installer/linux-x64 @ffprobe-installer/win32-x64 @ffprobe-installer/darwin-x64 exiftool-vendored.exe exiftool-vendored.pl
-  - node scripts/download-nodejs.js --version=20.13.1 --platforms=linux-x64,darwin-x64,win-x64 --targetDir=node
+  - node scripts/download-nodejs.js --version=20.16.0 --platforms=linux-x64,darwin-x64,win-x64 --targetDir=node
 run:
   - npx rimraf node_modules/sharp/{build,vendor,platform.json}
   - command: npm --prefix=node_modules/sharp --platform=linux --arch=x64 --sharp-install-force run install
