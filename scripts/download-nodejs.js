@@ -1,7 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 
-const { exists, downloadFile, extractArchive } = require('./download.js')
+import { exists, downloadFile, extractArchive } from './download.js'
 
 const logLevel = process.env.LOG_LEVEL || 'info'
 
