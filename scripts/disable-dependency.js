@@ -33,7 +33,7 @@ const writeJson = async (filename, json) => fs.writeFile(filename, JSON.stringif
 const run = async (pkgFilename, names) => {
   const pkg = await readJson(pkgFilename)
 
-  disabled = disableDependencies(pkg, names)
+  const disabled = disableDependencies(pkg, names)
 
   await fs.rename(pkgFilename, `${pkgFilename}.orig`)
   await writeJson(pkgFilename, pkg)
