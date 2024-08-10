@@ -10,7 +10,7 @@ import { createQueryContext } from './queryContext.js'
 const log = Logger('server.api.database');
 
 /**
- * @param {EventBus} eventbus
+ * @param {import('@home-gallery/types').TGalleryContext} context
  */
 export function databaseApi(context, databaseFilename, getEvents) {
   const { eventbus, pluginManager } = context
@@ -18,6 +18,12 @@ export function databaseApi(context, databaseFilename, getEvents) {
   const databaseCache = cache(3600);
   let entryCache = {};
 
+  /**
+   * @param {object} database
+   * @param {string} [term]
+   * @param {object} [req]
+   * @returns {Promise<object>}
+   */
   const filterDatabase = async (database, term = '', req = {}) => {
     /** @type {import('@home-gallery/types').TQueryContext} */
     const queryContext = createQueryContext(context, req)
