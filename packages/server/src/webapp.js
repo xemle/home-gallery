@@ -7,11 +7,37 @@ const log = Logger('server.webapp')
 
 import { useIf, isIndex } from './utils.js'
 
+const readFileCached = (file, refreshMs = 10 * 1000) => {
+  let data = false
+  let lastStatCache = false
+  let lastStatTime = 0
+
+  return async () => {
+    if (data && (Date.now() - lastStatTime) < refreshMs) {
+      return data
+    }
+
+    const stat = await fs.stat(file)
+    const statCache = [stat.size, stat.ctimeMs, stat.dev, stat.ino].join(':')
+    lastStatTime = Date.now()
+
+    if (statCache == lastStatCache) {
+      return data
+    }
+
+    data = await fs.readFile(file, 'utf8')
+    lastStatCache = statCache
+    return data
+  }
+}
+
 const injectStateMiddleware = (indexFile, getState, {basePath, injectRemoteConsole}) => {
+
+  const readIndex = readFileCached(indexFile)
 
   const getIndex = async (req) => {
     const state = await getState(req)
-    let html = await fs.readFile(indexFile, 'utf-8')
+    let html = await readIndex()
 
     if (basePath && basePath != '/') {
       html = html.replace('<base href="/">', `<base href="${basePath}">`)
