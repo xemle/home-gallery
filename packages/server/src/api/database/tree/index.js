@@ -79,6 +79,7 @@ export const treeApi = (context, getDatabase) => {
 
     // Execute a dummy query to retriev the queryFilter in the queryContext
     await pluginManager.executeQuery([], '', queryContext)
+    log.trace({ast: queryContext.ast, queryAst: queryContext.queryAst}, `Create query filter with ${queryContext.stringifiedQueryAst}`)
 
     const entryFilter = queryContext.queryFilter || (() => true)
     const entryMapper = queryContext.queryMapper || (e => e)
