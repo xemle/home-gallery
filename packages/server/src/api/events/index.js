@@ -83,7 +83,7 @@ export const eventsApi = (context, eventsFilename) => {
     };
 
     clients.push(newClient);
-    log.info(`Add new client ${newClient}`);
+    log.info(`Add new client ${newClient}${req.username ? ' for user ' + req.username : ''}`);
 
     req.on('close', () => {
       log.debug(`Client connection closed. Remove client ${newClient}`);
