@@ -68,12 +68,19 @@ class ObjectStoreVisitor {
     } else if (this.mergeCount > 0 && this.paths.length) {
       this.flattenTree(tree)
     }
-    const data = tree.files.map(file => `${file.hash}  ${file.name}`).join('\n')
-    tree.hash = createHash(data)
-    this.store[tree.hash] = tree.files
 
-    if (!this.paths.length) {
+    const isRoot = this.paths.length == 0
+    const hasFiles = tree.files.length > 0
+    if (isRoot || hasFiles) {
+      const data = tree.files.map(file => `${file.hash}  ${file.name}`).join('\n')
+      tree.hash = createHash(data)
+      this.store[tree.hash] = tree.files
+    }
+
+    if (isRoot) {
       this.rootId = tree.hash
+      return
+    } else if (!hasFiles) {
       return
     }
 

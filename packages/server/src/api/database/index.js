@@ -10,7 +10,7 @@ import { createQueryContext } from './queryContext.js'
 const log = Logger('server.api.database');
 
 /**
- * @param {EventBus} eventbus
+ * @param {import('@home-gallery/types').TGalleryContext} context
  */
 export function databaseApi(context, databaseFilename, getEvents) {
   const { eventbus, pluginManager } = context
@@ -18,6 +18,12 @@ export function databaseApi(context, databaseFilename, getEvents) {
   const databaseCache = cache(3600);
   let entryCache = {};
 
+  /**
+   * @param {object} database
+   * @param {string} [term]
+   * @param {object} [req]
+   * @returns {Promise<object>}
+   */
   const filterDatabase = async (database, term = '', req = {}) => {
     /** @type {import('@home-gallery/types').TQueryContext} */
     const queryContext = createQueryContext(context, req)
@@ -96,12 +102,23 @@ export function databaseApi(context, databaseFilename, getEvents) {
           })
       })
     },
-    getFirstEntries: (count) => {
-      const key = `firstEntries:${count}`;
-      if (typeof entryCache[key] === 'undefined') {
-        entryCache[key] = database ? database.data.slice(0, count) : [];
+    getFirstEntries: async (count, req) => {
+      const key = `firstEntries:${req.username || ''}:${count}` + Date.now();
+      if (!database?.data?.length) {
+        return []
+      } else if (entryCache[key]?.length) {
+        return entryCache[key]
       }
-      return entryCache[key]
+
+      return filterDatabase(database, '', req)
+        .then(filteredDatabase => {
+          entryCache[key] = filteredDatabase.data.slice(0, count);
+          return entryCache[key]
+        })
+        .catch(err => {
+          log.warn(err, `Failed to query database for first entries. Return empty list`)
+          return []
+        })
     },
     read: (req, res) => databaseCache.middleware(req, res, () => send(req, res)),
     getDatabase: () => database

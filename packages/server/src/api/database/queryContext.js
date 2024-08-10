@@ -13,7 +13,7 @@ export const createQueryContext = (context, req = {}) => {
     },
     plugin: {
       req: req.method ? {
-        remoteAdress: req.remoteAdress,
+        remoteAddress: req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress,
         ignoreAuth: req.ignoreAuth,
         username: req.username || 'anonymous'
       } : false

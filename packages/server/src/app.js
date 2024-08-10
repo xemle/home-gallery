@@ -71,14 +71,21 @@ export function createApp(context) {
   app.get('/api/database', readDatabase);
   app.get('/api/events', readEvents);
 
-  const disabled = config?.webapp?.disabled || []
-  app.use(webapp(webappDir, req => ({
-    disabled: !!req.username ? [...disabled, 'pwa'] : disabled,
-    entries: getFirstEntries(50)
-  }), {
-    basePath: config.server.basePath || '/',
-    injectRemoteConsole: !!config.server.remoteConsoleToken
-  }));
+  const getWebAppState = async (req) => {
+    const disabled = config?.webapp?.disabled || []
+    const entries = await getFirstEntries(50, req)
+    return {
+      disabled: !!req.username ? [...disabled, 'pwa'] : disabled,
+      entries
+    }
+  }
+
+  const webAppOptions = {
+    basePath: (config.server.basePath || '').replaceAll(/\/+/g, '') + '/',
+    injectRemoteConsole: !!config.server.remoteConsoleToken,
+  }
+
+  app.use(webapp(webappDir, getWebAppState, webAppOptions))
 
   return {
     app,

@@ -82,6 +82,48 @@ t.test('ObjectStore', async t => {
     }])
   })
 
+  t.test('addFileStore with filter and empty folder', async t => {
+    const entries = [
+      'files:IMG_1234.JPG',
+      'files:sub/IMG_4321.JPG',
+      'other:IMG_9876.JPG',
+    ].map(toEntry)
+    const fileStore = new FileStore()
+    fileStore.addEntries(entries)
+
+    const filter = e => !e.files[0].filename.match(/(4321|9876)/)
+    const store = new ObjectStore()
+    const rootId = store.addFileStore(fileStore, filter)
+
+    let obj = store.getByHash(rootId)
+    t.same(obj.length, 1)
+    t.match(obj, [{
+      type: 'tree',
+      name: 'files',
+    }])
+    obj = store.getByHash(obj[0].hash)
+    t.same(obj.length, 1)
+    t.match(obj, [{
+      type: 'entry',
+      name: 'IMG_1234.JPG',
+    }])
+  })
+
+  t.test('addFileStore with filter and empty root', async t => {
+    const entries = [
+      'files:IMG_1234.JPG',
+    ].map(toEntry)
+    const fileStore = new FileStore()
+    fileStore.addEntries(entries)
+
+    const filter = e => !e.files[0].filename.match(/1234/)
+    const store = new ObjectStore()
+    const rootId = store.addFileStore(fileStore, filter)
+
+    let obj = store.getByHash(rootId)
+    t.same(obj.length, 0)
+  })
+
   t.test('addFileStore with mapper', async t => {
     const entries = [
       'files:IMG_1234.JPG',
