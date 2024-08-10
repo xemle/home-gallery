@@ -18,5 +18,16 @@ Tags: server,auth,filter
 * Fetch database
 * Fetched database has "3" entries
 
+## Different users with app state in index.html
+
+* Request file "/index.html"
+* Response has app state with "1" entries
+* Set user "guest" with password "guest"
+* Request file "/index.html"
+* Response has app state with "2" entries
+* Set user "admin" with password "admin"
+* Request file "/index.html"
+* Response has app state with "3" entries
+
 ___
 * Stop server

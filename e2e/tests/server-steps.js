@@ -265,6 +265,10 @@ step("Request file <file>", async (file) => {
         return res.json().then(body => {
           gauge.dataStore.scenarioStore.put('response.body', body)
         })
+      } else if (res.ok) {
+        return res.text().then(body => {
+          gauge.dataStore.scenarioStore.put('response.body', body)
+        })
       }
     })
 })
@@ -283,6 +287,16 @@ step("Response body has property <property> with value <value>", async (property
   } catch (e) {
     assert(false, `Expected body property ${property} to be ${value} but: ${e}`)
   }
+})
+
+step("Response has app state with <amount> entries", async (amount) => {
+  const body = gauge.dataStore.scenarioStore.get('response.body') || ''
+  const script = body.split('\n').filter(line => line.match(/__homeGallery/)).filter(line => line.match(/script/)).pop() || ''
+  const json = script.replace(/<\/script>.*/, '').replace(/.*homeGallery=/, '') || '{}'
+  const state = JSON.parse(json)
+
+  const entryLength = state.entries ? state.entries.length : 0
+  assert(entryLength == amount, `Expecting ${amount} entries in app state but found ${entryLength}`)
 })
 
 const btoa = text => Buffer.from(text).toString('base64')
