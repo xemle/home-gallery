@@ -14,12 +14,15 @@ export const toPlugin = (extractorFactory, name, requires = []) => {
     name,
     version: '1.0.0',
     requires,
+    /** @param {import('@home-gallery/types').TPluginManager} manager */
     async initialize(manager) {
-      /** @type {import('@home-gallery/types').TModuleFactory} */
-      const factory = {
-        getExtractors: () => Array.isArray(extractorFactory) ? extractorFactory.map(factory => factory(manager)) : [extractorFactory(manager)]
+      if (Array.isArray(extractorFactory)) {
+        for (let factory of extractorFactory) {
+          await manager.register('extractor', factory(manager))
+        }
+      } else {
+        await manager.register('extractor', extractorFactory(manager))
       }
-      return factory
     }
   }
 

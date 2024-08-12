@@ -149,76 +149,6 @@ const command = {
               })
           }
         )
-        .command(
-          ['extractors', 'extractor', 'extract'],
-          'List extractor tasks',
-          (yargs) => yargs
-            .options({
-            }),
-          (argv) => {
-            const run = async () => {
-              const options = await loadManagerOptions(argv)
-              const { createExtractorStreams } = await import('@home-gallery/plugin')
-
-              // Initiate the extractors and tear them down
-              return createExtractorStreams(options.config)
-                .then(([streams, tearDown]) => tearDown().then(() => streams))
-            }
-
-            const t0 = Date.now();
-            return run()
-              .then((streams) => {
-                log.debug(t0, `Found ${streams.length} extractor tasks`)
-                const phases = [
-                  {phase: 'meta', extractors: streams.filter(e => e.extractor.phase == 'meta')},
-                  {phase: 'raw', extractors: streams.filter(e => e.extractor.phase == 'raw')},
-                  {phase: 'file', extractors: streams.filter(e => !['meta', 'raw'].includes(e.extractor.phase))},
-                ]
-
-                console.log(`List Extractor Tasks (${streams.length}):`)
-                for (let phase of phases) {
-                  console.log(`\nExtractor phase ${phase.phase} (${phase.extractors.length}):`)
-                  phase.extractors.forEach(extractor => {
-                    console.log(`- ${extractor.extractor.name} (plugin ${extractor.plugin.name})`)
-                  })
-                }
-              })
-              .catch(err => {
-                log.error(err, `List of extractor plugins failed: ${err}`);
-                process.exit(1)
-              })
-          }
-        )
-        .command(
-          ['database'],
-          'List database mappers',
-          (yargs) => yargs
-            .options({
-            }),
-          (argv) => {
-            const run = async () => {
-              const options = await loadManagerOptions(argv)
-              const { createDatabaseMapperStream } = await import('@home-gallery/plugin')
-
-              return createDatabaseMapperStream(options.config)
-            }
-
-            const t0 = Date.now();
-            return run()
-              .then((stream) => {
-                log.debug(t0, `Found ${stream.entries.length} database mappers`)
-                console.log(`List Database Mappers (${stream.entries.length}):`)
-                stream.entries.forEach(mapperEntry => {
-                  const order = mapperEntry.databaseMapper.order || 1
-                  console.log(`- ${mapperEntry.databaseMapper.name} (plugin ${mapperEntry.plugin.name}${order != 1 ? ', order ' + order : ''})`)
-                })
-              })
-              .catch(err => {
-                log.error(err, `List of extractor plugins failed: ${err}`);
-                process.exit(1)
-              })
-          }
-        )
     )
   }
 }
@@ -262,11 +192,10 @@ const loadManagerOptions = async(argv) => {
  */
 const listPluginsLong = manager => {
   const config = manager.getConfig()
-  const disabledExtractors = config.pluginManager?.disabledExtractors || []
-  const disabledDatabaseMappers = config.pluginManager?.disabledDatabaseMappers || []
-  const disabledQueryPlugins = config.pluginManager?.disabledQueryPlugins || []
+  const disabledExtensions = config.pluginManager?.disabled || []
 
   const plugins = manager.getPlugins()
+  const extensions = manager.getExtensions()
   console.log(`Plugins: ${plugins.length} available`)
   plugins.forEach(plugin => {
     console.log(`\n- ${plugin.name} v${plugin.version}:`)
@@ -276,35 +205,38 @@ const listPluginsLong = manager => {
         console.log(`  - ${dependency}`)
       })
     }
-    const factory = manager.getModuleFactoryFor(plugin.name)
+    const pluginExtensions = extensions.filter(e => e.plugin == plugin)
+    if (!pluginExtensions.length) {
+      return
+    }
 
-    const extractors = factory?.getExtractors?.()
+    const extractors = pluginExtensions.filter(e => e.type == 'extractor').map(e => e.extension)
     if (extractors?.length) {
       console.log(`  Extractors${extractors.length > 1 ? '(' + extractors.length + ')' : ''}:`)
       extractors.forEach(extractor => {
         const phase = extractor.phase != 'file' ? ', phase ' + extractor.phase : ''
-        const disabled = disabledExtractors.includes(extractor.name) ? ' (disabled)' : ''
-        console.log(`  - ${extractor.name}${phase}${disabled}`)
+        const disabled = disabledExtensions.includes(`${plugin.name}.${extractor.name}`) ? ' (disabled)' : ''
+        console.log(`  - ${plugin.name}.${extractor.name}${phase}${disabled}`)
       })
     }
 
-    const mappers = factory?.getDatabaseMappers?.()
+    const mappers = pluginExtensions.filter(e => e.type == 'database').map(e => e.extension)
     if (mappers?.length) {
       console.log(`  Database mappers${mappers.length > 1 ? '(' + mappers.length + ')' : ''}:`)
       mappers.forEach(mapper => {
         const order = typeof mapper.order != 'undefined' ? mapper.order : 1
-        const disabled = disabledDatabaseMappers.includes(mapper.name) ? ' (disabled)' : ''
-        console.log(`  - ${mapper.name}${order != 1 ? ', order ' + order : ''}${disabled}`)
+        const disabled = disabledExtensions.includes(`${plugin.name}.${mapper.name}`) ? ' (disabled)' : ''
+        console.log(`  - ${plugin.name}.${mapper.name}${order != 1 ? ', order ' + order : ''}${disabled}`)
       })
     }
 
-    const queryPlugins = factory?.getQueryPlugins?.()
+    const queryPlugins = pluginExtensions.filter(e => e.type == 'query').map(e => e.extension)
     if (queryPlugins?.length) {
       console.log(`  Query plugins${queryPlugins.length > 1 ? '(' + queryPlugins.length + ')' : ''}:`)
       queryPlugins.forEach(query => {
         const order = typeof query.order != 'undefined' ? query.order : 1
-        const disabled = disabledQueryPlugins.includes(query.name) ? ' (disabled)' : ''
-        console.log(`  - ${query.name}${order != 1 ? ', order ' + order : ''}${disabled}`)
+        const disabled = disabledExtensions.includes(`${plugin.name}.${query.name}`) ? ' (disabled)' : ''
+        console.log(`  - ${plugin.name}.${query.name}${order != 1 ? ', order ' + order : ''}${disabled}`)
       })
     }
   })
@@ -315,33 +247,33 @@ const listPluginsLong = manager => {
  */
 const listPluginsJson = manager => {
   const plugins = manager.getPlugins()
+  const extensions = manager.getExtensions()
   const data = plugins.map(plugin => {
-    const factory = manager.getModuleFactoryFor(plugin.name)
-    const extractors = factory?.getExtractors?.() || []
-    const databaseMappers = factory?.getDatabaseMappers?.() || []
-    const queryPlugins = factory?.getQueryPlugins?.() || []
+    const pluginExtensions = extensions.filter(e => e.plugin == plugin)
     const pluginData = {
       name: plugin,
       version: plugin.version,
       requires: plugin.requires || [],
-      extractors: extractors.map(extractor => {
-        return {
-          name: extractor.name,
-          phase: extractor.phase
-        }
-      }),
-      databaseMappers: databaseMappers.map(mapper => {
-        const order = typeof mapper.order == 'number' ? mapper.order : 1
-        return {
-          name: mapper.name,
-          order
-        }
-      }),
-      queryPlugins: queryPlugins.map(query => {
-        const order = typeof query.order == 'number' ? query.order : 1
-        return {
-          name: query.name,
-          order
+      extensions: pluginExtensions.map(({type, extension}) => {
+        switch (type) {
+          case 'extractor': return {
+            type,
+            name: extension.name,
+            phase: extension.phase
+          }
+          case 'database': return {
+            type,
+            name: extension.name,
+            order: extension.order || 1
+          }
+          case 'query': return {
+            type,
+            name: extension.name,
+            order: extension.order || 1
+          }
+          default: return {
+            type,
+          }
         }
       })
     }

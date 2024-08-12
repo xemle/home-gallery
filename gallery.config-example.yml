@@ -198,12 +198,7 @@ sources:
     #- pluginFile
   #disabled:
     #- acmePlugin
-  #disabledExtractors:
-    #- acmeExtractor
-  #disabledDatabaseMappers:
-    #- acmeMapper
-  #disabledQueryPlugins:
-    #- acmeQuery
+    #- acmePlugin.extensionName
 
 # Plugin settings
 #plugin:

@@ -5,6 +5,35 @@ import { TQueryPlugin, TAst, TQueryAst, TQueryContext } from '@home-gallery/type
 import { createQueryContext, createEntryMock } from './query-test-utils.js'
 
 t.only('QueryExecutor', async t => {
+  t.only('Executor is valid without plugins', async t => {
+    const entries = [
+      createEntryMock('1', {type: 'vide'}),
+      createEntryMock('2'),
+    ]
+
+    const executor = new QueryExecutor()
+    const context = createQueryContext()
+
+
+    const filtered = await executor.execute(entries, 'type:image', context)
+
+
+    t.same(filtered.length, 1)
+    t.same(filtered[0].id, '2')
+  })
+
+  t.test('execute failes by unknown cmp key', async t => {
+    const context = createQueryContext()
+    const entries = [
+      createEntryMock('1', {plugin: {acme: 'foo'}}),
+      createEntryMock('2', {plugin: {acme: 'bar'}}),
+    ]
+
+    const executor = new QueryExecutor()
+
+    t.rejects(executor.execute(entries, 'acme = bar', context))
+  })
+
   t.test('add custom compare key', async t => {
     const executor = new QueryExecutor()
 

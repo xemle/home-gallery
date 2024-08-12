@@ -1,7 +1,6 @@
 {
   "files": [
     "src/index.js.mustache",
-    "src/factory.js.mustache",
     "package.json.mustache",
     "README.md.mustache"
   ],

@@ -14,7 +14,7 @@ const sortByOrder = (a: TQueryPlugin, b: TQueryPlugin) => {
 export class QueryExecutor implements TQueryExecutorFactory {
   plugins: TQueryPlugin[] = []
   textFns: TQueryTextFn[] = []
-  transformRules: TAstTransformRule[] = []
+  transformRules: TAstTransformRule[] = [...transformRules]
   queryHandlers: TQueryAstErrorHandler[] = []
 
   addQueryPlugins(plugins: TQueryPlugin[]) {

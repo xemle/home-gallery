@@ -1,15 +1,12 @@
-async function initialize() {
-  return {
-    getExtractors() {
-      return []
-    },
-  }
-}
-
 const plugin = {
   name: 'CommonJS Plugin',
   version: '1.0',
-  initialize
+  async initialize(manager) {
+    manager.register('query', {
+      name: 'commonJsQuery',
+      textFn: () => ''
+    })
+  }
 }
 
 module.exports = plugin

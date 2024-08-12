@@ -2,11 +2,10 @@ export const toPlugin = (mappers, name) => {
   return {
     name,
     version: '1.0.0',
-    async initialize() {
-      return {
-        getDatabaseMappers() {
-          return Array.isArray(mappers) ? mappers : [mappers]
-        }
+    /** @param {import('@home-gallery/types').TPluginManager} manager */
+    async initialize(manager) {
+      for (let mapper of mappers) {
+        await manager.register('database', mapper)
       }
     }
   }

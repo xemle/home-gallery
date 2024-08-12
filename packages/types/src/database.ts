@@ -1,5 +1,8 @@
+import { Transform } from 'stream'
+
 import { TGalleryConfig } from './config'
 import { TStorageEntry } from './storage'
+import { TPlugin } from './plugin'
 
 export type TDatabaseEntry = {
   id: string,
@@ -26,4 +29,14 @@ export type TDatabaseMapper = {
    */
   order?: number
   mapEntry: TDabaseMapperFunction
+}
+
+export type TDatabaseMapperStream = {
+  stream: Transform,
+  entries: TDatabaseMapperEntry[]
+}
+
+export type TDatabaseMapperEntry = {
+  databaseMapper: TDatabaseMapper;
+  plugin: TPlugin;
 }

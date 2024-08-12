@@ -3,13 +3,12 @@ import http from 'http';
 import https from 'https';
 import open from 'open'
 
-import { callbackify, ProcessManager } from '@home-gallery/common'
+import { ProcessManager } from '@home-gallery/common'
 
 import Logger from '@home-gallery/logger'
-import { createPluginManager } from '@home-gallery/plugin'
+import { createPluginManager, QueryExecutor } from '@home-gallery/plugin'
 
 const log = Logger('server')
-const openCb = callbackify(open)
 
 import { EventBus } from './eventbus.js';
 import { createApp } from './app.js'
@@ -56,6 +55,18 @@ const shutdown = (server, processManager) => {
   return processManager.killAll('SIGINT')
 }
 
+/**
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('./types.js').TExecuteQueryFn}
+ */
+const createQueryExecutor = (manager) => {
+  /** @type {import('@home-gallery/types').TQueryPlugin[]} */
+  const queryPlugins = manager.getExtensions().filter(e => e.type == 'query').map(e => e.extension);
+  const queryExecutor = new QueryExecutor()
+  queryExecutor.addQueryPlugins(queryPlugins);
+  return (entries, query, context) => queryExecutor.execute(entries, query, context)
+}
+
 export async function startServer(options) {
   const { config } = options
 
@@ -66,8 +77,10 @@ export async function startServer(options) {
     eventbus: new EventBus(),
     processManager: new ProcessManager(),
   }
+  /** @type {import('@home-gallery/types').TGalleryPluginManager} */
   const pluginManager = await createPluginManager(options.config, context)
   context.pluginManager = pluginManager
+  context.executeQuery = createQueryExecutor(pluginManager)
 
   const { app, initDatabase } = createApp(context)
 

@@ -3,6 +3,11 @@ import { stringifyEntry } from '@home-gallery/query'
 
 const log = Logger('server.queryContext')
 
+/**
+ * @param {import('../../types.js').TServerContext} context
+ * @param {object} [req] Server request
+ * @returns {import('@home-gallery/types').TQueryContext}
+ */
 export const createQueryContext = (context, req = {}) => {
   const { config } = context
 

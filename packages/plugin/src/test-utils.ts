@@ -3,7 +3,7 @@ import { pipeline } from 'stream/promises'
 
 import Logger from '@home-gallery/logger'
 import { toList, write } from '@home-gallery/stream'
-import { TExtractorStream, TExtractorFunction, TExtractor, TPlugin, TDatabaseMapperStream, TDabaseMapperFunction, TDatabaseMapper, TExtractorEntry, TStorageEntry, TQueryPlugin, TQueryAst, TQueryContext, TAst } from '@home-gallery/types'
+import { TExtractorStream, TExtractorFunction, TExtractor, TPlugin, TDatabaseMapperStream, TDabaseMapperFunction, TDatabaseMapper, TExtractorEntry, TStorageEntry, TQueryPlugin, TQueryAst, TQueryContext, TAst, TPluginManager } from '@home-gallery/types'
 
 Logger.addPretty('trace')
 const log = Logger('testUtils')
@@ -95,18 +95,16 @@ export const createPlugin = (name: string, option: TTestPluginOption) => {
   const plugin: TPlugin = {
     name: `${name}Plugin`,
     version: '1.0',
-    async initialize() {
+    async initialize(manager: TPluginManager) {
       log.debug(`Initialize plugin ${this.name}`)
-      return {
-        getExtractors() {
-          return option.extractor ? [option.extractor] : []
-        },
-        getDatabaseMappers() {
-          return option.mapper ? [option.mapper] : []
-        },
-        getQueryPlugins() {
-          return option.query ? [option.query] : []
-        }
+      if (option.extractor) {
+        manager.register('extractor', option.extractor)
+      }
+      if (option.mapper) {
+        manager.register('database', option.mapper)
+      }
+      if (option.query) {
+        manager.register('query', option.query)
       }
     }
   }

@@ -8,10 +8,10 @@ import { createQueryContext } from '../queryContext.js';
 const log = Logger('server.api.database.tree');
 
 /**
- * @param {import('../../types.js').TServerContext} context
+ * @param {import('../../../types.js').TServerContext} context
  */
 export const treeApi = (context, getDatabase) => {
-  const { eventbus, pluginManager } = context
+  const { eventbus, executeQuery } = context
 
   /**
    * @type {FileStore}
@@ -78,7 +78,7 @@ export const treeApi = (context, getDatabase) => {
     const queryContext = createQueryContext(context, req)
 
     // Execute a dummy query to retriev the queryFilter in the queryContext
-    await pluginManager.executeQuery([], '', queryContext)
+    await executeQuery([], '', queryContext)
     log.trace({ast: queryContext.ast, queryAst: queryContext.queryAst}, `Create query filter with ${queryContext.stringifiedQueryAst}`)
 
     const entryFilter = queryContext.queryFilter || (() => true)
