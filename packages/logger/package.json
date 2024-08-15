@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Logger for HomeGallery",
   "type": "module",
-  "exports": "./dist/index.js",
+  "exports": {
+    "node": "./dist/node.js",
+    "default": "./dist/index.js"
+  },
   "files": [
     "dist"
   ],
