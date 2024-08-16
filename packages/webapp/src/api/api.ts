@@ -2,13 +2,7 @@ import { Event, EventListener } from '@home-gallery/events'
 import { fetchJsonWorker } from '../utils/fetch-json-worker'
 import { byPreviewSize } from '../utils/preview'
 
-const decodeBase64 = base64 => atob(base64);
-
 export const mapEntriesForBrowser = entry => {
-  if (entry.similarityHash) {
-    const ascii = decodeBase64(entry.similarityHash);
-    entry.similarityHash = ascii;
-  }
   entry.shortId = entry.id.substring(0, 12)
   if (entry.previews?.length) {
     entry.previews.sort(byPreviewSize)
