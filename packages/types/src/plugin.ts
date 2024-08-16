@@ -24,7 +24,7 @@ export type TPluginExtension = {
  * Context to store and read global objects
  */
 export type TGalleryContext = {
-  type: 'extractorContext' | 'databaseMapperContext' | 'serverContext' | 'cliContext'
+  type: 'extractorContext' | 'databaseMapperContext' | 'serverContext' | 'cliContext' | 'browserContext'
   plugin: {
     [key: string]: any
   }

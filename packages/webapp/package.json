@@ -38,7 +38,10 @@
   },
   "dependencies": {
     "@home-gallery/events": "file:../events",
+    "@home-gallery/logger": "file:../logger",
+    "@home-gallery/plugin": "file:../plugin",
     "@home-gallery/query": "file:../query",
+    "@home-gallery/types": "file:../types",
     "hammerjs": "^2.0.8",
     "leaflet": "^1.8.0",
     "moo": "^0.5.1",
