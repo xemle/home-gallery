@@ -2,98 +2,96 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <base href="/">
-    <link rel="shortcut icon" href="favicon.ico" />
-    <link rel="apple-touch-icon" href="logo192.png" />
-    <meta name="theme-color" content="#909090" />
-    <link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials">
-    <link rel="stylesheet" href="App.css">
-    <title>Home Gallery</title>
-    <script src="/remote-console.js"></script>
-    <script src="//localhost:35729/livereload.js?snipver=1"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <base href="/">
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" href="logo192.png" />
+  <meta name="theme-color" content="#909090" />
+  <link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials">
+  <link rel="stylesheet" href="App.css">
+  <title>Home Gallery</title>
+  <script src="/remote-console.js"></script>
+  <script src="//localhost:35729/livereload.js?snipver=1"></script>
+  <style>
+    #app-loader {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color:#222;
+    }
+    #app-loader .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: -15vh;
+    }
+    #app-loader .icon {
+      width: 128px;
+      animation: shadow-glow 1.5s ease-in-out infinite alternate;
+    }
+    #app-loader .icon.-glowing path {
+      animation: glowing 1.5s ease-in-out infinite alternate;
+    }
+    #app-loader p {
+      font-family: Verdana,Arial;
+      color:#999;
+      text-align: center;
+    }
+    #app-loader .warning {
+      color:rgb(207, 109, 28);
+    }
+    @media (min-width: 720px) {
+      #app-loader .icon {
+        width: 192px;
+        height: 192px;
+      }
+      #app-loader .icon.-glowing-l {
+        animation: shadow-glow 1.5s ease-in-out infinite alternate;
+      }
+    }
+
+    @keyframes glowing {
+      from { stroke: #666; }
+      to { stroke: #ccc; }
+    }
+    @keyframes shadow-glow {
+      from { filter: drop-shadow(0px 0px 2px #222) }
+      to { filter: drop-shadow(0px 0px 6px rgba(101, 248, 180, .7)) }
+    }
+    @keyframes shadow-glow-l {
+      from { filter: drop-shadow(0px 0px 2px #222) }
+      to { filter: drop-shadow(0px 0px 10px rgba(101, 248, 180, .9)) }
+    }
+  </style>
 </head>
 
 <body class="bg-gray-900" style="margin: 0">
-    <div id="app">
-      <style>
-        #app-loader {
-          height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background-color:#222;
-        }
-        #app-loader .container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          margin-top: -15vh;
-        }
-        #app-loader .icon {
-          width: 128px;
-          animation: shadow-glow 1.5s ease-in-out infinite alternate;
-        }
-        #app-loader .icon path {
-          animation: glowing 1.5s ease-in-out infinite alternate;
-        }
-        #app-loader p {
-          font-family: Verdana,Arial;
-          color:#999;
-          text-align: center;
-        }
-        #app-loader .warning {
-          color:rgb(207, 109, 28);
-        }
-        @media (min-width: 720px) {
-          #app-loader .icon {
-            width: 192px;
-            height: 192px;
-            animation: shadow-glow-l 1.5s ease-in-out infinite alternate;
-          }
-        }
-
-        @keyframes glowing {
-          from { stroke: #666; }
-          to { stroke: #ccc; }
-        }
-        @keyframes shadow-glow {
-          from { filter: drop-shadow(0px 0px 2px #222) }
-          to { filter: drop-shadow(0px 0px 6px rgba(101, 248, 180, .7)) }
-        }
-        @keyframes shadow-glow-l {
-          from { filter: drop-shadow(0px 0px 2px #222) }
-          to { filter: drop-shadow(0px 0px 10px rgba(101, 248, 180, .9)) }
-        }
-      </style>
-      <div id="app-loader">
-        <div class="container">
-          <div class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 12.7 12.7">
-              <g style="display:inline">
-                <path class="cycle" d="M4.76 295.67h5.55v-4.49h1.05v-.52l-5.02-5.02-5.02 5.02v.53H2.38v4.49h.79" style="fill:none;fill-rule:evenodd;stroke:#aaa;stroke-width:.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;text-shadow: 10px 10px 2px blue" transform="translate(0 -284.3)"/>
-              </g>
-              <g style="display:inline">
-                <path class="cycle" style="fill:none;stroke:#aaa;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke" d="M31.30 20.47a6 6 0 0 0-7.33 2.21 6 6 0 0 0-5-2.69 6 6 0 0 0 0 12 6 6 0 0 0 5-2.69 6 6 0 0 0 5 2.69 6 6 0 0 0 5.52-8.33" transform="scale(.26)"/>
-              </g>
-            </svg>
-          </div>
-          <p>Your Home Gallery is loading...</p>
-
-          <noscript>
-            <p class="warning">Please enable Javascript to run the application</p>
-          </noscript>
+  <div id="app">
+    <div id="app-loader">
+      <div class="container">
+        <div class="icon -glowing">
+          <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 12.7 12.7">
+            <path d="m 4.76,11.37 h 5.56 V 6.88 h 1.06 V 6.35 L 6.35,1.32 1.32,6.35 V 6.88 H 2.38 v 4.5 h 0.8" style="fill:none;fill-rule:evenodd;stroke:#aaa;stroke-width:0.53;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+            <path d="M 8.28,5.41 A 1.59,1.59 0 0 0 6.34,6.0 1.59,1.59 0 0 0 5.02,5.3 a 1.59,1.59 0 0 0 0,3.17 1.59,1.59 0 0 0 1.32,-0.71 1.59,1.59 0 0 0 1.32,0.71 1.59,1.59 0 0 0 1.46,-2.21" style="fill:none;fill-opacity:1;stroke:#aaa;stroke-width:0.53;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke" />
+          </svg>
         </div>
+        <p>Your Home Gallery is loading...</p>
+
+        <noscript>
+          <p class="warning">Please enable Javascript to run the application</p>
+        </noscript>
       </div>
     </div>
-    <script>window.__homeGallery={}</script>
-    <script defer src="App.js" type="text/javascript"></script>
-    <script>
+  </div>
+  <script>window.__homeGallery={}</script>
+  <script defer src="App.js" type="text/javascript"></script>
+  <script>
+    ((window, navigator, config) => {
       const isLocal = ['127.0.0.1', 'localhost'].includes(location.hostname)
-      const config = (window.__homeGallery || {})
       const searchParams = new URLSearchParams(location.search?.substring(1))
       const disabledFeatures = [...(config.disabled || []), ...searchParams.getAll('disabled')]
 
@@ -101,30 +99,35 @@
         console.log('Feature PWA is disabled')
         return
       }
-      const worker = new URL('service-worker.js', document.baseURI || '/').href;
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register(worker).then(registration => {
-          registration.onupdatefound = () => {
-            const installingWorker = registration.installing;
-            if (installingWorker == null) {
-              return;
-            }
-            installingWorker.onstatechange = () => {
-              if (installingWorker.state === 'installed') {
-                if (navigator.serviceWorker.controller) {
-                  console.log(`New content is available and will be used when all tabs for this page are closed.`);
-                } else {
-                  console.log('Content is cached for offline use.');
-                }
+
+      const onLoad = () => {
+        const worker = new URL('service-worker.js', document.baseURI || '/').href;
+        navigator.serviceWorker.register(worker)
+          .then(registration => {
+            registration.onupdatefound = () => {
+              const installingWorker = registration.installing;
+              if (installingWorker == null) {
+                return;
               }
+              installingWorker.onstatechange = () => {
+                if (installingWorker.state === 'installed') {
+                  if (navigator.serviceWorker.controller) {
+                    console.log(`New content is available and will be used when all tabs for this page are closed.`);
+                  } else {
+                    console.log('Content is cached for offline use.');
+                  }
+                }
+              };
             };
-          };
-        })
-        .catch(error => {
-          console.error('Error during service worker registration:', error);
-        });
-      });
-    </script>
+          })
+          .catch(error => {
+            console.error('Error during service worker registration:', error);
+          });
+      }
+
+      window.addEventListener('load', onLoad);
+    })(window, navigator, window.__homeGallery || {})
+  </script>
 </body>
 
 </html>
