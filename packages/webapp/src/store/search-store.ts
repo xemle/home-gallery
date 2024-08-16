@@ -18,7 +18,6 @@ export interface Search {
 export interface SearchStore {
   query: Search
   search: (query: Search) => void
-  refresh: () => Promise<void>
 }
 
 const doSearch = async (entries: Entry[], query) => {
@@ -48,13 +47,6 @@ const doSearch = async (entries: Entry[], query) => {
   return entries
 }
 
-const updateQuery = async (query: Search) => {
-  const allEntries = useEntryStore.getState().allEntries
-  const entries = await doSearch([...allEntries], query)
-  console.log(`update query to ${entries.length} entries from ${allEntries.length} entries`)
-  useEntryStore.getState().setEntries(entries)
-}
-
 export const useSearchStore = create<
   SearchStore,
   [
@@ -66,13 +58,7 @@ export const useSearchStore = create<
 
     search: (query: Search) => {
       set((state) => ({...state, query}))
-      updateQuery(query)
     },
-    refresh: async () => {
-      updateQuery(get().query)
-    }
   }), { name: 'gallery-search' })
 )
 
-const refresh = () => useSearchStore.getState().refresh()
-useEntryStore.subscribe(state => state.id2Entries, refresh)

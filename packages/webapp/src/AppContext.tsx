@@ -4,6 +4,7 @@ import AppLoading from "./init/AppLoading"
 import { useAppConfig } from "./utils/useAppConfig"
 import { TGalleryConfig, TGalleryContext } from "@home-gallery/types"
 import Logger from '@home-gallery/logger'
+import DefaultQueryPlugin from "./plugin/defaultQueryPlugin"
 
 type TAppContext = {
   pluginManager: BrowserPluginManager
@@ -32,6 +33,7 @@ export const AppContextProvider: React.FC<{children: React.ReactNode}> = ({child
     const loadManager = async () => {
       const log = Logger('AppContext')
       const pluginManager = new BrowserPluginManager(config as TGalleryConfig, context)
+      await pluginManager.addPlugin(DefaultQueryPlugin)
 
       pluginManager.loadPlugins()
         .then((() => {
