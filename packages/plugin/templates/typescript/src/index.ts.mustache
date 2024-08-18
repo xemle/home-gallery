@@ -1,6 +1,14 @@
 import { TPlugin, TPluginManager } from '@home-gallery/types'
 
-import { {{ className }}ModuleFactory } from './factory.js'
+{{#modules.extractor}}
+import { {{ className }}Extractor } from './extractor/index.js'
+{{/modules.extractor}}
+{{#modules.database}}
+import { {{ className }}DatabaseMapper } from './database/index.js'
+{{/modules.database}}
+{{#modules.query}}
+import { {{ className }}QueryPlugin } from './query/index.js'
+{{/modules.query}}
 
 const {{ className }}Plugin = {
   name: '{{ camelName }}Plugin',
@@ -10,7 +18,15 @@ const {{ className }}Plugin = {
     const log = manager.createLogger('plugin.{{ camelName }}')
     log.trace(`Initialize ${this.name} plugin`)
 
-    return new {{ className }}ModuleFactory(manager)
+    {{#modules.extractor}}
+    await manager.register('extractor', new {{ className }}Extractor(manager))
+    {{/modules.extractor}}
+    {{#modules.database}}
+    await manager.register('database', new {{ className }}DatabaseMapper(manager))
+    {{/modules.database}}
+    {{#modules.query}}
+    await manager.register('query', new {{ className }}QueryPlugin(manager))
+    {{/modules.query}}
   }
 }
 

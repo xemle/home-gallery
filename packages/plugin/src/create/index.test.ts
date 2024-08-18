@@ -6,8 +6,8 @@ import t from 'tap'
 import Logger from '@home-gallery/logger'
 
 import { createPlugin } from './index.js'
-import { PluginManager, Storage } from '../manager/index.js'
-import { TGalleryConfig } from '@home-gallery/types'
+import { PluginManager } from '../manager/index.js'
+import { createExtractorStreams, createDatabaseMapperStream } from '../factory.js'
 
 const testDir = path.resolve(os.tmpdir(), 'gallery-unit', `run-${process.pid}`)
 
@@ -59,7 +59,6 @@ t.only('createPlugin', async t => {
     const files = [
       'package.json',
       'src/index.js',
-      'src/factory.js',
       'src/extractor/index.js'
     ]
     const missingFiles = [
@@ -84,7 +83,6 @@ t.only('createPlugin', async t => {
     const files = [
       'package.json',
       'src/index.js',
-      'src/factory.js',
       'src/database/index.js'
     ]
     const missingFiles = [
@@ -95,12 +93,14 @@ t.only('createPlugin', async t => {
     t.ok(accessAll(pluginBase, files))
     t.ok(accessAll(pluginBase, missingFiles, 'rejected'))
 
-    const manager = new PluginManager()
-    await manager.loadPlugin(path.join(baseDir, 'acme'))
-    await manager.initializePlugins()
+    const manager = new PluginManager({
+      pluginManager: {plugins: [path.join(baseDir, 'acme')]}
+    })
+    await manager.loadPlugins()
 
-    t.same(manager.getPlugins().length, 1)
-    t.same(manager.getPlugin('acmePlugin')?.name, 'acmePlugin')
+    const plugins = manager.getPlugins()
+    t.same(plugins.length, 1)
+    t.ok(plugins.find(p => p.name =='acmePlugin'))
   })
 
   t.test('vanilla plugin loads', async t => {
@@ -113,14 +113,15 @@ t.only('createPlugin', async t => {
     }}})
 
 
-    const pluginDir = path.join(baseDir, 'acme')
-    const manager = new PluginManager()
-    await manager.loadPlugin(pluginDir)
-    await manager.initializePlugins()
+    const manager = new PluginManager({
+      pluginManager: {plugins: [path.join(baseDir, 'acme')]}
+    })
+    await manager.loadPlugins()
 
 
-    t.same(manager.getPlugins().length, 1)
-    t.same(manager.getPlugin('acmePlugin')?.name, 'acmePlugin')
+    const plugins = manager.getPlugins()
+    t.same(plugins.length, 1)
+    t.ok(plugins.find(p => p.name =='acmePlugin'))
   })
 
   t.test('vanilla plugin extractors', async t => {
@@ -133,15 +134,10 @@ t.only('createPlugin', async t => {
     }}})
 
 
-    const pluginDir = path.join(baseDir, 'acme')
-    const manager = new PluginManager()
-    const storage = new Storage(storageDir)
-
-    await manager.loadPlugin(pluginDir)
-    await manager.initializePlugins()
-
-
-    const [streams] = await manager.getExtractorStreams(storage)
+    const [streams] = await createExtractorStreams({
+      storage: {dir: storageDir},
+      pluginManager: {plugins: [path.join(baseDir, 'acme')]}
+    })
 
 
     t.same(streams.length, 1)
@@ -158,12 +154,12 @@ t.only('createPlugin', async t => {
     }}})
 
 
-    const manager = new PluginManager()
-    await manager.loadPlugin(path.join(baseDir, 'acme'))
-    await manager.initializePlugins()
+    const mapperStream = await createDatabaseMapperStream({
+      database: {update: new Date().toISOString()},
+      pluginManager: {plugins: [path.join(baseDir, 'acme')]}
+    })
 
 
-    const mapperStream = await manager.getDatabaseMapperStream(new Date().toISOString())
     t.same(mapperStream.entries?.length, 1)
     t.ok(mapperStream.stream)
   })

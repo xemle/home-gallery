@@ -129,29 +129,6 @@ const queryPlugin = manager => ({
 
 // Plugin setup  ---------------------------
 
-const factory = manager => {
-  const log = manager.createLogger('plugin.{{ camelName }}.factory')
-  log.trace(`Initialize plugin factory`)
-
-  return {
-    {{#modules.extractor}}
-    getExtractors() {
-      return [extractor(manager)]
-    },
-    {{/modules.extractor}}
-    {{#modules.database}}
-    getDatabaseMappers() {
-      return [databaseMapper(manager)]
-    },
-    {{/modules.database}}
-    {{#modules.query}}
-    getQueryPlugins() {
-      return [queryPlugin(manager)]
-    },
-    {{/modules.query}}
-  }
-}
-
 const plugin = {
   name: '{{ camelName }}Plugin',
   version: '1.0',
@@ -160,7 +137,15 @@ const plugin = {
     const log = manager.createLogger('plugin.{{ camelName }}')
     log.trace(`Initialize ${this.name} plugin`)
 
-    return factory(manager)
+    {{#modules.extractor}}
+    await manager.register('extractor', extractor(manager))
+    {{/modules.extractor}}
+    {{#modules.database}}
+    await manager.register('database', databaseMapper(manager))
+    {{/modules.database}}
+    {{#modules.query}}
+    await manager.register('query', queryPlugin(manager))
+    {{/modules.query}}
   }
 
 }

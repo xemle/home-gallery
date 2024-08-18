@@ -42,9 +42,10 @@
   "types": "./dist/node.d.ts",
   "dependencies": {
     "@home-gallery/common": "file:../common",
-    "@home-gallery/stream": "file:../stream",
     "@home-gallery/query": "file:../query",
-    "mustache": "4.2.0"
+    "@home-gallery/stream": "file:../stream",
+    "mustache": "4.2.0",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@home-gallery/types": "file:../types"

@@ -2,35 +2,18 @@ import { TDatabaseMapperStream, TExtractorStream, TExtractorStreamTearDown, TGal
 import Logger from "@home-gallery/logger"
 
 import { PluginManager } from "./manager/manager.js"
-import { Storage } from "./manager/storage.js"
+import { Storage } from "./extractor/storage.js"
+import { ExtractorStreamFactory } from "./extractor/extractorStreamFactory.js"
+import { createDatabaseMapperStream as createDatabaseMapperFactory } from "./database/databaseMapperStreamFactory.js"
 
 const log = Logger('pluginManager.factory')
 
 export async function createPluginManager(config: any, context: TGalleryContext = {type: 'serverContext', plugin: {}}) {
   const t0 = Date.now()
   const manager = new PluginManager(config, context)
-  const managerConfig = config?.pluginManager || {}
-
-  const files = managerConfig.plugins || []
-  const loadedFilePlugins: TPlugin[] = []
-  for (let file of files) {
-    await manager.loadPlugin(file)
-      .then(plugin => plugin && loadedFilePlugins.push(plugin))
-      .catch(err => {
-        log.warn(err, `Failed to load plugin from file ${file}: ${err}`)
-      })
-  }
-  if (files.length && loadedFilePlugins.length) {
-    log.debug(`Loaded ${loadedFilePlugins.length} plugins from files: ${loadedFilePlugins.map(p => p.name).join(', ')}`)
-  }
-
-  const dirs = managerConfig.dirs || []
-  for (let dir of dirs) {
-    await manager.loadPluginDir(dir)
-  }
-
-  await manager.initializePlugins()
-  log.info(t0, `Initialized plugin manager`)
+  await manager.loadPlugins()
+  const plugins = manager.getPlugins()
+  log.info(t0, `Initialized plugin manager with ${plugins.length} plugins`)
   return manager
 }
 
@@ -42,8 +25,8 @@ export async function createExtractorStreams(config: any): Promise<[TExtractorSt
   const manager = await createPluginManager(config, context)
 
   const storage = new Storage(config?.storage?.dir || '.')
-
-  return manager.getExtractorStreams(storage)
+  const streamFactory = new ExtractorStreamFactory(manager, storage, manager.getExtensions())
+  return streamFactory.getExtractorStreams()
 }
 
 export async function createDatabaseMapperStream(config: any): Promise<TDatabaseMapperStream> {
@@ -54,5 +37,6 @@ export async function createDatabaseMapperStream(config: any): Promise<TDatabase
   const manager = await createPluginManager(config, context)
 
   const updated = config.database.updated || new Date().toISOString()
-  return manager.getDatabaseMapperStream(updated)
+
+  return createDatabaseMapperFactory(manager.getExtensions(), manager.getConfig(), updated)
 }

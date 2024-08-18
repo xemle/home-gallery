@@ -6,14 +6,14 @@ import { Transform } from 'stream'
 
 
 import Logger from '@home-gallery/logger'
-import { TExtractor, TExtractorEntry, TPlugin } from "@home-gallery/types";
+import { TExtractor, TExtractorEntry, TPlugin, TPluginExtension } from "@home-gallery/types";
 import { through } from '@home-gallery/stream'
 
 import { ExtractorStreamFactory } from './extractorStreamFactory.js'
-import { PluginManager } from './manager.js'
+import { PluginManager } from '../manager/manager.js'
 import { Storage } from './storage.js'
 
-import { testEntryStream } from './test-utils.js'
+import { createExtractorPlugin, testEntryStream } from '../test-utils.js'
 
 Logger.addPretty('trace')
 const log = Logger('plugin.streamFactory.test')
@@ -40,7 +40,7 @@ t.only('StreamFactory', async t => {
       .catch(() => true)
   })
 
-  t.test('getExtractorStreamsFrom from function only', async t => {
+  t.test('toStream from function only', async t => {
     const manager = new PluginManager()
     const storage = new Storage(storageDir)
 
@@ -55,20 +55,20 @@ t.only('StreamFactory', async t => {
     }
 
 
-    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [extractor])
+    const stream = await streamFactory.toStream({} as TPlugin, extractor)
 
 
-    t.same(streams.length, 1)
-    t.ok(streams[0]?.stream instanceof Transform)
-    t.same(streams[0]?.extractor?.name, 'acme')
+    t.ok(stream)
+    t.ok(stream.stream instanceof Transform)
+    t.same(stream.extractor?.name, 'acme')
 
-    const data = await testEntryStream(streams)
+    const data = await testEntryStream([stream])
     t.same(data.length, 2)
     t.same(data[0].meta.acme, 'foo')
     t.same(data[1].meta.acme, 'foo')
   })
 
-  t.test('getExtractorStreamsFrom from task only', async t => {
+  t.test('toStream from task only', async t => {
     const manager = new PluginManager()
     const storage = new Storage(storageDir)
     const context = { manager, storage }
@@ -88,20 +88,20 @@ t.only('StreamFactory', async t => {
     }
 
 
-    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [extractor])
+    const stream = await streamFactory.toStream({} as TPlugin, extractor)
 
 
-    t.same(streams.length, 1)
-    t.ok(streams[0]?.stream instanceof Transform)
-    t.same(streams[0]?.extractor?.name, 'acme')
+    t.ok(stream)
+    t.ok(stream.stream instanceof Transform)
+    t.same(stream.extractor?.name, 'acme')
 
-    const data = await testEntryStream(streams)
+    const data = await testEntryStream([stream])
     t.same(data.length, 2)
     t.same(data[0].meta.acme, 'foo')
     t.same(data[1].meta.acme, 'foo')
   })
 
-  t.test('getExtractorStreamsFrom from task and test', async t => {
+  t.test('toStream from task and test', async t => {
     const manager = new PluginManager()
     const storage = new Storage(storageDir)
     const context = { manager, storage }
@@ -124,16 +124,16 @@ t.only('StreamFactory', async t => {
     }
 
 
-    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [extractor])
+    const stream = await streamFactory.toStream({} as TPlugin, extractor)
 
 
-    const data = await testEntryStream(streams)
+    const data = await testEntryStream([stream])
     t.same(data.length, 2)
     t.same(data[0].meta.acme, undefined)
     t.same(data[1].meta.acme, 'foo')
   })
 
-  t.test('getExtractorStreamsFrom from transform', async t => {
+  t.test('toStream from transform', async t => {
     const manager = new PluginManager()
     const storage = new Storage(storageDir)
     const context = { manager, storage }
@@ -154,16 +154,16 @@ t.only('StreamFactory', async t => {
     }
 
 
-    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [extractor])
+    const stream = await streamFactory.toStream({} as TPlugin, extractor)
 
 
-    const data = await testEntryStream(streams)
+    const data = await testEntryStream([stream])
     t.same(data.length, 2)
     t.same(data[0].meta.acme, undefined)
     t.same(data[1].meta.acme, 'bar')
   })
 
-  t.test('getExtractorStreamsFrom invalid task is skipped', async t => {
+  t.test('toStream invalid task is skipped', async t => {
     const manager = new PluginManager({})
     const storage = new Storage(storageDir)
 
@@ -179,10 +179,8 @@ t.only('StreamFactory', async t => {
       },
     }
 
-    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [invalidExtractor])
 
-
-    t.same(streams.length, 0)
+    t.rejects(streamFactory.toStream({} as TPlugin, invalidExtractor))
   })
 
 
@@ -190,8 +188,6 @@ t.only('StreamFactory', async t => {
     const manager = new PluginManager()
     const storage = new Storage(storageDir)
     const context = { manager, storage }
-
-    const streamFactory = new ExtractorStreamFactory(manager, storage, [])
 
     const failingExtractor: TExtractor = {
       name: 'fancy',
@@ -213,8 +209,12 @@ t.only('StreamFactory', async t => {
       },
     }
 
+    const extensions: TPluginExtension[] = [failingExtractor, extractor].map(extension => ({plugin: {} as TPlugin, type: 'extractor', extension}))
+    const streamFactory = new ExtractorStreamFactory(manager, storage, extensions)
 
-    const streams = await streamFactory.getExtractorStreamsFrom({} as TPlugin, [failingExtractor, extractor])
+
+
+    const [streams] = await streamFactory.getExtractorStreams()
 
 
     t.same(streams.length, 1)
@@ -223,6 +223,27 @@ t.only('StreamFactory', async t => {
     t.same(data.length, 2)
     t.same(data[0].meta.acme, undefined)
     t.same(data[1].meta.acme, 'bar')
+  })
+
+  t.test('getExtractorStreams', async t => {
+    const extractorTask = async (entry: TExtractorEntry) => { entry.meta.acme = 'foo' }
+    const plugin = createExtractorPlugin('acme', extractorTask)
+
+    const manager = new PluginManager()
+    await manager.addPlugin(plugin)
+    await manager.loadPlugins()
+
+    const storage = new Storage('.')
+
+
+    const streamFactory = new ExtractorStreamFactory(manager, storage, manager.getExtensions())
+    const [streams] = await streamFactory.getExtractorStreams()
+
+
+    const data = await testEntryStream(streams)
+    t.same(data.length, 2)
+    t.same(data[0].meta.acme, 'foo')
+    t.same(data[1].meta.acme, 'foo')
   })
 
 })

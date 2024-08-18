@@ -1,2 +1,4 @@
 export { PluginManager } from './manager.js'
-export { Storage } from './storage.js'
+export { ExtensionRegistry } from './extensionRegistry.js'
+export { proxyRegisterForPlugin } from './pluginRegistryProxy.js'
+export * from './pluginSchemas.js'

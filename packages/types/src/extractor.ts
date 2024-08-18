@@ -1,5 +1,7 @@
-import { Readable } from 'stream'
-import { TStorageEntry } from './storage'
+import { Readable, Transform } from 'stream'
+
+import { TStorage, TStorageEntry } from './storage'
+import { TPlugin } from './plugin';
 
 /**
  * Phases
@@ -39,3 +41,24 @@ export type TExtractorTask = {
    */
   end?: () => Promise<void>
 }
+
+export type TExtractor = {
+  name: string
+  /**
+   * Default phase is 'file'
+   */
+  phase?: TExtractorPhase
+  create: (storage: TStorage) => Promise<TExtractorFunction | TExtractorTask | Transform>
+  /**
+   * Called when all extractor task have been completed
+   */
+  tearDown?: () => Promise<void>
+}
+
+export type TExtractorStream = {
+  stream: Transform
+  extractor: TExtractor;
+  plugin: TPlugin;
+}
+
+export type TExtractorStreamTearDown = () => Promise<void>

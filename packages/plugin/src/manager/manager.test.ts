@@ -3,12 +3,11 @@ import t from 'tap'
 import { fileURLToPath } from 'url'
 
 import Logger from '@home-gallery/logger'
-import { TExtractorEntry, TStorageEntry } from '@home-gallery/types'
+import { TExtractorEntry } from '@home-gallery/types'
 
 import { PluginManager } from './manager.js'
-import { Storage } from './storage.js'
 
-import { testEntryStream, createPlugin, testDatabaseMapperStream, createDatabaseMapperPlugin, createExtractorPlugin, createQueryPlugin } from './test-utils.js'
+import { createPlugin,createExtractorPlugin, createQueryPlugin } from '../test-utils.js'
 import { createQueryContext, createEntryMock } from '../query/query-test-utils.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -25,193 +24,103 @@ t.only('PluginManager', async t => {
     t.same(manager.getPlugins().length, 0)
   })
 
-  t.test('loadPlugin() from file', async t => {
-    const manager = new PluginManager()
+  t.test('loadPlugins() from file', async t => {
+    const manager = new PluginManager({
+      pluginManager: {plugins: [path.resolve(testDir, 'plugins', 'vanilla', 'index.js')]}
+    })
 
 
-    await manager.loadPlugin(path.resolve(testDir, 'plugins', 'vanilla', 'index.js'))
-    await manager.initializePlugins()
+    await manager.loadPlugins()
 
 
-    const plugin = manager.getPlugin('vanilla')
+    const plugin = manager.getPlugins().find(p => p.name == 'vanilla')
     t.ok(plugin)
     t.same(plugin?.name, 'vanilla')
     t.same(plugin?.version, '1.0')
   })
 
-  t.test('loadPlugin() from dir', async t => {
-    const manager = new PluginManager()
+  t.test('loadPlugins() from dir', async t => {
+    const manager = new PluginManager({
+      pluginManager: {plugins: [path.resolve(testDir, 'plugins', 'vanilla')]}
+    })
 
 
-    await manager.loadPlugin(path.resolve(testDir, 'plugins', 'vanilla'))
-    await manager.initializePlugins()
+    await manager.loadPlugins()
 
 
-    const plugin = manager.getPlugin('vanilla')
+    const plugin = manager.getPlugins().find(p => p.name == 'vanilla')
     t.ok(plugin)
     t.same(plugin?.name, 'vanilla')
     t.same(plugin?.version, '1.0')
   })
 
-  t.test('loadPlugin() from package dir', async t => {
-    const manager = new PluginManager()
+  t.test('loadPlugins() from package dir', async t => {
+    const manager = new PluginManager({
+      pluginManager: {plugins: [path.resolve(testDir, 'plugins', 'acme')]}
+    })
 
 
-    await manager.loadPlugin(path.resolve(testDir, 'plugins', 'acme'))
-    await manager.initializePlugins()
+    await manager.loadPlugins()
 
 
-    const plugin = manager.getPlugin('acme')
+    const plugin = manager.getPlugins().find(p => p.name == 'acme')
     t.ok(plugin)
     t.same(plugin?.name, 'acme')
     t.same(plugin?.version, '1.0')
   })
 
-  t.test('loadPluginDir()', async t => {
-    const manager = new PluginManager()
+  t.test('loadPlugins with directory()', async t => {
+    const manager = new PluginManager({
+      pluginManager: {dirs: [path.resolve(testDir, 'plugins')]}
+    })
 
 
-    await manager.loadPluginDir(path.resolve(testDir, 'plugins'))
-    await manager.initializePlugins()
+    await manager.loadPlugins()
 
 
-    t.same(manager.getPlugins().length, 6)
-    t.same(manager.getPlugin('vanilla')?.name, 'vanilla')
-    t.same(manager.getPlugin('acme')?.name, 'acme')
-    t.same(manager.getPlugin('other')?.name, 'other')
-    t.same(manager.getPlugin('fancy')?.name, 'fancy')
-    t.same(manager.getPlugin('CommonJS Plugin')?.name, 'CommonJS Plugin')
-    t.same(manager.getPlugin('ESM Plugin')?.name, 'ESM Plugin')
+    const plugins = manager.getPlugins()
+    t.same(plugins.length, 6)
+    t.same(plugins.find(p => p.name == 'vanilla')?.name, 'vanilla')
+    t.same(plugins.find(p => p.name == 'acme')?.name, 'acme')
+    t.same(plugins.find(p => p.name == 'other')?.name, 'other')
+    t.same(plugins.find(p => p.name == 'fancy')?.name, 'fancy')
+    t.same(plugins.find(p => p.name == 'CommonJS Plugin')?.name, 'CommonJS Plugin')
+    t.same(plugins.find(p => p.name == 'ESM Plugin')?.name, 'ESM Plugin')
   })
 
-  t.test('loadPluginDir() with disabled plugins', async t => {
+  t.test('loadPlugins() with disabled plugins', async t => {
     const config = {
       pluginManager: {
+        dirs: [path.resolve(testDir, 'plugins')],
         disabled: ['CommonJS Plugin', 'ESM Plugin']
       }
     }
     const manager = new PluginManager(config)
 
 
-    await manager.loadPluginDir(path.resolve(testDir, 'plugins'))
-    await manager.initializePlugins()
+    await manager.loadPlugins()
 
 
-    t.same(manager.getPlugins().length, 4)
-    t.same(manager.getPlugin('vanilla')?.name, 'vanilla')
-    t.same(manager.getPlugin('acme')?.name, 'acme')
-    t.same(manager.getPlugin('other')?.name, 'other')
-    t.same(manager.getPlugin('fancy')?.name, 'fancy')
+    const plugins = manager.getPlugins()
+    t.same(plugins.length, 4)
+    t.same(plugins.find(p => p.name == 'vanilla')?.name, 'vanilla')
+    t.same(plugins.find(p => p.name == 'acme')?.name, 'acme')
+    t.same(plugins.find(p => p.name == 'other')?.name, 'other')
+    t.same(plugins.find(p => p.name == 'fancy')?.name, 'fancy')
   })
 
-  t.test('getModuleFactoryFor()', async t => {
+  t.test('getExtensions()', async t => {
     const extractorTask = async (entry: TExtractorEntry) => { entry.meta.acme = 'foo' }
     const plugin = createExtractorPlugin('acme', extractorTask)
 
     const manager = new PluginManager()
-    await manager.addPlugin('dummy.file', plugin)
-    await manager.initializePlugins()
+    await manager.addPlugin(plugin)
+    await manager.loadPlugins()
 
 
-    const factory = manager.getModuleFactoryFor('acmePlugin')
-    const extractors = factory?.getExtractors?.()
-    t.ok(factory)
-    t.same(extractors?.length, 1)
+    const extensions = manager.getExtensions()
+    t.ok(extensions)
+    t.same(extensions?.length, 1)
   })
 
-  t.test('getExtractorStreams', async t => {
-    const extractorTask = async (entry: TExtractorEntry) => { entry.meta.acme = 'foo' }
-    const plugin = createExtractorPlugin('acme', extractorTask)
-
-    const manager = new PluginManager()
-    await manager.addPlugin('dummy.file', plugin)
-    await manager.initializePlugins()
-
-    const storage = new Storage('.')
-
-
-    const [streams] = await manager.getExtractorStreams(storage)
-
-
-    const data = await testEntryStream(streams)
-    t.same(data.length, 2)
-    t.same(data[0].meta.acme, 'foo')
-    t.same(data[1].meta.acme, 'foo')
-  })
-
-  t.test('getExtractorStreams with disabled extractor', async t => {
-    const extractorTask = async (entry: TExtractorEntry) => { entry.meta.acme = 'foo' }
-    const plugin = createExtractorPlugin('acme', extractorTask)
-
-    const config = {
-      pluginManager: {
-        disabledExtractors: ['acmeExtractor']
-      }
-    }
-    const manager = new PluginManager(config)
-    await manager.addPlugin('dummy.file', plugin)
-    await manager.initializePlugins()
-
-    const storage = new Storage('.')
-
-
-    const [streams] = await manager.getExtractorStreams(storage)
-
-
-    t.same(streams.length, 0)
-  })
-
-
-  t.test('getDatabaseMapperStream', async t => {
-    const mapper = (entry: TStorageEntry, media: any) => { media.plugin.acme = 'foo' }
-    const plugin = createDatabaseMapperPlugin('acme', mapper)
-
-    const manager = new PluginManager()
-    await manager.addPlugin('dummy.file', plugin)
-    await manager.initializePlugins()
-
-
-    const stream = await manager.getDatabaseMapperStream('2024-07-29T22:03:48.098Z')
-
-
-    const data = await testDatabaseMapperStream(stream)
-    t.same(data.length, 2)
-    t.same(data[0].plugin?.acme, 'foo')
-    t.same(data[1].plugin?.acme, 'foo')
-  })
-
-  t.test('executeQuery', async t => {
-    const queryPlugin = createQueryPlugin('acmeQuery', 'acme', (e: any) => e.plugin?.acme)
-    const plugin = createPlugin('acme', {query: queryPlugin})
-
-    const manager = new PluginManager()
-    await manager.addPlugin('dummy.file', plugin)
-    await manager.initializePlugins()
-
-    const context = createQueryContext()
-    const entries = [
-      createEntryMock('1', {plugin: {acme: 'foo'}}),
-      createEntryMock('2', {plugin: {acme: 'bar'}}),
-    ]
-
-
-    const filteredEntries = await manager.executeQuery(entries, 'acme = bar', context)
-
-
-    t.same(filteredEntries.map(e => e.id), ['2'])
-  })
-
-  t.test('executeQuery failes by unknown cmp key', async t => {
-    const manager = new PluginManager()
-    await manager.initializePlugins()
-
-    const context = createQueryContext()
-    const entries = [
-      createEntryMock('1', {plugin: {acme: 'foo'}}),
-      createEntryMock('2', {plugin: {acme: 'bar'}}),
-    ]
-
-
-    t.rejects(manager.executeQuery(entries, 'acme = bar', context))
-  })
 })

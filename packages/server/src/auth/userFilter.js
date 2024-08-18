@@ -86,34 +86,22 @@ const createUserFilterQueryPlugin = async manager => {
 
 // Plugin setup  ---------------------------
 
-/** @param {import('@home-gallery/types').TPluginManager} */
-const factory = async manager => {
-  const log = manager.createLogger(`${logPrefix}.factory`)
-
-  const queryPlugins = []
-  const context = manager.getContext()
-  if (context.type == 'serverContext' || context.type == 'cliContext') {
-    const filterPlugin = await createUserFilterQueryPlugin(manager)
-    if (filterPlugin) {
-      queryPlugins.push(filterPlugin)
-    }
-  } else {
-    log.trace(`Skip query plugins for context type ${context.type}`)
-  }
-
-  return {
-    getQueryPlugins() {
-      return queryPlugins
-    },
-  }
-}
-
 const plugin = {
   name: 'userFilterPlugin',
   version: '1.0',
   requires: [],
+  /** @param {import('@home-gallery/types').TPluginManager} manager */
   async initialize(manager) {
-    return factory(manager)
+    const log = manager.createLogger(`${logPrefix}`)
+    const context = manager.getContext()
+    if (context.type == 'serverContext' || context.type == 'cliContext') {
+      const filterPlugin = await createUserFilterQueryPlugin(manager)
+      if (filterPlugin) {
+        manager.register('query', filterPlugin)
+      }
+    } else {
+      log.trace(`Skip query plugins for context type ${context.type}`)
+    }
   }
 }
 

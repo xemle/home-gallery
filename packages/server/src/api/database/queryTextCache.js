@@ -57,20 +57,16 @@ const textCacheQueryPlugin = manager => {
 const queryTextCache = {
   name: 'queryTextCache',
   version: '1.0.0',
+  /** @param {import('@home-gallery/types').TPluginManager} manager */
   async initialize(manager) {
-    const context = manager.getContext()
-    const queryPlugins = []
-    
     const log = manager.createLogger('server.api.database.textCache')
+
+    const context = manager.getContext()
     if (context.type == 'serverContext' || context.type == 'cliContext') {
-      queryPlugins.push(textCacheQueryPlugin(manager))
+      await manager.register('query', textCacheQueryPlugin(manager))
       log.debug(`Use text cache for queries`)
     } else {
       log.debug(`Skip query text cache for non server contexts`)
-    }
-
-    return {
-      getQueryPlugins: () => queryPlugins
     }
   }
 }

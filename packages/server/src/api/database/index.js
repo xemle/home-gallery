@@ -10,10 +10,10 @@ import { createQueryContext } from './queryContext.js'
 const log = Logger('server.api.database');
 
 /**
- * @param {import('@home-gallery/types').TGalleryContext} context
+ * @param {import('../../types.js').TServerContext} context
  */
 export function databaseApi(context, databaseFilename, getEvents) {
-  const { eventbus, pluginManager } = context
+  const { eventbus, executeQuery } = context
   let database = false;
   const databaseCache = cache(3600);
   let entryCache = {};
@@ -27,7 +27,7 @@ export function databaseApi(context, databaseFilename, getEvents) {
   const filterDatabase = async (database, term = '', req = {}) => {
     /** @type {import('@home-gallery/types').TQueryContext} */
     const queryContext = createQueryContext(context, req)
-    const data = await pluginManager.executeQuery(database.data, term, queryContext)
+    const data = await executeQuery(database.data, term, queryContext)
     log.trace({ast: queryContext.ast, queryAst: queryContext.queryAst}, `Queried database with ${queryContext.stringifiedQueryAst}`)
     return {...database, data}
   }
