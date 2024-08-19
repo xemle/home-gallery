@@ -19,14 +19,16 @@ app.use(
   '/api/',
   createProxyMiddleware({
     target: API_PROXY,
-    secure: false
+    secure: false,
+    changeOrigin: true
   })
 );
 app.use(
   '/files/',
   createProxyMiddleware({
     target: API_PROXY,
-    secure: false
+    secure: false,
+    changeOrigin: true
   })
 );
 
