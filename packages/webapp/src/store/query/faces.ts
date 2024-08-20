@@ -2,7 +2,7 @@ import { Entry } from '../entry'
 
 import { uniqBy } from './utils'
 
-const euclideanDistance = (a, b) => {
+export const euclideanDistance = (a, b) => {
   const max = Math.min(a.length, b.length)
   let result = 0
   for (let i = 0; i < max; i++) {

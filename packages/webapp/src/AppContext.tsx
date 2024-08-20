@@ -6,6 +6,7 @@ import { TGalleryConfig, TGalleryContext } from "@home-gallery/types"
 import Logger from '@home-gallery/logger'
 import DefaultQueryPlugin from "./plugin/defaultQueryPlugin"
 import SimilarQueryPlugin from "./plugin/similarQueryPlugin"
+import FaceQueryPlugin from "./plugin/faceQueryPlugin"
 
 type TAppContext = {
   pluginManager: BrowserPluginManager
@@ -36,6 +37,7 @@ export const AppContextProvider: React.FC<{children: React.ReactNode}> = ({child
       const pluginManager = new BrowserPluginManager(config as TGalleryConfig, context)
       await pluginManager.addPlugin(DefaultQueryPlugin)
       await pluginManager.addPlugin(SimilarQueryPlugin)
+      await pluginManager.addPlugin(FaceQueryPlugin)
 
       pluginManager.loadPlugins()
         .then((() => {

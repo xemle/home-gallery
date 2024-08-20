@@ -35,6 +35,7 @@ const run = async (databaseApi, query, manager, log) => {
     case 'query': term = query.value || ''; ; break
     case 'year': term = query.query || ''; queryContext.plugin.year = { value: query.value }; break
     case 'similar': term = query.query || ''; queryContext.plugin.similar = { seedId: query.value }; break
+    case 'faces': term = query.query || ''; queryContext.plugin.face = { id: `${query.value.id}.${query.value.faceIndex}` }; break
     default:
       log.warn(`Search type ${query.type} NYI`)
       break
