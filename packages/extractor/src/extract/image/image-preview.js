@@ -24,7 +24,7 @@ const isSupportedImage = entry => fileExtension(entry.filename).match(/(jpe?g|jp
 async function resizeImage(storage, imageResizer, entry, src, previewSizes, sizeToImagePreviewSuffix) {
   const firstMissingIndex = previewSizes.findIndex(size => !storage.hasFile(entry, sizeToImagePreviewSuffix(size)))
   if (firstMissingIndex < 0) {
-    return
+    return []
   }
 
   let createdPreviewSizes = []
