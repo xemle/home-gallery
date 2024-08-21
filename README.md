@@ -10,7 +10,7 @@ powered image and face discovery. Try the [demo gallery](https://demo.home-galle
 or enjoy the [food images](https://demo.home-gallery.org/similar/c7f8a3bf0142fc9694f517c23e42d988c97233c3)!
 
 **Note:** This software is a private pet/spare time project without any warranty.
-Ask questions on [gitter.im](https://gitter.im/home-gallery/community) or [Discord](https://discord.gg/6YungJ9Y).
+Ask questions on [gitter.im](https://gitter.im/home-gallery/community) or [Discord](https://discord.gg/kbvmvadCwe).
 
 Do you like HomeGallery? Does it solve your media problem?
 Would you like to help? Please read the [CONTRIBUTING](CONTRIBUTING.md) guidlines and
