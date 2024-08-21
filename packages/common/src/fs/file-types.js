@@ -1,5 +1,5 @@
 export const fileTypes = {
-  image: 'ico,bmp,gif,png,jpg,jpeg,jpe,tif,tiff,thm,webp'.split(','),
+  image: 'ico,bmp,gif,png,jpg,jpeg,jpe,tif,tiff,thm,webp,avif'.split(','),
   binImage: 'psd,xcf'.split(','),
   rawImage: 'arw,cr2,cr3,crw,dng,gpr,heic,heif,mrw,nef,nrw,orf,raf,rw2,sr2,srf,srw'.split(','),
   video: 'avi,wmv,mov,mpg,mpeg,mp4,m4v,3gp,mjpeg,mts,flv,swf,webm,mkv'.split(','),

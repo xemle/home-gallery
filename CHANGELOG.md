@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- extractor: Add support for avif images
+
 ### Changed
 
 - plugin: Add register for extensions
