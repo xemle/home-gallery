@@ -5,8 +5,11 @@ export type TPlugin = {
   name: string
   version: string
   requires?: string[]
+  environments?: TPluginEnvironment[]
   initialize: (manager: TPluginManager) => Promise<void>
 }
+
+export type TPluginEnvironment = 'server' | 'browser'
 
 export type TExtenstionType = 'extractor' | 'database' | 'query'
 

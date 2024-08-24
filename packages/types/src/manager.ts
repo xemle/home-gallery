@@ -6,3 +6,18 @@ export type TGalleryPluginManager = TPluginManager & {
   getPlugins(): TPlugin[]
   getExtensions(): TPluginExtension[]
 }
+
+export type TBrowserPluginResource = {
+  plugin: TPlugin
+  localDir: string
+  publicPath: string
+  publicEntry: string
+}
+
+export type TBrowserPluginContext = {
+  plugins: TBrowserPluginResource[]
+}
+
+export type TServerPluginManager = TGalleryPluginManager & {
+  getBrowserPlugins(): TBrowserPluginContext
+}

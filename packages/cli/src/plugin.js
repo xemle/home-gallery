@@ -41,6 +41,13 @@ const command = {
             default: 'vanilla',
             choices: ['single', 'vanilla', 'typescript']
           },
+          environment: {
+            alias: 'e',
+            describe: 'Plugin environments',
+            array: true,
+            default: 'server',
+            choices: ['server', 'browser']
+          },
           modules: {
             alias: 'm',
             array: true,
@@ -61,6 +68,7 @@ const command = {
           'modules': 'createPlugin.modules',
           'sourceType': 'createPlugin.sourceType',
           'force': 'createPlugin.force',
+          'environment': 'createPlugin.environments',
         }
 
         const setDefaults = config => {

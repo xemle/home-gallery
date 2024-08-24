@@ -14,7 +14,7 @@
  * @property {any} config
  * @property {EventBus} eventbus
  * @property {ProcessManager} processManager
- * @property {import('@home-gallery/types').TPluginManager} pluginManager
+ * @property {import('@home-gallery/types').TServerPluginManager} pluginManager
  * @property {TExecuteQueryFn} executeQuery
  */
 

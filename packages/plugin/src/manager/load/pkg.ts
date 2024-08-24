@@ -10,13 +10,17 @@ function getPath(o: any, path: string) {
 
   let result = o
   let i = 0
-  while (typeof result == 'object' && i < parts.length) {
-    result = result[parts[i++]]
+  while (result && i < parts.length) {
+    if (typeof result == 'object') {
+      result = result[parts[i++]]
+    } else {
+      result = undefined
+    }
   }
   return result
 }
 
-const entryPaths = [
+const nodeEntryPaths = [
   'exports',
   'exports.module',
   'exports.node',
@@ -27,8 +31,23 @@ const entryPaths = [
   'main'
 ]
 
+const browserEntryPaths = [
+  'exports.browser',
+  'exports.\'.\'.browser',
+  'browser'
+]
+
 export function resolvePackageEntry(pkg: any) {
-  for (let path of entryPaths) {
+  for (let path of nodeEntryPaths) {
+    const entry = getPath(pkg, path)
+    if (typeof entry == 'string') {
+      return entry
+    }
+  }
+}
+
+export function resolveBrowserEntry(pkg: any) {
+  for (let path of browserEntryPaths) {
     const entry = getPath(pkg, path)
     if (typeof entry == 'string') {
       return entry

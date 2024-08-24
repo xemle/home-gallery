@@ -3,7 +3,7 @@ import { pipeline } from 'stream/promises'
 
 import Logger from '@home-gallery/logger'
 import { toList, write } from '@home-gallery/stream'
-import { TExtractorStream, TExtractorFunction, TExtractor, TPlugin, TDatabaseMapperStream, TDabaseMapperFunction, TDatabaseMapper, TExtractorEntry, TStorageEntry, TQueryPlugin, TQueryAst, TQueryContext, TAst, TPluginManager } from '@home-gallery/types'
+import { TExtractorStream, TExtractorFunction, TExtractor, TPlugin, TDatabaseMapperStream, TDabaseMapperFunction, TDatabaseMapper, TExtractorEntry, TStorageEntry, TQueryPlugin, TQueryAst, TQueryContext, TAst, TPluginManager, TPluginEnvironment } from '@home-gallery/types'
 
 Logger.addPretty('trace')
 const log = Logger('testUtils')
@@ -80,6 +80,7 @@ export type TTestPluginOption = {
   extractor?: TExtractor,
   mapper?: TDatabaseMapper
   query?: TQueryPlugin
+  environments?: TPluginEnvironment[]
 }
 
 export const createExtractorPlugin = (name: string, fn: TExtractorFunction) => {
@@ -95,6 +96,7 @@ export const createPlugin = (name: string, option: TTestPluginOption) => {
   const plugin: TPlugin = {
     name: `${name}Plugin`,
     version: '1.0',
+    environments: option.environments,
     async initialize(manager: TPluginManager) {
       log.debug(`Initialize plugin ${this.name}`)
       if (option.extractor) {

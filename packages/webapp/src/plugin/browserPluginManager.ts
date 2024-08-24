@@ -1,6 +1,7 @@
 import Logger from '@home-gallery/logger'
 import { TGalleryConfig, TGalleryContext, TLogger, TPlugin, TGalleryPluginManager, TQueryContext, TPluginExtension, TQueryPlugin, TExtenstionType } from "@home-gallery/types";
 import { QueryExecutor, ExtensionRegistry, QuerySchema, PluginSchema, proxyRegisterForPlugin } from '@home-gallery/plugin'
+import { BrowserPluginLoader } from './browserPluginLoader';
 
 type TPluginContext = {
   plugin: TPlugin
@@ -13,6 +14,7 @@ export class BrowserPluginManager implements TGalleryPluginManager {
   config: TGalleryConfig
   context: TGalleryContext
 
+  loader: BrowserPluginLoader
   registry: ExtensionRegistry
 
   queryExecutor: QueryExecutor
@@ -22,6 +24,7 @@ export class BrowserPluginManager implements TGalleryPluginManager {
     this.config = config;
     this.context = context;
 
+    this.loader = new BrowserPluginLoader(config.pluginManager?.plugins || [])
     this.registry = new ExtensionRegistry({
       'query': QuerySchema,
     }, [])
@@ -30,8 +33,9 @@ export class BrowserPluginManager implements TGalleryPluginManager {
   }
 
   getApiVersion(): string {
-    // replace moduleFactory by register
-    return '0.8'
+    // 0.9 - Add browser plugin entries
+    // 0.8 - replace moduleFactory by register
+    return '0.9'
   }
 
   getConfig(): TGalleryConfig {
@@ -47,20 +51,13 @@ export class BrowserPluginManager implements TGalleryPluginManager {
   }
 
   addPlugin(plugin: TPlugin) {
-    PluginSchema.validate(plugin)
-      .then(() => {
-        this.plugins.push({
-          plugin,
-          initialized: false
-        })
-      })
-      .catch(err => {
-        this.log.warn(err, `Failed to load plugin ${plugin?.name}: ${err}`)
-      })
+    this.loader.addPlugin(plugin)
   }
 
   async loadPlugins() {
-    for (const plugin of this.plugins) {
+    await this.loader.loadPlugins()
+
+    for (const plugin of this.loader.plugins) {
       if (plugin.initialized) {
         continue
       }
@@ -83,7 +80,7 @@ export class BrowserPluginManager implements TGalleryPluginManager {
   }
 
   getPlugins(): TPlugin[] {
-    return this.plugins.filter(p => p.initialized).map(p => p.plugin)
+    return this.loader.plugins.filter(p => p.initialized).map(p => p.plugin)
   }
 
   getExtensions(): TPluginExtension[] {

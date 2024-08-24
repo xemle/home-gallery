@@ -7,6 +7,7 @@ export const PluginSchema = Yup.object({
   'name': Yup.string().required(),
   'version': Yup.string().required(),
   'requires': Yup.array().optional(),
+  'environments': Yup.array().of(Yup.string().oneOf(['server', 'browser'])).optional(),
   'initialize': requiredFunction,
 })
 

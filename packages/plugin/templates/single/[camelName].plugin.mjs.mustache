@@ -133,6 +133,13 @@ const plugin = {
   name: '{{ camelName }}Plugin',
   version: '1.0',
   requires: [{{{ requires }}}],
+  {{#environments.length}}
+  environments: [
+    {{#environments}}
+    '{{.}}',
+    {{/environments}}
+  ],
+  {{/environments.length}}
   async initialize(manager) {
     const log = manager.createLogger('plugin.{{ camelName }}')
     log.trace(`Initialize ${this.name} plugin`)

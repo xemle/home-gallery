@@ -14,23 +14,16 @@ const indexFile = path.resolve('src', 'index.html')
 
 const app = express()
 
+const proxy = createProxyMiddleware({
+  target: API_PROXY,
+  secure: false,
+  changeOrigin: true
+})
+
 app.use(compression())
-app.use(
-  '/api/',
-  createProxyMiddleware({
-    target: API_PROXY,
-    secure: false,
-    changeOrigin: true
-  })
-);
-app.use(
-  '/files/',
-  createProxyMiddleware({
-    target: API_PROXY,
-    secure: false,
-    changeOrigin: true
-  })
-);
+app.use('/api/', proxy)
+app.use('/files/', proxy)
+app.use('/plugins/', proxy)
 
 app.set('etag', 'weak')
 app.use(express.static(path.resolve('src', 'public')))
