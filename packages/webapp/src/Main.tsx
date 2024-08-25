@@ -2,7 +2,7 @@ import * as React from "react";
 import {
   BrowserRouter,
 } from "react-router-dom";
-import { LastLocationProvider } from './utils/lastLocation/LoastLocationProvider'
+import { LastLocationProvider } from './utils/lastLocation/LastLocationProvider'
 import { AppRoutes } from "./AppRoutes";
 import { AppContextProvider } from "./AppContext";
 import LoadDatabaseAndEvents from "./init/LoadDatabaseAndEvents";
