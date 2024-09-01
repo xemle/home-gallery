@@ -34,6 +34,7 @@
     "@home-gallery/logger": "file:../logger",
     "@home-gallery/query": "file:../query",
     "@home-gallery/storage": "file:../storage",
+    "@home-gallery/webapp": "file:../webapp",
     "archiver": "^5.0.0",
     "async": "^3.2.0",
     "glob": "^7.1.6",
