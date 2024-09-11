@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- bundle: Fix binary tmp dir with snapshot
 - extractor: Fix image resizer for all existing previews
 
 ## [1.16.1] - 2024-08-10

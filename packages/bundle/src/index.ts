@@ -120,7 +120,8 @@ export const bundle = async (options: BundleOptions): Promise<void> => {
     log.info(`Created archive ${archiveFile}`)
 
     if (Array.isArray(target.command)) {
-      await pack(archiveFile, archivePrefix, `${output.name}/${version}`, target.platform, target.command, binFile)
+      const sanitizeVersion = `${version}${snapshot}`.replaceAll(/[^-.A-Za-z0-9]+/g, '-').replaceAll(/-+/g, '-').replace(/(^-|-$)/g, '')
+      await pack(archiveFile, archivePrefix, `${output.name}/${sanitizeVersion}`, target.platform, target.command, binFile)
       await updateHash(binFile, hashAlgorithm, `${binFile}.${hashAlgorithm}sum`)
       await updateHash(binFile, hashAlgorithm, hashFile)
       await symlink(binFile, binLatestLink).catch(err => log.warn(err, `Could not create symlink from ${binFile} to ${binLatestLink}`))
