@@ -11,7 +11,7 @@ const isMain = () => {
   if (process.argv.length < 2) {
     return false
   }
-  const script = process.argv[1]
+  const script = process.argv[1].replaceAll(/\\/g, '/') // ensure posix path
   const normalizedScript = script.endsWith('.js') ? script : script + '.js'
   return import.meta.url.endsWith(normalizedScript)
 }
