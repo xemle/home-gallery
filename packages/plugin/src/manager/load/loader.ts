@@ -1,5 +1,6 @@
 import fs from 'fs/promises'
 import path from 'path';
+import url from 'url'
 
 import { TGalleryConfig, TLogger, TPlugin } from "@home-gallery/types";
 import { Logger } from "@home-gallery/logger";
@@ -19,7 +20,9 @@ export class PluginLoader {
   }
 
   async importPlugin(file: string) {
-    const module = await import(file)
+    // On Windows, absolute paths must be valid file:// URLs
+    const fileUrl = url.pathToFileURL(file).href
+    const module = await import(fileUrl)
     const plugin = module.default ?? module
     await PluginSchema.validate(plugin)
       .catch((err: any) => {

@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- plugin: Fix plugin module load on windows
 - cli: Fix execution on windows
 - bundle: Fix binary tmp dir with snapshot
 - extractor: Fix image resizer for all existing previews
