@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import url from 'url'
+
 const run = async () => {
   const { Logger } = await import('@home-gallery/logger')
   Logger() // Initiate root logger
@@ -13,7 +15,8 @@ const isMain = () => {
   }
   const script = process.argv[1].replaceAll(/\\/g, '/') // ensure posix path
   const normalizedScript = script.endsWith('.js') ? script : script + '.js'
-  return import.meta.url.endsWith(normalizedScript)
+  const scriptUrl = url.pathToFileURL(normalizedScript)
+  return import.meta.url.endsWith(scriptUrl.href)
 }
 
 if (isMain()) {
