@@ -34,6 +34,17 @@ const getAuthMiddleware = config => {
   return (req, _, next) => next()
 }
 
+/**
+ * Ensure leading and tailing slash. Allow base path with schema like http://foo.com/bar
+ */
+const normalizeBasePath = basePath => {
+  let path = `${basePath}`
+  if (!path.startsWith('/') && path.indexOf('://') < 0) {
+    path = '/' + path
+  }
+  return path.endsWith('/') ? path : path + '/'
+}
+
 export function createApp(context) {
   const { config } = context
   const app = express();
@@ -81,7 +92,7 @@ export function createApp(context) {
   }
 
   const webAppOptions = {
-    basePath: (config.server.basePath || '').replaceAll(/\/+/g, '') + '/',
+    basePath: normalizeBasePath(config.server.basePath),
     injectRemoteConsole: !!config.server.remoteConsoleToken,
   }
 

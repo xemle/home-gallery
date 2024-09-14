@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- server: Fix base path with multiple path segements
 - webapp: Fix tag list with different tag cases
 - plugin: Fix plugin module load on windows
 - cli: Fix execution on windows

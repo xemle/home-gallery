@@ -109,8 +109,6 @@ const command = {
     .default('open-browser', undefined, 'true')
   },
   handler: (argv) => {
-    const ensureLeadingSlash = url => url.startsWith('/') ? url : '/' + url
-
     const argvMapping = {
       host: 'server.host',
       port: 'server.port',
@@ -119,7 +117,7 @@ const command = {
       events: 'events.file',
       key: 'server.key',
       cert: 'server.cert',
-      basePath: {path: 'server.basePath', map: (basePath) => ensureLeadingSlash(basePath)},
+      basePath: 'server.basePath',
       openBrowser: 'server.openBrowser',
       remoteConsoleToken: 'server.removeConsoleToken',
       user: {path: 'server.auth.users', type: 'add', map: mapUsers},
