@@ -38,7 +38,7 @@ jobs:
             fi
           fi
 
-          echo "{\"version\":\"${BUILD_VERSION}\",\"commit\":\"${GITHUB_SHA}\",\"created\":\"$(date -Is)\",\"createdBy\":\"github action #${{ github.run_id }}\"}" > .build.json
+          echo "{\"version\":\"${BUILD_VERSION}\",\"commit\":\"${GITHUB_SHA}\",\"created\":\"$(date -Is)\",\"createdBy\":\"github action #${{ github.run_id }}\"}" | tee .build.json
 
           # Set output parameters.
           echo VERSION=${VERSION} >> $GITHUB_OUTPUT
