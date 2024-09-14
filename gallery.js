@@ -15,7 +15,7 @@ const run = async () => {
   Logger() // Initiate root logger
   const { cli } = await import('@home-gallery/cli')
   const buildInfo = await readBuildInfo().catch(() => ({}))
-  return cli(buildInfo.version || '1.0.0')
+  return cli(buildInfo)
 }
 
 const isMain = () => {

@@ -4,6 +4,7 @@ import { loggerOptions, loggerMiddleware } from './logger.js'
 
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
+import { buildOptions, createBuildMiddleware } from './build.js'
 import fileIndexCli from './file-index/index.js';
 import extractCli from './extractor.js';
 import databaseCli from './database.js';
@@ -16,14 +17,16 @@ import interactiveCli from './interactive/index.js';
 import runCli from './run.js'
 import pluginCli from './plugin.js'
 
-export const cli = (version = '1.0.0') => {
+export const cli = (buildInfo = {}) => {
   return yargs(hideBin(process.argv))
     .usage('Usage: $0 [global options] <command> [options]')
-    .version(version)
+    .version(buildInfo.version || '1.0.0')
     .env('GALLERY')
+    .options(buildOptions)
     .options(loggerOptions)
     .default('level', undefined, 'debug')
     .middleware(loggerMiddleware)
+    .middleware(createBuildMiddleware(buildInfo))
     .command(fileIndexCli)
     .command(extractCli)
     .command(databaseCli)
