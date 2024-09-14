@@ -22,6 +22,7 @@ jobs:
           BRANCH=${GITHUB_REF#refs/heads/}
           VERSION=${BRANCH//\//-}
           SNAPSHOT="-$(date +%Y%m%d)-${SHORTREF}"
+          BUILD_VERSION=${BRANCH}-${SHORTREF}
           TARGET_DIR=unstable/
 
           # If this is git tag, use the tag name as a docker tag
@@ -31,10 +32,13 @@ jobs:
             # binary below the root
             if [[ $TAG_VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
               VERSION=$TAG_VERSION
+              BUILD_VERSION=$VERSION
               SNAPSHOT=
               TARGET_DIR=/
             fi
           fi
+
+          echo "{\"version\":\"${BUILD_VERSION}\",\"commit\":\"${GITHUB_SHA}\",\"created\":\"$(date -Is)\",\"createdBy\":\"github action #${{ github.run_id }}\"}" > .build.json
 
           # Set output parameters.
           echo VERSION=${VERSION} >> $GITHUB_OUTPUT

@@ -21,6 +21,8 @@ jobs:
         run: |
           DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/${GITHUB_REPOSITORY#*/}
           SHORTREF=${GITHUB_SHA::8}
+          BRANCH=${GITHUB_REF#refs/heads/}
+          BUILD_VERSION=${BRANCH}-${SHORTREF}
 
           # Use latest as default image tag
           TAGS="${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${SHORTREF}"
@@ -29,6 +31,7 @@ jobs:
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             # Extract semver tag v1.0.1 to VERSION 1.0.1
             VERSION=${GITHUB_REF#refs/tags/v}
+            BUILD_VERSION=$VERSION
 
             # If the VERSION looks like a semver version major.minor.patch,
             # tag image also with major, major.minor
@@ -38,6 +41,8 @@ jobs:
               TAGS="${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${MAJOR},${DOCKER_IMAGE}:${MAJOR_MINOR},${DOCKER_IMAGE}:${VERSION}"
             fi
           fi
+
+          echo "{\"version\":\"${BUILD_VERSION}\",\"commit\":\"${GITHUB_SHA}\",\"created\":\"$(date -Is)\",\"createdBy\":\"github action #${{ github.run_id }}\"}" > .build.json
 
           # Set output parameters.
           echo tags=${TAGS} >> $GITHUB_OUTPUT

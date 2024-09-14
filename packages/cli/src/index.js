@@ -16,9 +16,10 @@ import interactiveCli from './interactive/index.js';
 import runCli from './run.js'
 import pluginCli from './plugin.js'
 
-export const cli = () => {
+export const cli = (version = '1.0.0') => {
   return yargs(hideBin(process.argv))
     .usage('Usage: $0 [global options] <command> [options]')
+    .version(version)
     .env('GALLERY')
     .options(loggerOptions)
     .default('level', undefined, 'debug')
