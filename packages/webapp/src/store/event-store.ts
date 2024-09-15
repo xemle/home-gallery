@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { applyEvents, Event, EventAction } from '@home-gallery/events'
+import { applyEvents, Event } from '@home-gallery/events'
 
 import { Entry } from './entry'
 import { useEntryStore } from './entry-store'
@@ -48,7 +48,7 @@ const _applyEvents = (events: Event[]) => {
 const getRecentTags = (events: Event[], recentTags: string[]) => {
   getEventTags(events).forEach(tag => lruAdd(recentTags, tag))
   return recentTags
-}    
+}
 
 export const useEventStore = create<EventStore>((set) => ({
   events: [],

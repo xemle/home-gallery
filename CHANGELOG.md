@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- webapp: Add dynamic load of plugins
 - cli: Add build version
 - extractor: Add support for avif images
 

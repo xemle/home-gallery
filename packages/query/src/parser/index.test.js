@@ -91,6 +91,7 @@ t.test('Comparator', async t => {
   t.equal(await simpleAst('foo:bar'), 'foo:bar', 'Colon')
   t.equal(await simpleAst('foo:"bar baz"'), 'foo:"bar baz"', 'Colon value with whitespace')
   t.equal(await simpleAst('foo = "bar baz"'), 'foo = "bar baz"', 'Equal with whitespace')
+  t.equal(await simpleAst('foo=bar:baz'), 'foo = bar:baz', 'Value with colon')
 })
 
 t.test('Function', async t => {
@@ -115,6 +116,7 @@ t.test('List', async t => {
   t.equal(await simpleAst('foo in (bar,baz cat)'), 'foo in (bar, baz, cat)', 'More with mixed syntax')
   t.equal(await simpleAst('not foo in (bar,baz,cat)'), 'not(foo in (bar, baz, cat))', 'With Not')
   t.equal(await simpleAst('foo in (bär,fuß ché)'), 'foo in (bär, fuß, ché)', 'With umlaut')
+  t.equal(await simpleAst('foo in (bar:baz "zoo:lar")'), 'foo in (bar:baz, "zoo:lar")', 'With colon')
 })
 
 t.test('Range', async t => {
@@ -153,4 +155,12 @@ t.test('Complex query', async t => {
   t.equal(await simpleAst('not (foo > bar) (baz or cat in (a, 2, c))'), 'terms(not(foo > bar), (or(baz, cat in (a, 2, c))))', 'Two')
   t.equal(await simpleAst('(2021) not foo'), 'terms((2021), not(foo))', 'Three')
   t.equal(await simpleAst('(2021) not foo in [  2021 : 2023]'), 'terms((2021), not(foo in [2021 : 2023]))', 'Four')
+})
+
+t.test('key:value', async t => {
+  t.equal(await simpleAst('key:value'), 'key:value', 'Single value')
+  t.equal(await simpleAst('key:foo:baz'), 'key:foo:baz', 'Value with colon')
+  t.equal(await simpleAst('key:"foo baz"'), 'key:"foo baz"', 'Value with text')
+  t.equal(await simpleAst('key:foo/baz'), 'key:foo/baz', 'Value with slash')
+  t.equal(await simpleAst('key:foo://baz'), 'key:foo://baz', 'Value with double slash')
 })

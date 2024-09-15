@@ -11,10 +11,6 @@ export type UsedTagsProps = {
 export const UsedTags = ({title, tags, initialCount, dispatch}: UsedTagsProps) => {
   const [tagCount, setTagCount] = useState(initialCount)
 
-  if (!tags.length) {
-    return (<></>)
-  }
-
   const mostUsedTags = useMemo(() => {
     const byCountDesc = (a, b) => b.count - a.count
     const byName = (a, b) => a.name < b.name ? -1 : 1
@@ -24,6 +20,10 @@ export const UsedTags = ({title, tags, initialCount, dispatch}: UsedTagsProps) =
       .slice(0, tagCount)
       .sort(byName)
   }, [tags, tagCount])
+
+  if (!tags.length) {
+    return (<></>)
+  }
 
   return (
     <>

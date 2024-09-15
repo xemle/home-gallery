@@ -13,6 +13,7 @@ import { webapp } from './webapp.js';
 import { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
 import { isIndex, skipIf } from './utils.js'
 import { debugApi } from './api/debug/index.js'
+import { browserPlugin } from './browser-plugins.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const webappDir = path.join(__dirname, 'public')
@@ -38,13 +39,17 @@ const getAuthMiddleware = config => {
  * Ensure leading and tailing slash. Allow base path with schema like http://foo.com/bar
  */
 const normalizeBasePath = basePath => {
-  let path = `${basePath}`
+  let path = `${basePath || '/'}`
   if (!path.startsWith('/') && path.indexOf('://') < 0) {
     path = '/' + path
   }
   return path.endsWith('/') ? path : path + '/'
 }
 
+
+/**
+ * @param {import('./types.js').TServerContext} context
+ */
 export function createApp(context) {
   const { config } = context
   const app = express();
@@ -61,6 +66,10 @@ export function createApp(context) {
   app.use(getAuthMiddleware(config))
 
   app.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
+
+  const pluginApi = browserPlugin(context, '/plugins/')
+  app.use('/plugins', pluginApi.static)
+
   app.use(bodyParser.json({limit: '1mb'}))
 
   const { read: readEvents, push: pushEvent, stream, getEvents } = eventsApi(context, config.events.file);
@@ -84,10 +93,14 @@ export function createApp(context) {
 
   const getWebAppState = async (req) => {
     const disabled = config?.webapp?.disabled || []
+    const plugins = pluginApi.pluginEntries
     const entries = await getFirstEntries(50, req)
     return {
       disabled: !!req.username ? [...disabled, 'pwa'] : disabled,
-      entries
+      pluginManager: {
+        plugins
+      },
+      entries,
     }
   }
 

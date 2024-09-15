@@ -1,12 +1,15 @@
+import path from 'path'
+
 import Logger from '@home-gallery/logger'
-import { TPlugin, TGalleryPluginManager, TLogger, TGalleryConfig, TExtenstionType, TPluginExtension } from '@home-gallery/types'
+import { TPlugin, TServerPluginManager, TLogger, TGalleryConfig, TExtenstionType, TPluginExtension, TBrowserPluginContext } from '@home-gallery/types'
 
 import { ExtensionRegistry } from './extensionRegistry.js'
 import { DatabaseSchema, ExtractorSchema, QuerySchema } from './pluginSchemas.js'
 import { PluginLoader } from './load/loader.js'
 import { proxyRegisterForPlugin } from './pluginRegistryProxy.js'
+import { toCamelName } from '../utils/nameConverter.js'
 
-export class PluginManager implements TGalleryPluginManager {
+export class PluginManager implements TServerPluginManager {
   log: TLogger = Logger('pluginManager')
 
   config: TGalleryConfig
@@ -32,10 +35,11 @@ export class PluginManager implements TGalleryPluginManager {
    * are subjects of change until ApiVersion 1.0 is released
    */
   getApiVersion(): string {
+    // 0.9 - Add getBrowserPlugins
     // 0.8 - Add register. Deprecate ModuleFactory
     // 0.7 - Add TPluginManager context, chanage TExtractor create() signature
     // 0.6 - Initial
-    return '0.7'
+    return '0.9'
   }
 
   getConfig(): TGalleryConfig {
@@ -51,12 +55,16 @@ export class PluginManager implements TGalleryPluginManager {
   }
 
   addPlugin(plugin: TPlugin) {
-    return this.loader.addPlugin('direct.source', plugin)
+    return this.loader.addPlugin(plugin)
   }
 
   async #initializePlugins() {
     const orderedPlugins = this.loader.getResolvedPlugins()
     for (let ctx of orderedPlugins) {
+      if (ctx.plugin.environments && !ctx.plugin.environments.includes('server')) {
+        this.log.trace(`Skip initializing non-server plugin: ${ctx.plugin.name}`)
+        continue
+      }
       const managerProxy = proxyRegisterForPlugin(this, this.registry, ctx.plugin)
       await ctx.plugin.initialize(managerProxy)
         .then((factory: unknown) => {
@@ -110,6 +118,31 @@ export class PluginManager implements TGalleryPluginManager {
     }
 
     return result
+  }
+
+  getBrowserPlugins() {
+    const orderedPlugins = this.loader.getResolvedPlugins()
+    const browserContext: TBrowserPluginContext = {
+      plugins: [],
+    }
+
+    for (let ctx of orderedPlugins) {
+      if (!ctx.plugin.environments?.includes('browser')) {
+        continue
+      } else if (!ctx.publicDir) {
+        this.log.warn(`Skip browser plugin ${ctx.plugin.name}. Public directory is missing`)
+        continue
+      }
+      if (ctx.file && ctx.publicDir) {
+        const publicPath = toCamelName(ctx.plugin.name) + '/'
+        const publicEntry = path.posix.join(publicPath, path.relative(ctx.publicDir, ctx.file).replaceAll(path.win32.sep, path.posix.sep))
+        browserContext.plugins.push({plugin: ctx.plugin, localDir: ctx.publicDir, publicPath, publicEntry})
+      }
+    }
+
+    browserContext.plugins.sort((a, b) => a.publicPath.localeCompare(b.publicPath))
+
+    return browserContext
   }
 
 }

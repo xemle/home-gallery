@@ -27,7 +27,7 @@ const lexer = moo.compile({
   lt: '<',
   eq: '=',
   tilde: '~',
-  compoundChar: /[/]/,
+  slash: '/',
   text: [
     {match: /"(?:\\["\\rn]|[^"\\])*?"/, lineBreaks: true, value: x => x.slice(1, -1)},
     {match: /'(?:\\['\\rn]|[^'\\])*?'/, lineBreaks: true, value: x => x.slice(1, -1)},
@@ -86,7 +86,7 @@ Expression ->
   | ListExpression {% data => data[0] %}
   | FunctionExpression {% data => data[0] %}
   | %lparen _ Terms _ %rparen {% data => ({type: 'paren', value: data[2], col: data[0].col }) %}
-  | Value {% data => data[0] %}
+  | RangeValue {% data => data[0] %} # RangeValue has no colon which is used by KeyValue rule
 
 KeyValue ->
   %identifier %colon Value {% data => ({type: 'keyValue', key: data[0].value, value: data[2], col: data[0].col}) %}
@@ -125,20 +125,28 @@ ListValues ->
   | Value _ ListValues {% data => [data[0]].concat(data[2]) %}
 
 Range ->
-  %lbracket _ Value _ %colon _ Value _ %rbracket {% data => ({type: 'range', value: [data[2], data[6]], col: data[0].col}) %}
+  %lbracket _ RangeValue _ %colon _ RangeValue _ %rbracket {% data => ({type: 'range', value: [data[2], data[6]], col: data[0].col}) %}
+
+# RangeValue has no colon for range syntax: foo in [from:to]
+RangeValue ->
+  %text {% data => ({type: 'text', value: data[0].value, col: data[0].col}) %}
+  | SimpleValue {% data => data[0] %}
 
 Value ->
   %text {% data => ({type: 'text', value: data[0].value, col: data[0].col}) %}
-  | CompoundValue {% data => data[0] %}
+  | ColonValue {% data => data[0] %}
 
-CompoundValue ->
-  %identifier {% data => ({type: 'identifier', value: data[0].value, col: data[0].col}) %}
-  | %identifier ComboundChar CompoundValue {% data => ({type: 'comboundValue', value: `${data[0]}${data[1].value}${data[2].value}`, col: data[0].col}) %}
-  | %identifier CompoundValue {% data => ({type: 'comboundValue', value: `${data[0]}${data[1].value}`, col: data[0].col}) %}
-  | %value {% data => ({type: 'comboundValue', value: `${data[0]}`, col: data[0].col}) %}
+ColonValue ->
+  %identifier %colon ColonValue {% data => ({type: 'value', value: `${data[0]}${data[1].value}${data[2].value}`, col: data[0].col}) %}
+  | %slash ColonValue {% data => ({type: 'value', value: `${data[0].value}${data[1].value}`, col: data[0].col}) %}
+  | SimpleValue {% data => data[0] %}
 
-ComboundChar ->
-  (%compoundChar) {% data => ({type: 'compoundChar', value: data[0][0].value, col: data[0][0].col}) %}
+SimpleValue ->
+  %slash SimpleValue {% data => ({type: 'value', value: `${data[0].value}${data[1].value}`, col: data[0].col}) %}
+  | %identifier SimpleValue {% data => ({type: 'value', value: `${data[0].value}${data[1].value}`, col: data[0].col}) %}
+  | %identifier {% data => ({type: 'value', value: data[0].value, col: data[0].col}) %}
+  | %value {% data => ({type: 'value', value: `${data[0]}`, col: data[0].col}) %}
+
 
 _ -> %ws:* {% () => null %}
 __ -> %ws

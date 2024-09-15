@@ -163,4 +163,28 @@ t.only('createPlugin', async t => {
     t.same(mapperStream.entries?.length, 1)
     t.ok(mapperStream.stream)
   })
+
+  t.test('vanilla query for browser', async t => {
+    await createPlugin({ config: { createPlugin: {
+      name: 'acme',
+      baseDir,
+      sourceType: 'vanilla',
+      requires: [],
+      environments: ['browser'],
+      modules: ['query']
+    }}})
+
+    const manager = new PluginManager({
+      pluginManager: {plugins: [path.join(baseDir, 'acme')]}
+    })
+    await manager.loadPlugins()
+
+
+    const plugins = manager.getPlugins()
+    const browserPlugins = manager.getBrowserPlugins()
+
+
+    t.same(plugins.length, 0)
+    t.same(browserPlugins.plugins.length, 1)
+  })
 })

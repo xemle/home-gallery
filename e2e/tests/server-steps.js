@@ -289,14 +289,25 @@ step("Response body has property <property> with value <value>", async (property
   }
 })
 
-step("Response has app state with <amount> entries", async (amount) => {
+const getAppState = () => {
   const body = gauge.dataStore.scenarioStore.get('response.body') || ''
   const script = body.split('\n').filter(line => line.match(/__homeGallery/)).filter(line => line.match(/script/)).pop() || ''
   const json = script.replace(/<\/script>.*/, '').replace(/.*homeGallery=/, '') || '{}'
-  const state = JSON.parse(json)
+  return JSON.parse(json)
+}
+
+step("Response has app state with <amount> entries", async (amount) => {
+  const state = getAppState()
 
   const entryLength = state.entries ? state.entries.length : 0
   assert(entryLength == amount, `Expecting ${amount} entries in app state but found ${entryLength}`)
+})
+
+step("Response has app state has plugin entry <plugin>", async (pluginEntry) => {
+  const state = getAppState()
+
+  const plugins = (state.pluginManager ? state.pluginManager : {}).plugins || []
+  assert(plugins.includes(pluginEntry), `Expecting ${pluginEntry} but have only ${plugins.join(', ')}`)
 })
 
 const btoa = text => Buffer.from(text).toString('base64')

@@ -7,8 +7,14 @@ import { Logger } from "@home-gallery/logger";
 
 import { TPluginContext } from "../types.js";
 import { PluginSchema } from '../pluginSchemas.js';
-import { resolvePackageEntry } from './pkg.js';
+import { resolveBrowserEntry, resolvePackageEntry } from './pkg.js';
 import { resolveValid } from './resolve.js';
+
+type TPluginOption = {
+  file?: string
+  publicDir?: string
+  browserOnly?: boolean
+}
 
 export class PluginLoader {
   plugins: TPluginContext[] = []
@@ -19,7 +25,7 @@ export class PluginLoader {
     this.config = config
   }
 
-  async importPlugin(file: string) {
+  async importPlugin(file: string, options: TPluginOption = {}) {
     // On Windows, absolute paths must be valid file:// URLs
     const fileUrl = url.pathToFileURL(file).href
     const module = await import(fileUrl)
@@ -29,10 +35,10 @@ export class PluginLoader {
         throw new Error(`Invalid plugin file ${file}: ${err}. Skip it`, {cause: err})
       })
 
-    return this.addPlugin(file, plugin)
+    return this.addPlugin(plugin, {...options, file})
   }
 
-  async addPlugin(file: string, plugin: any) {
+  async addPlugin(plugin: any, options: TPluginOption = {}) {
     const { name } = plugin
 
     const nameExists = this.plugins.find(ctx => ctx.plugin.name == name)
@@ -43,24 +49,29 @@ export class PluginLoader {
       this.log.debug(`Skip loading disabled plugin ${plugin.name}`)
       return
     }
+    if (options.browserOnly && !plugin.environments) {
+      plugin.environments = ['browser']
+    }
 
     this.plugins.push({
-      file,
       plugin,
+      file: options.file || null,
+      publicDir: options.publicDir || null,
       initialized: false
     })
     return plugin
   }
 
-  async getPackageEntry(dir: string) {
-    const data = await fs.readFile(path.join(dir, 'package.json'), 'utf-8')
-    let pkg
+  async readPackageJson(file: string) {
+    const data = await fs.readFile(file, 'utf-8')
     try {
-      pkg = JSON.parse(data)
+      return JSON.parse(data)
     } catch (err) {
-      throw new Error(`Invalid package.json format: ${err}`)
+      throw new Error(`Invalid format for ${file}: ${err}`)
     }
+  }
 
+  async getPackageEntry(pkg: any, dir: string) {
     const main = resolvePackageEntry(pkg)
     if (main) {
       return path.resolve(dir, main)
@@ -75,22 +86,33 @@ export class PluginLoader {
     throw new Error(`Could not resolve package entry for ${path.join(dir, 'package.json')}`)
   }
 
-  async loadPlugin(dirOrFile: string) {
+  async #loadBrowserEntry(pkg: any, dir: string) {
+    const browserEntry = resolveBrowserEntry(pkg)
+    if (!browserEntry) {
+      return
+    }
+    const browserEntryFile = path.resolve(dir, browserEntry)
+    return this.importPlugin(browserEntryFile, {publicDir: path.dirname(browserEntryFile), browserOnly: true})
+  }
+
+  async loadPlugin(dirOrFile: string, baseDir: string | null = null) {
     const stat = await fs.stat(dirOrFile)
 
     if (stat.isFile() && dirOrFile.match(/\.[mc]?js$/)) {
-      return this.importPlugin(path.resolve(dirOrFile))
+      return this.importPlugin(path.resolve(dirOrFile), baseDir ? {publicDir: path.dirname(dirOrFile)} : {})
     } else if (stat.isDirectory()) {
       const files = await fs.readdir(dirOrFile)
       if (files.includes('package.json')) {
-        const packageEntry = await this.getPackageEntry(dirOrFile)
-        return this.importPlugin(packageEntry)
+        const pkg = await this.readPackageJson(path.resolve(dirOrFile, 'package.json'))
+        await this.#loadBrowserEntry(pkg, dirOrFile)
+        const packageEntry = await this.getPackageEntry(pkg, dirOrFile)
+        return this.importPlugin(packageEntry, {publicDir: path.dirname(packageEntry)})
       }
       const indexFile = ['index.js', 'index.mjs', 'index.cjs'].find(index => files.includes(index))
       if (!indexFile) {
         throw new Error(`Could not find index file in plugin directory ${dirOrFile}`)
       }
-      return this.importPlugin(path.resolve(dirOrFile, indexFile))
+      return this.importPlugin(path.resolve(dirOrFile, indexFile), !indexFile.endsWith('.cjs') ? {publicDir: dirOrFile} : {})
     } else {
       throw new Error(`Invalid plugin location ${dirOrFile}`)
     }
@@ -118,12 +140,13 @@ export class PluginLoader {
     for (let file of files) {
       const pluginFile = path.resolve(fileOrDir, file)
       const stat = await fs.stat(pluginFile)
-      if (!stat.isDirectory() && (!stat.isFile() || !pluginFile.match(/\.[mc]?js$/))) {
+      if (!stat.isDirectory() && !stat.isFile()) {
         continue
       }
-      await this.loadPlugin(pluginFile)
+
+      await this.loadPlugin(pluginFile, fileOrDir)
         .then(plugin => plugin && dirPlugins.push(plugin))
-        .catch(err => this.log.warn(err, `Failed to load plugin from ${pluginFile}`))
+        .catch(err => this.log.warn(err, `Failed to load plugin from ${pluginFile}: ${err}`))
     }
 
     if (!dirPlugins.length) {

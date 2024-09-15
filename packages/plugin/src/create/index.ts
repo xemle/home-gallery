@@ -4,6 +4,9 @@ import Mustache from 'mustache'
 import { fileURLToPath } from 'url'
 
 import Logger from '@home-gallery/logger'
+import { TPluginEnvironment } from '@home-gallery/types'
+
+import { toSanitizeName, toDashName, toCamelName, toClassName } from '../utils/nameConverter.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const log = Logger('plugin.create')
@@ -15,6 +18,7 @@ export type TPluginCreateOptions = {
   modules?: string[]
   requires?: string[]
   force: boolean
+  environments: TPluginEnvironment[]
 }
 
 export const createPlugin = async (options: any) => {
@@ -42,6 +46,8 @@ export const createPlugin = async (options: any) => {
     dashName: toDashName(createOptions.name),
     camelName: toCamelName(createOptions.name),
     className: toClassName(createOptions.name),
+    environments: createOptions.environments,
+    browser: createOptions.environments?.includes('browser'),
     requires: createOptions.requires?.length ? createOptions.requires.map(r => `'${r}'`).join(', ') : '',
     modules: {
 
@@ -97,23 +103,6 @@ const getPluginDir = async (createOptions: any, templateConfig: any, vars: any) 
 const readJson = async (file: string): Promise<any> => {
   const data = await fs.readFile(file, 'utf8')
   return JSON.parse(data)
-}
-
-const toSanitizeName = (name: string) => name.replaceAll(/[^A-Za-z0-9]+/g, '-').replaceAll(/(^-+|-+$)/g, '')
-
-const toDashName = (name: string) => {
-  const sanitizedName = toSanitizeName(name)
-  return sanitizedName.replaceAll(/[A-Z]+/g, (char: string, pos: number) => `${pos == 0 ? '' : '-'}${char.toLowerCase()}`).replaceAll(/-+/g, '-')
-}
-
-const toCamelName = (name: string) => {
-  const dashName = toDashName(name)
-  return dashName.replaceAll(/-[a-z]+/g, (char: string) => char.substring(1, 2).toUpperCase() + char.substring(2))
-}
-
-const toClassName = (name: string) => {
-  const camelName = toCamelName(name)
-  return camelName.charAt(0).toUpperCase() + camelName.slice(1)
 }
 
 const readDir = async (dir: string): Promise<string[]> => {

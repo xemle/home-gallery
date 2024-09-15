@@ -5,8 +5,11 @@ export type TPlugin = {
   name: string
   version: string
   requires?: string[]
+  environments?: TPluginEnvironment[]
   initialize: (manager: TPluginManager) => Promise<void>
 }
+
+export type TPluginEnvironment = 'server' | 'browser'
 
 export type TExtenstionType = 'extractor' | 'database' | 'query'
 
@@ -24,7 +27,7 @@ export type TPluginExtension = {
  * Context to store and read global objects
  */
 export type TGalleryContext = {
-  type: 'extractorContext' | 'databaseMapperContext' | 'serverContext' | 'cliContext'
+  type: 'extractorContext' | 'databaseMapperContext' | 'serverContext' | 'cliContext' | 'browserContext'
   plugin: {
     [key: string]: any
   }

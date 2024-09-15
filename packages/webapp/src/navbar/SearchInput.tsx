@@ -28,7 +28,7 @@ export const SearchInput = ({focus}) => {
     } else if (query.type == 'none' || query.type == 'query') {
       navigate(`/search/${termInput}`);
     } else if (query.type == 'year') {
-      navigate(`/years/${term.value}?q=${termInput}`);
+      navigate(`/years/${query.value}?q=${termInput}`);
     } else if (query.type == 'similar') {
       navigate(`/similar/${query.value}?q=${termInput}`);
     } else if (query.type == 'faces') {

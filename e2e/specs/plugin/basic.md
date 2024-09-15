@@ -53,3 +53,17 @@ Tags: typescript
 * Extract files
 * Create database
 * Database entry "2e17e23" has property "plugin.acme.value" with value "acme"
+
+## Create browser plugin
+
+* Create plugin "acme" with args "--environment browser --module query"
+* Create index
+* Extract files
+* Create database
+* Start only server
+* Request file "/index.html"
+* Response has app state has plugin entry "/plugins/acmePlugin/index.js"
+* Request file "/plugins/acmePlugin/index.js"
+* Response status is "200"
+___
+* Stop server

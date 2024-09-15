@@ -1,5 +1,4 @@
 const defaultConfig = {
-  entries: [],
   /**
    * List of disabled features
    *
@@ -10,11 +9,25 @@ const defaultConfig = {
    * A feature will be expanded to `disabledEdit: true`
    */
   disabled: [],
+  pluginManager: {
+    plugins: []
+  },
+  entries: [],
 }
 
 export const useAppConfig = () => {
   const injectedConfig = window['__homeGallery'] || {};
-  const result = {...defaultConfig, ...injectedConfig}
+
+  const pluginManager = {
+    ...defaultConfig.pluginManager,
+    ...injectedConfig.pluginManager
+  }
+
+  const result = {
+    ...defaultConfig,
+    ...injectedConfig,
+    pluginManager
+  }
 
   const searchParams = new URLSearchParams(location.search?.substring(1) || '')
   result.disabled.push(...searchParams.getAll('disabled').filter(v => !!v))
