@@ -58,6 +58,7 @@ steps:
   environment:
     TZ: Europe/Berlin
     GAUGE_HOME: /drone/src/.gauge
+    test_timeout: 120000 # 2 min timeout for gauge
   when:
     branch:
     - master
@@ -92,6 +93,7 @@ steps:
   environment:
     TZ: Europe/Berlin
     GAUGE_HOME: /drone/src/.gauge
+    test_timeout: 120000 # 2 min timeout for gauge
   when:
     branch:
     - master
