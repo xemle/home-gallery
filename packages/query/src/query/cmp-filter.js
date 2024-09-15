@@ -3,7 +3,7 @@ import { toLower, matchNumber, matchFloat, matchDate, getDateByKey, dirname, bas
 
 const cmpFilters = [
   {
-    keys: ['id', 'model', 'make', 'country', 'state', 'city', 'road'],
+    keys: ['id', 'model', 'make', 'description', 'country', 'state', 'city', 'road'],
     ops: ['=', '!=', '~'],
     filter: ast => compare(v => toLower(v[ast.key]), ast.op, toLower(ast.value.value))
   },

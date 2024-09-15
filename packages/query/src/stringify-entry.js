@@ -9,6 +9,7 @@ export const stringifyEntry = entry => {
     entry.make,
     entry.model,
     entry.files ? entry.files[0].filename : '',
+    entry.description,
     entry.country,
     entry.state,
     entry.city,

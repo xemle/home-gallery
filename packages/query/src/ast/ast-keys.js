@@ -31,6 +31,7 @@ export const textKeys = [
   'ext',
   'model',
   'make',
+  'description',
   'country',
   'state',
   'city',

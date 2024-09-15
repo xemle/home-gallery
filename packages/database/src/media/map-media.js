@@ -16,6 +16,7 @@ import { geoLocationMapper } from './geo.js';
 import { similarityMapper } from './similarity.js';
 import { objectMapper } from './objects.js';
 import { faceMapper } from './faces.js';
+import { iptcMapper } from './iptc.js'
 
 const createMedia = (entry, orig = {}) => {
   const date = getEntryDate(entry) || entry.date
@@ -49,6 +50,7 @@ const baseDatabaseMapper = {
 const databaseMappers = [
   baseDatabaseMapper,
   exifMapper,
+  iptcMapper,
   addressMapper,
   geoLocationMapper,
   similarityMapper,
