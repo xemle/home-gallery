@@ -5,8 +5,6 @@ import Logger from '@home-gallery/logger'
 
 const log = Logger('server.webapp')
 
-import { useIf, isIndex } from './utils.js'
-
 const readFileCached = (file, refreshMs = 10 * 1000) => {
   let data = false
   let lastStatCache = false
@@ -69,9 +67,5 @@ const injectStateMiddleware = (indexFile, getState, {basePath, injectRemoteConso
 
 export const webapp = (webappDir, getState, options) => {
   const indexFile = path.resolve(webappDir, 'index.html')
-  const injectState = injectStateMiddleware(indexFile, getState, options)
-  return [
-    useIf(injectState, isIndex),
-    (_, res) => res.sendFile(indexFile)
-  ];
+  return injectStateMiddleware(indexFile, getState, options)
 }
