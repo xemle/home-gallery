@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - webapp: Support IPTC description
 
+### Fixed
+
+- webapp: Fix browser based router with base path
+
 ## [1.17.0] - 2024-09-15
 
 ### Added

@@ -13,11 +13,13 @@ import LoadDatabaseAndEvents from "./init/LoadDatabaseAndEvents";
 
 export const Main = () => {
   const base = document.querySelector('base')?.getAttribute('href') || '/';
+  // Browser router should serve base path /pictures/ by url path /pictures
+  const basename = base.match(/[^/]\/$/) ? base.substring(0, base.length - 1) : base
 
   Logger.setLevel('trace')
 
   return (
-    <BrowserRouter basename={base}>
+    <BrowserRouter basename={basename}>
       <LastLocationProvider>
         <AppContextProvider>
           <LoadDatabaseAndEvents>
