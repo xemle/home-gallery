@@ -22,6 +22,8 @@ import { Zoomable } from "./Zoomable";
 import useBodyDimensions from "../utils/useBodyDimensions";
 import { classNames } from '../utils/class-names'
 import { SingleTagDialogProvider } from "../dialog/tag-dialog-provider";
+import {HelpModal} from "./HelpModal";
+
 
 const findEntryIndex = (location, entries, id) => {
   if (location.state?.index && entries[location.state.index]?.id.startsWith(id)) {
@@ -65,7 +67,8 @@ const hotkeysToAction = {
   's': 'similar',
   'c': 'chronology',
   't': 'toggleNavigation',
-  'm': 'map'
+  'm': 'map',
+  'h': 'help'
 }
 
 export const MediaView = () => {
@@ -80,13 +83,14 @@ export const MediaView = () => {
   const showDetails = useSingleViewStore(state => state.showDetails);
   const showAnnotations = useSingleViewStore(state => state.showAnnotations);
   const showNavigation = useSingleViewStore(state => state.showNavigation);
+  const showHelp = useSingleViewStore(state => state.showHelp);
   const setLastId = useSingleViewStore(state => state.setLastId);
   const setLastIndex = useSingleViewStore(state => state.setLastIndex);
   const search = useSearchStore(state => state.search);
   const setShowDetails = useSingleViewStore(actions => actions.setShowDetails);
   const setShowAnnotations = useSingleViewStore(actions => actions.setShowAnnotations);
   const setShowNavigation = useSingleViewStore(actions => actions.setShowNavigation);
-
+  const setShowHelp = useSingleViewStore(actions => actions.setShowHelp);
   const [hideNavigation, setHideNavigation] = useState(false)
 
   let index = findEntryIndex(location, entries, id);
@@ -147,6 +151,8 @@ export const MediaView = () => {
       navigate(`/search/${encodeUrl(action.query)}`);
     } else if (type == 'map') {
       navigate(`/map?lat=${current.latitude.toFixed(5)}&lng=${current.longitude.toFixed(5)}&zoom=14`, {state: {listLocation}})
+    } else if (type == 'help') {
+      setShowHelp(!showHelp);
     }
   }
 
@@ -171,7 +177,7 @@ export const MediaView = () => {
     if (found) {
       ev.preventDefault()
     }
-  }, [index, showDetails, showAnnotations, showNavigation])
+  }, [index, showDetails, showAnnotations, showNavigation, showHelp])
 
   const mediaVanishes = index < 0 && lastIndex >= 0 && entries.length > 0
   if (mediaVanishes) {
@@ -208,7 +214,8 @@ export const MediaView = () => {
           </div>
           { showDetails &&
             <div className="md:w-90">
-              <Details entry={current} dispatch={dispatch} />
+              <Details entry={current} dispatch={dispatch}/>
+              <HelpModal showHelp={showHelp} setShowHelp={setShowHelp} dispatch={dispatch}/>
             </div>
           }
         </div>
