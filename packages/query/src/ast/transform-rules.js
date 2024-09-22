@@ -24,6 +24,24 @@ export const transformRules = [
     ], ast.col)
   },
   {
+    // map location alias to 'country or state or city or road'
+    keys: ['location'],
+    transform: ast => orAst([
+      {...ast, key: 'country'},
+      {...ast, key: 'state'},
+      {...ast, key: 'city'},
+      {...ast, key: 'road'},
+    ], ast.col)
+  },
+  {
+    // map geo alias to 'latitude and longitude'
+    keys: ['geo'],
+    transform: ast => andAst([
+      {...ast, key: 'latitude'},
+      {...ast, key: 'longitude'}
+    ], ast.col)
+  },
+  {
     // map keyValue to 'key = value'
     types: ['keyValue'],
     keys: [...numericKeys, ...textKeys],
@@ -43,23 +61,5 @@ export const transformRules = [
         default: return cmpAst(ast.key, '<', valueAst('1', ast.value.col), ast.col)
       }
     }
-  },
-  {
-    // map location alias to 'country or state or city or road'
-    keys: ['location'],
-    transform: ast => orAst([
-      {...ast, key: 'country'},
-      {...ast, key: 'state'},
-      {...ast, key: 'city'},
-      {...ast, key: 'road'},
-    ], ast.col)
-  },
-  {
-    // map geo alias to 'latitude and longitude'
-    keys: ['geo'],
-    transform: ast => andAst([
-      {...ast, key: 'latitude'},
-      {...ast, key: 'longitude'}
-    ], ast.col)
   },
 ]

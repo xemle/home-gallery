@@ -54,6 +54,48 @@ t.test('and', async t => {
 
     t.match(result, {type: 'noop', col: 2})
   })
+
+  t.test('no duplicates', async t => {
+    const ast = {
+      type: 'or',
+      value: [
+        {type: 'cmp', key: 'country', op: '=', value: {type: 'value', value: 'paris', col: 10}, col: 2},
+        {type: 'cmp', key: 'city', op: '=', value: {type: 'value', value: 'paris', col: 10}, col: 2},
+      ],
+      col: 2
+    }
+
+    const result = transformAst(ast, {}, [], simplifyRules)
+
+
+    t.match(result, ast)
+  })
+
+  t.test('duplicates', async t => {
+    const ast = {
+      type: 'or',
+      value: [
+        {type: 'cmp', key: 'country', op: '=', value: {type: 'value', value: 'paris', col: 10}, col: 2},
+        {type: 'cmp', key: 'city', op: '=', value: {type: 'value', value: 'paris', col: 10}, col: 2},
+        {type: 'cmp', key: 'city', op: '=', value: {type: 'value', value: 'paris', col: 10}, col: 2},
+      ],
+      col: 2
+    }
+
+    const result = transformAst(ast, {}, [], simplifyRules)
+
+
+    const expected = {
+      type: 'or',
+      value: [
+        {type: 'cmp', key: 'country', op: '=', value: {type: 'value', value: 'paris', col: 10}, col: 2},
+        {type: 'cmp', key: 'city', op: '=', value: {type: 'value', value: 'paris', col: 10}, col: 2},
+      ],
+      col: 2
+    }
+
+    t.match(result, expected)
+  })
 })
 
 t.test('cmp', async t => {

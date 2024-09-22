@@ -57,22 +57,27 @@ export const simplifyRules = [
     // remove duplicates
     types: ['and', 'or'],
     transform: ast => {
+      const ignoreProps = ['col', 'value', 'data']
       const createId = ast => {
-        if (Array.isArray(ast.value)) { // and, or
-          const childIds = ast.value.map(createId)
+        const entries = Object.entries(ast)
+          .filter(([key, value]) => typeof value != 'undefined' && !ignoreProps.includes(key))
+          .sort(([a], [b]) => a < b ? -1 : 1)
+
+        const isChildAst = ast.value?.type && typeof ast.value.col == 'number'
+        if (isChildAst) {
+          entries.push(['value', createId(ast.value)])
+        } else if (Array.isArray(ast.value)) { // and, or
+          const children = ast.value.map(createId)
           if (ast.type == 'and') { // and expr can be sorted
-            childIds.sort()
+            children.sort((a, b) => a < b ? -1 : 1)
           }
-          return `{${ast.type}:[${childIds.join(',')}]}`
-        } else if (ast.value?.type && typeof ast.value.col == 'number') { // child is an ast
-          return `{${ast.type}:[${createId(ast.value)}]}`
-        } else if (ast.op) { // cmp, cmpFn
-          return `{${ast.type}:${ast.fn} ${ast.key} ${ast.op} ${ast.value}}`
-        } else if (ast.key) {
-          return `{${ast.type}:${ast.fn} ${ast.key},${ast.value}}`
-        } else {
-          return `{${ast.type}:${ast.value}}`
+
+          entries.push(['value', children])
+        } else if (ast.value) {
+          entries.push(['value', `'${ast.value}'`])
         }
+
+        return `{${entries.map(([key, value]) => `${key}:${value}`).join(',')}}`
       }
 
       const childIds = []
