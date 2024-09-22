@@ -179,7 +179,7 @@ export const Details = ({entry, dispatch}) => {
               </div>
               <div>
                 {entry.road && (
-                  <p>{simpleSearchLink(entry.road, 'location', entry.road)}</p>
+                  <p>{simpleSearchLink(entry.road, 'road', entry.road)}</p>
                 )}
                 {entry.city && (
                   <p>{simpleSearchLink(entry.city, 'city', entry.city)}</p>

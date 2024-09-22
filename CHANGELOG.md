@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- webapp: Fix street/road search link
 - webapp: Fix similarity search
 - server: Fix page reload with base path
 - webapp: Fix browser based router with base path
