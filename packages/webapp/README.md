@@ -8,5 +8,5 @@ Use `API_PROXY` environment variable to change the api proxy url.
 
 ```
 cd packages/webapp
-API_PROXY=http://localhost:3000 npm run dev
+API_PROXY=https://demo.home-gallery.org npm run dev
 ```
