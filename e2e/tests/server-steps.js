@@ -23,13 +23,14 @@ const insecureOption = {
 
 const fetchFacade = (path, options = {}) => {
   const url = gauge.dataStore.scenarioStore.get('serverUrl')
+  const prefix = gauge.dataStore.scenarioStore.get('prefix') || ''
   assert(!!url, `Expected serverUrl but was empty. Start server first`)
 
   const headers = gauge.dataStore.scenarioStore.get('request.headers') || {}
   const agent = url.startsWith('https') ? insecureOption : {}
   const t0 = Date.now()
-  const fetchUrl = `${url}${path || ''}`
-  return fetch(fetchUrl, Object.assign(options, {timeout: 500, headers: Object.assign({}, options.headers, headers)}, agent))
+  const fetchUrl = `${url}${prefix}${path || ''}`
+  return fetch(fetchUrl, Object.assign(options, {timeout: 500, headers: Object.assign({}, options.headers, headers), redirect: 'manual'}, agent))
     .then(res => {
       const curlHeaders = Object.entries(headers).map(([key, value]) => `-H "${key}: ${value}"`).join(' ') + ' '
       const curl = `curl ${url.startsWith('https') ? '-k ' : ''}${curlHeaders}${url}${path || ''}`
@@ -70,7 +71,7 @@ const startServer = async (args = []) => {
   }
   gauge.dataStore.scenarioStore.put('serverUrl', url)
 
-  return waitFor(() => fetchFacade('/favicon.ico'), 10 * 1000).catch(e => {throw new Error(`Could not start server with args: ${args.join(' ')}. Error ${e}`)})
+  return waitFor(() => fetchFacade('/'), 10 * 1000).catch(e => {throw new Error(`Could not start server with args: ${args.join(' ')}. Error ${e}`)})
 }
 
 step("Start server", startServer)
@@ -166,6 +167,10 @@ step("Start mock server", async () => {
       resolve()
     })
   })
+})
+
+step("Wait for file <file>", async (file) => {
+  return waitFor(() => fetchFacade(file), 10 * 1000).catch(e => {throw new Error(`Waiting for file ${file} failed. Error ${e}`)})
 })
 
 step("Wait for database", () => waitFor(() => fetchDatabase(), 10 * 1000).catch(e => {throw new Error(`Waiting for database failed. Error ${e}`)}))

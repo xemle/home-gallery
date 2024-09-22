@@ -171,6 +171,9 @@ sources:
   #    - allow: localhost
   #    - allow: '192.168/16'
   #    - deny: all
+  # Prefix of application. E.g. /gallery
+  #prefix: /
+  # Prefix path for browser only. basePath is Overwritten by prefix
   #basePath: /
   #watchSources: true
 

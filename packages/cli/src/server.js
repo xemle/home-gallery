@@ -74,10 +74,14 @@ const command = {
         alias: 'C',
         describe: 'SSL certificate file'
       },
+      'prefix': {
+        type: 'string',
+        describe: 'Server prefix for all routes and for browser app. E.g. "/gallery"'
+      },
       'base-path': {
         alias: 'b',
         type: 'string',
-        describe: 'Base path of static page. e.g. "/gallery"'
+        describe: 'Base path of browser app only. E.g. "/gallery". See also prefix option'
       },
       user: {
         alias: 'U',
@@ -117,6 +121,7 @@ const command = {
       events: 'events.file',
       key: 'server.key',
       cert: 'server.cert',
+      prefix: 'server.prefix',
       basePath: 'server.basePath',
       openBrowser: 'server.openBrowser',
       remoteConsoleToken: 'server.removeConsoleToken',

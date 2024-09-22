@@ -14,9 +14,12 @@ import { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhiteli
 import { isIndex, skipIf } from './utils.js'
 import { debugApi } from './api/debug/index.js'
 import { browserPlugin } from './browser-plugins.js';
+import Logger from '@home-gallery/logger';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const webappDir = path.join(__dirname, 'public')
+
+const log = Logger('server.app')
 
 function shouldCompress (req, res) {
   if (req.headers['x-no-compression']) {
@@ -38,12 +41,17 @@ const getAuthMiddleware = config => {
 /**
  * Ensure leading and tailing slash. Allow base path with schema like http://foo.com/bar
  */
-const normalizeBasePath = basePath => {
+const browserBasePath = basePath => {
   let path = `${basePath || '/'}`
   if (!path.startsWith('/') && path.indexOf('://') < 0) {
     path = '/' + path
   }
   return path.endsWith('/') ? path : path + '/'
+}
+
+const routerPrefix = basePath => {
+  let path = browserBasePath(basePath)
+  return path.match(/[^/]\/$/) ? path.substring(0, path.length - 1) : path
 }
 
 
@@ -55,41 +63,42 @@ export function createApp(context) {
   const app = express();
   app.disable('x-powered-by')
   app.enable('trust proxy')
-
-  app.use(augmentReqByUserMiddleware())
   app.use(loggerMiddleware())
-  app.use(cors());
-  app.use(compression({ filter: shouldCompress }))
 
-  app.use(skipIf(express.static(webappDir, {maxAge: '1h'}), isIndex))
+  const router = express.Router()
+  router.use(augmentReqByUserMiddleware())
+  router.use(cors());
+  router.use(compression({ filter: shouldCompress }))
 
-  app.use(getAuthMiddleware(config))
+  router.use(skipIf(express.static(webappDir, {maxAge: '1h'}), isIndex))
 
-  app.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
+  router.use(getAuthMiddleware(config))
+
+  router.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
 
   const pluginApi = browserPlugin(context, '/plugins/')
-  app.use('/plugins', pluginApi.static)
+  router.use('/plugins', pluginApi.static)
 
-  app.use(bodyParser.json({limit: '1mb'}))
+  router.use(bodyParser.json({limit: '1mb'}))
 
   const { read: readEvents, push: pushEvent, stream, getEvents } = eventsApi(context, config.events.file);
   const { read: readDatabase, init: initDatabase, getFirstEntries, getDatabase } = databaseApi(context, config.database.file, getEvents);
   const { read: readTree } = treeApi(context, getDatabase);
 
-  app.get('/api/events.json', readEvents);
-  app.get('/api/events/stream', stream);
-  app.post('/api/events', pushEvent);
-  app.get('/api/database.json', readDatabase);
-  app.get('/api/database/tree/:hash', readTree);
+  router.get('/api/events.json', readEvents);
+  router.get('/api/events/stream', stream);
+  router.post('/api/events', pushEvent);
+  router.get('/api/database.json', readDatabase);
+  router.get('/api/database/tree/:hash', readTree);
 
   if (config.server.remoteConsoleToken) {
     const { console } = debugApi({remoteConsoleToken: config.server?.remoteConsoleToken})
-    app.post('/api/debug/console', console);
+    router.post('/api/debug/console', console);
   }
 
   // deprecated
-  app.get('/api/database', readDatabase);
-  app.get('/api/events', readEvents);
+  router.get('/api/database', readDatabase);
+  router.get('/api/events', readEvents);
 
   const getWebAppState = async (req) => {
     const disabled = config?.webapp?.disabled || []
@@ -105,11 +114,20 @@ export function createApp(context) {
   }
 
   const webAppOptions = {
-    basePath: normalizeBasePath(config.server.basePath),
+    basePath: browserBasePath(config.server.prefix || config.server.basePath),
     injectRemoteConsole: !!config.server.remoteConsoleToken,
   }
 
-  app.use(webapp(webappDir, getWebAppState, webAppOptions))
+  router.use(webapp(webappDir, getWebAppState, webAppOptions))
+
+  const prefix = routerPrefix(config.server.prefix)
+  app.use(prefix, router)
+
+
+  if (prefix != '/') {
+    log.info(`Set prefix to ${prefix}`)
+    app.get('/', (_, res) => res.redirect(prefix))
+  }
 
   return {
     app,

@@ -56,7 +56,7 @@ const command = {
             describe: 'Search query for matching entries'
           },
           'base-path': {
-            alias: 'b',
+            alias: ['b', 'prefix'],
             type: 'string',
             default: '/',
             describe: 'Base path of static page. e.g. "/gallery"'
