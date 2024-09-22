@@ -202,7 +202,7 @@ export const MediaView = () => {
             </div>
           </div>
           { showDetails &&
-            <div className="md:flex-shrink-0 md:w-90">
+            <div className="md:w-90">
               <Details entry={current} dispatch={dispatch} />
             </div>
           }
