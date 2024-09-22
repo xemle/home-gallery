@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - server: Add option prefix
 - webapp: Support IPTC description
 
+### Changed
+
+- server: Reduce log levels of request logs
+
 ### Fixed
 
 - server: Fix page reload with base path
