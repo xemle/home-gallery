@@ -184,7 +184,7 @@ const base64Value = (i: number) => {
   }
 }
 
-const isAst = (ast: any) => ast.type && ast.col
+const isAst = (ast: any) => ast.type && (ast.col || ast.col === 0)
 
 function walkAst(ast: any, cb: (ast: TAst) => void) {
   if (!isAst(ast)) {
