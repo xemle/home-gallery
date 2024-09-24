@@ -1,8 +1,11 @@
-const { createHash } = require('@home-gallery/common')
+import { createHash } from '@home-gallery/common'
 
 const createTree = (name) => ({type: 'tree', name, hash: null, files: []})
 
-const createFile = (file) => ({type: 'entry', name: file.name, hash: file.entry.hash, entry: file.entry})
+const createFile = (file, mapEntry) => {
+  const entry = mapEntry(file.entry)
+  return {type: 'entry', name: file.name, hash: entry.hash, entry}
+}
 
 class ObjectStoreVisitor {
   mergeCount
@@ -10,7 +13,9 @@ class ObjectStoreVisitor {
   store = {}
   paths = []
 
-  constructor(mergeCount = 0) {
+  constructor(entryFilter, mapEntry, mergeCount = 0) {
+    this.entryFilter = entryFilter
+    this.mapEntry = mapEntry
     this.mergeCount = mergeCount
   }
 
@@ -49,8 +54,11 @@ class ObjectStoreVisitor {
   }
 
   visitFile(file) {
+    if (!this.entryFilter(file.entry)) {
+      return
+    }
     const parent = this.paths[this.paths.length - 1]
-    parent.files.push(createFile(file))
+    parent.files.push(createFile(file, this.mapEntry))
   }
 
   afterDir() {
@@ -60,12 +68,19 @@ class ObjectStoreVisitor {
     } else if (this.mergeCount > 0 && this.paths.length) {
       this.flattenTree(tree)
     }
-    const data = tree.files.map(file => `${file.hash}  ${file.name}`).join('\n')
-    tree.hash = createHash(data)
-    this.store[tree.hash] = tree.files
 
-    if (!this.paths.length) {
+    const isRoot = this.paths.length == 0
+    const hasFiles = tree.files.length > 0
+    if (isRoot || hasFiles) {
+      const data = tree.files.map(file => `${file.hash}  ${file.name}`).join('\n')
+      tree.hash = createHash(data)
+      this.store[tree.hash] = tree.files
+    }
+
+    if (isRoot) {
       this.rootId = tree.hash
+      return
+    } else if (!hasFiles) {
       return
     }
 
@@ -95,11 +110,11 @@ const walker = (store, hash, visitor, name = '') => {
   }
 }
 
-class ObjectStore {
+export class ObjectStore {
   store = {}
 
-  addFileStore(fileStore, mergeCount = 0) {
-    const visitor = new ObjectStoreVisitor(mergeCount)
+  addFileStore(fileStore, entryFilter = () => true, mapEntry = entry => entry, mergeCount = 0) {
+    const visitor = new ObjectStoreVisitor(entryFilter, mapEntry, mergeCount)
     fileStore.walk(visitor)
     walker(visitor.store, visitor.rootId, {
       beforeTree: (_, files, hash) => {
@@ -117,8 +132,4 @@ class ObjectStore {
   walk(root, visitor) {
     walker(this.store, root, visitor)
   }
-}
-
-module.exports = {
-  ObjectStore
 }

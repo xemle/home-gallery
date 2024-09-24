@@ -1,7 +1,9 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const log = require('@home-gallery/logger')('index.walker');
+import Logger from '@home-gallery/logger'
+
+const log = Logger('index.walker');
 
 function handleReaddirError(dir, err, done) {
   if (err.code === 'EACCES') {
@@ -69,7 +71,7 @@ function byDirDescNameAsc(a, b) {
   }
 }
 
-function walkDir(dir, filesMapper, cb, done) {
+export function walkDir(dir, filesMapper, cb, done) {
   fs.readdir(dir, (err, files) => {
     if (err) {
       return handleReaddirError(dir, err, done);
@@ -92,5 +94,3 @@ function walkDir(dir, filesMapper, cb, done) {
     });
   })
 }
-
-module.exports = walkDir;

@@ -1,0 +1,10 @@
+{
+  "name": "server-browser",
+  "description": "server-browser plugin for HomeGallery",
+  "version": "1.0",
+  "type": "module",
+  "exports": {
+    "node": "./dist/index.js",
+    "browser": "./dist/public/index.js"
+  }
+}

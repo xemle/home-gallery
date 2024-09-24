@@ -1,9 +1,7 @@
-const path = require('path');
-const { group } = require('@home-gallery/stream');
+import path from 'path';
+import { group } from '@home-gallery/stream';
 
-const groupByDir = () => group({
+export const groupByDir = () => group({
   keyFn: (entry) => path.dirname(entry.filename),
   eager: true
 });
-
-module.exports = groupByDir;

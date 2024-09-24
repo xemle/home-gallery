@@ -1,7 +1,7 @@
 const uniq = (v, i, a) => a.indexOf(v) === i;
 const flatten = (r, v) => r.concat(v);
 
-const stringifyEntry = entry => {
+export const stringifyEntry = entry => {
   return [
     entry.id.substring(0, 10),
     entry.type,
@@ -9,6 +9,7 @@ const stringifyEntry = entry => {
     entry.make,
     entry.model,
     entry.files ? entry.files[0].filename : '',
+    entry.description,
     entry.country,
     entry.state,
     entry.city,
@@ -20,8 +21,4 @@ const stringifyEntry = entry => {
   .concat((entry.faces || []).map(face => `${Math.trunc(face.age / 10) * 10}s`).reduce(flatten, []).filter(uniq))
   .join(' ')
   .toLowerCase()
-}
-
-module.exports = {
-  stringifyEntry
 }

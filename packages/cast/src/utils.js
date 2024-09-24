@@ -10,11 +10,7 @@ const getHighestPreview = (previews, maxSize) => {
     .pop()
 }
 
-const getPreview = (entry, type, maxSize = 10000000) => {
+export const getPreview = (entry, type, maxSize = 10000000) => {
   const previews = entry.previews.filter(preview => preview.match(`${type}-preview-\\d+`))
   return getHighestPreview(previews, maxSize)
-}
-
-module.exports = {
-  getPreview
 }

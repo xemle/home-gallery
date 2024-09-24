@@ -7,6 +7,7 @@ includes:
   - ./LICENSE
   - ./gallery.js
   - ./gallery.config-example.yml
+  - ./.build.json
 excludes:
   - node_modules/@ffmpeg-installer
   - node_modules/@ffprobe-installer

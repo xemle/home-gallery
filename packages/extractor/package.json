@@ -2,7 +2,8 @@
   "name": "@home-gallery/extractor",
   "version": "1.0.0",
   "description": "Preview and metadata extractor of HomeGallery",
-  "main": "dist/index.js",
+  "type": "module",
+  "exports": "./dist/index.js",
   "files": [
     "dist"
   ],
@@ -31,6 +32,7 @@
     "@home-gallery/common": "file:../common",
     "@home-gallery/index": "file:../index",
     "@home-gallery/logger": "file:../logger",
+    "@home-gallery/plugin": "file:../plugin",
     "@home-gallery/storage": "file:../storage",
     "@home-gallery/stream": "file:../stream",
     "exiftool-vendored": "^24.2.0",

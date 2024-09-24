@@ -1,4 +1,4 @@
-const { getEntryMetaByKey } = require('./utils')
+import { getEntryMetaByKey } from './utils.js'
 
 const getObjects = (entry, minScore) => {
   const objects = getEntryMetaByKey(entry, 'objects')
@@ -20,6 +20,9 @@ const getObjects = (entry, minScore) => {
     })
 }
 
-module.exports = {
-  getObjects
+export const objectMapper = {
+  name: 'objectMapper',
+  mapEntry(entry, media) {
+    media.objects = getObjects(entry, 0.6)
+  }
 }

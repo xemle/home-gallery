@@ -1,7 +1,7 @@
-const path = require('path');
-const cocoSsd = require('@tensorflow-models/coco-ssd');
+import path from 'path';
+import cocoSsd from '@tensorflow-models/coco-ssd';
 
-const loadCachedModel = require('../utils/load-cached-model')
+import { loadCachedModel } from '../utils/index.js'
 
 const toCachedConfig = (config, cacheDir) => {
   const { base } = config;
@@ -15,12 +15,12 @@ const toCachedConfig = (config, cacheDir) => {
   return {...config, ...{modelUrl} };
 }
 
-const downloadModel = async(config, cacheDir) => {
+export const downloadModel = async(config, cacheDir) => {
   const cachedConfig = toCachedConfig(config, cacheDir)
   await cachedConfig.modelUrl.load();
 }
 
-const init = async (config, cacheDir) => {
+export const init = async (config, cacheDir) => {
   const cachedConfig = toCachedConfig(config, cacheDir);
   const model = await cocoSsd.load(cachedConfig);
 
@@ -32,5 +32,3 @@ const init = async (config, cacheDir) => {
 
   return { config, model, detect }
 }
-
-module.exports = { init, downloadModel };

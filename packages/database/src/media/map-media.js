@@ -1,65 +1,61 @@
-const { through } = require('@home-gallery/stream');
-const { serialize, createHash } = require('@home-gallery/common');
+import Logger from '@home-gallery/logger'
 
-const log = require('@home-gallery/logger')('database.media')
+const log = Logger('database.media')
 
-const { getEntryDate } = require('./date')
-const { getVibrantColors } = require('./vibrant-colors')
-const { getExif } = require('./exif')
-const { getVideo } = require('./video')
-const { getAddress } = require('./address')
-const { getGeo} = require('./geo')
-const { getTags } = require('./tags')
-const { getSimilarityHash } = require('./similarity')
-const { getObjects } = require('./objects')
-const { getFaces } = require('./faces')
-const { getFiles } = require('./files')
-const { getPreviews } = require('./previews')
+import { getEntryDate } from './date.js'
+import { getVibrantColors } from './vibrant-colors.js'
+import { exifMapper } from './exif.js'
+import { getVideo } from './video.js'
 
-const createMedia = (entry, updated) => {
+import { getTags } from './tags.js'
+import { getFiles } from './files.js'
+import { getPreviews } from './previews.js'
+import { toPlugin } from './plugin-utils.js';
+import { addressMapper } from './address.js';
+import { geoLocationMapper } from './geo.js';
+import { similarityMapper } from './similarity.js';
+import { objectMapper } from './objects.js';
+import { faceMapper } from './faces.js';
+import { iptcMapper } from './iptc.js'
+
+const createMedia = (entry, orig = {}) => {
   const date = getEntryDate(entry) || entry.date
   const files = getFiles(entry)
   const previews = getPreviews(entry)
   const vibrantColors = getVibrantColors(entry)
   
-  const exif = getExif(entry)
   const video = getVideo(entry)
-  const address = getAddress(entry)
-  const geo = getGeo(entry)
   
   const tags = getTags(entry)
-  const similarityHash = getSimilarityHash(entry)
-  const objects = getObjects(entry, 0.6)
-  const faces = getFaces(entry, 0.7)
 
-  const media = Object.assign({
-    id: entry.sha1sum,
-    hash: '',
-    type: entry.type,
-    updated,
+  const media = Object.assign(orig, {
+    groupIds: [],
     date,
     files,
     previews,
     vibrantColors,
     tags,
-    objects,
-    faces
-  }, exif, video, address, geo, similarityHash)
+  }, video)
 
-  media.hash = createHash(serialize(media, 'hash'))
   return media
 }
 
-const mapMedia = (updated) => {
-  return through(function (entry, _, cb) {
-    try {
-      const media = createMedia(entry, updated)
-      this.push(media)
-    } catch (e) {
-      log.warn(e, `Could not create media entry of ${entry}: ${e}. Skip it`)
-    }
-    cb()
-  })
+const baseDatabaseMapper = {
+  name: 'baseMapper',
+  mapEntry(entry, media) {
+    return createMedia(entry, media)
+  }
 }
 
-module.exports = mapMedia
+const databaseMappers = [
+  baseDatabaseMapper,
+  exifMapper,
+  iptcMapper,
+  addressMapper,
+  geoLocationMapper,
+  similarityMapper,
+  objectMapper,
+  faceMapper
+]
+
+export default toPlugin(databaseMappers, 'baseMapper')

@@ -1,11 +1,18 @@
-const { traverseAst } = require('./traverse-ast')
+import { traverseAst } from './traverse-ast.js'
 
-const stringifyOrderByAst = ast => ast ? `orderBy(${ast.type == 'sortKey' ? ast.value : `count(${ast.value})`}${ast.direction ? ` ${ast.direction}` : ''})` : ''
+const silentContext = {
+  astErrorHandler: () => false
+}
 
-const stringifyAst = ast => {
+export const stringifyAst = (ast, context = silentContext) => {
   traverseAst(ast, {after: ast => {
+    if (!ast.type) {
+      context.astErrorHandler(ast, context)
+      return
+    }
+
     switch (ast.type) {
-      case 'query': ast.data = [(ast.value ? ast.value.data : ''), stringifyOrderByAst(ast.orderBy)].filter(v => !!v).join(' '); break;
+      case 'query': ast.data = `${ast.value ? ast.value?.data : ''}${ast.value && ast.orderBy ? ' ' : ''}${ast.orderBy ? ast.orderBy?.data : ''}`; break;
       case 'terms': ast.data = `terms(${ast.value.map(value => value.data).join(', ')})`; break;
       case 'paren': ast.data = `(${ast.value.data})`; break;
       case 'not': ast.data = `not(${ast.value.data})`; break;
@@ -22,12 +29,15 @@ const stringifyAst = ast => {
       case 'identifier':
       case 'comboundValue':
       case 'value': ast.data = `${ast.value}`; break;
-      default: ast.data = `!unknown type ${ast.type}: ${JSON.stringify(ast)}!`
+
+      case 'orderBy': ast.data = `orderBy(${ast.value.data})${ast.direction ? ' ' + ast.direction : ''}`; break;
+      case 'orderKey': ast.data = ast.value; break;
+      case 'orderFn': ast.data = `${ast.fn}(${ast.value})`; break;
+
+      default:
+        ast.data = ''
+        context.astErrorHandler(ast, context)
     }
   }})
   return ast.data
-}
-
-module.exports = {
-  stringifyAst
 }

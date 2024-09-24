@@ -1,10 +1,7 @@
-const { group } = require('@home-gallery/stream');
-const { getEntryFilesCacheKey } = require('@home-gallery/storage');
+import { group } from '@home-gallery/stream';
+import { getEntryFilesCacheKey } from '@home-gallery/storage';
 
-const groupByEntryFilesCacheKey = () => group({
+export const groupByEntryFilesCacheKey = () => group({
   keyFn: getEntryFilesCacheKey,
   eager: true
 });
-
-module.exports = groupByEntryFilesCacheKey;
-

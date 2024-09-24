@@ -1,8 +1,12 @@
-const chokidar = require('chokidar')
+import path from 'path'
+import chokidar from 'chokidar'
 
-const { CliProcessManager } = require('../utils/cli-process-manager')
+import Logger from '@home-gallery/logger'
 
-const log = require('@home-gallery/logger')('cli.task.import')
+import { CliProcessManager } from '../utils/cli-process-manager.js'
+
+const log = Logger('cli.task.import')
+
 const pm = new CliProcessManager()
 
 const updateIndex = async (source, options) => {
@@ -44,7 +48,7 @@ const deleteJournals = async (sources, options) => {
   }
 }
 
-const extract = async (sources, options) => {
+export const extract = async (sources, options) => {
   if (!sources.length) {
     log.warn(`Sources list is empty. No files to extract`);
     return;
@@ -63,18 +67,13 @@ const extract = async (sources, options) => {
   await pm.runCli(args, {env: options.configEnv})
 }
 
-const createDatabase = async (sources, options) => {
+export const createDatabase = async (sources, options) => {
   const args = ['database', 'create'];
 
   sources.forEach(source => args.push('--index', source.index));
   if (options.journal) {
     args.push('--journal', options.journal)
   }
-
-  const storage = options.config.storage || {}
-  args.push('--storage', storage.dir, '--database', options.config.database.file);
-  const excludes = storage.excludes || [];
-  excludes.forEach(exclude => args.push('--exclude', exclude))
 
   const maxMemory = options.config.database?.maxMemory || 2048;
   const nodeArgs = maxMemory ? [`--max-old-space-size=${maxMemory}`] : [];
@@ -106,7 +105,7 @@ const generateJournal = () => {
   return `${pad2(now.getUTCMonth() + 1)}${pad2(now.getUTCDate())}-${generateId(4)}`
 }
 
-const importSources = async (sources, options) => {
+export const importSources = async (sources, options) => {
   let processing = true
   const { initialImport, incrementalUpdate } = options
   const withJournal = initialImport || incrementalUpdate
@@ -160,7 +159,7 @@ const batchImport = async (sources, options) => {
   log.debug(t0, `Import of online sources finished`)
 }
 
-const watchSources = async (sources, options) => {
+export const watchSources = async (sources, options) => {
   const { watch, watchDelay, watchMaxDelay, watchPollInterval, importOnWatchStart } = options
   if (!watch) {
     return batchImport(sources, options)
@@ -169,6 +168,7 @@ const watchSources = async (sources, options) => {
   let isImporting = false
   let isInitializing = true
   let fileChangeCount = 0
+  let sourcesQueue = []
   const sourceDirs = sources.map(source => source.dir)
 
   log.info(`Run import in watch mode. Start watching source dirs for file changes: ${sourceDirs.join(', ')}`)
@@ -190,7 +190,9 @@ const watchSources = async (sources, options) => {
     }
     isImporting = true
     fileChangeCount = 0
-    return batchImport(sources, options)
+    const importSources = sourcesQueue.length ? sourcesQueue : sources
+    sourcesQueue = []
+    return batchImport(importSources, options)
       .then(() => {
         isImporting = false
         if (fileChangeCount > 0) {
@@ -200,6 +202,14 @@ const watchSources = async (sources, options) => {
       })
   }
 
+  const queueSourceOf = file => {
+    const source = sources.find(source => file.startsWith(path.resolve(source.dir)))
+    if (source && !sourcesQueue.includes(source)) {
+      sourcesQueue.push(source)
+      log.debug(`Queue source ${source.dir} for next import`)
+    }
+  }
+
   const createChangeDelay = (delay, maxDelay, onChange) => {
     let firstChangeMs
     let timerId
@@ -207,13 +217,14 @@ const watchSources = async (sources, options) => {
     const clearTimer = () => clearTimeout(timerId)
     process.once('SIGINT', clearTimer)
 
-    return (event, path) => {
+    return (event, file) => {
       if (fileChangeCount == 0) {
         firstChangeMs = Date.now()
       }
       fileChangeCount++
       const importDelay = Math.min(Math.max(0, firstChangeMs + maxDelay - Date.now()), delay)
-      log.trace(`File change detected: ${event} at ${path}. Delay import by ${importDelay}ms`)
+      log.trace(`File change detected: ${event} at ${file}. Delay import by ${importDelay}ms`)
+      queueSourceOf(path.resolve(file))
       clearTimer()
       timerId = setTimeout(() => {
         if (!fileChangeCount) {
@@ -293,11 +304,4 @@ const watchSources = async (sources, options) => {
 
     process.on('SIGUSR1', () => log.info(`File watcher status: ${isInitializing ? 'initializing' : (isImporting ? 'importing' : 'idle')}`))
   })
-}
-
-module.exports = {
-  importSources,
-  watchSources,
-  extract,
-  createDatabase
 }

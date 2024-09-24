@@ -1,21 +1,6 @@
-const { initConfig } = require('./init')
-const { readConfig, readData } = require('./read')
-const { validateConfig } = require('./validate')
-const { findConfig, defaultConfigFilename, defaultConfigDir, defaultConfigFile, defaultCacheDir } = require('./find-config')
-const { load } = require('./load')
-const { mapArgs, getMissingPaths } = require('./map-args')
-
-module.exports = {
-  findConfig,
-  defaultConfigFilename,
-  defaultConfigDir,
-  defaultConfigFile,
-  defaultCacheDir,
-  initConfig,
-  readConfig,
-  readData,
-  validateConfig,
-  load,
-  mapArgs,
-  getMissingPaths
-}
+export { initConfig } from './init.js'
+export { readConfig, readData } from './read.js'
+export { validateConfig } from './validate.js'
+export { findConfig, defaultConfigFilename, defaultConfigDir, defaultConfigFile, defaultCacheDir } from './find-config.js'
+export { load } from './load.js'
+export { mapArgs, validatePaths } from './map-args.js'

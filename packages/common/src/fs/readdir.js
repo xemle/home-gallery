@@ -1,6 +1,6 @@
-const fs = require('fs');
+import fs from 'fs';
 
-function readDir(dir, cb) {
+export function readDir(dir, cb) {
   fs.readdir(dir, (err, files) => {
     if (err) {
       return cb(err);
@@ -19,7 +19,7 @@ function createDir(dir, cb) {
   });
 }
 
-function readDirCreate(dir, cb) {
+export function readDirCreate(dir, cb) {
   readdir(dir, (err, files) => {
     if (err && err.code === 'ENOENT') {
       return createDir(dir, cb);
@@ -30,5 +30,3 @@ function readDirCreate(dir, cb) {
     }
   });
 }
-
-module.exports = { readDir, readDirCreate };

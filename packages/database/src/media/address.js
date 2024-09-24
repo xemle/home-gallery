@@ -1,6 +1,8 @@
-const { getMetaEntries } = require('./utils')
+import { getMetaEntries } from './utils.js'
 
-const log = require('@home-gallery/logger')('database.media.address')
+import Logger from '@home-gallery/logger'
+
+const log = Logger('database.media.address')
 
 const keyMapping = {
   hamlet: 'city',
@@ -46,6 +48,9 @@ const getAddress = (entry) => {
   return allAddress ? allAddress : {}
 }
 
-module.exports = {
-  getAddress
+export const addressMapper = {
+  name: 'addressMapper',
+  mapEntry(entry, media) {
+    return {...media, ...getAddress(entry)}
+  }
 }

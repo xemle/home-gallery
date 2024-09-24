@@ -1,12 +1,24 @@
-const log = require('@home-gallery/logger')('cli.storage')
+import Logger from '@home-gallery/logger'
+
+import { load, mapArgs, validatePaths } from './config/index.js'
+
+const log = Logger('cli.storage')
 
 const command = {
   command: 'storage',
   describe: 'Storage utils',
   builder: (yargs) => {
     return yargs.option({
+      config: {
+        alias: 'c',
+        describe: 'Configuration file'
+      },
+      'auto-config': {
+        boolean: true,
+        default: true,
+        describe: 'Search for configuration on common configuration directories'
+      },
       storage: {
-        require: true,
         alias: 's',
         describe: 'Storage directory',
       },
@@ -17,7 +29,6 @@ const command = {
       (yargs) => yargs
         .option({
           database: {
-            require: true,
             alias: 'd',
             describe: 'Database file',
           },
@@ -33,16 +44,44 @@ const command = {
           },
         }),
       (argv) => {
-        const { purgeOrphanFiles } = require('@home-gallery/storage')
-
-        const storageDir = argv.storage
-        const databaseFilename = argv.database
-        const indexFilenames = argv.index || []
-        const options = {
-          dryRun: argv.dryRun
+        const argvMapping = {
+          index: 'fileIndex.files',
+          storage: 'storage.dir',
+          dryRun: 'storage.dryRun',
+          database: 'database.file',
         }
-        purgeOrphanFiles(storageDir, databaseFilename, indexFilenames, options)
-          .catch(err => log.error(err, `Error: ${err}`))
+
+        const setDefaults = (config) => {
+          if (!config.fileIndex?.files) {
+            const files = config.sources?.map(source => source.index) || [];
+            config.fileIndex = {
+              ...config.fileIndex,
+              files
+            }
+          }
+        }
+
+        const run = async () => {
+          const { purgeOrphanFiles } = await import('@home-gallery/storage')
+
+          const options = await load(argv.config, false, argv.autoConfig)
+
+          mapArgs(argv, options.config, argvMapping)
+          setDefaults(options.config)
+          validatePaths(options.config, ['storage.dir', 'database.file'])
+
+          return purgeOrphanFiles(options)
+        }
+
+        const t0 = Date.now();
+        return run()
+          .then(() => {
+            log.info(t0, 'Purged orphan files')
+          })
+          .catch(err => {
+            log.error(err, `Failed to purge orphan files: ${err}`);
+            process.exit(1)
+          })
       }
     )
     .demandCommand()
@@ -50,4 +89,4 @@ const command = {
   handler: () => false
 }
 
-module.exports = command
+export default command

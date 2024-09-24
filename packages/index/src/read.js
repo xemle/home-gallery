@@ -1,6 +1,6 @@
-const { readJsonGzip } = require('@home-gallery/common');
+import { readJsonGzip } from '@home-gallery/common';
 
-const readIndex = (filename, cb) => {
+export const readIndex = (filename, cb) => {
   readJsonGzip(filename, (err, index) => {
     if (err && err.code === 'ENOENT') {
       return cb(null, {data: []});
@@ -11,5 +11,3 @@ const readIndex = (filename, cb) => {
     cb(err, index);
   });
 }
-
-module.exports = readIndex;

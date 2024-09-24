@@ -2,7 +2,7 @@ const pad2 = v => ('' + v).padStart(2, '0')
 
 const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-const formatDate = (format, date) => {
+export const formatDate = (format, date) => {
   if (!date) {
     return 'Unkown'
   }
@@ -21,5 +21,3 @@ const formatDate = (format, date) => {
     }
   })
 }
-
-module.exports = formatDate

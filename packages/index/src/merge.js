@@ -1,33 +1,8 @@
-const log = require('@home-gallery/logger')('index.merge');
+import Logger from '@home-gallery/logger'
 
-const matcherFns = {
-  size: (fileEntry, fsEntry) => {
-    if (fileEntry.size === fsEntry.size &&
-      fileEntry.fileType === fsEntry.fileType) {
-      return true;
-    }
-    return false;
-  },
-  'size-ctime': (fileEntry, fsEntry) => {
-    if (fileEntry.size === fsEntry.size &&
-      fileEntry.fileType === fsEntry.fileType &&
-      fileEntry.ctimeMs === fsEntry.ctimeMs) {
-      return true;
-    }
-    return false;
-  },
-  'size-ctime-inode': (fileEntry, fsEntry) => {
-    if (fileEntry.size === fsEntry.size &&
-      fileEntry.fileType === fsEntry.fileType &&
-      fileEntry.ctimeMs === fsEntry.ctimeMs &&
-      fileEntry.ino === fsEntry.ino) {
-      return true;
-    }
-    return false;
-  }
-}
+const log = Logger('index.merge');
 
-const mergeIndex = (fileEntryMap, fsEntryMap, commonKeys, matcherFn) => {
+export const mergeIndex = (fileEntryMap, fsEntryMap, commonKeys, matcherFn) => {
   const t0 = Date.now();
   let changedKeys = [];
   
@@ -51,8 +26,3 @@ const mergeIndex = (fileEntryMap, fsEntryMap, commonKeys, matcherFn) => {
   log.info(t0, `Merged ${commonKeys.length} entries`);
   return {commonEntryMap, changedKeys};
 }
-
-module.exports = {
-  mergeIndex,
-  matcherFns
-};

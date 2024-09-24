@@ -1,8 +1,10 @@
-const log = require('@home-gallery/logger')('stream.skip');
+import Logger from '@home-gallery/logger'
 
-const filter = require('./filter');
+const log = Logger('stream.skip');
 
-function skip(amount) {
+import { filter } from './filter.js';
+
+export function skip(amount) {
   amount = +amount || 0
   if (amount > 0) {
     log.info(`Skip first ${amount} stream entries`)
@@ -11,5 +13,3 @@ function skip(amount) {
   let count = 0;
   return filter(() => count++ >= amount)
 }
-
-module.exports = skip;

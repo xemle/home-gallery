@@ -24,6 +24,3 @@ packages/server/public
 # Exclude api-server module
 # Build it separately in packages/api-server and run it via docker-compose
 packages/api-server
-
-# styleguide package is required only for dev
-packages/styleguide

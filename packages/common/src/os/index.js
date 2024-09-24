@@ -1,8 +1,2 @@
-const { spawn, run } = require('./spawn');
-const { ProcessManager } = require('./process-manager');
-
-module.exports = {
-  ProcessManager,
-  run,
-  spawn
-}
+export { spawn, run } from './spawn.js';
+export { ProcessManager } from './process-manager.js';

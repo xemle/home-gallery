@@ -1,12 +1,3 @@
-const { importSources, watchSources, extract, createDatabase } = require('./import-sources')
-const { startServer } = require('./server')
-const { exportMeta } = require('./export-meta')
-
-module.exports = {
-  importSources,
-  watchSources,
-  extract,
-  createDatabase,
-  startServer,
-  exportMeta
-}
+export { importSources, watchSources, extract, createDatabase } from './import-sources.js'
+export { startServer } from './server.js'
+export { exportMeta } from './export-meta.js'

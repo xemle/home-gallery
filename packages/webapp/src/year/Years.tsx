@@ -77,10 +77,10 @@ export const Years = () => {
 export const YearView = () => {
   const params = useParams();
   const location = useLocation();
-  const search = useSearchStore(state => state.search);
+  const search = useSearchStore.getState().search;
 
   useEffect(() => {
-    const year = +params.year;
+    const year = params.year;
     let locationQuery = new URLSearchParams(location.search && location.search.substring(1) || '');
     search({type: 'year', value: year, query: locationQuery.get('q') || ''});
   }, [params, location])

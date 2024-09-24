@@ -1,9 +1,11 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const log = require('@home-gallery/logger')('export.storage');
+import Logger from '@home-gallery/logger'
 
-const copyFile = require('./copy-file');
+const log = Logger('export.storage');
+
+import { copyFile } from './copy-file.js';
 
 const exportEntry = (entry, storageDir, directory, cb) => {
   let i = 0;
@@ -52,24 +54,24 @@ const entryToString = entry => {
   return `${entry.id.substr(7)}:${firstFile.indexName}:${firstFile.filename}`
 }
 
-const exportStorage = (database, storageDir, outputDirectory, basePath, cb) => {
-  if (!outputDirectory) {
+export const exportStorage = (database, storageDir, dir, basePath, cb) => {
+  if (!dir) {
     const date = formatDate();
-    outputDirectory = `home-gallery-export-${date}`
+    dir = `home-gallery-export-${date}`
   }
 
-  const directory = path.join(outputDirectory, basePath, 'files');
+  const filesDir = path.join(dir, basePath, 'files');
   const t0 = Date.now();
   const entries = database.data;
   let i = 0;
   const next = () => {
     if (i === entries.length) {
       log.info(t0, `Exported ${entries.length} entries`);
-      return cb(null, database, outputDirectory, basePath);
+      return cb(null, database, dir, basePath);
     }
 
     const entry = entries[i++];
-    exportEntry(entry, storageDir, directory, () => {
+    exportEntry(entry, storageDir, filesDir, () => {
       if (i % 200 === 0) {
         process.nextTick(next);
       } else {
@@ -81,5 +83,3 @@ const exportStorage = (database, storageDir, outputDirectory, basePath, cb) => {
 
   next();
 }
-
-module.exports = exportStorage;

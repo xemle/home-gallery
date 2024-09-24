@@ -7,39 +7,26 @@ import * as icons from '@fortawesome/free-solid-svg-icons'
 import { NavBar } from '../navbar/NavBar';
 import { useEntryStore } from '../store/entry-store';
 
-
 export const Tags = () => {
-  const escapeSearchValue = value => /[\s+]/.test(value) ? `"${value}"` : value
-
-  const searchLink = (value) => {
-    let query = `tag:${escapeSearchValue(value)}`
-    return query
-  }
 
   const allEntries = useEntryStore(state => state.allEntries);
 
   const tags = useMemo(() => {
-    const tagsCount = {};
+    const tagsCount: {[key: string]: number} = {};
     allEntries.forEach(({tags}) => {
-      if (tags) {
-        tags.forEach((tag) => {
-          if (tagsCount[tag]) {
-            tagsCount[tag] += 1;
-          } else {
-            tagsCount[tag] = 1;
-          }
-        })
+      if (!tags?.length) {
+        return
       }
+
+      tags.forEach((tag) => {
+        if (!tagsCount[tag]) {
+          tagsCount[tag] = 0;
+        }
+        tagsCount[tag]++;
+      })
     });
 
-    const allTags = Object.keys(tagsCount).map((k) => {
-      return {
-        tag: k,
-        count: tagsCount[k]
-      };
-    })
-    allTags.sort((a,b) => a.tag.toLowerCase() < b.tag.toLowerCase() ? -1 : 1);
-    return allTags;
+    return unifyTags(tagsCount)
   }, [allEntries]);
 
   return (
@@ -64,4 +51,44 @@ export const Tags = () => {
       </ul>
     </>
   )
+}
+
+const escapeSearchValue = value => /[\s+]/.test(value) ? `"${value}"` : value
+
+const searchLink = (value) => {
+  let query = `tag:${escapeSearchValue(value)}`
+  return query
+}
+
+const unifyTags = (tagCount: {[key: string]: number}) => {
+  const tags = Object.keys(tagCount)
+
+  const normalizedMap: {[key: string]: {tag: string, count:number}[]} = {}
+  Object.entries(tagCount).forEach(([tag, count]) => {
+    const normalizedTag = tag.toLocaleLowerCase()
+
+    if (!normalizedMap[normalizedTag]) {
+      normalizedMap[normalizedTag] = []
+    }
+    normalizedMap[normalizedTag].push({tag, count})
+  })
+
+  return Object.entries(normalizedMap).map(([_, tagCounts]) => {
+    if (tagCounts.length == 1) {
+      return tagCounts[0]
+    } else {
+      // sort tag count by count DESC, tag DESC
+      tagCounts.sort((a, b) => {
+        if (a.count == b.count) {
+          return a.tag < b.tag ? 1 : -1
+        }
+        return a.count < b.count ? 1 : -1
+      })
+
+      return {
+        tag: tagCounts[0].tag,
+        count: tagCounts.reduce((count, t) => count + t.count, 0)
+      }
+    }
+  }).sort((a, b) => a.tag.toLowerCase() < b.tag.toLocaleLowerCase() ? -1 : 1)
 }

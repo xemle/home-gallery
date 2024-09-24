@@ -1,13 +1,16 @@
-const { Readable, pipeline } = require('stream')
+import { Readable } from 'stream'
+import { pipeline } from 'stream/promises'
 
-const log = require('@home-gallery/logger')('export.meta')
+import Logger from '@home-gallery/logger'
 
-const { promisify } = require('@home-gallery/common')
-const { readIndexHead } = require('@home-gallery/index')
-const { filter, toList } = require('@home-gallery/stream')
+const log = Logger('export.meta')
 
-const { getMetadataEntries } = require('./entries')
-const { createMetadataWriter } = require('./meta')
+import { promisify } from '@home-gallery/common'
+import { readIndexHead } from '@home-gallery/index'
+import { filter, toList, write } from '@home-gallery/stream'
+
+import { getMetadataEntries } from './entries.js'
+import { createMetadataWriter } from './meta.js'
 
 const readIndexHeadAsync = promisify(readIndexHead)
 
@@ -19,8 +22,12 @@ const getIndexRootMap = async (indices) => {
   return Object.fromEntries(indexHeads.map(index => [index.indexName, index.base]))
 }
 
-const exportMeta = async (options = {}) => {
-  const { indices, database, events, changesAfter, dryRun } = options
+export const exportMeta = async (options = {}) => {
+  const indices = options.config.fileIndex.files
+  const database = options.config.database.file
+  const events = options.config.events.file
+
+  const { changesAfter, dryRun } = options.config.exportMeta
 
   const entries = await getMetadataEntries(database, events, changesAfter)
   if (!entries.length) {
@@ -31,17 +38,13 @@ const exportMeta = async (options = {}) => {
   const rootMap = await getIndexRootMap(indices)
   const hasBaseDir = entry => rootMap[entry.files[0]?.index]
 
-  return new Promise((resolve, reject) => {
-    pipeline(
-      Readable.from(entries),
-      filter(hasBaseDir),
-      createMetadataWriter(rootMap, dryRun),
-      toList().on('data', entries => resolve(entries)),
-      err => err && reject(err)
-    )
-  })
+  let result
+  await pipeline(
+    Readable.from(entries),
+    filter(hasBaseDir),
+    createMetadataWriter(rootMap, dryRun),
+    toList(),
+    write(data => result = data)
+  )
+  return result
 }
-
-module.exports = {
-  exportMeta
-};

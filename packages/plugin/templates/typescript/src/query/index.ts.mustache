@@ -1,0 +1,41 @@
+import { TPluginManager, TAstTransformRule, TQueryAst, TQueryContext } from '@home-gallery/types'
+
+import { insertHas{{ className }}IfNotQueried } from './astUtils.js'
+
+export class {{ className }}QueryPlugin {
+  name = '{{ camelName }}Query'
+  order = 1
+  transformRules: TAstTransformRule[] = []
+  manager: TPluginManager
+  pluginConfig: any
+
+  constructor(manager) {
+    this.manager = manager
+    this.pluginConfig = manager.getConfig().plugin?.{{ camelName }} || {}
+    this.transformRules.push(insertHas{{ className }}IfNotQueried)
+  }
+
+  textFn(entry: any) {
+    return entry.plugin?.{{ camelName }}?.value || ''
+  }
+
+  queryHandler(ast: TQueryAst, context: TQueryContext) {
+    // Create filter on {{ camelName }} keyword in condition to support '{{ camelName }} = value' or '{{ camelName }}:value'
+    if (ast.type == 'cmp' && ast.key == '{{ camelName }}' && ast.op == '=') {
+      ast.filter = (entry: any) => {
+        return entry.plugin?.{{ camelName }}?.value == ast?.value?.value
+      }
+      // The ast node could be handled. Return true to prevent further chain calls
+      return true
+    }
+
+    // Create custom sort key 'order by {{ camelName }}'
+    if (ast.type == 'orderKey' && ast.value == '{{ camelName }}') {
+      ast.scoreFn = e => e.plugin.{{ camelName }}.created || '0000-00-00'
+      ast.direction = 'desc'
+      return true
+    }
+
+    return false
+  }
+}

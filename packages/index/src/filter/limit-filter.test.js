@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { getNewFileLimit, createLimitFilter } = require('./limit-filter')
+import { getNewFileLimit, createLimitFilter } from './limit-filter.js'
 
 t.test('getNewFileLimit', async t => {
   // count: init, offset, factor => result

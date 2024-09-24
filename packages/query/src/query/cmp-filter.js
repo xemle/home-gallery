@@ -1,9 +1,9 @@
-const { dateKeys } = require('./keys')
-const { toLower, matchNumber, matchFloat, matchDate, getDateByKey, dirname, basename, ext } = require('./utils')
+import { dateKeys } from '../ast/index.js'
+import { toLower, matchNumber, matchFloat, matchDate, getDateByKey, dirname, basename, ext } from './utils.js'
 
 const cmpFilters = [
   {
-    keys: ['id', 'model', 'make', 'country', 'state', 'city', 'road'],
+    keys: ['id', 'model', 'make', 'description', 'country', 'state', 'city', 'road'],
     ops: ['=', '!=', '~'],
     filter: ast => compare(v => toLower(v[ast.key]), ast.op, toLower(ast.value.value))
   },
@@ -92,19 +92,21 @@ const cmpFilters = [
   },
 ]
 
-const cmpFilter = (ast, options) => {
+export const cmpFilter = (ast, context) => {
   const filter = cmpFilters.find(filter => matchCmpFilter(filter, ast))
   if (filter) {
-    return filter.filter(ast, options)
+    ast.filter = filter.filter(ast, context)
+  } else {
+    ast.filter = () => true
+    context.queryErrorHandler(ast, context, `Unknown cmp mapping. key=${ast.key}, op=${ast.op} or value='${ast.value?.avlue}' is unknown`)
   }
-  return options.unknownExpressionHandler(ast, options)
 }
 
-const matchCmpFilter = (cmp, ast) => (!cmp.keys || cmp.keys.includes(ast.key)) &&
+export const matchCmpFilter = (cmp, ast) => (!cmp.keys || cmp.keys.includes(ast.key)) &&
   (!cmp.ops || cmp.ops.includes(ast.op)) &&
   (!cmp.matchValue || cmp.matchValue(ast.value.value))
 
-const compare = (valueFn, op, right) => v => {
+export const compare = (valueFn, op, right) => v => {
   const value = valueFn(v)
   if (op == '=') {
     return value == right
@@ -125,7 +127,7 @@ const compare = (valueFn, op, right) => v => {
   }
 }
 
-const listCompare = (valuesFn, op, right, valueMapFn = v => toLower(v)) => {
+export const listCompare = (valuesFn, op, right, valueMapFn = v => toLower(v)) => {
   return v => {
     const values = valuesFn(v)
     if (!values) {
@@ -193,11 +195,4 @@ const bytes = {
     const factor = m[3] ? units[m[3].toLowerCase()] : 1
     return +m[1] * factor
   }
-}
-
-module.exports = {
-  matchCmpFilter,
-  compare,
-  listCompare,
-  cmpFilter
 }

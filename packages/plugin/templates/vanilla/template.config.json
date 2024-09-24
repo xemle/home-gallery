@@ -1,0 +1,20 @@
+{
+  "files": [
+    "src/index.js.mustache",
+    "package.json.mustache",
+    "README.md.mustache"
+  ],
+  "modules": {
+    "extractor": [
+      "src/extractor/index.js.mustache"
+    ],
+    "database": [
+      "src/database/index.js.mustache"
+    ],
+    "query": [
+      "src/query/astUtils.js.mustache",
+      "src/query/index.js.mustache"
+    ]
+  },
+  "dir": "[sanitizedName]"
+}

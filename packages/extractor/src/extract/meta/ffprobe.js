@@ -1,35 +1,65 @@
-const ffprobe = require('ffprobe');
+import ffprobeBin from 'ffprobe';
 
-const log = require('@home-gallery/logger')('extractor.video.ffprobe');
+import Logger from '@home-gallery/logger'
 
-const { getNativeCommand } = require('../utils/native-command')
-const { toPipe, conditionalTask } = require('../../stream/task');
+import { getFfprobePath, getFfmpegPath } from '../utils/ffmpeg-path.js'
 
+const log = Logger('extractor.video.ffprobe');
 const ffprobeSuffix = 'ffprobe.json';
 
-function videoMeta(storage, extractor) {
-  const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, ffprobeSuffix);
+/**
+ * @param {import('@home-gallery/types').TStorage} storage
+ * @param {string} ffprobePath
+ * @returns {import('stream').Transform}
+ */
+export function ffprobe(storage, ffprobePath) {
+  const test = entry => entry.type === 'video' && !storage.hasFile(entry, ffprobeSuffix);
 
-  const task = (entry, cb) => {
+  const task = async (entry) => {
     const t0 = Date.now();
-    ffprobe(entry.src, { path: extractor.ffprobePath }, function (err, info) {
-      if (err) {
-        log.warn(err, `Could not extract video meta data from ${entry}: ${err}`);
-        return cb();
-      }
-
-      storage.writeEntryFile(entry, ffprobeSuffix, JSON.stringify(info), (err) => {
+    const src = await entry.getFile()
+    return new Promise((resolve, reject) => {
+      ffprobeBin(src, { path: ffprobePath }, (err, data) => {
         if (err) {
-          log.warn(err, `Could not write video meta data from ${entry}: ${err}`);
-          return cb();
+          return reject(err)
         }
-        log.debug(t0, `Extracted video meta data from ${entry}`);
-        cb();
+        resolve(data)
       })
-    });
+    })
+    .then(data => storage.writeFile(entry, ffprobeSuffix, data))
+    .then(() => {
+      log.debug(t0, `Extracted video meta data from ${entry}`);
+    })
+    .catch(err => {
+      log.warn(err, `Could not extract video meta data from ${entry}: ${err}`);
+    })
   }
 
-  return toPipe(conditionalTask(test, task));
+  return {
+    test,
+    task
+  }
 }
 
-module.exports = videoMeta;
+/**
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
+ */
+export const ffprobePlugin = manager => ({
+  name: 'ffprobe',
+  phase: 'meta',
+  /**
+   * @param {import('@home-gallery/types').TStorage} storage
+   */
+  async create(storage) {
+    const config = manager.getConfig()
+    const ffprobePath = await getFfprobePath(config)
+    const ffmpegPath = await getFfmpegPath(config)
+
+    const context = manager.getContext()
+    context.ffprobePath = ffprobePath
+    context.ffmpegPath = ffmpegPath
+
+    return ffprobe(storage, ffprobePath)
+  },
+})

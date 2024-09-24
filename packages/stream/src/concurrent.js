@@ -1,9 +1,11 @@
-const through = require('./through');
-const log = require('@home-gallery/logger')('stream.concurrent');
+import { through } from './through.js';
+import Logger from '@home-gallery/logger'
+
+const log = Logger('stream.concurrent');
 
 const noop = () => through((entry, _, cb) => cb(null, entry))
 
-const concurrent = (concurrent, countOffset) => {
+export const concurrent = (concurrent, countOffset) => {
   concurrent = typeof concurrent == 'undefined' ? 0 : +concurrent
   countOffset = +countOffset || 0
   if (concurrent <= 0) {
@@ -56,5 +58,3 @@ const concurrent = (concurrent, countOffset) => {
     releaseEntry
   }
 }
-
-module.exports = concurrent;

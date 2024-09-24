@@ -2,7 +2,11 @@
   "name": "@home-gallery/cast",
   "version": "1.0.0",
   "description": "Cast module for HomeGallery",
-  "main": "dist/index.js",
+  "type": "module",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/require-mapper.cjs"
+  },
   "files": [
     "dist"
   ],

@@ -1,11 +1,10 @@
-const isMimeMiddleware = require('./server/is-mime-middleware');
-const binaryBodyMiddleware = require('./server/binary-body-middleware');
-const asyncMiddleware = require('./server/async-middleware');
-const readJpeg = require('./utils/read-jpeg');
-const toSha1 = require('./utils/sha1');
+import { isMimeMiddleware } from './server/is-mime-middleware.js';
+import { binaryBodyMiddleware } from './server/binary-body-middleware.js';
+import { asyncMiddleware } from './server/async-middleware.js';
+import { readJpeg, toSha1 } from './utils/index.js';
 
 const t0 = Date.now()
-const routes = (app, maxBytes, modelConfig, embeddings, objects, faces) => {
+export const routes = (app, maxBytes, modelConfig, embeddings, objects, faces) => {
   app.get('/health', (_, res) => {
     res.send({health: 'OK', uptime: Date.now() - t0})
   })
@@ -45,5 +44,3 @@ const routes = (app, maxBytes, modelConfig, embeddings, objects, faces) => {
     })
   ])
 }
-
-module.exports = routes;

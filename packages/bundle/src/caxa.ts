@@ -2,8 +2,10 @@ import { access, mkdir } from 'fs/promises'
 import { createWriteStream, createReadStream } from 'fs'
 import path from 'path'
 import { Readable } from 'stream'
+import { fileURLToPath } from 'url'
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
-import { logger } from './log'
+import { logger } from './log.js'
 
 const log = logger('caxa')
 

@@ -1,20 +1,20 @@
-const fs = require('fs');
-const path = require('path');
-const log = require('@home-gallery/logger')('server.api.database.read');
+import fs from 'fs';
+import path from 'path';
+import Logger from '@home-gallery/logger'
 
-const { debounce } = require('@home-gallery/common');
-const { readDatabase } = require('@home-gallery/database');
-const { applyEvents } = require('./events-facade')
+const log = Logger('server.api.database.read');
 
-function read(filename, cb) {
+import { debounce } from '@home-gallery/common';
+import { readDatabaseStreamed } from '@home-gallery/database';
+import { applyEvents } from './events-facade.js'
+
+export function read(filename, cb) {
   const t0 = Date.now();
-  readDatabase(filename, (err, database) => {
-    if (err) {
-      return cb(err);
-    }
-    log.info(t0, `Read database file ${filename} with ${database.data.length} entries`);
-    cb(err, database);
-  });
+  readDatabaseStreamed(filename)
+    .then(database => {
+      log.info(t0, `Read database file ${filename} with ${database.data.length} entries`);
+      cb(null, database);
+    }, cb);
 }
 
 
@@ -58,7 +58,7 @@ const mergeEvents = (database, getEvents, cb) => {
   })
 }
 
-function waitReadWatch(filename, getEvents, stringifyEntryCache, cb) {
+export function waitReadWatch(filename, getEvents, cb) {
   const onChange = () => {
     exists(filename, (err, hasFile) => {
       if (err) {
@@ -77,7 +77,7 @@ function waitReadWatch(filename, getEvents, stringifyEntryCache, cb) {
       if (err) {
         return cb(err);
       }
-      mergeEvents(database, getEvents, stringifyEntryCache, (err, database) => {
+      mergeEvents(database, getEvents, (err, database) => {
         if (err) {
           return cb(err)
         }
@@ -121,5 +121,3 @@ function waitReadWatch(filename, getEvents, stringifyEntryCache, cb) {
     }
   })
 }
-
-module.exports = { waitReadWatch, read };

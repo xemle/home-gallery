@@ -1,6 +1,6 @@
-import { Event, EventAction } from './models';
+import { Event, EventAction } from './models.js';
 
-import { Taggable } from './taggable';
+import { Taggable } from './taggable.js';
 
 const applyEventAction = <T extends Taggable>(data: T, action: EventAction): boolean => {
   let changed = false;

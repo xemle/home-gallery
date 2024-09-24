@@ -1,6 +1,6 @@
-const { resolveAll } = require('./resolve')
+import { resolveAll } from './resolve.js'
 
-const resolveConfig = (config, baseDir, env) => {
+export const resolveConfig = (config, baseDir, env) => {
   resolveAll(config, ['baseDir', 'configDir', 'configPrefix', 'cacheDir'], config, baseDir, env)
 
   const sources = config.sources || [];
@@ -16,8 +16,4 @@ const resolveConfig = (config, baseDir, env) => {
   }
 
   return config
-}
-
-module.exports = {
-  resolveConfig
 }

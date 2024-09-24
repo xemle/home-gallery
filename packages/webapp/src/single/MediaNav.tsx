@@ -50,7 +50,7 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
 
   const itemClass = "md:opacity-40 hover:opacity-100 hover:cursor-pointer"
   const buttonClass = "block flex items-center justify-center rounded w-8 h-8 md:w-12 md:h-12"
-  const buttonBgClass = "bg-gray-400/50 md:bg-gray-400/40"
+  const buttonBgClass = "bg-gray-400/60 md:bg-gray-400/70"
   const iconClass = "md:text-2xl text-gray-800"
 
   const hasGeo = current?.latitude && current?.longitude && current.latitude != 0 && current.longitude != 0
@@ -99,6 +99,11 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
         }
         { (faceRects || objectRects) &&
           <a onClick={() => dispatch({type: 'toggleRects'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show objects (o)">
+            <FontAwesomeIcon icon={icons.faUsersViewfinder} className={iconClass}/>
+          </a>
+        }
+        { current &&
+          <a onClick={() => dispatch({type: 'toggleAnnotations'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show object and face annotations (a)">
             <FontAwesomeIcon icon={icons.faUsersViewfinder} className={iconClass}/>
           </a>
         }

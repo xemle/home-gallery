@@ -1,14 +1,27 @@
-const log = require('@home-gallery/logger')('cli.database')
+import Logger from '@home-gallery/logger'
+
+import { load, mapArgs, validatePaths } from './config/index.js'
+
+const log = Logger('cli.database')
 
 const command = {
   command: 'database',
   describe: 'Database commands',
   builder: (yargs) => {
     return yargs.option({
+      config: {
+        alias: 'c',
+        describe: 'Configuration file'
+      },
+      'auto-config': {
+        boolean: true,
+        default: true,
+        describe: 'Search for configuration on common configuration directories'
+      },
       database: {
         alias: 'd',
         describe: 'Database filename'
-      }
+      },
     })
     .command(
       ['create', '$0'],
@@ -37,31 +50,56 @@ const command = {
             string: true,
             describe: 'Journal id'
           }
-        })
-        .demandOption(['index', 'storage', 'database']),
+        }),
       (argv) => {
-        const { fileFilter } = require('@home-gallery/common')
-        const { buildDatabase } = require('@home-gallery/database')
-        const { promisify } = require('@home-gallery/common')
-
-        const fileFilterAsync = promisify(fileFilter)
-        const buildDatabaseAsync = promisify(buildDatabase)
-
-        const run = async () => {
-          const t0 = Date.now();
-          const fileFilterFn = await fileFilterAsync(argv.exclude, argv['exclude-from-file'])
-          const options = {
-            fileFilterFn,
-            journal: argv.journal,
-            supportedTypes: ['image', 'rawImage', 'video'],
-            updated: new Date().toISOString()
-          }
-
-          const database = await buildDatabaseAsync(argv.index, argv.storage, argv.database, options)
-          log.info(t0, `Build catalog database ${argv.database} with ${database.data.length} entries`)
+        const argvMapping = {
+          index: 'fileIndex.files',
+          journal: 'fileIndex.journal',
+          storage: 'storage.dir',
+          database: 'database.file',
+          exclude: 'database.excludes',
+          excludeFromFile: 'database.excludeFromFile',
         }
 
-        run()
+        const databaseDefaults = {
+          supportedTypes: ['image', 'rawImage', 'video'],
+          updated: new Date().toISOString()
+        }
+
+        const setDefaults = (config, basePluginFiles) => {
+          const withOfflineSources = !config.fileIndex?.journal
+          config.fileIndex = {
+            files: config.sources?.filter(s => withOfflineSources || !s.offline).map(s => s.index),
+            ...config.fileIndex
+          }
+          config.database = {
+            ...databaseDefaults,
+            ...config.database,
+          },
+          config.pluginManager = {
+            ...config.pluginManager,
+            plugins: [...basePluginFiles, ...(config.pluginManager?.plugins || [])]
+          }
+        }
+
+        const run = async() => {
+          const { buildDatabase, getPluginFiles: getDatabasePluginFiles } = await import('@home-gallery/database')
+          const basePluginFiles = [...getDatabasePluginFiles()]
+
+          const options = await load(argv.config, false, argv.autoConfig)
+
+          mapArgs(argv, options.config, argvMapping)
+          setDefaults(options.config, basePluginFiles)
+          validatePaths(options.config, ['fileIndex.files', 'storage.dir', 'database.file'])
+
+          return buildDatabase(options)
+        }
+
+        const t0 = Date.now();
+        return run()
+          .then(count => {
+            log.info(t0, `Created database with ${count} entries`)
+          })
           .catch(err => {
             if (err?.code == 'ENOCHANGE') {
               return log.info(`Database unchanged: ${err?.message}`)
@@ -103,14 +141,6 @@ const command = {
         .example('$0 database remove -k -q tag:good', 'Keep all entries with tag "good"')
         .demandOption(['q']),
       (argv) => {
-        const { buildDatabase } = require('@home-gallery/export-static')
-        const { writeDatabase } = require('@home-gallery/database')
-        const { promisify } = require('@home-gallery/common')
-
-        const { load, mapArgs } = require('./config')
-
-        const asyncBuildDatabase = promisify(buildDatabase)
-        const asyncWriteDatabase = promisify(writeDatabase)
 
         const mapping = {
           database: 'database.file',
@@ -118,13 +148,20 @@ const command = {
         }
 
         const run = async () => {
+          const { buildDatabase } = await import('@home-gallery/export-static')
+          const { writeDatabase } = await import('@home-gallery/database')
+          const { promisify } = await import('@home-gallery/common')
+
+          const asyncBuildDatabase = promisify(buildDatabase)
+          const asyncWriteDatabase = promisify(writeDatabase)
+
           const query = argv.keep ? argv.query : `not ( ${argv.query} )`
           const options = await load(argv.config, false)
           mapArgs(argv, options.config, mapping)
 
           const t0 = Date.now();
           log.info(`Rewriting database by ${argv.keep ? 'keeping' : 'removing'} entries with matching query '${argv.query}'`)
-          return await asyncBuildDatabase(options.config.database.file, options.config.events.file, query)
+          return asyncBuildDatabase(options.config.database.file, options.config.events.file, query)
             .then(database => {
               if (argv.dryRun) {
                 log.debug(`Skip write of database due dry run`)
@@ -137,7 +174,7 @@ const command = {
             })
         }
 
-        run()
+        return run()
           .catch(err => {
             log.error(err, `Failed to rewrite database: ${err}`)
             process.exit(1)
@@ -147,4 +184,4 @@ const command = {
   }
 }
 
-module.exports = command;
+export default command;

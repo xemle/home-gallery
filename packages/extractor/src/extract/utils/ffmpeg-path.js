@@ -1,27 +1,26 @@
 
-const log = require('@home-gallery/logger')('extractor.ffmpeg');
+import Logger from '@home-gallery/logger'
 
-const { getNativeCommand } = require('./native-command')
+const log = Logger('extractor.ffmpeg');
 
-const getFfmpegPath = config => {
+import { getNativeCommand } from './native-command.js'
+
+export const getFfmpegPath = async config => {
   if (config?.extractor?.useNative?.includes('ffmpeg')) {
     log.debug(`Use native system command ffmpeg`)
     return getNativeCommand('ffmpeg')
   } else {
-    return require('@ffmpeg-installer/ffmpeg').path
+    return import('@ffmpeg-installer/ffmpeg')
+      .then(({path}) => path)
   }
 }
 
-const getFprobePath = config => {
+export const getFfprobePath = async config => {
   if (config?.extractor?.useNative?.includes('ffprobe')) {
     log.debug(`Use native system command ffprobe`)
     return getNativeCommand('ffprobe')
   } else {
-    return require('@ffprobe-installer/ffprobe').path
+    return import('@ffprobe-installer/ffprobe')
+      .then(({path}) => path)
   }
-}
-
-module.exports = {
-  getFfmpegPath,
-  getFprobePath
 }

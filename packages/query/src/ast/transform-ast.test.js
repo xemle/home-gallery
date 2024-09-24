@@ -1,6 +1,7 @@
-const t = require('tap')
+import t from 'tap'
 
-const { transformAst, cmpAst, valueAst } = require('./transform-ast')
+import { cmpAst, valueAst } from './ast-factories.js'
+import { transformAst } from './transform-ast.js'
 
 t.only('Simple', async t => {
   const ast = {
@@ -18,8 +19,8 @@ t.only('Simple', async t => {
     types: ['keyValue'],
     keys: ['ratio'],
     matchValue: v => ['landscape'].includes(v),
-    map: ast => cmpAst(ast.key, '>', valueAst('1', ast.value.col), ast.col)
+    transform: ast => cmpAst(ast.key, '>', valueAst('1', ast.value.col), ast.col)
   }]
 
-  t.same(transformAst(ast, rules), {type: 'cmp', key: 'ratio', op: '>', value: {type: 'value', value: '1', col: 7}, col: 1}, 'Map orienation')
+  t.same(transformAst(ast, {}, rules), {type: 'cmp', key: 'ratio', op: '>', value: {type: 'value', value: '1', col: 7}, col: 1}, 'Map orientation')
 })

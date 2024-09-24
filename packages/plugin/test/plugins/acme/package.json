@@ -1,0 +1,7 @@
+{
+  "name": "acme",
+  "description": "acme plugin for HomeGallery",
+  "version": "1.0",
+  "type": "module",
+  "exports": "./index.js"
+}

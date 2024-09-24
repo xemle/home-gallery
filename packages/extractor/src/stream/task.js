@@ -1,12 +1,8 @@
-const { through } = require('@home-gallery/stream');
+import { through } from '@home-gallery/stream';
 
-const toPipe = (task, flush) => {
+export const toPipe = (task, flush) => {
   return through(function (entry, _, cb) {
-    const that = this;
-    task(entry, () => {
-      that.push(entry);
-      cb();
-    })
+    task(entry, () => cb(null, entry))
   }, function (cb) {
     if (flush) {
       flush(cb)
@@ -16,17 +12,22 @@ const toPipe = (task, flush) => {
   });
 }
 
-const conditionalTask = (test, task) => {
-  return (entry, cb) => {
+export const conditionalTask = (test, task) => {
+  return (entry, done) => {
     if (test(entry)) {
-      task(entry, cb);
+      task(entry, done);
     } else {
-      cb(entry);
+      done();
     }
   }
 }
 
-module.exports = {
-  toPipe,
-  conditionalTask
+export const conditionalAsyncTask = (test, task) => {
+  return (entry, done) => {
+    if (test(entry)) {
+      task(entry).finally(done)
+    } else {
+      done(entry)
+    }
+  }
 }

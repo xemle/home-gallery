@@ -1,9 +1,9 @@
-const t = require('tap')
+import t from 'tap'
 
-const { serialize, createHash } = require('@home-gallery/common')
+import { serialize, createHash } from '@home-gallery/common'
 
-const { FileStore } = require('./file-store')
-const { ObjectStore } = require('./object-store')
+import { FileStore } from './file-store.js'
+import { ObjectStore } from './object-store.js'
 
 const toEntry = (s, i) => {
   const [index, filename] = s.split(':')
@@ -50,6 +50,121 @@ t.test('ObjectStore', async t => {
     t.same(rootId, 'e8f4647acfdbdd3b033d092e464d66d573713d6c')
   })
 
+  t.test('addFileStore with filter', async t => {
+    const entries = [
+      'files:IMG_1234.JPG',
+      'files:sub/IMG_4321.JPG',
+    ].map(toEntry)
+    const fileStore = new FileStore()
+    fileStore.addEntries(entries)
+
+    const no1234Filter = e => !e.files[0].filename.match(/1234/)
+    const store = new ObjectStore()
+    const rootId = store.addFileStore(fileStore, no1234Filter)
+
+    let obj = store.getByHash(rootId)
+    t.same(obj.length, 1)
+    t.match(obj, [{
+      type: 'tree',
+      name: 'files',
+    }])
+    obj = store.getByHash(obj[0].hash)
+    t.same(obj.length, 1)
+    t.match(obj, [{
+      type: 'tree',
+      name: 'sub',
+    }])
+    obj = store.getByHash(obj[0].hash)
+    t.same(obj.length, 1)
+    t.match(obj, [{
+      type: 'entry',
+      name: 'IMG_4321.JPG',
+    }])
+  })
+
+  t.test('addFileStore with filter and empty folder', async t => {
+    const entries = [
+      'files:IMG_1234.JPG',
+      'files:sub/IMG_4321.JPG',
+      'other:IMG_9876.JPG',
+    ].map(toEntry)
+    const fileStore = new FileStore()
+    fileStore.addEntries(entries)
+
+    const filter = e => !e.files[0].filename.match(/(4321|9876)/)
+    const store = new ObjectStore()
+    const rootId = store.addFileStore(fileStore, filter)
+
+    let obj = store.getByHash(rootId)
+    t.same(obj.length, 1)
+    t.match(obj, [{
+      type: 'tree',
+      name: 'files',
+    }])
+    obj = store.getByHash(obj[0].hash)
+    t.same(obj.length, 1)
+    t.match(obj, [{
+      type: 'entry',
+      name: 'IMG_1234.JPG',
+    }])
+  })
+
+  t.test('addFileStore with filter and empty root', async t => {
+    const entries = [
+      'files:IMG_1234.JPG',
+    ].map(toEntry)
+    const fileStore = new FileStore()
+    fileStore.addEntries(entries)
+
+    const filter = e => !e.files[0].filename.match(/1234/)
+    const store = new ObjectStore()
+    const rootId = store.addFileStore(fileStore, filter)
+
+    let obj = store.getByHash(rootId)
+    t.same(obj.length, 0)
+  })
+
+  t.test('addFileStore with mapper', async t => {
+    const entries = [
+      'files:IMG_1234.JPG',
+      'files:sub/IMG_4321.JPG',
+    ].map(toEntry)
+    const fileStore = new FileStore()
+    fileStore.addEntries(entries)
+
+    const mapper = e => ({...e, acme: true})
+    const store = new ObjectStore()
+    const rootId = store.addFileStore(fileStore, () => true, mapper)
+
+    let obj = store.getByHash(rootId)
+    t.same(obj.length, 1)
+    t.match(obj, [{
+      type: 'tree',
+      name: 'files',
+    }])
+    obj = store.getByHash(obj[0].hash)
+    t.same(obj.length, 2)
+    t.match(obj, [{
+      type: 'entry',
+      name: 'IMG_1234.JPG',
+      entry: {
+        acme: true
+      }
+    }, {
+      type: 'tree',
+      name: 'sub',
+    }])
+    obj = store.getByHash(obj[1].hash)
+    t.same(obj.length, 1)
+    t.match(obj, [{
+      type: 'entry',
+      name: 'IMG_4321.JPG',
+      entry: {
+        acme: true
+      }
+    }])
+  })
+
   t.test('addFileStore with mergeCount 2', async t => {
     const entries = [
       'files:IMG_1234.JPG',
@@ -60,7 +175,7 @@ t.test('ObjectStore', async t => {
     fileStore.addEntries(entries)
 
     const store = new ObjectStore()
-    const rootId = store.addFileStore(fileStore, 2)
+    const rootId = store.addFileStore(fileStore, () => true, e => e, 2)
 
     t.same(rootId, 'e4b652c96e81bcda262fa8d641bec87ba4ac47e9')
     let obj = store.getByHash(rootId)
@@ -101,7 +216,7 @@ t.test('ObjectStore', async t => {
     fileStore.addEntries(entries)
 
     const store = new ObjectStore()
-    const rootId = store.addFileStore(fileStore, 3)
+    const rootId = store.addFileStore(fileStore, () => true, e => e, 3)
 
     t.same(rootId, '315cfc832aba5e3aeb0015ea4dcc2194395f7d09')
     let obj = store.getByHash(rootId)
@@ -192,7 +307,7 @@ t.test('ObjectStore', async t => {
     fileStore.addEntries(entries)
 
     const store = new ObjectStore()
-    const rootId = store.addFileStore(fileStore, 2)
+    const rootId = store.addFileStore(fileStore, () => true, e => e, 2)
 
     const callVisitor = new CallVisitor()
     store.walk(rootId, callVisitor)

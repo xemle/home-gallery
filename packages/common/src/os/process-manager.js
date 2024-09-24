@@ -32,7 +32,7 @@ class Process {
   }
 }
 
-class ProcessManager {
+export class ProcessManager {
   isStopped = false
   processes = []
 
@@ -53,8 +53,4 @@ class ProcessManager {
 
     return Promise.all(this.processes.map(p => p.kill(signal)))
   }
-}
-
-module.exports = {
-  ProcessManager
 }

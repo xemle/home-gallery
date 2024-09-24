@@ -1,8 +1,7 @@
-const express = require('express')
-const { createProxyMiddleware } = require('http-proxy-middleware');
-const log = require('@home-gallery/logger')('cast.proxy');
+import express from 'express'
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
-const proxy = ({serverUrl, port, host, sessionId}, cb) => {
+const proxyCb = ({serverUrl, port, host, sessionId}, cb) => {
   const app = express()
 
   app.use(`/${sessionId}/files`, createProxyMiddleware({
@@ -20,17 +19,13 @@ const proxy = ({serverUrl, port, host, sessionId}, cb) => {
   })
 }
 
-const proxyAsync = async (config) => {
+export const proxy = async (config) => {
   return new Promise((resolve, reject) => {
-    proxy(config, (err, server, app) => {
+    proxyCb(config, (err, server, app) => {
       if (err) {
         return reject(err)
       }
       resolve([server, app])
     })
   })
-}
-
-module.exports = {
-  proxy: proxyAsync
 }

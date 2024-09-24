@@ -1,7 +1,7 @@
-const express = require('express');
-const morgan = require('morgan');
+import express from 'express';
+import morgan from 'morgan';
 
-const server = async ({port}) => {
+export const server = async ({port}) => {
   const app = express();
 
   app.set('x-powered-by', false);
@@ -26,5 +26,3 @@ const server = async ({port}) => {
     });
   });
 }
-
-module.exports = server;

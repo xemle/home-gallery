@@ -2,15 +2,19 @@
   "name": "@home-gallery/logger",
   "version": "1.0.0",
   "description": "Logger for HomeGallery",
-  "main": "dist/index.js",
+  "type": "module",
+  "exports": {
+    "node": "./dist/node.js",
+    "default": "./dist/index.js"
+  },
   "files": [
     "dist"
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpy \"src/**/!(*.test.js)\" dist",
+    "build": "cpy \"src/**/!(*.test.[mc]?js)\" dist",
     "test": "tap",
-    "watch": "onchange \"src/**/*.js\" --delay 500 -- npm run build",
+    "watch": "onchange \"src/**/*.[mc]?js\" --delay 500 -- npm run build",
     "watch:test": "tap repl w"
   },
   "keywords": [

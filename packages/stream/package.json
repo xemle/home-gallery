@@ -2,14 +2,17 @@
   "name": "@home-gallery/stream",
   "version": "1.0.0",
   "description": "Stream utilities for HomeGallery",
-  "main": "dist/index.js",
+  "type": "module",
+  "exports": "./dist/index.js",
   "files": [
     "dist"
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpy \"src/**\" dist",
-    "watch": "onchange \"src/**\" -- npm run build"
+    "build": "cpy \"src/**/!(*.test.js)\" dist",
+    "test": "tap",
+    "watch": "onchange \"src/**\" -- npm run build",
+    "watch:test": "tap repl w"
   },
   "keywords": [
     "HomeGallery",
@@ -24,6 +27,7 @@
     "directory": "packages/stream"
   },
   "dependencies": {
-    "@home-gallery/logger": "file:../logger"
+    "@home-gallery/logger": "file:../logger",
+    "@home-gallery/common": "file:../common"
   }
 }

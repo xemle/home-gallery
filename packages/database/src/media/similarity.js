@@ -1,4 +1,4 @@
-const { getEntryMetaByKey } = require('./utils')
+import { getEntryMetaByKey } from './utils.js'
 
 const atob = bytes => Buffer.from(bytes).toString('base64')
 
@@ -20,13 +20,17 @@ const browserEncoder = values => {
 const getSimilarityHash = entry => {
   const embeddings = getEntryMetaByKey(entry, 'similarityEmbeddings')
   if (!embeddings || !embeddings.data || !embeddings.data.length) {
-    return {}
+    return false
   }
-  return {
-    similarityHash: browserEncoder(embeddings.data)
-  }
+  return browserEncoder(embeddings.data)
 }
 
-module.exports = {
-  getSimilarityHash
+export const similarityMapper = {
+  name: 'similarityMapper',
+  mapEntry(entry, media) {
+    const similarityHash = getSimilarityHash(entry)
+    if (similarityHash) {
+      media.similarityHash = similarityHash
+    }
+  }
 }

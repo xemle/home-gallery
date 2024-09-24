@@ -1,28 +1,25 @@
-const log = require('@home-gallery/logger')('api.events')
+import Logger from '@home-gallery/logger'
 
-const { applyEvents, mergeEvents } = require('@home-gallery/events')
+const log = Logger('api.events')
 
-const applyEventsFacade = (database, events) => {
+import { applyEvents as applyEventsOrig, mergeEvents } from '@home-gallery/events'
+
+export const applyEvents = (database, events) => {
   if (!events.data.length) {
     log.debug(`Events are empty. Skip apply events`)
   }
   const t0 = Date.now()
-  const changedEntries = applyEvents(database.data, events.data)
+  const changedEntries = applyEventsOrig(database.data, events.data)
   log.debug(t0, `Applied ${events.data.length} events to ${database.data.length} database entries and updated ${changedEntries.length} entries`)
   return database
 }
 
-const handleEvents = async (remoteEvents, eventFile) => {
+export const handleEvents = async (remoteEvents, eventFile) => {
   const t0 = Date.now()
-  if (!remoteEvents.data.length) {
+  if (!remoteEvents.data?.length) {
     log.info(t0, `Remote has no events. Skip event merge`)
     return
   }
   const newEvents = await mergeEvents(eventFile, remoteEvents.data)
   log.info(t0, `Merged ${newEvents.length} events to ${eventFile}`)
-}
-
-module.exports = {
-  applyEvents: applyEventsFacade,
-  handleEvents
 }

@@ -1,0 +1,30 @@
+export const isAst = ast => ast?.type && typeof ast.col == 'number'
+
+// Check if '{{ camelCase }} = {{ name }}' is present in AST
+const has{{ className }}Cmp = ast => ast.type == 'cmp' && ast.key == '{{ camelCase }}' && ast.op == '=' && ast.value?.value == '{{ name }}'
+
+const isQuery = ast => ast.type == 'query' || ast.type == 'orderedQuery'
+
+export const findAst = (ast, fn) => {
+  if (!isAst(ast)) {
+    return false
+  } else if (fn(ast)) {
+    return true
+  } else if (Array.isArray(ast.value)) {
+    return ast.value.find(child => findAst(child, fn))
+  } else if (ast.value) {
+    return findAst(ast.value, fn)
+  }
+}
+
+export const insertHas{{ className }}IfNotQueried = {
+  transform(ast, context) {
+    if (isQuery(ast) && !findAst(ast, has{{ className }}Cmp)) {
+      const value = {type: 'identifier', value: '{{ name }}', col: ast.col}
+      const cmp = {type: 'cmp', key: '{{ camelName }}', op: '=', value, col: ast.col}
+      const and = {type: 'and', value: [ast.value, cmp], col: ast.col}
+      ast.value = and
+    }
+    return ast
+  }
+}

@@ -5,11 +5,12 @@ const { Buffer } = require('buffer')
 const fs = require('fs').promises
 const http = require('http')
 const https = require('https')
+const url = require('url')
 const assert = require('assert')
 const fetch = require('node-fetch')
 const express = require('express')
 
-const { generateId, nextPort, waitFor, runCliAsync, killChildProcess, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase, addCliEnv, resolveProperty, parseValue, assertDeep } = require('../utils')
+const { generateId, nextPort, waitFor, runCliAsync, killChildProcess, getBaseDir, getPath, getStorageDir, getDatabaseFilename, getEventsFilename, readDatabase, addCliEnv, resolveProperty, parseValue, assertDeep, log } = require('../utils')
 
 const serverTestHost = '127.0.0.1'
 const servers = {}
@@ -22,11 +23,21 @@ const insecureOption = {
 
 const fetchFacade = (path, options = {}) => {
   const url = gauge.dataStore.scenarioStore.get('serverUrl')
+  const prefix = gauge.dataStore.scenarioStore.get('prefix') || ''
   assert(!!url, `Expected serverUrl but was empty. Start server first`)
 
   const headers = gauge.dataStore.scenarioStore.get('request.headers') || {}
   const agent = url.startsWith('https') ? insecureOption : {}
-  return fetch(`${url}${path || ''}`, Object.assign(options, {timeout: 500, headers: Object.assign({}, options.headers, headers)}, agent))
+  const t0 = Date.now()
+  const fetchUrl = `${url}${prefix}${path || ''}`
+  return fetch(fetchUrl, Object.assign(options, {timeout: 500, headers: Object.assign({}, options.headers, headers), redirect: 'manual'}, agent))
+    .then(res => {
+      const curlHeaders = Object.entries(headers).map(([key, value]) => `-H "${key}: ${value}"`).join(' ') + ' '
+      const curl = `curl ${url.startsWith('https') ? '-k ' : ''}${curlHeaders}${url}${path || ''}`
+      const data = {duration: Date.now() - t0, curl, headers}
+      log.debug(data, `Fetched ${path} with status ${res.status}`)
+      return res
+    })
 }
 
 const fetchDatabase = () => fetchFacade('/api/database.json')
@@ -60,7 +71,7 @@ const startServer = async (args = []) => {
   }
   gauge.dataStore.scenarioStore.put('serverUrl', url)
 
-  return waitFor(() => fetchFacade(''), 10 * 1000).catch(e => {throw new Error(`Could not start server with args: ${args.join(' ')}. Error ${e}`)})
+  return waitFor(() => fetchFacade('/'), 10 * 1000).catch(e => {throw new Error(`Could not start server with args: ${args.join(' ')}. Error ${e}`)})
 }
 
 step("Start server", startServer)
@@ -158,6 +169,10 @@ step("Start mock server", async () => {
   })
 })
 
+step("Wait for file <file>", async (file) => {
+  return waitFor(() => fetchFacade(file), 10 * 1000).catch(e => {throw new Error(`Waiting for file ${file} failed. Error ${e}`)})
+})
+
 step("Wait for database", () => waitFor(() => fetchDatabase(), 10 * 1000).catch(e => {throw new Error(`Waiting for database failed. Error ${e}`)}))
 
 step("Wait for current database", async () => {
@@ -183,9 +198,10 @@ const waitForEvent = async (eventPredicate) => {
 }
 
 step("Listen to server events", async () => {
-  const url = gauge.dataStore.scenarioStore.get('serverUrl')
+  const serverUrl = gauge.dataStore.scenarioStore.get('serverUrl')
 
   const onResponse = res => {
+    res.setEncoding('utf8')
     res.on('data', (data) => {
       const lines = data.toString().split('\n').filter(line => !!line)
       let event = Object.fromEntries(lines.map(line => line.split(/:\s+/)))
@@ -198,7 +214,26 @@ step("Listen to server events", async () => {
     })
   }
 
-  http.get(`${url}/api/events/stream`, onResponse)
+  const headers = gauge.dataStore.scenarioStore.get('request.headers') || {}
+  const agent = serverUrl.startsWith('https') ? insecureOption : undefined
+
+  const parsedUrl = url.parse(`${serverUrl}/api/events/stream`)
+  const options = {
+    method: 'GET',
+    protocol: parsedUrl.protocol,
+    hostname: parsedUrl.hostname,
+    port: parsedUrl.port,
+    path: parsedUrl.path,
+    headers,
+    agent
+  }
+  const req = http.request(options, onResponse)
+
+  req.on('error', err => {
+    gauge.message(`Listen to EventStream failed: ${err}`)
+  })
+  req.end()
+
   return waitForEvent(event => event.type == 'pong')
 })
 
@@ -235,6 +270,10 @@ step("Request file <file>", async (file) => {
         return res.json().then(body => {
           gauge.dataStore.scenarioStore.put('response.body', body)
         })
+      } else if (res.ok) {
+        return res.text().then(body => {
+          gauge.dataStore.scenarioStore.put('response.body', body)
+        })
       }
     })
 })
@@ -255,11 +294,38 @@ step("Response body has property <property> with value <value>", async (property
   }
 })
 
+const getAppState = () => {
+  const body = gauge.dataStore.scenarioStore.get('response.body') || ''
+  const script = body.split('\n').filter(line => line.match(/__homeGallery/)).filter(line => line.match(/script/)).pop() || ''
+  const json = script.replace(/<\/script>.*/, '').replace(/.*homeGallery=/, '') || '{}'
+  return JSON.parse(json)
+}
+
+step("Response has app state with <amount> entries", async (amount) => {
+  const state = getAppState()
+
+  const entryLength = state.entries ? state.entries.length : 0
+  assert(entryLength == amount, `Expecting ${amount} entries in app state but found ${entryLength}`)
+})
+
+step("Response has app state has plugin entry <plugin>", async (pluginEntry) => {
+  const state = getAppState()
+
+  const plugins = (state.pluginManager ? state.pluginManager : {}).plugins || []
+  assert(plugins.includes(pluginEntry), `Expecting ${pluginEntry} but have only ${plugins.join(', ')}`)
+})
+
 const btoa = text => Buffer.from(text).toString('base64')
 
 step("Set user <user> with password <password>", async (user, password) => {
   const headers = gauge.dataStore.scenarioStore.get('request.headers') || {}
   headers['Authorization'] = `Basic ${btoa(user + ':' + password)}`
+  gauge.dataStore.scenarioStore.put('request.headers', headers)
+})
+
+step("Set anonymous user", async () => {
+  const headers = gauge.dataStore.scenarioStore.get('request.headers') || {}
+  delete headers['Authorization']
   gauge.dataStore.scenarioStore.put('request.headers', headers)
 })
 
@@ -305,13 +371,21 @@ step("Log has entry with key <key> and value <value>", async (key, value) => {
   assert(matches.length, `Could not find any log entry with key ${key} and value '${value}' but found ${values.map(v => `'${v}'`).join(', ')}`)
 })
 
-step("Fetch database with query <query>", async (query) => {
+const requestDatabase = async (query) => {
   return fetchFacade(`/api/database.json${query}`)
     .then(res => {
       assert(res.ok, `Could not fetch database`)
       return res.json()
     })
     .then(data => gauge.dataStore.scenarioStore.put('fetched.database', data))
+}
+
+step("Fetch database", async () => {
+  return requestDatabase('')
+})
+
+step("Fetch database with query <query>", async (query) => {
+  return requestDatabase(query)
 })
 
 step("Fetched database has <amount> entries", async (amount) => {

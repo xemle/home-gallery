@@ -1,24 +1,51 @@
-const request = require('request');
+import request from 'request';
 
-const log = require('@home-gallery/logger')('extractor.apiEntry');
-const { through, parallel } = require('@home-gallery/stream');
+import Logger from '@home-gallery/logger'
+import { parallel, noop } from '@home-gallery/stream';
 
-const { conditionalTask } = require('../../stream/task');
-const { sizeToImagePreviewSuffix } = require('./image-preview')
+import { conditionalAsyncTask } from '../../stream/task.js';
+import { toPlugin } from '../pluginUtils.js';
+
+const log = Logger('extractor.apiEntry');
 
 const ERROR_THRESHOLD = 5
 const PUBLIC_API_SERVER = 'https://api.home-gallery.org'
 const DOCUMENATION_URL = 'https://docs.home-gallery.org'
 
-const getEntryFileBySuffixes = (storage, entry, suffixes) => suffixes.find(suffix => storage.hasEntryFile(entry, suffix));
+const getEntryFileBySuffixes = (storage, entry, suffixes) => suffixes.find(suffix => storage.hasFile(entry, suffix));
 
+const simpleFetch = async (options) => {
+  return new Promise((resolve, reject) => {
+    request(options, (err, res, body) => {
+      if (err) {
+        return reject(err)
+      } else if (res.statusCode < 200 || res.statusCode >= 300) {
+        const err = new Error(`Request was not successful: ${res.statusCode}`)
+        err.statusCode = res.statusCode
+        return reject(err)
+      }
+      resolve({res, body})
+    })
+  })
+  .then(async ({body}) => {
+    try {
+      return JSON.parse(body)
+    } catch(err) {
+      throw new Error(`Failed to parse response body as json`, {cause: err})
+    }
+  })
+}
+
+/**
+ * @param {import('@home-gallery/types').TStorage} storage
+ */
 const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imagePreviewSuffixes, entrySuffix, concurrent, timeout}) => {
   let currentErrors = 0;
 
   const test = entry => {
     if (currentErrors > ERROR_THRESHOLD) {
       return false;
-    } else if (!getEntryFileBySuffixes(storage, entry, imagePreviewSuffixes) || storage.hasEntryFile(entry, entrySuffix)) {
+    } else if (!getEntryFileBySuffixes(storage, entry, imagePreviewSuffixes) || storage.hasFile(entry, entrySuffix)) {
       return false;
     } else if (entry.type === 'image' || entry.type === 'rawImage') {
       return true;
@@ -27,72 +54,41 @@ const apiServerEntry = (storage, {name, apiServerUrl, apiPath, imagePreviewSuffi
     }
   }
 
-  const addError = () => {
-    currentErrors++;
-    if (currentErrors > ERROR_THRESHOLD) {
-      log.warn(`Too many errors. Skip processing of ${name}`);
-    }
-  }
-
-  const task = (entry, cb) =>{
+  const task = async (entry) =>{
     const t0 = Date.now();
     const imagePreviewSuffix = getEntryFileBySuffixes(storage, entry, imagePreviewSuffixes);
-    storage.readEntryFile(entry, imagePreviewSuffix, (err, buffer) => {
-      if (err) {
-        log.warn(`Could not read image entry file ${imagePreviewSuffix} from ${entry}: ${err}. Skip ${name} for this entry`);
-        return cb();
-      }
+    const buffer = await storage.readFile(entry, imagePreviewSuffix)
 
-      const url = `${apiServerUrl}${apiPath}`;
-      const options = {
-        url,
-        method: 'POST',
-        headers: { 'Content-Type': 'image/jpeg' },
-        body: buffer,
-        encoding: null,
-        timeout: timeout * 1000,
-      }
-      request(options, (err, res, body) => {
-        if (err) {
-          addError();
-          log.warn(err, `Could not get ${name} of ${entry} from URL ${url}: ${err}`);
-          return cb();
-        } else if (res.statusCode < 100 || res.statusCode >= 300) {
-          addError();
-          log.error(err, `Could not get ${name} of ${entry} from URL ${url}: HTTP response code is ${res.statusCode}`);
-          return cb();
+    const options = {
+      url: `${apiServerUrl}${apiPath}`,
+      method: 'POST',
+      headers: { 'Content-Type': 'image/jpeg' },
+      body: buffer,
+      encoding: null,
+      timeout: timeout * 1000,
+    }
+    const data = await simpleFetch(options)
+    await storage.writeFile(entry, entrySuffix, data)
+    log.debug(t0, `Fetched ${name} for ${entry}`);
+  }
+
+  const taskFacade = async (entry) => {
+    return task(entry)
+      .then(() => {
+        if (currentErrors > 0) {
+          currentErrors--
         }
-        storage.writeEntryFile(entry, entrySuffix, body, (err) => {
-          if (err) {
-            log.warn(err, `Could write ${name} of ${entry}: ${err}`);
-          } else {
-            if (currentErrors > 0) {
-              currentErrors--;
-            }
-            log.debug(t0, `Fetched ${name} for ${entry}`);
-          }
-          cb();
-        });
       })
-    });
+      .catch(err => {
+        log.warn(err, `Failed to fetch ${name} for ${entry}: ${err}`)
+        currentErrors++;
+        if (currentErrors > ERROR_THRESHOLD) {
+          log.warn(`Too many errors. Skip processing of ${name}`);
+        }
+      })
   }
 
-  return parallel({task: conditionalTask(test, task), concurrent});
-}
-
-const noop = () => through((entry, _, cb) => cb(null, entry))
-
-const logPublicApiPrivacyHint = (config) => {
-  const {url, timeout, concurrent} = config?.extractor?.apiServer
-
-  if (url?.startsWith(PUBLIC_API_SERVER)) {
-    log.warn(`You are using the public api server ${url}. Please read its documentation at ${DOCUMENATION_URL} for privacy concerns`)
-  } else {
-    log.debug(`Use api server ${url}`)
-  }
-  log.trace(`Use api server with ${concurrent} concurrent connections and timeout of ${timeout}s`)
-
-  return noop()
+  return parallel({task: conditionalAsyncTask(test, taskFacade), concurrent});
 }
 
 const apiServerPreviewSizeFilter = size => size <= 800
@@ -105,64 +101,123 @@ const isDisabled = (config, feature) => {
   return disable == feature
 }
 
-const similarEmbeddings = (storage, common, config) => {
-  if (isDisabled(config, 'similarDetection')) {
-    log.info(`Disable similar detection`)
+/**
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
+ */
+const apiServerPlugin = manager => ({
+  name: 'apiServerMessage',
+  phase: 'file',
+  async create() {
+    const config = manager.getConfig()
+    const {url, timeout, concurrent} = config?.extractor?.apiServer || {}
+
+    if (url?.startsWith(PUBLIC_API_SERVER)) {
+      log.warn(`You are using the public api server ${url}. Please read its documentation at ${DOCUMENATION_URL} for privacy concerns`)
+    } else {
+      log.debug(`Use api server ${url}`)
+    }
+    log.trace(`Use api server with ${concurrent} concurrent connections and timeout of ${timeout}s`)
     return noop()
-  }
+  },
+})
 
-  const apiServer = config.extractor.apiServer
-  return apiServerEntry(storage, {
-    name: 'similarity embeddings',
-    apiServerUrl: apiServer.url,
-    apiPath: '/embeddings',
-    imagePreviewSuffixes: common.imagePreviewSizes.filter(apiServerPreviewSizeFilter).map(sizeToImagePreviewSuffix),
-    entrySuffix: 'similarity-embeddings.json',
-    concurrent: apiServer.concurrent,
-    timeout: apiServer.timeout,
-  })
-}
+/**
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
+ */
+const similarDetectionPlugin = manager => ({
+  name: 'similarDetection',
+  phase: 'file',
+  /**
+   * @param {import('@home-gallery/types').TStorage} storage
+   */
+  async create(storage) {
+    const config = manager.getConfig()
+    const context = manager.getContext()
+    const { imagePreviewSizes, sizeToImagePreviewSuffix } = context
+    if (isDisabled(config, 'similarDetection')) {
+      log.info(`Disable similar detection`)
+      return noop()
+    }
 
-const objectDetection = (storage, common, config) => {
-  if (isDisabled(config, 'objectDetection')) {
-    log.info(`Disable object detection`)
-    return noop()
-  }
+    const apiServer = config.extractor.apiServer
+    return apiServerEntry(storage, {
+      name: 'similarity embeddings',
+      apiServerUrl: apiServer.url,
+      apiPath: '/embeddings',
+      imagePreviewSuffixes: imagePreviewSizes.filter(apiServerPreviewSizeFilter).map(sizeToImagePreviewSuffix),
+      entrySuffix: 'similarity-embeddings.json',
+      concurrent: apiServer.concurrent,
+      timeout: apiServer.timeout,
+    })
+  },
+})
 
-  const apiServer = config.extractor.apiServer
-  return apiServerEntry(storage, {
-    name: 'object detection',
-    apiServerUrl: apiServer.url,
-    apiPath: '/objects',
-    imagePreviewSuffixes: common.imagePreviewSizes.filter(apiServerPreviewSizeFilter).map(sizeToImagePreviewSuffix),
-    entrySuffix: 'objects.json',
-    concurrent: apiServer.concurrent,
-    timeout: apiServer.timeout,
-  })
-}
+/**
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
+ */
+const objectDetectionPlugin = manager => ({
+  name: 'objectDetection',
+  phase: 'file',
+  /**
+   * @param {import('@home-gallery/types').TStorage} storage
+   */
+  async create(storage) {
+    const config = manager.getConfig()
+    const context = manager.getContext()
+    const { imagePreviewSizes, sizeToImagePreviewSuffix } = context
+    if (isDisabled(config, 'objectDetection')) {
+      log.info(`Disable object detection`)
+      return noop()
+    }
 
-const faceDetection = (storage, common, config) => {
-  if (isDisabled(config, 'faceDetection')) {
-    log.info(`Disable face detection`)
-    return noop()
-  }
+    const apiServer = config.extractor.apiServer
+    return apiServerEntry(storage, {
+      name: 'object detection',
+      apiServerUrl: apiServer.url,
+      apiPath: '/objects',
+      imagePreviewSuffixes: imagePreviewSizes.filter(apiServerPreviewSizeFilter).map(sizeToImagePreviewSuffix),
+      entrySuffix: 'objects.json',
+      concurrent: apiServer.concurrent,
+      timeout: apiServer.timeout,
+    })
+  },
+})
 
-  const apiServer = config.extractor.apiServer
-  return apiServerEntry(storage, {
-    name: 'face detection',
-    apiServerUrl: apiServer.url,
-    apiPath: '/faces',
-    imagePreviewSuffixes: common.imagePreviewSizes.filter(apiServerPreviewSizeFilter).map(sizeToImagePreviewSuffix),
-    entrySuffix: 'faces.json',
-    concurrent: apiServer.concurrent,
-    timeout: apiServer.timeout,
-  })
-}
+/**
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
+ */
+const faceDetectionPlugin = manager => ({
+  name: 'faceDetection',
+  phase: 'file',
+  /**
+   * @param {import('@home-gallery/types').TStorage} storage
+   */
+  async create(storage) {
+    const config = manager.getConfig()
+    const context = manager.getContext()
+    const { imagePreviewSizes, sizeToImagePreviewSuffix } = context
+    if (isDisabled(config, 'faceDetection')) {
+      log.info(`Disable face detection`)
+      return noop()
+    }
 
-module.exports = {
-  apiServerEntry,
-  logPublicApiPrivacyHint,
-  similarEmbeddings,
-  objectDetection,
-  faceDetection
-}
+    const apiServer = config.extractor.apiServer
+    return apiServerEntry(storage, {
+      name: 'face detection',
+      apiServerUrl: apiServer.url,
+      apiPath: '/faces',
+      imagePreviewSuffixes: imagePreviewSizes.filter(apiServerPreviewSizeFilter).map(sizeToImagePreviewSuffix),
+      entrySuffix: 'faces.json',
+      concurrent: apiServer.concurrent,
+      timeout: apiServer.timeout,
+    })
+  },
+})
+
+const plugin = toPlugin([apiServerPlugin, similarDetectionPlugin, objectDetectionPlugin, faceDetectionPlugin], 'aiExtractor', ['imagePreviewExtractor'])
+
+export default plugin

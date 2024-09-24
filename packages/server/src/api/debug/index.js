@@ -1,8 +1,10 @@
-const log = require('@home-gallery/logger')('server.api.debug');
+import Logger from '@home-gallery/logger'
 
-const { sendError } = require('../error');
+const log = Logger('server.api.debug');
 
-const debugApi = ({remoteConsoleToken}) => {
+import { sendError } from '../error/index.js';
+
+export const debugApi = ({remoteConsoleToken}) => {
 
   const generateToken = () => {
     return 'xxxxxx-xxxxxx'.replace(/x/g, () => {
@@ -46,5 +48,3 @@ const debugApi = ({remoteConsoleToken}) => {
     console,
   };
 }
-
-module.exports = debugApi;

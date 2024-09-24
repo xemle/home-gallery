@@ -1,8 +1,11 @@
-const t = require('tap')
-const path = require('path')
-const YAML = require('yaml')
+import t from 'tap'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import YAML from 'yaml'
 
-const { readConfig, readData } = require('./read')
+import { readConfig, readData } from './read.js'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const testDir = path.resolve(__dirname, '..', '..', 'test')
 
 const env = {

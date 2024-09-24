@@ -37,8 +37,11 @@ const slice = (set) => ({
       return result
     }, {})
     const mergedId2Entries = {...state.id2Entries, ...id2Entries}
-    const allEntries = Object.values(mergedId2Entries)
-    
+    const allEntries = Object.values(mergedId2Entries) as Entry[]
+
+    // sort all entries by id. Entries should be search by binary search
+    allEntries.sort((a: Entry, b: Entry) => a.id <= b.id ? -1 : 1)
+
     // SearchStore will listen to allEntries changes and updates entries
     return {
       ...state,

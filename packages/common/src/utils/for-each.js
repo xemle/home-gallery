@@ -1,4 +1,4 @@
-const forEach = (items, onItem, cb) => {
+export const forEach = (items, onItem, cb) => {
   let i = 0
   const result = []
   
@@ -17,5 +17,3 @@ const forEach = (items, onItem, cb) => {
 
   next()
 }
-
-module.exports = forEach

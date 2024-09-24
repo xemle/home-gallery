@@ -1,13 +1,15 @@
-const log = require('@home-gallery/logger')('extractor.video.frames');
+import Logger from '@home-gallery/logger'
 
-const { toPipe, conditionalTask } = require('../../stream/task');
+const log = Logger('extractor.video.frames');
+
+import { toPipe, conditionalTask } from '../../stream/task.js';
 
 const videoPreviewSuffix = 'video-preview-720.mp4';
 const firstFrameSuffix = 'video-frame-001.jpg';
 const framePatternSuffix = 'video-frame-%00i.jpg';
 
-function videoFrames(storage, videoFrameExtractor, frameCount) {
-  const test = entry => entry.type === 'video' && storage.hasEntryFile(entry, videoPreviewSuffix) && !storage.hasEntryFile(entry, firstFrameSuffix);
+export function videoFrames(storage, videoFrameExtractor, frameCount) {
+  const test = entry => entry.type === 'video' && storage.hasFile(entry, videoPreviewSuffix) && !storage.hasFile(entry, firstFrameSuffix);
 
   const task = (entry, cb) => {
     const videoPreview = storage.getEntryFilename(entry, videoPreviewSuffix);
@@ -27,5 +29,3 @@ function videoFrames(storage, videoFrameExtractor, frameCount) {
 
   return toPipe(conditionalTask(test, task));
 }
-
-module.exports = {videoFrames, createVideoFrameExtractor};

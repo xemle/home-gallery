@@ -1,7 +1,7 @@
-const path = require('path');
-const mobilenet = require('@tensorflow-models/mobilenet');
+import path from 'path';
+import mobilenet from '@tensorflow-models/mobilenet';
 
-const loadCachedModel = require('../utils/load-cached-model')
+import { loadCachedModel } from '../utils/index.js'
 
 const toCachedConfig = (config, cacheDir) => {
   if (config.modelUrl) {
@@ -21,12 +21,12 @@ const toCachedConfig = (config, cacheDir) => {
   return {...config, ...{modelUrl}};
 }
 
-const downloadModel = async(config, cacheDir) => {
+export const downloadModel = async(config, cacheDir) => {
   const cachedConfig = toCachedConfig(config, cacheDir)
   await cachedConfig.modelUrl.load();
 }
 
-const init = async (config, cacheDir) => {
+export const init = async (config, cacheDir) => {
   const cachedConfig = toCachedConfig(config, cacheDir)
   const model = await mobilenet.load(cachedConfig);
 
@@ -41,5 +41,3 @@ const init = async (config, cacheDir) => {
 
   return { config, model, classify, infer };
 }
-
-module.exports = { init, downloadModel };

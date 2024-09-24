@@ -1,15 +1,17 @@
-const path = require('path');
-const fs = require('fs');
-const zlib = require('zlib');
-const { PassThrough, Transform, Readable } = require('stream')
-const split2 = require('split2');
+import path from 'path';
+import fs from 'fs';
+import zlib from 'zlib';
+import { PassThrough, Transform, Readable } from 'stream'
+import split2 from 'split2';
 
-const log = require('@home-gallery/logger')('index.readStream');
-const { callbackify } = require('@home-gallery/common')
-const { map } = require('@home-gallery/stream')
+import Logger from '@home-gallery/logger'
 
-const { getJournalFilename, readJournal } = require('./journal')
-const { getIndexName, byDirDescFileAsc } = require('./utils')
+const log = Logger('index.readStream');
+import { callbackify } from '@home-gallery/common'
+import { map } from '@home-gallery/stream'
+
+import { getJournalFilename, readJournal } from './journal.js'
+import { getIndexName, byDirDescFileAsc } from './utils.js'
 
 const readJournalCb = callbackify(readJournal)
 
@@ -74,7 +76,7 @@ const ifThen = (ifFn, thenFn) => cb => ifFn(err => err ? cb(err) : thenFn(cb))
 
 const ifThenElse = (ifFn, thenFn, elseFn) => cb => ifFn(err => err ? elseFn(cb) : thenFn(cb))
 
-const readIndexHead = (indexFilename, cb) => {
+export const readIndexHead = (indexFilename, cb) => {
   const indexName = getIndexName(indexFilename)
   const stream = fs.createReadStream(indexFilename)
 
@@ -131,7 +133,7 @@ const fromJournal = (indexFilename, journal, cb) => {
   })
 }
 
-const readStream = (indexFilename, journal, cb) => {
+export const readStream = (indexFilename, journal, cb) => {
   const journalFilename = getJournalFilename(indexFilename, journal)
   const asStream = ifThen(cb => exists(indexFilename, cb), cb => fromIndex(indexFilename, cb))
   const asJournalOrStream = ifThenElse(cb => exists(journalFilename, cb), cb => fromJournal(indexFilename, journal, cb), asStream)
@@ -157,7 +159,7 @@ const appendStream = (nextStream) => {
   return output
 }
 
-const readStreams = (indexFilenames, journal, cb) => {
+export const readStreams = (indexFilenames, journal, cb) => {
   let i = 0;
   const nextStream = (cb) => {
     if (i == indexFilenames.length) {
@@ -184,6 +186,3 @@ const readStreams = (indexFilenames, journal, cb) => {
   const stream = appendStream(nextStream);
   cb(null, stream);
 }
-
-
-module.exports = { readIndexHead, readStream, readStreams };

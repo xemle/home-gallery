@@ -1,0 +1,53 @@
+{
+  "name": "@home-gallery/plugin",
+  "version": "1.0.0",
+  "description": "Plugin system for HomeGallery",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "node": "./dist/node.js",
+      "browser": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm-run-all -p build:js build:types copy:templates",
+    "build:js": "node build.js",
+    "build:types": "npx tsc -d --emitDeclarationOnly",
+    "copy:templates": "cpy templates dist",
+    "test": "tap",
+    "watch": "npm-run-all -p watch:js watch:types watch:templates watch:test",
+    "watch:js": "node build.js --watch",
+    "watch:types": "npx tsc -d --emitDeclarationOnly --watch",
+    "watch:templates": "onchange \"templates/**\" -- npm run copy:templates",
+    "watch:test": "tap repl w"
+  },
+  "keywords": [
+    "HomeGallery",
+    "plugin",
+    "extend"
+  ],
+  "author": "Sebastian Felis <sebastian@silef.de>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xemle/home-gallery.git",
+    "directory": "packages/plugin"
+  },
+  "types": "./dist/node.d.ts",
+  "dependencies": {
+    "@home-gallery/common": "file:../common",
+    "@home-gallery/query": "file:../query",
+    "@home-gallery/stream": "file:../stream",
+    "mustache": "4.2.0",
+    "yup": "^1.4.0"
+  },
+  "devDependencies": {
+    "@home-gallery/types": "file:../types"
+  }
+}

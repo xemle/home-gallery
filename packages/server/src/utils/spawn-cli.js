@@ -1,12 +1,12 @@
-const { spawn } = require('@home-gallery/common')
+import { spawn } from '@home-gallery/common'
 
-const Logger = require('@home-gallery/logger')
+import Logger from '@home-gallery/logger'
 const log = Logger('server.cli')
 
 const nodeBin = process.argv[0]
 const cliScript = process.argv[1]
 
-const spawnCli = (args, env = {}) => {
+export const spawnCli = (args, env = {}) => {
   const spawnEnv = {
     ...env,
     GALLERY_LOG_LEVEL: 'trace',
@@ -28,8 +28,4 @@ const spawnCli = (args, env = {}) => {
   })
 
   return child
-}
-
-module.exports = {
-  spawnCli
 }

@@ -1,21 +1,25 @@
-const path = require('path');
-const express = require('express');
-const compression = require('compression');
-const cors = require('cors');
-const bodyParser = require('body-parser');
+import path from 'path';
+import express from 'express';
+import compression from 'compression';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import { fileURLToPath } from 'url'
 
-const { loggerMiddleware } = require('./logger-middleware')
-const { EventBus } = require('./eventbus');
-const databaseApi = require('./api/database');
-const treeApi = require('./api/database/tree');
-const eventsApi = require('./api/events');
-const webapp = require('./webapp');
-const { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } = require('./auth')
-const { isIndex, skipIf } = require('./utils')
+import { loggerMiddleware } from './logger-middleware.js'
+import { databaseApi } from './api/database/index.js';
+import { treeApi } from './api/database/tree/index.js';
+import { eventsApi } from './api/events/index.js';
+import { webapp } from './webapp.js';
+import { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
+import { isIndex, skipIf } from './utils.js'
+import { debugApi } from './api/debug/index.js'
+import { browserPlugin } from './browser-plugins.js';
+import Logger from '@home-gallery/logger';
 
-const eventbus = new EventBus()
-
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const webappDir = path.join(__dirname, 'public')
+
+const log = Logger('server.app')
 
 function shouldCompress (req, res) {
   if (req.headers['x-no-compression']) {
@@ -34,58 +38,99 @@ const getAuthMiddleware = config => {
   return (req, _, next) => next()
 }
 
-function createApp(config) {
+/**
+ * Ensure leading and tailing slash. Allow base path with schema like http://foo.com/bar
+ */
+const browserBasePath = basePath => {
+  let path = `${basePath || '/'}`
+  if (!path.startsWith('/') && path.indexOf('://') < 0) {
+    path = '/' + path
+  }
+  return path.endsWith('/') ? path : path + '/'
+}
 
+const routerPrefix = basePath => {
+  let path = browserBasePath(basePath)
+  return path.match(/[^/]\/$/) ? path.substring(0, path.length - 1) : path
+}
+
+
+/**
+ * @param {import('./types.js').TServerContext} context
+ */
+export function createApp(context) {
+  const { config } = context
   const app = express();
   app.disable('x-powered-by')
   app.enable('trust proxy')
-
-  app.use(augmentReqByUserMiddleware())
   app.use(loggerMiddleware())
-  app.use(cors());
-  app.use(compression({ filter: shouldCompress }))
 
-  app.use(skipIf(express.static(webappDir, {maxAge: '1h'}), isIndex))
+  const router = express.Router()
+  router.use(augmentReqByUserMiddleware())
+  router.use(cors());
+  router.use(compression({ filter: shouldCompress }))
 
-  app.use(getAuthMiddleware(config))
+  router.use(skipIf(express.static(webappDir, {maxAge: '1h'}), isIndex))
 
-  app.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
-  app.use(bodyParser.json({limit: '1mb'}))
+  router.use(getAuthMiddleware(config))
 
-  const { read: readEvents, push: pushEvent, stream, getEvents } = eventsApi(eventbus, config.events.file);
-  const { read: readDatabase, init: initDatabase, getFirstEntries, getDatabase } = databaseApi(eventbus, config.database.file, getEvents);
-  const { read: readTree } = treeApi(eventbus, getDatabase);
+  router.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
 
-  app.get('/api/events.json', readEvents);
-  app.get('/api/events/stream', stream);
-  app.post('/api/events', pushEvent);
-  app.get('/api/database.json', readDatabase);
-  app.get('/api/database/tree/:hash', readTree);
+  const pluginApi = browserPlugin(context, '/plugins/')
+  router.use('/plugins', pluginApi.static)
+
+  router.use(bodyParser.json({limit: '1mb'}))
+
+  const { read: readEvents, push: pushEvent, stream, getEvents } = eventsApi(context, config.events.file);
+  const { read: readDatabase, init: initDatabase, getFirstEntries, getDatabase } = databaseApi(context, config.database.file, getEvents);
+  const { read: readTree } = treeApi(context, getDatabase);
+
+  router.get('/api/events.json', readEvents);
+  router.get('/api/events/stream', stream);
+  router.post('/api/events', pushEvent);
+  router.get('/api/database.json', readDatabase);
+  router.get('/api/database/tree/:hash', readTree);
 
   if (config.server.remoteConsoleToken) {
-    const debugApi = require('./api/debug')({remoteConsoleToken: config.server?.remoteConsoleToken})
-    app.post('/api/debug/console', debugApi.console);
+    const { console } = debugApi({remoteConsoleToken: config.server?.remoteConsoleToken})
+    router.post('/api/debug/console', console);
   }
 
   // deprecated
-  app.get('/api/database', readDatabase);
-  app.get('/api/events', readEvents);
+  router.get('/api/database', readDatabase);
+  router.get('/api/events', readEvents);
 
-  const disabled = config?.webapp?.disabled || []
-  app.use(webapp(webappDir, req => ({
-    disabled: !!req.user ? [...disabled, 'pwa'] : disabled,
-    entries: getFirstEntries(50)
-  }), {
-    basePath: config.server.basePath || '/',
-    injectRemoteConsole: !!config.server.remoteConsoleToken
-  }));
+  const getWebAppState = async (req) => {
+    const disabled = config?.webapp?.disabled || []
+    const plugins = pluginApi.pluginEntries
+    const entries = await getFirstEntries(50, req)
+    return {
+      disabled: !!req.username ? [...disabled, 'pwa'] : disabled,
+      pluginManager: {
+        plugins
+      },
+      entries,
+    }
+  }
+
+  const webAppOptions = {
+    basePath: browserBasePath(config.server.prefix || config.server.basePath),
+    injectRemoteConsole: !!config.server.remoteConsoleToken,
+  }
+
+  router.use(webapp(webappDir, getWebAppState, webAppOptions))
+
+  const prefix = routerPrefix(config.server.prefix)
+  app.use(prefix, router)
+
+
+  if (prefix != '/') {
+    log.info(`Set prefix to ${prefix}`)
+    app.get('/', (_, res) => res.redirect(prefix))
+  }
 
   return {
     app,
     initDatabase
   }
-}
-
-module.exports = {
-  createApp
 }

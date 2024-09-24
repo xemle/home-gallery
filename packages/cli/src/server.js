@@ -1,6 +1,8 @@
-const { load, mapArgs } = require('./config');
+import Logger from '@home-gallery/logger'
 
-const log = require('@home-gallery/logger')('cli.server');
+import { load, mapArgs, validatePaths } from './config/index.js';
+
+const log = Logger('cli.server');
 
 const mapUsers = users => {
   return users.map(user => {
@@ -37,6 +39,11 @@ const command = {
         alias: 'c',
         describe: 'Configuration files'
       },
+      'auto-config': {
+        boolean: true,
+        default: true,
+        describe: 'Search for configuration on common configuration directories'
+      },
       storage: {
         alias: 's',
         describe: 'Storage directory'
@@ -67,10 +74,14 @@ const command = {
         alias: 'C',
         describe: 'SSL certificate file'
       },
+      'prefix': {
+        type: 'string',
+        describe: 'Server prefix for all routes and for browser app. E.g. "/gallery"'
+      },
       'base-path': {
         alias: 'b',
         type: 'string',
-        describe: 'Base path of static page. e.g. "/gallery"'
+        describe: 'Base path of browser app only. E.g. "/gallery". See also prefix option'
       },
       user: {
         alias: 'U',
@@ -102,11 +113,7 @@ const command = {
     .default('open-browser', undefined, 'true')
   },
   handler: (argv) => {
-    const { startServer, webappDir } = require('@home-gallery/server');
-
-    const ensureLeadingSlash = url => url.startsWith('/') ? url : '/' + url
-
-    const mapping = {
+    const argvMapping = {
       host: 'server.host',
       port: 'server.port',
       storage: 'storage.dir',
@@ -114,7 +121,8 @@ const command = {
       events: 'events.file',
       key: 'server.key',
       cert: 'server.cert',
-      basePath: {path: 'server.basePath', map: (basePath) => ensureLeadingSlash(basePath)},
+      prefix: 'server.prefix',
+      basePath: 'server.basePath',
       openBrowser: 'server.openBrowser',
       remoteConsoleToken: 'server.removeConsoleToken',
       user: {path: 'server.auth.users', type: 'add', map: mapUsers},
@@ -122,24 +130,32 @@ const command = {
       watchSources: {path: 'server.watchSources'}
     }
 
-    const run = async (argv) => {
-      const options = await load(argv.config, false)
-      mapArgs(argv, options.config, mapping)
+    const setDefaults = (config, serverPluginFiles) => {
+      config.pluginManager = {
+        ...config.pluginManager,
+        plugins: [...serverPluginFiles, ...(config.pluginManager?.plugins || [])]
+      }
+    }
 
-      return new Promise((resolve, reject) => {
-        startServer(options, (err, server) => {
-          if (err) {
-            return reject(err)
-          }
-          process.once('SIGINT', () => {
-            log.debug(`Stopping server`)
-            server.shutdown().then(resolve)
-          })
+    const run = async (argv) => {
+      const { startServer, getPluginFiles } = await import('@home-gallery/server')
+
+      const options = await load(argv.config, false, argv.autoConfig)
+      const serverPluginFiles = getPluginFiles()
+      mapArgs(argv, options.config, argvMapping)
+      setDefaults(options.config, serverPluginFiles)
+      validatePaths(options.config, ['database.file', 'events.file', 'storage.dir'])
+
+      const [server, shutdown] = await startServer(options)
+      return new Promise(resolve => {
+        process.once('SIGINT', () => {
+          log.debug(`Stopping server`)
+          shutdown().then(resolve)
         })
       })
     }
 
-    run(argv)
+    return run(argv)
       .then(() => {
         log.info(`Server stopped`)
         process.exit(0)
@@ -151,4 +167,4 @@ const command = {
   }
 }
 
-module.exports = command;
+export default command;

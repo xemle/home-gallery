@@ -1,0 +1,23 @@
+export class {{ className }}DatabaseMapper {
+  name = '{{ camelName }}Mapper'
+  order = 1
+
+  constructor(manager) {
+    this.manager = manager
+    this.log = manager.createLogger('plugin.{{ camelName }}.database')
+    this.pluginConfig = manager.getConfig().plugin?.{{ camelName }} || {}
+  }
+
+  mapEntry(entry, media) {
+    this.log.info(`Map database entry: ${entry}`)
+
+    {{#modules.extractor}}
+    // Add data from the plugin extractor task
+    media.plugin.{{ camelName }} = entry.meta.{{ camelName }}
+    {{/modules.extractor}}
+    {{^modules.extractor}}
+    // Add some plugin data to the database
+    media.plugin.{{ camelName }} = {created: new Date().toISOString(), value: '{{ name }}'}
+    {{/modules.extractor}}
+  }
+}

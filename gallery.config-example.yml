@@ -70,6 +70,10 @@ sources:
 # Extractor settings
 #
 #extractor:
+  # excludes:
+  #   - *.xmp
+  #   - *.svg
+  # excludeFromFile: '{configDir}/excludes'
   # Preview image settings
   #image:
   #  previewSizes: [1920, 1280, 800, 320, 128]
@@ -122,6 +126,14 @@ sources:
   # Use less memory for smaller devices (e.g. Raspberry Pi Zero), e.g. 512 MB.
   # Node's default memory limit is 512 MB (changeable via --max-old-space-size node arg)
   #maxMemory: 2048
+  # excludes:
+  #   - *.xmp
+  #   - *.svg
+  # excludeFromFile: '{configDir}/excludes'
+  # supportedTypes
+  #   - image
+  #   - rawImage
+  #   - video
 #events:
   #file: '{configDir}/{configPrefix}events.db'
 
@@ -139,16 +151,29 @@ sources:
   # Enable basic authentication users and ip whitelist rules which require no authentication
   # First matching rule wins. Default rules are: allow: localhost and deny: all.
   # Hashed password can be generated via
+  #   node -e "pw=process.argv[1];const {createHash,randomBytes}=require('crypto');salt=randomBytes(12);hash=createHash('sha256').update(salt.toString()+pw).digest('base64');console.log('{SHA256-salted}'+salt.toString('base64')+'.'+hash)" 'password'
+  #   {SHA256-salted}FkcbhhcHYW0DdE9u.P9Ik9MG8ldtO0fzGB+RV186vi8PZMomsya5OWC0AEiA=
   #   node -e "pw=process.argv[1]||'';sha1=require('crypto').createHash('sha1').update(pw).digest('base64');console.log('{SHA}'+sha1)" password
   #   {SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g=
   # auth:
+  #  public:
+  #    filter: 'year >= 2024 tag:public' # Database filter for non authenticated users and non whitelisted IPs
   #  users:
   #    - username: password
   #    - username: '{SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g='
+  #    - username: admin
+  #      password: '{SHA256-salted}FkcbhhcHYW0DdE9u.P9Ik9MG8ldtO0fzGB+RV186vi8PZMomsya5OWC0AEiA=' # passsword
+  #      filter: '' # no database filter for admin user
+  #    - username: guest
+  #      password: '{SHA256-salted}W1jrZgK81z06YLhA.qTSmeyYtPP19ZEpGiiAyVn61nly4jqbuuGoSefzLm98=' # guest
+  #      filter: 'year >= 2019 not tag:private'
   #  rules:
   #    - allow: localhost
   #    - allow: '192.168/16'
   #    - deny: all
+  # Prefix of application. E.g. /gallery
+  #prefix: /
+  # Prefix path for browser only. basePath is Overwritten by prefix
   #basePath: /
   #watchSources: true
 
@@ -162,6 +187,28 @@ sources:
     #- serverEvents
     #- pwa
     #- offlineDatabase
+
+#
+# Plugin settings
+#
+#pluginManager:
+  # Directories to load. Each folder entry for or dir is handled as plugin
+  #dirs:
+    # First directory is default directory for plugin creation
+    #- plugins
+  # List of dedicated plugin files
+  #plugins:
+    #- pluginFile
+  #disabled:
+    #- acmePlugin
+    #- acmePlugin.extensionName
+
+# Plugin settings
+#plugin:
+  # Plugin name
+  #acme:
+    # Plugin setting
+    #prop: value
 
 logger:
   # Currently console and file loggers are available

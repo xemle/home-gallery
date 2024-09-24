@@ -1,40 +1,33 @@
-const fs = require('fs');
-const ffmpeg = require('fluent-ffmpeg');
+import ffmpeg from 'fluent-ffmpeg';
 
-const log = require('@home-gallery/logger')('extractor.video');
+import Logger from '@home-gallery/logger'
+import { humanizeBytes, humanizeDuration } from '@home-gallery/common';
 
-const { toPipe, conditionalTask } = require('../../stream/task');
+import { getFfmpegArgs, getVideoStream } from './video-utils.js'
+import { toPlugin } from '../pluginUtils.js';
 
-const { getVideoOptions, getFfmpegArgs } = require('./video-utils')
+const log = Logger('extractor.video');
 
-function convertVideo(storage, entry, options, cb) {
-  log.info(`Start video conversion of ${entry}`);
-
-  const {ffprobePath, ffmpegPath, videoSuffix} = options
-  const t0 = Date.now();
-  const file = storage.getEntryFilename(entry, videoSuffix);
-  const tmpFile = `${file}.tmp`;
+/**
+ * @param {import('@home-gallery/types').TExtractorEntry} entry
+ * @param {string} src
+ * @param {string} dst
+ * @param {string} ffmpegPath
+ * @param {string} ffprobePath
+ * @param {string[]} ffmpegArgs
+ */
+function convertVideo(entry, src, dst, ffmpegPath, ffprobePath, ffmpegArgs, cb) {
   const intervalMs = 30*1000;
   let last = Date.now();
-  const ffmpegArgs = getFfmpegArgs(entry, options)
-  const command = ffmpeg(entry.src);
+
+  const command = ffmpeg(src);
   command.setFfmpegPath(ffmpegPath);
   command.setFfprobePath(ffprobePath);
   command
     .on('error', cb)
-    .on('end', () => {
-      fs.rename(tmpFile, file, (err) => {
-        if (err) {
-          log.error(err, `Could not rename file ${tmpFile} to ${file} for ${entry}`)
-          return cb();
-        }
-        storage.addEntryFilename(entry, videoSuffix);
-        log.info(t0, `Video conversion of ${entry} done`);
-        cb();
-      })
-    })
+    .on('end', cb)
     .addOptions(ffmpegArgs)
-    .output(tmpFile)
+    .output(dst)
     .on('start', commandLine => log.debug({ffmpegArgs}, `Start video conversion via ffmpeg command: ${commandLine}`))
     .on('progress', progress => {
       const now = Date.now();
@@ -47,23 +40,78 @@ function convertVideo(storage, entry, options, cb) {
     .run();
 }
 
-function video(storage, extractor, config) {
-  const videoOptions = getVideoOptions(extractor, config)
-
-  const test = entry => entry.type === 'video' && !storage.hasEntryFile(entry, videoOptions.videoSuffix);
-
-  const task = (entry, cb) => {
-    convertVideo(storage, entry, videoOptions, (err) => {
-      if (err) {
-        log.error(err, `Video preview conversion of ${entry} failed: ${err}`);
-      }
-      cb();
+const createVideoConverter = (ffmpegPath, ffprobePath, options) => {
+  return async (entry, dst) => {
+    const src = await entry.getFile()
+    const ffmpegArgs = getFfmpegArgs(entry, options)
+    return new Promise((resolve, reject) => {
+      convertVideo(entry, src, dst, ffmpegPath, ffprobePath, ffmpegArgs, err => err ? reject(err) : resolve())
     })
   }
-
-  return toPipe(conditionalTask(test, task));
 }
 
-module.exports = {
-  video
-};
+/**
+ * @param {import('@home-gallery/types').TStorage} storage
+ * @param {string} ffmpegPath
+ * @param {string} ffprobePath
+ * @param {object} options
+ * @returns {import('stream').Transform}
+ */
+async function video(storage, videoConverter, videoSuffix) {
+
+  const test = entry => entry.type === 'video' && !storage.hasFile(entry, videoSuffix) && getVideoStream(entry)?.duration > 0;
+
+  const task = async (entry) => {
+    const {width, height, duration} = getVideoStream(entry)
+    const logData = {video: {width, height, duration, size: entry.size}}
+    log.debug(logData, `Starting video conversion of ${entry} (${width}x${height}, ${humanizeDuration(duration)}, ${humanizeBytes(entry.size)})`)
+
+    const t0 = Date.now()
+    const localFile = await storage.createLocalFile(entry, videoSuffix)
+    return videoConverter(entry, localFile.file)
+      .then(async () => {
+        await localFile.commit()
+        log.debug(t0, `Video conversion of ${entry} done`)
+      })
+      .catch(async err => {
+        await localFile.release()
+        log.warn(err, `Failed to convert video of ${entry}: ${err}`)
+      })
+  }
+
+  return {
+    test,
+    task
+  }
+}
+
+/**
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
+ */
+const videoPlugin = manager => ({
+  name: 'video',
+  phase: 'file',
+  /**
+   * @param {import('@home-gallery/types').TStorage} storage
+   */
+  async create(storage) {
+    const config = manager.getConfig()
+    const context = manager.getContext()
+    const { ffmpegPath, ffprobePath } = context
+
+    const options = {
+      previewSize: 720,
+      ext: 'mp4',
+      ...config?.extractor?.video
+    }
+    const videoSuffix = `video-preview-${options.previewSize}.${options.ext}`
+    const videoConverter = createVideoConverter(ffmpegPath, ffprobePath, options)
+
+    return video(storage, videoConverter, videoSuffix)
+  },
+})
+
+const plugin = toPlugin(videoPlugin, 'videoExtractor', ['metaExtractor'])
+
+export default plugin

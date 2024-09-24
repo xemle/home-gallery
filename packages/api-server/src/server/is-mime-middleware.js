@@ -1,6 +1,6 @@
 const UNSUPPORTED_MEDIA_TYPE = 415;
 
-const isMimeMiddleware = (mimeType) => {
+export const isMimeMiddleware = (mimeType) => {
   return (req, res, next) => {
     if (!req.is(mimeType)) {
       const err = new Error(`Given MIME type is not acceptable. Require MIME type '${mimeType}'`);
@@ -11,5 +11,3 @@ const isMimeMiddleware = (mimeType) => {
     }
   }
 }
-
-module.exports = isMimeMiddleware;

@@ -1,5 +1,5 @@
-const { load } = require('../config')
-const { runner } = require('./menu')
+import { load } from '../config/index.js'
+import { runner } from './menu.js'
 
 const command = {
   command: ['interactive', '$0'],
@@ -24,4 +24,4 @@ const command = {
   }
 }
 
-module.exports = command
+export default command

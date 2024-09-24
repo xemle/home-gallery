@@ -1,25 +1,32 @@
 #!/usr/bin/env node
 
-const { loggerOptions, loggerMiddleware } = require('./logger')
+import { loggerOptions, loggerMiddleware } from './logger.js'
 
-const yargs = require('yargs');
-const fileIndexCli = require('./file-index');
-const extractCli = require('./extractor');
-const databaseCli = require('./database');
-const serverCli = require('./server');
-const storageCli = require('./storage');
-const exportCli = require('./export');
-const fetchCli = require('./fetch');
-const castCli = require('./cast');
-const interactiveCli = require('./interactive');
-const runCli = require('./run')
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+import { buildOptions, createBuildMiddleware } from './build.js'
+import fileIndexCli from './file-index/index.js';
+import extractCli from './extractor.js';
+import databaseCli from './database.js';
+import serverCli from './server.js';
+import storageCli from './storage.js';
+import exportCli from './export.js';
+import fetchCli from './fetch.js';
+import castCli from './cast.js';
+import interactiveCli from './interactive/index.js';
+import runCli from './run.js'
+import pluginCli from './plugin.js'
 
-const cli = () => {
-  yargs.usage('Usage: $0 [global options] <command> [options]')
+export const cli = (buildInfo = {}) => {
+  return yargs(hideBin(process.argv))
+    .usage('Usage: $0 [global options] <command> [options]')
+    .version(buildInfo.version || '1.0.0')
     .env('GALLERY')
+    .options(buildOptions)
     .options(loggerOptions)
     .default('level', undefined, 'debug')
     .middleware(loggerMiddleware)
+    .middleware(createBuildMiddleware(buildInfo))
     .command(fileIndexCli)
     .command(extractCli)
     .command(databaseCli)
@@ -30,11 +37,10 @@ const cli = () => {
     .command(castCli)
     .command(interactiveCli)
     .command(runCli)
+    .command(pluginCli)
     .demandCommand()
     .help()
     .alias('h', 'help')
-    .epilog('(c) 2023 HomeGallery - https://home-gallery.org')
-    .argv;
+    .epilog('(c) 2024 HomeGallery - https://home-gallery.org')
+    .parse();
 }
-
-module.exports = cli;

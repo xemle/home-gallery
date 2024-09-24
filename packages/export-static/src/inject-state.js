@@ -1,12 +1,14 @@
-const path = require('path');
+import path from 'path';
 
-const log = require('@home-gallery/logger')('export.webapp.injectState');
+import Logger from '@home-gallery/logger'
 
-const rewriteFile = require('./rewrite-file');
+const log = Logger('export.webapp.injectState');
 
-const injectState = (database, outputDirectory, basePath, disableEdit, cb) => {
+import { rewriteFile } from './rewrite-file.js';
+
+export const injectState = (database, dir, basePath, disableEdit, cb) => {
   const t0 = Date.now();
-  const indexFilename = path.join(outputDirectory, basePath, 'index.html')
+  const indexFilename = path.join(dir, basePath, 'index.html')
   rewriteFile(indexFilename, data => {
     const disabled = ['offlineDatabase']
     if (disableEdit) {
@@ -22,8 +24,6 @@ const injectState = (database, outputDirectory, basePath, disableEdit, cb) => {
       return cb(err);
     }
     log.info(t0, `Inject state`)
-    cb(null, outputDirectory, basePath)
+    cb(null, dir, basePath)
   });
 }
-
-module.exports = injectState;

@@ -1,8 +1,10 @@
-const log = require('@home-gallery/logger')('extractor.readAllEntryFiles');
+import Logger from '@home-gallery/logger'
 
-const { toPipe } = require('./task');
+const log = Logger('extractor.readAllEntryFiles');
 
-const readAllEntryFiles = (storage) => {
+import { toPipe } from './task.js';
+
+export const readAllEntryFiles = (storage) => {
   const task = (entry, cb) => {
     storage.readAllEntryFiles(entry, (err, {files, meta}) => {
       if (err) {
@@ -17,5 +19,3 @@ const readAllEntryFiles = (storage) => {
 
   return toPipe(task);
 }
-
-module.exports = readAllEntryFiles;

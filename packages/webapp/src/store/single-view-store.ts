@@ -5,13 +5,13 @@ export interface SingleViewStore {
   lastId: string
   lastIndex: number
   showDetails: boolean
-  showRects: boolean
+  showAnnotations: boolean
   showNavigation: boolean
 
   setLastId(lastId: string): void
   setLastIndex(lastIndex: number): void
   setShowDetails(show: boolean): void
-  setShowRects(show: boolean): void
+  setShowAnnotations(show: boolean): void
   setShowNavigation(show: boolean): void
 }
 
@@ -28,13 +28,13 @@ export const useSingleViewStore = create<
   lastId: '',
   lastIndex: -1,
   showDetails: false,
-  showRects: false,
+  showAnnotations: false,
   showNavigation: true,
 
   setLastId: (lastId: string) => set((state: SingleViewStore) => ({...state, lastId})),
   setLastIndex: (lastIndex: number) => set((state: SingleViewStore) => ({...state, lastIndex})),
   setShowDetails: (show: boolean) => set((state: SingleViewStore) => ({...state, showDetails: show})),
-  setShowRects: (show: boolean) => set((state: SingleViewStore) => ({...state, showRects: show})),
+  setShowAnnotations: (show: boolean) => set((state: SingleViewStore) => ({...state, showAnnotations: show})),
   setShowNavigation: (show: boolean) => set((state: SingleViewStore) => ({...state, showNavigation: show})),
 }), {
   name: 'gallery-single-view',

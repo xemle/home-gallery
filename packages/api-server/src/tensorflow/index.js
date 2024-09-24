@@ -1,18 +1,18 @@
-const loadTensorflow = require('./load-tensorflow');
+import { loadTensorflow } from './load-tensorflow.js';
 
-const initFaceApi = require('./models/face-api');
-const { init: initMobileNet, downloadModel: downloadMobileNetModel } = require('./models/mobilenet');
-const { init: initCocoSsd, downloadModel: downloadCocoSsdModel } = require('./models/coco-ssd');
+import { initFaceApi } from './models/face-api.js';
+import { init as initMobileNet, downloadModel as downloadMobileNetModel } from './models/mobilenet.js';
+import { init as initCocoSsd, downloadModel as downloadCocoSsdModel } from './models/coco-ssd.js';
 
-const downloadModels = async (modelConfigs, cacheDir) => {
+export const downloadModels = async (modelConfigs, cacheDir) => {
   await downloadMobileNetModel(modelConfigs.mobileNet, cacheDir)
   await downloadCocoSsdModel(modelConfigs.cocoSsd, cacheDir)
 }
 
-const load = async (backend, modelConfigs, modelDir) => {
+export const load = async (backend, modelConfigs, modelDir) => {
   let t0 = Date.now();
   const tf = await loadTensorflow(backend);
-  console.log(`Load tensorflow width ${backend} backend in ${Date.now() - t0}ms`)
+  console.log(`Load tensorflow with ${backend} backend in ${Date.now() - t0}ms`)
 
   const toTensor = (buffer, width, height) => {
     const channels = 3;
@@ -52,5 +52,3 @@ const load = async (backend, modelConfigs, modelDir) => {
     }
   }
 }
-
-module.exports = { load, downloadModels };

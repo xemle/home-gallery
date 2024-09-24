@@ -72,3 +72,12 @@ step("File <file> has tags <tags>", async (file, tags) => {
   const exif = await exiftool.read(path.join(getFilesDir(), file))
   assert.deepEqual(exif.TagsList, tags.split(','), `Expected to be ${tags} but was ${exif.TagsList}`)
 })
+
+step("Replace <pattern> in <file> with <text>", async (pattern, file, text) => {
+  const data = await fs.readFile(path.join(getBaseDir(), file), 'utf8')
+  const pos = data.indexOf(pattern)
+  if (pos >= 0) {
+    data = data.substring(0, pos) + text + data.substring(pos + pattern.length)
+    await fs.writeFile(path.join(getBaseDir(), file), data, 'utf8')
+  }
+})

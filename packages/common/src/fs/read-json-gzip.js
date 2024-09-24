@@ -1,24 +1,16 @@
-const fs = require('fs');
-const zlib = require('zlib');
-const { pipeline, Writable } = require('stream')
+import fs from 'fs';
+import zlib from 'zlib';
+import { pipeline } from 'stream'
 
-const { parseJson } = require('@home-gallery/stream');
+import { parseJson, write } from '@home-gallery/stream';
 
-const readJsonGzip = (filename, cb) => {
-  let data
+export const readJsonGzip = (filename, cb) => {
+  let result
   pipeline(
     fs.createReadStream(filename),
     zlib.createGunzip(),
     parseJson(),
-    new Writable({
-      objectMode: true,
-      write(chunk, _, done) {
-        data = chunk
-        done()
-      }
-    }),
-    err => cb(err, data)
+    write(data => result = data),
+    err => cb(err, result)
   )
 }
-
-module.exports = readJsonGzip;

@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { filterEntriesByQuery, throwUnknownExpressions, ignoreUnknownExpressions } = require('./index')
+import { filterEntriesByQuery, throwUnknownExpressions, ignoreUnknownExpressions } from './index.js'
 
 const data = [
   {
@@ -86,6 +86,14 @@ t.test('Simple', async t => {
 
 t.test('Complex', async t => {
   t.same(await execQuery('not(bar or snow)'), ['0987', '6718'], 'not with terms')
+})
+
+t.test('or', async t => {
+  t.same(await execQuery('123456 or tag:snow or year=2019'), ['1234', '1223', '6718'], 'any match with more than two')
+})
+
+t.test('and', async t => {
+  t.same(await execQuery('width > 2000 and height > 1000 and country:Italy'), ['0987'], 'all match with more than two')
 })
 
 t.test('cmp', async t => {
@@ -257,7 +265,6 @@ t.test('order by', async t => {
 
   t.same(await execQuery('order by count(files)'), ['0987', '1223', '1234', '6718'], 'by count files')
   t.same(await execQuery('order by count(tags)'), ['1223', '1234', '0987', '6718'], 'by count tags')
-
 })
 
 t.test('Not yet implemented', async t => {

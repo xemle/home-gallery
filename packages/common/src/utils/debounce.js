@@ -1,4 +1,4 @@
-const debounce = (fn, waitMs = 1000) => {
+export const debounce = (fn, waitMs = 1000) => {
   let timerId
   return (...args) => {
     if (timerId) {
@@ -7,5 +7,3 @@ const debounce = (fn, waitMs = 1000) => {
     timerId = setTimeout(() => fn(...args), waitMs)
   }
 }
-
-module.exports = debounce

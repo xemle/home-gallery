@@ -1,11 +1,9 @@
-const { Transform } = require('stream')
+import { Transform } from 'stream'
 
-const through = (transform, flush) => {
+export const through = (transform, flush) => {
   return new Transform({
     objectMode: true,
     transform,
     flush
   })
 }
-
-module.exports = through

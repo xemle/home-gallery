@@ -1,11 +1,7 @@
-const t = require('tap')
+import t from 'tap'
 
-const { stringifyAst } = require('../ast')
-const { parse: parseCb } = require('./index')
-
-const parse = query => new Promise((resolve, reject) => {
-  parseCb(query, (err, result) => err ? reject(err) : resolve(result))
-})
+import { stringifyAst } from '../ast/index.js'
+import { parse } from './index.js'
 
 const simpleAst = query => parse(query).then(stringifyAst)
 
@@ -95,6 +91,7 @@ t.test('Comparator', async t => {
   t.equal(await simpleAst('foo:bar'), 'foo:bar', 'Colon')
   t.equal(await simpleAst('foo:"bar baz"'), 'foo:"bar baz"', 'Colon value with whitespace')
   t.equal(await simpleAst('foo = "bar baz"'), 'foo = "bar baz"', 'Equal with whitespace')
+  t.equal(await simpleAst('foo=bar:baz'), 'foo = bar:baz', 'Value with colon')
 })
 
 t.test('Function', async t => {
@@ -109,8 +106,8 @@ t.test('List', async t => {
   t.equal(await simpleAst('foo IN (bar)'), 'foo in (bar)', 'Capitalized')
   t.equal(await simpleAst('foo all in (bar)'), 'foo all in (bar)', 'All in')
   t.equal(await simpleAst('foo ALL IN (bar)'), 'foo all in (bar)', 'All in capitalized')
-  t.rejects(simpleAst('foo all IN (bar)'), 'Invalid all in')
-  t.rejects(simpleAst('foo ALL in (bar)'), 'Invalid all in other way')
+  t.rejects(simpleAst('foo all IN (bar)'), 'terms(Invalid all in')
+  t.rejects(simpleAst('foo ALL in (bar)'), 'terms(Invalid all in other way')
   t.equal(await simpleAst('foo.bar in (baz)'), 'foo.bar in (baz)', 'Dotted key')
   t.equal(await simpleAst('foo.bar in ( "baz baz" , "cat cat" )'), 'foo.bar in ("baz baz", "cat cat")', 'Text value')
   t.equal(await simpleAst('foo in (bar, baz)'), 'foo in (bar, baz)', 'Multiple')
@@ -119,6 +116,7 @@ t.test('List', async t => {
   t.equal(await simpleAst('foo in (bar,baz cat)'), 'foo in (bar, baz, cat)', 'More with mixed syntax')
   t.equal(await simpleAst('not foo in (bar,baz,cat)'), 'not(foo in (bar, baz, cat))', 'With Not')
   t.equal(await simpleAst('foo in (bär,fuß ché)'), 'foo in (bär, fuß, ché)', 'With umlaut')
+  t.equal(await simpleAst('foo in (bar:baz "zoo:lar")'), 'foo in (bar:baz, "zoo:lar")', 'With colon')
 })
 
 t.test('Range', async t => {
@@ -130,21 +128,23 @@ t.test('Range', async t => {
 
 t.test('Order by', async t => {
   t.equal(await simpleAst('foo order by bar'), 'foo orderBy(bar)', 'Simple')
-  t.equal(await simpleAst('foo order by bar asc'), 'foo orderBy(bar asc)', 'Simple asc')
-  t.equal(await simpleAst('foo order by bar desc'), 'foo orderBy(bar desc)', 'Simple desc')
+  t.equal(await simpleAst('foo order by bar asc'), 'foo orderBy(bar) asc', 'Simple asc')
+  t.equal(await simpleAst('foo order by bar desc'), 'foo orderBy(bar) desc', 'Simple desc')
   t.equal(await simpleAst('foo order by count(bar)'), 'foo orderBy(count(bar))', 'count function')
-  t.equal(await simpleAst('foo order by count(bar) asc'), 'foo orderBy(count(bar) asc)', 'count function asc')
-  t.equal(await simpleAst('foo order by count(bar) ASC'), 'foo orderBy(count(bar) asc)', 'count function asc capitalized')
-  t.equal(await simpleAst('foo order by count(bar) desc'), 'foo orderBy(count(bar) desc)', 'count function desc')
-  t.equal(await simpleAst('foo order by count(bar) DESC'), 'foo orderBy(count(bar) desc)', 'count function desc capitalized')
+  t.equal(await simpleAst('foo order by count(bar) asc'), 'foo orderBy(count(bar)) asc', 'count function asc')
+  t.equal(await simpleAst('foo order by count(bar) ASC'), 'foo orderBy(count(bar)) asc', 'count function asc capitalized')
+  t.equal(await simpleAst('foo order by count(bar) desc'), 'foo orderBy(count(bar)) desc', 'count function desc')
+  t.equal(await simpleAst('foo order by count(bar) DESC'), 'foo orderBy(count(bar)) desc', 'count function desc capitalized')
+})
 
+t.test('Order by2', async t => {
   t.equal(await simpleAst('foo ORDER BY bar'), 'foo orderBy(bar)', 'Capitalized')
   t.equal(await simpleAst('foo bar order by baz'), 'terms(foo, bar) orderBy(baz)', 'Terms')
-  t.rejects(simpleAst('foo bar order baz'), 'Invalid order by versions: sort')
-  t.rejects(simpleAst('foo bar by baz'), 'Invalid order by versions: by')
-  t.rejects(simpleAst('foo bar ORDER by baz'), 'Invalid order by versions: ORDER by')
-  t.rejects(simpleAst('foo bar order BY baz'), 'Invalid order by versions: order BY')
-  t.equal(await simpleAst('foo bar "sort" baz'), 'terms(foo, bar, "sort", baz)', 'Escaped sort keyword')
+  t.rejects(simpleAst('foo bar order baz'), 'terms(Invalid order by versions: order')
+  t.rejects(simpleAst('foo bar by baz'), 'terms(Invalid order by versions: by')
+  t.rejects(simpleAst('foo bar ORDER by baz'), 'terms(Invalid order by versions: ORDER by')
+  t.rejects(simpleAst('foo bar order BY baz'), 'terms(Invalid order by versions: order BY')
+  t.equal(await simpleAst('foo bar "order" baz'), 'terms(foo, bar, "order", baz)', 'Escaped order keyword')
   t.equal(await simpleAst('foo bar "by" baz'), 'terms(foo, bar, "by", baz)', 'Escaped by keyword')
 
   t.equal(await simpleAst('order by foo'), 'orderBy(foo)', 'Empty filter, only order by')
@@ -155,4 +155,12 @@ t.test('Complex query', async t => {
   t.equal(await simpleAst('not (foo > bar) (baz or cat in (a, 2, c))'), 'terms(not(foo > bar), (or(baz, cat in (a, 2, c))))', 'Two')
   t.equal(await simpleAst('(2021) not foo'), 'terms((2021), not(foo))', 'Three')
   t.equal(await simpleAst('(2021) not foo in [  2021 : 2023]'), 'terms((2021), not(foo in [2021 : 2023]))', 'Four')
+})
+
+t.test('key:value', async t => {
+  t.equal(await simpleAst('key:value'), 'key:value', 'Single value')
+  t.equal(await simpleAst('key:foo:baz'), 'key:foo:baz', 'Value with colon')
+  t.equal(await simpleAst('key:"foo baz"'), 'key:"foo baz"', 'Value with text')
+  t.equal(await simpleAst('key:foo/baz'), 'key:foo/baz', 'Value with slash')
+  t.equal(await simpleAst('key:foo://baz'), 'key:foo://baz', 'Value with double slash')
 })

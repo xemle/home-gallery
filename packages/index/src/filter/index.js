@@ -1,8 +1,8 @@
-const { fileFilter, promisify } = require('@home-gallery/common')
+import { fileFilter, promisify } from '@home-gallery/common'
 
-const { createFilesizeFilter } = require('./filesize-filter')
-const { createFilterChain } = require('./filter-chain')
-const { createLimitFilter } = require('./limit-filter')
+import { createFilesizeFilter } from './filesize-filter.js'
+import { createFilterChain } from './filter-chain.js'
+import { createLimitFilter } from './limit-filter.js'
 
 const asyncFileFilter = promisify(fileFilter)
 
@@ -14,7 +14,7 @@ const createFilename2Entry = (entries) => {
     }, {})
 }
 
-const createFilter = async (entries, options) => {
+export const createFilter = async (entries, options) => {
   const filters = []
   const filename2Entry = createFilename2Entry(entries)
 
@@ -28,8 +28,4 @@ const createFilter = async (entries, options) => {
   }
 
   return createLimitFilter(entries.length, filename2Entry, options.addLimits, createFilterChain(filters))
-}
-
-module.exports = {
-  createFilter
 }

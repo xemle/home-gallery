@@ -1,28 +1,26 @@
-const { readJsonGzip } = require('@home-gallery/common');
+import { readJsonGzip } from '@home-gallery/common';
 
-const { HeaderType, isDatabaseTypeCompatible } = require('./header')
-const { migrate } = require('./migrate')
+import { migrate, getDatabaseFileType } from './migrate.js'
 
-function readDatabase(filename, cb) {
+export function readDatabase(filename, cb) {
   readJsonGzip(filename, (err, database) => {
     if (err) {
       return cb(err);
-    } else if (!isDatabaseTypeCompatible(database && database.type)) {
-      return cb(new Error(`Incompatible database format ${database && database.type || 'unknown'} of file ${filename}. Expect ${HeaderType}`))
     }
-    migrate(database, cb)
+    migrate(database).then(database => cb(null, database), cb)
   });
 }
 
-const initDatabase = (entries) => {
+export const initDatabase = (entries) => {
+  const databaseFileType = getDatabaseFileType()
   return {
-    type: HeaderType,
+    type: databaseFileType.toString(),
     created: new Date().toISOString(),
     data: entries
   }
 }
 
-const readOrCreateDatabase = (filename, cb) => {
+export const readOrCreateDatabase = (filename, cb) => {
   readDatabase(filename, (err, database) => {
     if (err && err.code == 'ENOENT') {
       cb(null, initDatabase([]))
@@ -31,9 +29,3 @@ const readOrCreateDatabase = (filename, cb) => {
     }
   })
 }
-
-module.exports = {
-  initDatabase,
-  readDatabase,
-  readOrCreateDatabase
-};

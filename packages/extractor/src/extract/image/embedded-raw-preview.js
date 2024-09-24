@@ -1,10 +1,11 @@
-const ExifTool = require('exiftool-vendored').ExifTool
+import Logger from '@home-gallery/logger'
 
-const log = require('@home-gallery/logger')('extractor.image.rawPreview')
+import { toPlugin } from '../pluginUtils.js';
 
-const { toPipe, conditionalTask } = require('../../stream/task')
+const log = Logger('extractor.image.rawPreview')
 
-const rawPreviewSuffix = 'raw-preview.jpg'
+const rawPreviewImageSuffix = 'raw-preview.jpg'
+const rawPreviewMetaSuffix = 'raw-preview-exif.json'
 
 const rawImageTypes = ['rawImage']
 
@@ -22,9 +23,14 @@ const hasEmbeddedPreview = entry => {
   return !!exif.PreviewImage
 }
 
-const embeddedRawPreview = (storage, {exiftool}) => {
+/**
+ * @param {import('@home-gallery/types').TStorage} storage
+ * @param {ExifTool} exifTool
+ * @returns {import('stream').Transform}
+ */
+const embeddedRawPreview = (storage, exifTool) => {
   const test = entry => { 
-    if (!rawImageTypes.includes(entry.type) || storage.hasEntryFile(entry, rawPreviewSuffix) || hasJpg(entry)) {
+    if (!rawImageTypes.includes(entry.type) || storage.hasFile(entry, rawPreviewImageSuffix) || hasJpg(entry)) {
       return false
     } else if (hasEmbeddedPreview(entry)) {
       return true
@@ -33,17 +39,17 @@ const embeddedRawPreview = (storage, {exiftool}) => {
     return false
   }
 
-  const task = (entry, cb) => {
-    const src = entry.src
+  const task = async (entry) => {
+    const src = await entry.getFile()
 
     const t0 = Date.now()
-    const previewFile = storage.getEntryFilename(entry, rawPreviewSuffix)
-    exiftool.extractPreview(src, previewFile)
-      .then(() => exiftool.read(previewFile))
-      .then(tags => {
-        storage.addEntryFilename(entry, rawPreviewSuffix)
+    const previewFile = await storage.createLocalFile(entry, rawPreviewImageSuffix)
+    return exifTool.extractPreview(src, previewFile.file)
+      .then(() => exifTool.read(previewFile.file))
+      .then(async tags => {
+        await previewFile.commit()
+        await storage.writeFile(entry, rawPreviewMetaSuffix, tags)
         log.debug(t0, `Extracted raw preview image with size of ${tags.ImageWidth}x${tags.ImageHeight} from ${entry}`)
-        cb()
       })
       .catch(err => {
         log.warn(err, `Could not extract raw preview image of ${entry}: ${err}`)
@@ -51,7 +57,30 @@ const embeddedRawPreview = (storage, {exiftool}) => {
       })
   }
 
-  return toPipe(conditionalTask(test, task))
+  return {
+    test,
+    task
+  }
 }
 
-module.exports = embeddedRawPreview
+/**
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
+ */
+const embeddedRawPreviewPlugin = manager => ({
+  name: 'embeddedRawPreview',
+  phase: 'raw',
+  /**
+   * @param {import('@home-gallery/types').TStorage} storage
+   */
+  async create(storage) {
+    const context = manager.getContext()
+    const { exifTool } = context
+
+    return embeddedRawPreview(storage, exifTool)
+  },
+})
+
+const plugin = toPlugin(embeddedRawPreviewPlugin, 'embeddedRawPreviewExtractor', ['metaExtractor'])
+
+export default plugin

@@ -2,7 +2,8 @@
   "name": "@home-gallery/server",
   "version": "1.0.0",
   "description": "Web server of HomeGallery",
-  "main": "dist/index.js",
+  "type": "module",
+  "exports": "./dist/index.js",
   "files": [
     "dist"
   ],
@@ -32,6 +33,7 @@
     "@home-gallery/database": "file:../database",
     "@home-gallery/events": "file:../events",
     "@home-gallery/logger": "file:../logger",
+    "@home-gallery/plugin": "file:../plugin",
     "@home-gallery/query": "file:../query",
     "compression": "^1.7.4",
     "cors": "^2.8.5",

@@ -1,9 +1,9 @@
-const path = require('path');
+import path from 'path';
 
-const { writeSafe } = require('@home-gallery/common');
-const getMetaKeyName = require('./meta-file-key');
+import { writeSafe } from '@home-gallery/common';
+import { getMetaKeyName } from './meta-file-key.js';
 
-function writeStorageFile(entry, storageDir, filename, data, cb) {
+export function writeStorageFile(entry, storageDir, filename, data, cb) {
   writeSafe(path.join(storageDir, filename), data, (err) => {
     if (err) {
       return cb(err);
@@ -19,5 +19,3 @@ function writeStorageFile(entry, storageDir, filename, data, cb) {
   })
 
 }
-
-module.exports = writeStorageFile;

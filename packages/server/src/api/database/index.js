@@ -1,56 +1,62 @@
-const log = require('@home-gallery/logger')('server.api.database');
+import Logger from '@home-gallery/logger'
 
-const { filterEntriesByQuery, createStringifyEntryCache } = require('@home-gallery/query')
-const { applyEvents } = require('./events-facade')
+import { applyEvents } from './events-facade.js'
+import { waitReadWatch } from './read-database.js';
+import { cache } from './cache-middleware.js';
+import { sanitizeInt } from './sanitize.js';
+import { sendError } from '../error/index.js'
+import { createQueryContext } from './queryContext.js'
 
-const { waitReadWatch } = require('./read-database');
-const { cache } = require('./cache-middleware');
-const { sanitizeInt } = require('./sanitize');
-
-const { sendError } = require('../error')
-
-const filterEntriesByQueryCb = (entries, query, stringifyEntryCache, cb) => filterEntriesByQuery(entries, query, {textFn: stringifyEntryCache.stringifyEntry}).then(({entries}) => cb(null, entries)).catch(cb)
-
-const filterDatabase = (entries, query, stringifyEntryCache, cb) => query ? filterEntriesByQueryCb(entries, query, stringifyEntryCache, cb) : cb(null, entries)
+const log = Logger('server.api.database');
 
 /**
- * @param {EventBus} eventbus
+ * @param {import('../../types.js').TServerContext} context
  */
-function databaseApi(eventbus, databaseFilename, getEvents) {
+export function databaseApi(context, databaseFilename, getEvents) {
+  const { eventbus, executeQuery } = context
   let database = false;
   const databaseCache = cache(3600);
   let entryCache = {};
-  const stringifyEntryCache = createStringifyEntryCache()
+
+  /**
+   * @param {object} database
+   * @param {string} [term]
+   * @param {object} [req]
+   * @returns {Promise<object>}
+   */
+  const filterDatabase = async (database, term = '', req = {}) => {
+    /** @type {import('@home-gallery/types').TQueryContext} */
+    const queryContext = createQueryContext(context, req)
+    const data = await executeQuery(database.data, term, queryContext)
+    log.trace({ast: queryContext.ast, queryAst: queryContext.queryAst}, `Queried database with ${queryContext.stringifiedQueryAst}`)
+    return {...database, data}
+  }
 
   function send(req, res) {
     if (!database) {
       log.info(`Database file is not loaded yet.`);
       return sendError(res, 404, 'Database file is not loaded yet.')
-    } else if (req.query && (req.query.offset || req.query.limit || req.query.q)) {
-      filterDatabase(database.data, req.query.q, stringifyEntryCache, (err, entries) => {
-        if (err) {
-          log.error(err, `Failed to filter database with query '${req.query.q}': ${err}`)
-          return sendError(res, 400, `Failed to filter database with query '${req.query.q}': ${err}`)
+    }
+    filterDatabase(database, req.query?.q || '', req)
+      .then(database => {
+        if (!req.query?.offset && !req.query?.limit) {
+          return res.send(database)
         }
-        const length = entries.length;
+        const length = database.data.length;
         const offset = sanitizeInt(req.query.offset, 0, length, 0);
         const limit = sanitizeInt(req.query.limit, Math.min(10, length), length, length);
-        const data = entries.slice(offset, offset + limit);
-        res.send(Object.assign({}, database, { limit, offset, data }));
+        const data = database.data.slice(offset, offset + limit);
+        res.send({type: database.type, limit, offset, ...database, data });
       })
-    } else {
-      res.send(database);
-    }
+      .catch(err => {
+        log.error(err, `Failed to filter database with query '${req.query?.q}': ${err}`)
+        return sendError(res, 400, `Failed to filter database with query '${req.query?.q}': ${err}`)
+      })
   }
 
   const clearCaches = (entries = []) => {
     databaseCache.clear();
     entryCache = {};
-    if (entries.length) {
-      stringifyEntryCache.evictEntries(entries);
-    } else {
-      stringifyEntryCache.evictAll();
-    }
     log.trace(`Cleared caches`);
   }
 
@@ -80,26 +86,41 @@ function databaseApi(eventbus, databaseFilename, getEvents) {
     init: () => {
       waitReadWatch(databaseFilename, getEvents, (err, newDatabase) => {
         if (err) {
-          log.error(`Could not read database file ${databaseFilename}: ${err}`);
-        } else {
-          database = newDatabase;
-          clearCaches()
-          eventbus.emit('server', {
-            action: 'databaseReloaded'
-          })
+          log.error(err, `Could not read database file ${databaseFilename}: ${err}`)
+          return
         }
+        clearCaches()
+        filterDatabase(newDatabase, '', {})
+          .then(filteredDatabase => {
+            if (filteredDatabase.data.length != newDatabase.data.length) {
+              log.info(`New database entries are filtered from ${newDatabase.data.length} to ${filteredDatabase.data.length} entries`)
+            }
+            database = filteredDatabase;
+            eventbus.emit('server', {
+              action: 'databaseReloaded'
+            })
+          })
       })
     },
-    getFirstEntries: (count) => {
-      const key = `firstEntries:${count}`;
-      if (typeof entryCache[key] === 'undefined') {
-        entryCache[key] = database ? database.data.slice(0, count) : [];
+    getFirstEntries: async (count, req) => {
+      const key = `firstEntries:${req.username || ''}:${count}` + Date.now();
+      if (!database?.data?.length) {
+        return []
+      } else if (entryCache[key]?.length) {
+        return entryCache[key]
       }
-      return entryCache[key]
+
+      return filterDatabase(database, '', req)
+        .then(filteredDatabase => {
+          entryCache[key] = filteredDatabase.data.slice(0, count);
+          return entryCache[key]
+        })
+        .catch(err => {
+          log.warn(err, `Failed to query database for first entries. Return empty list`)
+          return []
+        })
     },
     read: (req, res) => databaseCache.middleware(req, res, () => send(req, res)),
     getDatabase: () => database
   }
 }
-
-module.exports = databaseApi;

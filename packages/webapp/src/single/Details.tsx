@@ -179,7 +179,7 @@ export const Details = ({entry, dispatch}) => {
               </div>
               <div>
                 {entry.road && (
-                  <p>{simpleSearchLink(entry.road, 'location', entry.road)}</p>
+                  <p>{simpleSearchLink(entry.road, 'road', entry.road)}</p>
                 )}
                 {entry.city && (
                   <p>{simpleSearchLink(entry.city, 'city', entry.city)}</p>
@@ -192,6 +192,18 @@ export const Details = ({entry, dispatch}) => {
                 )}
               </div>
             </div>
+          )}
+          { !!entry.description && (
+            <>
+              <div className="flex">
+                <div className="flex-shrink-0 w-8">
+                  <FontAwesomeIcon icon={icons.faNewspaper} className="text-gray-300"/>
+                </div>
+                <div>
+                  <p className="inline-flex flex-wrap gap-2">{entry.description}</p>
+                </div>
+              </div>
+            </>
           )}
           <div className="flex">
             <div className="flex-shrink-0 w-8">

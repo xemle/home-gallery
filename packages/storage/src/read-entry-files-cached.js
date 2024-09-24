@@ -1,11 +1,13 @@
-const path = require('path');
+import path from 'path';
 
-const log = require('@home-gallery/logger')('storage.cache.readEntryFiles');
+import Logger from '@home-gallery/logger'
 
-const readEntryFilesSingle = require('./read-entry-files');
-const { getEntryFilesCacheKey, getEntryFilesCacheFilename } = require('./entry-files-cache-file');
-const { readEntryFilesCache } = require('./entry-files-cache');
-const { lruCache } = require('@home-gallery/common');
+const log = Logger('storage.cache.readEntryFiles');
+
+import { readEntryFiles as readEntryFilesSingle } from './read-entry-files.js';
+import { getEntryFilesCacheKey, getEntryFilesCacheFilename } from './entry-files-cache-file.js';
+import { readEntryFilesCache } from './entry-files-cache.js';
+import { lruCache } from '@home-gallery/common';
 
 function createCache(storageDir, dirCacheSize) {
   const loadCache = (entry, cb) => {
@@ -16,7 +18,7 @@ function createCache(storageDir, dirCacheSize) {
   return lruCache(getEntryFilesCacheKey, loadCache, dirCacheSize);
 }
 
-function readEntryFilesCached(storageDir, dirCacheSize) {
+export function readEntryFilesCached(storageDir, dirCacheSize) {
   const cache = createCache(storageDir, dirCacheSize || 8);
   const clearCache = () => cache.clear();
 
@@ -30,12 +32,12 @@ function readEntryFilesCached(storageDir, dirCacheSize) {
       if (err && err.code === 'ENOENT') {
         log.warn(`Entry files cache for ${entry} is missing. Read files and meta from storage`);
       } else if (err) {
-        log.warn(`Could not read entry files cache for ${entry}: ${err}. Read files and meta from storage`);
+        log.warn(err, `Could not read entry files cache for ${entry}: ${err}. Read files and meta from storage`);
       }
 
       readEntryFilesSingle(entry, storageDir, (err, filesAndMeta) => {
         if (err) {
-          log.error(`Could not read files and metadata of ${entry}: ${err}`);
+          log.error(err, `Could not read files and metadata of ${entry}: ${err}`);
           return cb(err);
         }
         cb(null, filesAndMeta);
@@ -48,5 +50,3 @@ function readEntryFilesCached(storageDir, dirCacheSize) {
     clearCache,
   }
 }
-
-module.exports = readEntryFilesCached;

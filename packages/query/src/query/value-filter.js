@@ -1,13 +1,9 @@
-const { toLower } = require('./utils')
+import { toLower } from './utils.js'
 
-const valueFilter = (ast, options) => {
+export const valueFilter = (ast, context) => {
   const needle = toLower(ast.value)
-  return v => {
-    const text = options.textFn(v) || ''
+  ast.filter = v => {
+    const text = context.textFn(v) || ''
     return text.indexOf(needle) >= 0
   }
-}
-
-module.exports = {
-  valueFilter
 }

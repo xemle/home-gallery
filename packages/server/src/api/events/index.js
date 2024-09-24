@@ -1,17 +1,20 @@
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
 
-const log = require('@home-gallery/logger')('server.api.events');
+import Logger from '@home-gallery/logger'
 
-const { readEvents, appendEvent } = require('@home-gallery/events');
+const log = Logger('server.api.events');
 
-const { sendError } = require('../error');
+import { readEvents, appendEvent } from '@home-gallery/events';
+
+import { sendError } from '../error/index.js';
 
 /**
- * @param {EventBus} eventbus
+ * @param {import('../../types.js').TServerContext} context
  * @param {string} eventsFilename
  * @returns
  */
-const events = (eventbus, eventsFilename) => {
+export const eventsApi = (context, eventsFilename) => {
+  const { eventbus } = context
   let clients = [];
   let events = false;
 
@@ -80,7 +83,7 @@ const events = (eventbus, eventsFilename) => {
     };
 
     clients.push(newClient);
-    log.info(`Add new client ${newClient}`);
+    log.info(`Add new client ${newClient}${req.username ? ' for user ' + req.username : ''}`);
 
     req.on('close', () => {
       log.debug(`Client connection closed. Remove client ${newClient}`);
@@ -159,5 +162,3 @@ const events = (eventbus, eventsFilename) => {
     getEvents
   };
 }
-
-module.exports = events;

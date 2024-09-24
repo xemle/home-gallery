@@ -1,13 +1,15 @@
-const log = require('@home-gallery/logger')('index.filter.maxFilesize')
+import Logger from '@home-gallery/logger'
 
-const { parseFilesize } = require('../utils')
+const log = Logger('index.filter.maxFilesize')
+
+import { parseFilesize } from '../utils.js'
 
 const isKnown = (filename2Entry, filename, stat) => {
   const entry = filename2Entry[filename]
   return entry && entry.size == stat.size
 }
 
-const createFilesizeFilter = (filename2Entry, maxFilesize, keepKnownFiles = false) => {
+export const createFilesizeFilter = (filename2Entry, maxFilesize, keepKnownFiles = false) => {
   const maxSize = parseFilesize(maxFilesize)
 
   if (maxSize === false) {
@@ -19,8 +21,4 @@ const createFilesizeFilter = (filename2Entry, maxFilesize, keepKnownFiles = fals
   return (filename, stat) => {
     return stat.size <= maxSize || (keepKnownFiles && isKnown(filename2Entry, filename, stat))
   }
-}
-
-module.exports = {
-  createFilesizeFilter
 }

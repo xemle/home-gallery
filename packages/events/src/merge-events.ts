@@ -2,10 +2,11 @@ import { PathLike } from 'fs';
 import fs from 'fs/promises';
 import { Event } from './models';
 
-import { readEvents } from './read-events'
-import { writeEvents } from './append-event'
+import { readEvents } from './read-events.js'
+import { writeEvents } from './append-event.js'
 
-const log = require('@home-gallery/logger')('events.merge')
+import Logger from '@home-gallery/logger'
+const log = Logger('events.merge')
 
 type IdMap = {
   [key: string]: Event

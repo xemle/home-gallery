@@ -1,0 +1,32 @@
+import { TAst, TQueryContext, TAstTransformRule } from '@home-gallery/types'
+
+export const isAst = (ast: any) => ast?.type && typeof ast.col == 'number'
+
+// Check if '{{ camelCase }} = {{ name }}' is present in AST
+const has{{ className }}Cmp = (ast: TAst) => ast.type == 'cmp' && ast.key == '{{ camelCase }}' && ast.op == '=' && ast.value?.value == '{{ name }}'
+
+const isQuery = (ast: TAst) => ast.type == 'query' || ast.type == 'orderedQuery'
+
+export const findAst = (ast: any, fn: (ast: TAst) => boolean) => {
+  if (!isAst(ast)) {
+    return false
+  } else if (fn(ast)) {
+    return true
+  } else if (Array.isArray(ast.value)) {
+    return ast.value.find(child => findAst(child, fn))
+  } else if (ast.value) {
+    return findAst(ast.value, fn)
+  }
+}
+
+export const insertHas{{ className }}IfNotQueried: TAstTransformRule = {
+  transform(ast: TAst, context: TQueryContext) {
+    if (isQuery(ast) && !findAst(ast, has{{ className }}Cmp)) {
+      const value = {type: 'identifier', value: '{{ name }}', col: ast.col}
+      const cmp = {type: 'cmp', key: '{{ camelName }}', op: '=', value, col: ast.col}
+      const and = {type: 'and', value: [ast.value, cmp], col: ast.col} as TAst
+      ast.value = and
+    }
+    return ast
+  }
+}

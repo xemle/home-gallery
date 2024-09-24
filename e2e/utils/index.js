@@ -1,4 +1,5 @@
 const fs = require('fs')
+const {readFile, writeFile} = require('fs/promises')
 const path = require('path')
 const { createReadStream } = require('fs')
 const net = require('net')
@@ -15,7 +16,7 @@ const galleryBinArgs = process.env.gallery_bin_args ? process.env.gallery_bin_ar
 const projectRoot = path.resolve(process.cwd(), '..')
 const testDataDir = path.join(projectRoot, process.env.gallery_data_dir || 'data')
 
-const logLevel = process.env.gallery_log_level || 'debug'
+const logLevel = process.env.GALLERY_LOG_FILE_LEVEL || process.env.GALLERY_LOG_LEVEL || process.env.gallery_log_level || 'debug'
 
 const isWindows = os.platform == 'win32'
 
@@ -97,6 +98,13 @@ const getEventsFilename = () => getPath('config', 'events.db')
 
 const getExportOutputDir = () => getPath('export-output')
 
+const getPluginBaseDir = () => getPath('plugins')
+
+const getPluginDir = name => {
+  const sanitizedName = name.replaceAll(/[^A-Za-z0-9]+/g, '')
+  return path.resolve(getPluginBaseDir(), sanitizedName)
+}
+
 const tree = async dir => {
   const files = await fs.promises.readdir(dir)
   files.sort()
@@ -115,13 +123,45 @@ const tree = async dir => {
 
 const resolveArgs = (args, vars) => [].concat(args).map(arg => arg.replace(/\{([^}]+)\}/g, (_, name) => vars[name.trim()] || ''))
 
-const appendLog = (file, data, cb) => {
-  fs.appendFile(file, JSON.stringify(data) + '\n', err => {
-    if (err) {
-      gauge.message(`Could not write cli log: ${err}`)
+const log = {
+  log(level, obj, msg) {
+    const logFile = getPath('cli.log')
+    let log = {
+      level,
+      time: new Date().toISOString(),
     }
-    cb(err)
-  })
+
+    if (typeof obj == 'number') {
+      log = {...log, duration: Date.now() - obj, msg}
+    } else if (obj instanceof Error) {
+      log = {...log, err: obj, msg}
+    } else if (typeof obj == 'object') {
+      log = {...log, ...obj, msg}
+    } else if (typeof obj == 'string') {
+      log = {...log, msg: obj}
+    }
+
+    fs.appendFile(logFile, JSON.stringify(log) + '\n', err => {
+      if (err) {
+        gauge.message(`Could not write cli log: ${err}`)
+      }
+    })
+  },
+  trace(obj, msg) {
+    this.log(10, obj, msg)
+  },
+  debug(obj, msg) {
+    this.log(20, obj, msg)
+  },
+  info(obj, msg) {
+    this.log(30, obj, msg)
+  },
+  warn(obj, msg) {
+    this.log(40, obj, msg)
+  },
+  error(obj, msg) {
+    this.log(50, obj, msg)
+  },
 }
 
 const envToString = ([key, value]) => `${key}=${value}`
@@ -144,7 +184,7 @@ const runCommand = (command, args, options, cb) => {
   const stdoutChunks = []
   const stderrChunks = []
   const t0 = Date.now()
-  const logFile = getPath('cli.log')
+  log.trace({spawn: {command, args, env: options.env, cmd: commandLine}}, `Executing command: ${[command, ...args].map(escapeWhitespace).join(' ')}`)
   const child = spawn(command, args, spawnOptions)
   child.stdout.on('data', chunk => stdoutChunks.push(chunk))
   child.stderr.on('data', chunk => stderrChunks.push(chunk))
@@ -157,21 +197,18 @@ const runCommand = (command, args, options, cb) => {
     gauge.dataStore.scenarioStore.put('commandHistory', commandHistory)
     gauge.dataStore.scenarioStore.put('lastExitCode', code)
     const spawnInfo = { env: options.env || {}, command, args, pid: child.pid, code, signal, cmd: commandLine, stdout, stderr }
-    const data = {level: 30, time: new Date(t0).toISOString(), spawn: spawnInfo, duration: Date.now() - t0, msg: `${commandLine} exited with ${code}` }
-    appendLog(logFile, data, () => {
-      if (cb) {
-        cb(code, stdout, stderr)
-      }
-    })
+    const data = {spawn: spawnInfo, duration: Date.now() - t0}
+    log.info(data, `${commandLine} exited with ${code}`)
+    if (cb) {
+      cb(code, stdout, stderr)
+    }
   })
 
   child.on('error', (err) => {
-    const data = {level: 50, time: new Date().toISOString(), error, msg: `Failed to execute command ${commandLine}: ${err.message}`}
-    appendLog(logFile, data, () => {
-      if (cb) {
-        cb(code, stdout, stderr)
-      }
-    })
+    log.error(err, `Failed to execute command ${commandLine}: ${err.message}`)
+    if (cb) {
+      cb(code, stdout, stderr)
+    }
   })
 
   return child;
@@ -294,7 +331,7 @@ const assertDeep = (value, expected, path = '.') => {
       assertDeep(value[prop], expected[prop], `${prop}.`)
     }
   } else {
-    assert(value == expected, `Expected ${expected} but was ${value} in ${path}`)
+    assert(value == expected, `Expected ${expected} but was ${value} (${JSON.stringify(value)}) in ${path}`)
   }
 }
 
@@ -305,9 +342,9 @@ const resolveProperty = (value, path) => {
     const part = parts[i++]
     const [orig, name, _, index] = part.match(/^([a-zA-Z]+)(\[(\d+)\])?$/)
     if (index) {
-      return Array.isArray(value[name]) ? value[name][+index] : undefined
+      value = Array.isArray(value[name]) ? value[name][+index] : undefined
     } else {
-      return value[name]
+      value = value[part]
     }
   }
   return value
@@ -324,6 +361,52 @@ const parseValue = yamlLike => {
   return yamlLike
 }
 
+const readYaml = async filename => {
+  const yml = await readFile(filename, 'utf-8')
+  try {
+    return Yaml.parse(yml)
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+const readConfig = async () => {
+  const filename = getConfigFilename()
+  return readYaml(filename)
+}
+
+const writeConfig = async (config) => {
+  const filename = getConfigFilename()
+  writeFile(filename, Yaml.stringify(config))
+}
+
+const getSegement = (object, key) => {
+  const parts = key.split('.')
+  let segment = object
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!segment[parts[i]] || typeof segment[parts[i]] != 'object') {
+      segment[parts[i]] = {}
+    }
+    segment = segment[parts[i]]
+  }
+  return [segment, parts[parts.length - 1]]
+}
+
+const getConfigValue = async (key) => {
+  const config = await readConfig().catch(() => ({}))
+  const [segment, name] = getSegement(config, key)
+  return segment[name]
+}
+
+const setConfigValue = async (key, value) => {
+  const config = await readConfig()
+
+  const [segment, name] = getSegement(config, key)
+  segment[name] = value
+
+  await writeConfig(config)
+}
+
 module.exports = {
   addCliEnv,
   assertDeep,
@@ -337,15 +420,21 @@ module.exports = {
   getPath,
   getFilesDir,
   getConfigFilename,
+  getConfigValue,
   getIndexFilename,
   getJournalFilename,
   getStorageDir,
   getDatabaseFilename,
   getEventsFilename,
   getExportOutputDir,
+  getPluginBaseDir,
+  getPluginDir,
+  log,
   tree,
+  runCommand,
   runCli,
   runCliAsync,
+  setConfigValue,
   killChildProcess,
   readIndex,
   readJournal,
@@ -353,5 +442,5 @@ module.exports = {
   resolveProperty,
   parseValue,
   dateFormat,
-  pathToPlatformPath
+  pathToPlatformPath,
 }

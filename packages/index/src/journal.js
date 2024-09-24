@@ -1,9 +1,11 @@
-const { access, unlink } = require('fs/promises')
-const path = require('path')
+import { access, unlink } from 'fs/promises'
+import path from 'path'
 
-const log = require('@home-gallery/logger')('index.journal');
+import Logger from '@home-gallery/logger'
 
-const { mkdir, readJsonGzip, writeJsonGzip, promisify, sidecars } = require('@home-gallery/common')
+const log = Logger('index.journal');
+
+import { mkdir, readJsonGzip, writeJsonGzip, promisify, sidecars } from '@home-gallery/common'
 const { mapName2Sidecars, getSidecarsByFilename } = sidecars
 
 const mkdirAsync = promisify(mkdir)
@@ -12,7 +14,7 @@ const readJsonGzipAsync = promisify(readJsonGzip)
 
 const JOURNAL_TYPE = 'home-gallery/file-index-journal@1.1'
 
-const getJournalFilename = (indexFilename, journal) => `${indexFilename}.${journal}.journal`
+export const getJournalFilename = (indexFilename, journal) => `${indexFilename}.${journal}.journal`
 
 const fileToString = file => `${file.sha1sum ? file.sha1sum.slice(0, 7) : '0000000'}:${file.filename}`
 
@@ -106,7 +108,7 @@ const writeJournal = async (filename, data) => {
   return writeJsonGzipAsync(filename, data)
 }
 
-const createJournal = async (indexFilename, index, changes, checksumChanges, journal, dryRun) => {
+export const createJournal = async (indexFilename, index, changes, checksumChanges, journal, dryRun) => {
   if (!journal) {
     return
   }
@@ -127,7 +129,7 @@ const createJournal = async (indexFilename, index, changes, checksumChanges, jou
   return data
 }
 
-const readJournal = async (indexFilename, journal) => {
+export const readJournal = async (indexFilename, journal) => {
   const journalFilename = getJournalFilename(indexFilename, journal)
   const data = await readJsonGzipAsync(journalFilename)
   if (data.type != JOURNAL_TYPE) {
@@ -136,7 +138,7 @@ const readJournal = async (indexFilename, journal) => {
   return data
 }
 
-const removeJournal = async (indexFilename, journal) => {
+export const removeJournal = async (indexFilename, journal) => {
   const journalFilename = getJournalFilename(indexFilename, journal)
 
   const exists = await access(journalFilename).then(() => true).catch(() => false)
@@ -146,11 +148,4 @@ const removeJournal = async (indexFilename, journal) => {
   }
   log.info(`Remove journal ${journal} from file index ${indexFilename}`)
   return unlink(journalFilename)
-}
-
-module.exports = {
-  getJournalFilename,
-  createJournal,
-  readJournal,
-  removeJournal
 }

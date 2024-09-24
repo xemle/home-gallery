@@ -1,0 +1,40 @@
+import { TPlugin, TPluginManager } from '@home-gallery/types'
+
+{{#modules.extractor}}
+import { {{ className }}Extractor } from './extractor/index.js'
+{{/modules.extractor}}
+{{#modules.database}}
+import { {{ className }}DatabaseMapper } from './database/index.js'
+{{/modules.database}}
+{{#modules.query}}
+import { {{ className }}QueryPlugin } from './query/index.js'
+{{/modules.query}}
+
+const {{ className }}Plugin = {
+  name: '{{ camelName }}Plugin',
+  version: '1.0',
+  requires: [{{{ requires }}}],
+  {{#environments.length}}
+  environments: [
+    {{#environments}}
+    '{{.}}',
+    {{/environments}}
+  ],
+  {{/environments.length}}
+  async initialize(manager) {
+    const log = manager.createLogger('plugin.{{ camelName }}')
+    log.trace(`Initialize ${this.name} plugin`)
+
+    {{#modules.extractor}}
+    await manager.register('extractor', new {{ className }}Extractor(manager))
+    {{/modules.extractor}}
+    {{#modules.database}}
+    await manager.register('database', new {{ className }}DatabaseMapper(manager))
+    {{/modules.database}}
+    {{#modules.query}}
+    await manager.register('query', new {{ className }}QueryPlugin(manager))
+    {{/modules.query}}
+  }
+}
+
+export default {{ className }}Plugin

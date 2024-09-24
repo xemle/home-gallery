@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const { mapArgs, mapConfig, getMissingPaths } = require('./map-args')
+import { mapArgs, mapConfig, getMissingPaths, validatePaths } from './map-args.js'
 
 t.test('mapArgs', async t => {
   t.test('empty', async t => {
@@ -89,3 +89,16 @@ t.test('getMissingPaths', async t => {
   })
 })
 
+t.test('validatePaths', async t => {
+  t.test('happy path', async t => {
+    validatePaths({foo: true, bar: {baz: 4}}, ['foo', 'bar.baz'])
+  })
+
+  t.test('Throw error on missing path', async t => {
+    try {
+      validatePaths({foo: true, bar: {baz: 4}}, ['foo', 'bar.baz', 'bar.zoo'])
+      t.fail('Expect an exception')
+    } catch (expected) { }
+  })
+
+})

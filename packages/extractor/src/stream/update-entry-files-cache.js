@@ -1,8 +1,10 @@
-const log = require('@home-gallery/logger')('extractor.cache.updateEntryFiles');
+import Logger from '@home-gallery/logger'
 
-const { toPipe } = require('./task');
+const log = Logger('extractor.cache.updateEntryFiles');
 
-const updateEntryFilesCache = (storage) => {
+import { toPipe } from './task.js';
+
+export const updateEntryFilesCache = (storage) => {
 
   const task = (entries, cb) => {
     storage.updateEntryFilesCache(entries, (err) => {
@@ -15,5 +17,3 @@ const updateEntryFilesCache = (storage) => {
 
   return toPipe(task);
 }
-
-module.exports = { updateEntryFilesCache }

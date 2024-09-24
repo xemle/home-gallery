@@ -1,5 +1,5 @@
 # Image builder
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 ARG TARGETPLATFORM
 ARG NO_SHARP
 
@@ -9,9 +9,9 @@ COPY packages /build/packages/
 COPY scripts /build/scripts/
 WORKDIR /build
 
-RUN node scripts/disable-dependency.js api-server styleguide && \
+RUN node scripts/disable-dependency.js api-server && \
   if [[ -n "$NO_SHARP" || "$TARGETPLATFORM" == "linux/arm/v6" || "$TARGETPLATFORM" == "linux/arm/v7" ]]; then node scripts/disable-dependency.js --prefix=packages/extractor sharp ; fi && \
-  npm install
+  npm install --no-audit --loglevel verbose
 
 RUN npm run build --loglevel verbose
 RUN node scripts/bundle.js --bundle-file=bundle-docker.yml && \
@@ -19,7 +19,7 @@ RUN node scripts/bundle.js --bundle-file=bundle-docker.yml && \
 
 
 # Final image
-FROM node:18-alpine
+FROM node:20-alpine
 LABEL org.opencontainers.image.authors="sebastian@silef.de"
 LABEL org.opencontainers.image.url="https://home-gallery.org"
 LABEL org.opencontainers.image.documentation="https://docs.home-gallery.org"

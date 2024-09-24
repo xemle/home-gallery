@@ -1,5 +1,5 @@
-const fs = require('fs/promises')
-const path = require('path')
+import fs from 'fs/promises'
+import path from 'path'
 
 const args = process.argv.slice(2)
 
@@ -33,7 +33,7 @@ const writeJson = async (filename, json) => fs.writeFile(filename, JSON.stringif
 const run = async (pkgFilename, names) => {
   const pkg = await readJson(pkgFilename)
 
-  disabled = disableDependencies(pkg, names)
+  const disabled = disableDependencies(pkg, names)
 
   await fs.rename(pkgFilename, `${pkgFilename}.orig`)
   await writeJson(pkgFilename, pkg)

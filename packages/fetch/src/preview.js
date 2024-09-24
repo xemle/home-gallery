@@ -1,36 +1,55 @@
-const fs = require('fs')
-const path = require('path')
-const { Readable, pipeline } = require('stream')
+import fs from 'fs'
+import { access } from 'fs/promises'
+import path from 'path'
+import { Readable } from 'stream'
+import { pipeline } from 'stream/promises'
 
-const log = require('@home-gallery/logger')('fetch.preview')
-const { parallel, purge } = require('@home-gallery/stream')
+import Logger from '@home-gallery/logger'
+import { parallel, purge } from '@home-gallery/stream'
 
-const { fetchFile } = require('./api')
+import { fetchFile } from './api.js'
 
-const getPreviewFiles = (remoteDatabase, localDatabase, downloadAll) => {
-  const t0 = Date.now()
-  const localFileMap = {}
-  if (!downloadAll) {
-    log.trace(`Collecting local files`)
-    localDatabase.data.reduce((fileMap, entry) => {
-      (entry.previews || []).forEach(file => fileMap[file] = true)
-      return fileMap
-    }, localFileMap)
-    log.debug(t0, `Found ${Object.keys(localFileMap).length} local files`)
-  }
+const log = Logger('fetch.preview')
 
-  log.trace(`Collecting remote files`)
+/**
+ * @param {import('./types.js').RemoteDatabase} remoteDatabase
+ * @returns {string[]}
+ */
+const getPreviewFiles = (remoteDatabase) => {
   const remoteFiles = remoteDatabase.data.reduce((files, entry) => {
-    const previews = (entry.previews || []).filter(file => !localFileMap[file])
+    const previews = entry.previews || []
     files.push(...previews)
     return files
   }, [])
 
-  log.debug(t0, `Found ${remoteFiles.length} remote files for download`)
   return remoteFiles
 }
 
-const downloadPreviewFiles = async (serverUrl, previewFiles, storageDir, insecure, forceDownload) => {
+/**
+ * @param {string[]} previewFiles
+ * @param {string} storageDir
+ * @returns {Promise<string[]>}
+ */
+const collectMissingPreviewFiles = async (previewFiles, storageDir) => {
+  const missingFiles = []
+
+  const t0 = Date.now()
+  for (let file of previewFiles) {
+    const missing = await access(path.resolve(storageDir, file)).then(() => false, () => true)
+    if (missing) {
+      missingFiles.push(file)
+    }
+  }
+  log.trace(t0, `Found ${missingFiles.length} missing from total ${previewFiles.length} remote preview files`)
+
+  return missingFiles
+}
+/**
+ * @param {import('./types.js').Remote} remote
+ * @param {string[]} previewFiles
+ * @param {string} storageDir
+ */
+const downloadPreviewFiles = async (remote, previewFiles, storageDir) => {
   if (!previewFiles.length) {
     log.info(`No missing files to download`)
     return
@@ -39,7 +58,7 @@ const downloadPreviewFiles = async (serverUrl, previewFiles, storageDir, insecur
   let fetchFileCount = 0
 
   const test = (file, cb) => {
-    if (forceDownload) {
+    if (remote.forceDownload) {
       return cb(true)
     }
     fs.access(path.join(storageDir, file), (fs.constants || fs).F_OK, err => {
@@ -51,7 +70,7 @@ const downloadPreviewFiles = async (serverUrl, previewFiles, storageDir, insecur
     })
   }
 
-  const task = (file, cb) => fetchFile(serverUrl, file, storageDir, { insecure })
+  const task = (file, cb) => fetchFile(remote, file, storageDir)
     .then(() => {
       fetchFileCount++
       cb()
@@ -61,26 +80,26 @@ const downloadPreviewFiles = async (serverUrl, previewFiles, storageDir, insecur
       cb(err)
     })
 
-  log.info(`Fetching ${previewFiles.length} files from ${serverUrl}${forceDownload ? ' (forced)' : ''}`)
+  log.debug(`Fetching ${previewFiles.length} files from remote ${remote.url}${remote.forceDownload ? ' (forced)' : ''}`)
   const t0 = Date.now()
-  return new Promise((resolve, reject) => {
-    pipeline(
-      Readable.from(previewFiles),
-      parallel({ test, task, concurrent: 10 }),
-      purge(),
-      err => err ? reject(err) : resolve()
-    )
-  }).then(() => {
-    log.info(t0, `Fetched ${fetchFileCount} files from ${serverUrl}`)
-  })
+  await pipeline(
+    Readable.from(previewFiles),
+    parallel({ test, task, concurrent: 10 }),
+    purge(),
+  )
+  log.info(t0, `Fetched ${fetchFileCount} files from remote ${remote.url}`)
 }
 
-const handlePreviews = async (serverUrl, remoteDatabase, localDatabase, storageDir, options) => {
-  const { insecure, downloadAll, forceDownload } = options
-  const previewFiles = getPreviewFiles(remoteDatabase, localDatabase, downloadAll)
-  await downloadPreviewFiles(serverUrl, previewFiles, storageDir, insecure, forceDownload)
-}
-
-module.exports = {
-  handlePreviews
+/**
+ * @param {import('./types.js').Remote} remote
+ * @param {import('./types.js').RemoteDatabase} remoteDatabase
+ * @param {string} storageDir
+ */
+export const handlePreviews = async (remote, remoteDatabase, storageDir) => {
+  const previewFiles = getPreviewFiles(remoteDatabase, storageDir)
+  let filesToDownload = previewFiles
+  if (!remote.forceDownload) {
+    filesToDownload = await collectMissingPreviewFiles(previewFiles, storageDir)
+  }
+  await downloadPreviewFiles(remote, filesToDownload, storageDir)
 }

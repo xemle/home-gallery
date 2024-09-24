@@ -61,7 +61,7 @@ const hotkeysToAction = {
   'end': 'last',
   'esc': 'list',
   'i': 'toggleDetails',
-  'o': 'toggleRects',
+  'a': 'toggleAnnotations',
   's': 'similar',
   'c': 'chronology',
   't': 'toggleNavigation',
@@ -78,13 +78,13 @@ export const MediaView = () => {
   const entries = useEntryStore(state => state.entries);
   const lastIndex = useSingleViewStore(state => state.lastIndex);
   const showDetails = useSingleViewStore(state => state.showDetails);
-  const showRects = useSingleViewStore(state => state.showRects);
+  const showAnnotations = useSingleViewStore(state => state.showAnnotations);
   const showNavigation = useSingleViewStore(state => state.showNavigation);
   const setLastId = useSingleViewStore(state => state.setLastId);
   const setLastIndex = useSingleViewStore(state => state.setLastIndex);
   const search = useSearchStore(state => state.search);
   const setShowDetails = useSingleViewStore(actions => actions.setShowDetails);
-  const setShowRects = useSingleViewStore(actions => actions.setShowRects);
+  const setShowAnnotations = useSingleViewStore(actions => actions.setShowAnnotations);
   const setShowNavigation = useSingleViewStore(actions => actions.setShowNavigation);
 
   const [hideNavigation, setHideNavigation] = useState(false)
@@ -126,8 +126,8 @@ export const MediaView = () => {
       navigate(`/similar/${current.shortId}`);
     } else if (type === 'toggleDetails') {
       setShowDetails(!showDetails);
-    } else if (type === 'toggleRects') {
-      setShowRects(!showRects);
+    } else if (type === 'toggleAnnotations') {
+      setShowAnnotations(!showAnnotations);
     } else if (type === 'toggleNavigation') {
       setShowNavigation(!showNavigation);
     } else if (type == 'first' && entries.length) {
@@ -171,7 +171,7 @@ export const MediaView = () => {
     if (found) {
       ev.preventDefault()
     }
-  }, [index, showDetails, showNavigation])
+  }, [index, showDetails, showAnnotations, showNavigation])
 
   const mediaVanishes = index < 0 && lastIndex >= 0 && entries.length > 0
   if (mediaVanishes) {
@@ -190,12 +190,12 @@ export const MediaView = () => {
         <div className="flex flex-col w-screen md:flex-row h-dvh">
           <div className={classNames('w-full', {'h-1/2 flex-shrink-0 md:flex-shrink md:h-full': showDetails, 'h-full': !showDetails})}>
             <div className="relative w-full h-full overflow-hidden">
-              {!hideNavigation &&
+              {!hideNavigation && showNavigation &&
                 <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} dispatch={dispatch} />
               }
               {isImage &&
                 <Zoomable key={key} childWidth={current.width} childHeight={current.height} onSwipe={onSwipe}>
-                  <MediaViewImage key={key} media={current} next={next} prev={prev} showRects={showRects}/>
+                  <MediaViewImage key={key} media={current} next={next} prev={prev} showAnnotations={showAnnotations}/>
                 </Zoomable>
               }
               {isVideo &&
@@ -207,7 +207,7 @@ export const MediaView = () => {
             </div>
           </div>
           { showDetails &&
-            <div className="md:flex-shrink-0 md:w-90">
+            <div className="md:w-90">
               <Details entry={current} dispatch={dispatch} />
             </div>
           }

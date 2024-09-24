@@ -45,7 +45,7 @@ const run = async () => {
     {pattern: /\s+<script src="\/\/localhost:35729\/livereload.js\?snipver=1"><\/script>/g, replacer: ''},
     {pattern: /([-A-Za-z\.\/]+\.)(js|css)/g, replacer: hashReplacer}
   ])
-  await replaceFile('dist/app.css', [{pattern: /([-A-Za-z0-9\.\/]+\.)(ttf|woff2)/g, replacer: hashReplacer}])
+  await replaceFile('dist/App.css', [{pattern: /([-A-Za-z0-9\.\/]+\.)(ttf|woff2)/g, replacer: hashReplacer}])
 
   await Promise.all(Object.entries(renames).map(async ([file, hashedFile]) => {
     const mapFile = `${file}.map`

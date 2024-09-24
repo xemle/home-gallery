@@ -1,4 +1,8 @@
-const log = require('@home-gallery/logger')('cli.fetch')
+import Logger from '@home-gallery/logger'
+
+import { load, mapArgs, validatePaths } from './config/index.js'
+
+const log = Logger('cli.fetch')
 
 const command = {
   command: 'fetch',
@@ -53,27 +57,66 @@ const command = {
         default: false,
         describe: 'Download preview files from all remote entries. Use this option if preview files are missing from remote'
       },
+      config: {
+        alias: 'c',
+        describe: 'Configuration file'
+      },
+      'auto-config': {
+        boolean: true,
+        default: true,
+        describe: 'Search for configuration on common configuration directories'
+      },
     })
     .demandOption(['url', 'storage', 'database', 'events'])
   },
   handler: (argv) => {
-    const { fetch } = require('@home-gallery/fetch');
-    const options = {
-      serverUrl: argv.url,
-      databaseFile: argv.database,
-      storageDir: argv.storage,
-      eventFile: argv.events,
-      insecure: argv.insecure,
-      query: argv.query,
-      deleteLocal: argv.delete,
-      watch: argv.watch,
-      forceDownload: argv.forceDownload,
-      downloadAll: argv.downloadAll
+    const argvMapping = {
+      url: 'remote.url',
+      insecure: 'remote.insecure',
+      query: 'remote.query',
+      watch: 'remote.watch',
+      downloadAll: 'remote.downloadAll',
+      forceDownload: 'remote.forceDownload',
+      delete: 'remote.deleteLocal',
+
+      storage: 'storage.dir',
+      database: 'database.file',
+      events: 'events.file',
     }
-    const t0 = Date.now();
-    fetch(options)
-      .catch(() => process.exit(1))
+
+    const remoteDefaults = {
+    }
+
+    const setDefaults = (config) => {
+      config.remote = {
+        ...remoteDefaults,
+        ...config.remote,
+      }
+    }
+
+    const run = async () => {
+      const { fetch } = await import('@home-gallery/fetch');
+
+      const t0 = Date.now();
+      const options = await load(argv.config, false, argv.autoConfig)
+
+      mapArgs(argv, options.config, argvMapping)
+      setDefaults(options.config)
+      validatePaths(options.config, ['remote.url', 'database.file', 'storage.dir', 'events.file'])
+
+      return fetch(options.config.remote, options)
+        .then(() => {
+          log.info(t0, `Fetch database from remote`);
+        })
+    }
+
+    return run()
+      .catch(err => {
+        log.error(err, `Could not fetch from remote: ${err}`);
+        process.exit(1)
+      })
+
   }
 }
 
-module.exports = command;
+export default command;

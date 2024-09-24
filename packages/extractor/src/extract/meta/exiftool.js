@@ -1,14 +1,23 @@
-const ExifTool = require('exiftool-vendored').ExifTool;
+import { ExifTool } from 'exiftool-vendored';
 
-const log = require('@home-gallery/logger')('extractor.image.exif');
+import Logger from '@home-gallery/logger'
 
-const { toPipe, conditionalTask } = require('../../stream/task');
-const { getNativeCommand } = require('../utils/native-command')
+const log = Logger('extractor.image.exif');
+
+import { getNativeCommand } from '../utils/native-command.js'
 
 const exifSuffix = 'exif.json';
 
 const exifTypes = ['image', 'rawImage', 'video', 'meta']
 
+/**
+ * @typedef {import('exiftool-vendored').ExifTool} ExifTool
+ */
+/**
+ *
+ * @param {*} config
+ * @returns {Promise<ExifTool>}
+ */
 const initExiftool = async config => {
   const exiftoolOptions = {
     taskTimeoutMillis: 5000
@@ -34,47 +43,75 @@ const initExiftool = async config => {
    })
 }
 
-function exif(storage, {exiftool}) {
-  const test = entry => exifTypes.includes(entry.type) && !storage.hasEntryFile(entry, exifSuffix)
+/**
+ * @param {import('@home-gallery/types').TStorage} storage
+ * @param {ExifTool} exifTool
+ * @returns {import('stream').Transform}
+ */
+function exif(storage, exifTool) {
+  /**
+   * @param {import('@home-gallery/types').TExtractorEntry} entry
+   * @returns {boolean}
+   */
+  const test = entry => exifTypes.includes(entry.type) && !storage.hasFile(entry, exifSuffix)
 
-  const task = (entry, cb) => {
-    const src = entry.src;
+  /**
+   * @param {import('@home-gallery/types').TExtractorEntry} entry
+   * @param {callback} cb
+   */
+  const task = async (entry) => {
+    const src = await entry.getFile();
 
     const t0 = Date.now();
-    exiftool.read(src)
-      .then(tags => {
-        storage.writeEntryFile(entry, exifSuffix, JSON.stringify(tags), (err) => {
-          if (err) {
-            log.error(err, `Could not write exif data for ${entry}: ${err}`)
-            return cb();
-          }
-          log.debug(t0, `Extracted exif data from ${entry}`);
-          cb();
-        })
+    return exifTool.read(src)
+      .then(tags => storage.writeFile(entry, exifSuffix, tags))
+      .then(() => {
+        log.debug(t0, `Extracted exif data from ${entry}`);
       })
       .catch(err => {
-        log.warn(err, `Could not extract exif of ${entry}: ${err}`);
-        cb();
+        log.error(err, `Could not write exif data for ${entry}: ${err}`)
       })
   }
 
-  return toPipe(conditionalTask(test, task))
+  return {
+    test,
+    task
+  }
 }
 
-const endExiftool = (exiftool, cb) => {
-  exiftool.end()
+const tearDownExifTool = async (exifTool) => {
+  return exifTool.end()
     .then(() => {
       log.debug(`Close exiftool`)
-      cb()
     })
     .catch(err => {
       log.warn(err, `Could not close exiftool: ${err}`);
-      cb();
     })
 }
 
-module.exports = {
-  initExiftool,
-  exif,
-  endExiftool
-};
+/**
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
+ */
+export const exifPlugin = manager => ({
+  name: 'exif',
+  phase: 'meta',
+  /**
+   * @param {import('@home-gallery/types').TStorage} storage
+   */
+  async create(storage) {
+    const config = manager.getConfig()
+    const exifTool = await initExiftool(config)
+    manager.getContext().exifTool = exifTool
+    return exif(storage, exifTool)
+  },
+  async tearDown() {
+    const context = manager.getContext()
+    if (!context?.exifTool) {
+      return
+    }
+    const exifTool = context.exifTool
+    context.exifTool = null
+    return tearDownExifTool(exifTool)
+  }
+})

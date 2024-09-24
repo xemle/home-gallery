@@ -1,14 +1,14 @@
-const getVideoStream = (entry) => {
+export const getVideoStream = (entry) => {
   const streams = entry.meta?.ffprobe?.streams
   return streams?.find(stream => stream.codec_type == 'video')
 }
 
-const isPortraitVideo = (video) => {
+export const isPortraitVideo = (video) => {
   const displayMatrix = video?.side_data_list?.find(sideData => sideData.side_data_type == 'Display Matrix')
   return [-90, 90].includes(displayMatrix?.rotation)
 }
 
-const fixRotatedScale = (isPortrait) => {
+export const fixRotatedScale = (isPortrait) => {
   if (!isPortrait) {
     return v => v
   }
@@ -35,7 +35,7 @@ const fixRotatedScale = (isPortrait) => {
   }
 }
 
-const defaultFfmpegOptions = {
+export const defaultFfmpegOptions = {
   videoEncoder: 'libx264',
   frameRate: 30,
   maxVideoBitRate: 4000,
@@ -45,7 +45,7 @@ const defaultFfmpegOptions = {
   ext: 'mp4'
 }
 
-function getFfmpegArgs(entry, options) {
+export function getFfmpegArgs(entry, options) {
   const isPortrait = isPortraitVideo(getVideoStream(entry))
 
   const scale = options.scale ? options.scale : `-2:\'min(${options.previewSize || 720},ih)\'`
@@ -73,24 +73,4 @@ function getFfmpegArgs(entry, options) {
   ]
 
   return ffmpegArgs.map(fixRotatedScale(isPortrait))
-}
-
-const getVideoOptions = (extractor, config) => {
-  const { ffprobePath, ffmpegPath } = extractor
-  const options = {
-    previewSize: 720,
-    ext: 'mp4',
-    ...config?.extractor?.video
-  }
-
-  const videoSuffix = `video-preview-${options.previewSize}.${options.ext}`;
-  return {...options, videoSuffix, ffprobePath, ffmpegPath }
-}
-
-module.exports = {
-  getVideoStream,
-  isPortraitVideo,
-  fixRotatedScale,
-  getFfmpegArgs,
-  getVideoOptions
 }

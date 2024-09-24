@@ -1,6 +1,6 @@
-const t = require('tap')
+import t from 'tap'
 
-const serialize = require('./serialize')
+import { serialize } from './serialize.js'
 
 t.test('serialize', async t => {
   t.test('basic', async t => {

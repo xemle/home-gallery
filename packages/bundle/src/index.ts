@@ -1,17 +1,18 @@
 import os from 'os'
 import path from 'path'
 
-import { logger } from './log'
-import { BundleConfig, RunStep, Mapping, readConfig, Package, Target } from './config'
-import { runSimple } from './run'
-import { matchPlatformArch, getFilter } from './filter'
-import { writeArchive } from './archive'
-import { pack } from './caxa'
-import { updateHash } from './update-hash'
-import { symlink } from './symlink'
-import { PackageReolver } from './PackageResolver'
+import { logger } from './log.js'
+import { RunStep, Mapping, readConfig, Target } from './config.js'
+import type { BundleConfig, Package } from './config.js'
+import { runSimple } from './run.js'
+import { matchPlatformArch, getFilter } from './filter.js'
+import { writeArchive } from './archive.js'
+import { pack } from './caxa.js'
+import { updateHash } from './update-hash.js'
+import { symlink } from './symlink.js'
+import { PackageReolver } from './PackageResolver.js'
 
-export { BundleConfig, Pattern, RunStep, PlatformArch } from './config'
+export type { BundleConfig, Pattern, RunStep, PlatformArch } from './config.js'
 
 const log = logger('main');
 
@@ -119,7 +120,8 @@ export const bundle = async (options: BundleOptions): Promise<void> => {
     log.info(`Created archive ${archiveFile}`)
 
     if (Array.isArray(target.command)) {
-      await pack(archiveFile, archivePrefix, `${output.name}/${version}`, target.platform, target.command, binFile)
+      const sanitizeVersion = `${version}${snapshot}`.replaceAll(/[^-.A-Za-z0-9]+/g, '-').replaceAll(/-+/g, '-').replace(/(^-|-$)/g, '')
+      await pack(archiveFile, archivePrefix, `${output.name}/${sanitizeVersion}`, target.platform, target.command, binFile)
       await updateHash(binFile, hashAlgorithm, `${binFile}.${hashAlgorithm}sum`)
       await updateHash(binFile, hashAlgorithm, hashFile)
       await symlink(binFile, binLatestLink).catch(err => log.warn(err, `Could not create symlink from ${binFile} to ${binLatestLink}`))

@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Prepare
         id: prepare
@@ -22,6 +22,7 @@ jobs:
           BRANCH=${GITHUB_REF#refs/heads/}
           VERSION=${BRANCH//\//-}
           SNAPSHOT="-$(date +%Y%m%d)-${SHORTREF}"
+          BUILD_VERSION=${BRANCH}-${SHORTREF}
           TARGET_DIR=unstable/
 
           # If this is git tag, use the tag name as a docker tag
@@ -31,10 +32,13 @@ jobs:
             # binary below the root
             if [[ $TAG_VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
               VERSION=$TAG_VERSION
+              BUILD_VERSION=$VERSION
               SNAPSHOT=
               TARGET_DIR=/
             fi
           fi
+
+          echo "{\"version\":\"${BUILD_VERSION}\",\"commit\":\"${GITHUB_SHA}\",\"created\":\"$(date -Is)\",\"createdBy\":\"github action #${{ github.run_id }}\"}" | tee .build.json
 
           # Set output parameters.
           echo VERSION=${VERSION} >> $GITHUB_OUTPUT
@@ -44,8 +48,8 @@ jobs:
       - name: Install packages
         id: install
         run: |
-          rm -rf packages/api-server packages/styleguide
-          node scripts/disable-dependency.js api-server styleguide
+          rm -rf packages/api-server
+          node scripts/disable-dependency.js api-server
           npm install --force
 
       - name: Build packages

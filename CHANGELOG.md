@@ -5,10 +5,93 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.18.0] - 2024-09-24
+
+### Added
+
+- webapp: Add toggle for face and object annotations
+- server: Add option prefix
+- webapp: Support IPTC description
+
+### Changed
+
+- server: Reduce log levels of request logs
 
 ### Fixed
 
+- webapp: Fix tag wrap in detail view
+- query: Fix location alias
+- webapp: Fix street/road search link
+- webapp: Fix similarity search
+- server: Fix page reload with base path
+- webapp: Fix browser based router with base path
+
+## [1.17.0] - 2024-09-15
+
+### Added
+
+- webapp: Add dynamic load of plugins
+- cli: Add build version
+- extractor: Add support for avif images
+
+### Changed
+
+- plugin: Add register for extensions
+- plugin: Deprecate ModuleFactory
+
+### Fixed
+
+- server: Fix base path with multiple path segements
+- webapp: Fix tag list with different tag cases
+- plugin: Fix plugin module load on windows
+- cli: Fix execution on windows
+- bundle: Fix binary tmp dir with snapshot
+- extractor: Fix image resizer for all existing previews
+
+## [1.16.1] - 2024-08-10
+
+### Fixed
+
+- server: Fix user filter for initial app state
+
+## [1.16.0] - 2024-08-09
+
+### Added
+
+- server: Add user based filter to customize database access
+- plugin: Add query plugin (server side)
+- server: Add SHA256-salted password schema
+- plugin: Initial plugin manager (experimental)
+- cli: Only import changed sources in watch mode
+- database: Use stream based database reader and writer
+
+### Changed
+
+- database: Stream based database build to reduce resouces
+- database: Rewrite database migration handling
+- database: Use stream based database reader and writer
+- Use ESM instead of CommonJS
+
+### Fixed
+
+- server: Fix arguments to handle database read errors
+- extractor: Fix vips thumbnail creation on relative storage dir
+- server: Fix env for missing config file arg
+
+## [1.15.1] - 2024-06-15
+
+### Added
+
+- cli: Read settings from config for most commands
+- database: Read settings from config
+
+### Changed
+
+- docker: Disable armv6 and armv7 builds due github build failures
+
+### Fixed
+
+- docker: Raise node version v20
 - webapp: No browser history for singe media navigation
 - webapp: search tags with blanks in Detail
 

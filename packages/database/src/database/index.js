@@ -1,15 +1,6 @@
-const { HeaderType, isDatabaseTypeCompatible } = require('./header')
-const { initDatabase, readDatabase, readOrCreateDatabase } = require('./read-database')
-const { writeDatabase, writeDatabasePlain } = require('./write-database')
-const { migrate } = require('./migrate')
-
-module.exports = {
-  HeaderType,
-  isDatabaseTypeCompatible,
-  initDatabase,
-  readDatabase,
-  readOrCreateDatabase,
-  writeDatabase,
-  writeDatabasePlain,
-  migrate
-}
+export * from './header.js'
+export { initDatabase, readDatabase, readOrCreateDatabase } from './read-database.js'
+export { writeDatabase, writeDatabasePlain } from './write-database.js'
+export { migrate } from './migrate.js'
+export { createReadableStream, createOrEmptyReadableStream, readDatabaseStreamed } from './read-database-stream.js'
+export { createWriteStream } from './write-database-stream.js'

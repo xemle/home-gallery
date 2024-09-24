@@ -2,10 +2,11 @@ import fs from 'fs';
 import readline from 'readline';
 import { promisify } from 'util';
 
-const log = require('@home-gallery/logger')('events.read');
+import Logger from '@home-gallery/logger'
+const log = Logger('events.read')
 
-import { Event } from './models';
-import { EventDatabase, HeaderType, isEventTypeCompatible } from './header';
+import { Event } from './models.js';
+import { EventDatabase, HeaderType, isEventTypeCompatible } from './header.js';
 
 const readEventsCb = (filename: fs.PathLike, cb: (...args: any[]) => void) => {
   let isClosed = false;

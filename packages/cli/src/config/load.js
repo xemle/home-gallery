@@ -1,37 +1,39 @@
-const path = require('path')
-const process = require('process')
-const os = require('os')
+import path from 'path'
+import process from 'process'
+import os from 'os'
 
-const { findConfig } = require('./find-config')
-const { readConfig } = require('./read')
-const { validateConfig } = require('./validate')
+import { findConfig } from './find-config.js'
+import { readConfig } from './read.js'
+import { validateConfig } from './validate.js'
 
-const load = async (file, required = true) => {
-  const configFile = await findConfig().catch(() => false)
-  const autoConfigFile = configFile && (!file || path.resolve(file) == path.resolve(configFile))
-  if (!file && !configFile) {
+export const load = async (file, required = true, autoConfig = true) => {
+  let foundConfig = false
+  if (!file && autoConfig) {
+    foundConfig = await findConfig().catch(() => false)
+  }
+  const autoConfigFile = foundConfig && (!file || path.resolve(file) == path.resolve(foundConfig))
+  if (!file && !foundConfig) {
     if (required) {
       throw new Error(`No configuration could be found. Please initialize a configuration via ./gallery.js run init`)
     }
     return {
       configFile: null,
       config: {},
-      autoConfigFile: false
+      autoConfigFile: false,
+      configEnv: {}
     }
   }
 
   const env = {...process.env,
     HOME: process.env.HOME  || os.homedir()
   }
-  const config = await readConfig(file || configFile, env)
+  const configFile = file || foundConfig
+  const config = await readConfig(configFile, env)
   await validateConfig(config)
   return {
-    configFile: file || configFile,
+    configFile,
     config,
     autoConfigFile,
+    configEnv: !autoConfigFile && configFile ? {GALLERY_CONFIG: configFile} : {}
   }
-}
-
-module.exports = {
-  load
 }

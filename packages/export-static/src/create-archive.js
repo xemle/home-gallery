@@ -1,7 +1,9 @@
-const fs = require('fs');
-const archiver = require('archiver');
+import fs from 'fs';
+import archiver from 'archiver';
 
-const log = require('@home-gallery/logger')('export.archive');
+import Logger from '@home-gallery/logger'
+
+const log = Logger('export.archive');
 
 const zipOpitons = {
   zlib: {
@@ -27,14 +29,14 @@ const toHuman = (bytes) => {
   }
 }
 
-const createArchive = (outputDirectory, archiveFilename, cb) => {
-  if (!archiveFilename) {
-    return cb(null, outputDirectory, archiveFilename);
+export const createArchive = (dir, archiveFile, cb) => {
+  if (!archiveFile) {
+    return cb(null, dir, archiveFile);
   }
 
-  const match = archiveFilename.match(/\.(zip|tar\.gz)$/i);
+  const match = archiveFile.match(/\.(zip|tar\.gz)$/i);
   if (!match) {
-    const err = new Error(`Archive filename ${archiveFilename} must end with .zip or .tar.gz`);
+    const err = new Error(`Archive filename ${archiveFile} must end with .zip or .tar.gz`);
     log.error(err.message);
     cb(err)
   }
@@ -43,26 +45,24 @@ const createArchive = (outputDirectory, archiveFilename, cb) => {
   const options = isZip ? zipOpitons : tarOptions
 
   const t0 = Date.now();
-  log.info(`Creating archive ${archiveFilename}`);
+  log.info(`Creating archive ${archiveFile}`);
 
-  const output = fs.createWriteStream(archiveFilename);
+  const output = fs.createWriteStream(archiveFile);
   const archive = archiver(format, options);
 
   output.on('close', () => {
-    log.info(t0, `Created archive ${archiveFilename} with ${toHuman(archive.pointer())}`);
-    return cb(null, outputDirectory, archiveFilename);
+    log.info(t0, `Created archive ${archiveFile} with ${toHuman(archive.pointer())}`);
+    return cb(null, dir, archiveFile);
   });
 
   archive.on('error', (err) => {
-    log.error(`Failed to create archive ${archiveFilename}: ${err}`)
+    log.error(`Failed to create archive ${archiveFile}: ${err}`)
     cb(err);
   });
 
   archive.pipe(output);
 
-  archive.directory(`${outputDirectory}/`, false);
+  archive.directory(`${dir}/`, false);
 
   archive.finalize();
 }
-
-module.exports = createArchive;

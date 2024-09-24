@@ -1,9 +1,17 @@
-const request = require('request');
+import request from 'request';
 
-const log = require('@home-gallery/logger')('extractor.geoReverse');
-const { throttleAsync } = require('@home-gallery/stream');
+import Logger from '@home-gallery/logger'
+import { throttleAsync } from '@home-gallery/stream';
+
+import { toPlugin } from '../pluginUtils.js';
+
+const log = Logger('extractor.geoReverse');
 
 const getAcceptLanguageValue = (languages) => {
+  if (typeof languages == 'string') {
+    languages = languages.split(',')
+  }
+
   const anyLang = '*;q=0.5';
   const priorities = languages.map((lang, index, array) => {
     const isFirst = index === 0;
@@ -20,24 +28,21 @@ const getAcceptLanguageValue = (languages) => {
 
 const geoReverseSuffix = 'geo-reverse.json';
 
-function geoReverse(storage, config) {
-  const geoOptions = {
-    url: 'https://nominatim.openstreetmap.org',
-    addressLanguage: ['en', 'de'],
-    ...config?.extractor?.geoReverse
-  }
+/**
+ * @param {import('@home-gallery/types').TStorage} storage
+ * @param {object} options
+ * @returns {import('stream').Transform}
+ */
+async function geoReverse(storage, options) {
+
   let isLimitExceeded = false;
-
-  const acceptLanguageValue = getAcceptLanguageValue([].concat(geoOptions.addressLanguage || ['en', 'de']));
-
-  log.debug(`Use geo server ${geoOptions.url} with languages ${geoOptions.addressLanguage}`)
 
   function passThrough(entry) {
     if (isLimitExceeded) {
       return true;
-    } else if (storage.hasEntryFile(entry, geoReverseSuffix)) {
+    } else if (storage.hasFile(entry, geoReverseSuffix)) {
       return true
-    } else if (entry.meta['exif'] && entry.meta['exif'].GPSPosition) {
+    } else if (entry.meta.exif?.GPSPosition) {
       return false;
     } else {
       return true;
@@ -45,34 +50,35 @@ function geoReverse(storage, config) {
   }
 
   function task(entry, cb) {
-    if (!entry.meta['exif'] || !entry.meta['exif'].GPSPosition) {
+    if (!entry.meta.exif?.GPSPosition) {
       return cb();
     }
-    const geoPosition = entry.meta['exif'].GPSPosition;
+    const geoPosition = entry.meta.exif?.GPSPosition;
     if (!geoPosition.match(/^[-0-9+.eE]+ [-0-9+.eE]+$/)) {
-      log.warn(`Invalid geo position of ${entry}: ${entry.meta['exif'].GPSPosition}. Expecting space separated lat lon values`);
+      log.warn(`Invalid geo position of ${entry}: ${geoPosition}. Expecting space separated lat lon values`);
       return cb();
     }
-    const latLon = entry.meta['exif'].GPSPosition.split(' ');
+    const latLon = geoPosition.split(' ');
     const lat = (+latLon[0]).toFixed(7);
     const lon = (+latLon[1]).toFixed(7);
     const geo = `${lat}/${lon}`;
     if (lat === 'NaN' || lon === 'NaN' || Math.max(Math.abs(lat), Math.abs(lon)) < 0.001) {
-      log.warn(`Invalid geo position values of ${entry}: ${entry.meta['exif'].GPSPosition}`);
+      log.warn(`Invalid geo position values of ${entry}: ${geoPosition}`);
       return cb();
     }
 
-    const url = `${geoOptions.url}/reverse?format=jsonv2&lat=${lat}&lon=${lon}&polygon_geojson=1`;
-    const options = {
+    const url = `${options.url}/reverse?format=jsonv2&lat=${lat}&lon=${lon}&polygon_geojson=1`;
+    const req = {
       url,
       headers: {
         'User-Agent': 'home-gallery/1.0.0',
-        'Accept-Language': `${acceptLanguageValue}`
+        'Accept-Language': `${options.acceptLanguage}`
       },
       timeout: 4000,
     }
+
     const t0 = Date.now();
-    request(options, (err, res, body) => {
+    request(req, (err, res, body) => {
       if (err) {
         log.error(err, `Could not query geo reverse of ${entry} for ${geo} by URL ${url}: ${err}`);
         return cb();
@@ -81,28 +87,28 @@ function geoReverse(storage, config) {
           log.warn(`Bandwidth limit exceeded. Stop querying geo data`);
           isLimitExceeded = true;
         } else {
-          log.warn(`Could not query geo reverse of ${entry} for ${geo} by URL ${url}: response code is ${res.statusCode} with body ${res.body.replace(/\n/g, '\\n')})`);
+          log.warn({req, res}, `Could not query geo reverse of ${entry} for ${geo} by URL ${url}: response code is ${res.statusCode} with body ${res.body.replace(/\n/g, '\\n')})`);
         }
         return cb();
       }
-      storage.writeEntryFile(entry, geoReverseSuffix, body, (err) => {
-        if (err) {
+
+      let data
+      try {
+        data = JSON.parse(body)
+      } catch (err) {
+        log.warn({req, res}, `Could not parse request body of ${entry} for ${geo} by URL ${url}: ${err}`);
+        return cb()
+      }
+
+      storage.writeFile(entry, geoReverseSuffix, data)
+        .then(() => {
+          let info =`${data.osm_type} at ${[data.address?.city, data.address?.country].filter(v => !!v).join(', ')} (${data.address?.country_code?.toUpperCase()})`;
+          log.debug(t0, `Successful geo reverse lookup for ${entry} for ${geo}: ${info}`);
+        })
+        .catch(err => {
           log.error(err, `Could write geo reverse of ${entry} for ${geo}: ${err}`);
-          return cb();
-        } else {
-          let info = '';
-          try {
-            const data = JSON.parse(body);
-            const address = data.address || {};
-            const countryCode = address.country_code || '??';
-            info = `${data.osm_type} at ${[address.city, address.country].filter(v => !!v).join(', ')} (${countryCode.toUpperCase()})`;
-            log.debug(t0, `Successful geo reverse lookup for ${entry} for ${geo}: ${info}`);
-          } catch (e) {
-            log.warn(e, `Could not parse json data ${body}: ${e}`);
-          }
-        }
-        cb();
-      });
+        })
+        .finally(cb)
     })
   }
 
@@ -110,4 +116,35 @@ function geoReverse(storage, config) {
   return throttleAsync({passThrough, task, rateLimitMs: 1000, startLimitAfterTask: true});
 }
 
-module.exports = geoReverse;
+/**
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
+ */
+const geoReversePlugin = manager => ({
+  name: 'geoReverse',
+  phase: 'file',
+  /**
+   * @param {import('@home-gallery/types').TStorage} storage
+   */
+  async create(storage) {
+    const config = manager.getConfig()
+    const configOptions = config?.extractor?.geoReverse || {}
+
+    const addressLanguage = configOptions.addressLanguage || ['en', 'de']
+    const acceptLanguage = getAcceptLanguageValue(addressLanguage)
+
+    const options = {
+      url: 'https://nominatim.openstreetmap.org',
+      acceptLanguage,
+      ...configOptions
+    }
+
+    log.debug(`Use geo server ${options.url} with languages ${addressLanguage}`)
+
+    return geoReverse(storage, options)
+  },
+})
+
+const plugin = toPlugin(geoReversePlugin, 'geoAddressExtractor', ['metaExtractor'])
+
+export default plugin

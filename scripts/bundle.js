@@ -1,6 +1,8 @@
-const fs = require('fs/promises')
-const path = require('path')
-const bundler = require('@home-gallery/bundle')
+import fs from 'fs/promises'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 const printHelp = () => {
   console.log(`${process.argv[1]} <options>
@@ -54,8 +56,14 @@ const parseOptions = async () => {
   return config
 }
 
-parseOptions()
-  .then(bundler.bundle)
+const run = async() => {
+  const { bundle } = await import('@home-gallery/bundle')
+  const options = await parseOptions()
+
+  await bundle(options)
+}
+
+run()
   .then(() => console.log(`Bundling done`))
   .catch(e => {
     console.error(`Bundling failed! ${e}`)

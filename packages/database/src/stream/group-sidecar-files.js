@@ -1,11 +1,10 @@
-const { through } = require('@home-gallery/stream')
-const { sidecars } = require('@home-gallery/common')
-const { groupSidecarFiles } = sidecars
+import { through } from '@home-gallery/stream'
+import { sidecars } from '@home-gallery/common'
 
-const sidecarFiles = through(function (entries, enc, cb) {
-  this.push(groupSidecarFiles(entries))
+export const groupSidecarFiles = () => {
+  return through(function (entries, enc, cb) {
+    this.push(sidecars.groupSidecarFiles(entries))
 
-  cb()
-});
-
-module.exports = sidecarFiles;
+    cb()
+  })
+}

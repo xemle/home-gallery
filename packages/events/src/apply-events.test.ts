@@ -1,8 +1,8 @@
 import t from 'tap'
 
-import { applyEvents } from './apply-events';
-import { Taggable } from './taggable';
-import { Event } from './models';
+import { applyEvents } from './apply-events.ts';
+import { Taggable } from './taggable.js';
+import { Event } from './models.js';
 
 t.test('applyEvents()', async t => {
   t.test('should add one tag', async t => {

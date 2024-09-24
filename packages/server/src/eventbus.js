@@ -1,7 +1,3 @@
-const EventEmitter = require('events');
+import EventEmitter from 'events';
 
-class EventBus extends EventEmitter {}
-
-module.exports = {
-  EventBus
-}
+export class EventBus extends EventEmitter {}

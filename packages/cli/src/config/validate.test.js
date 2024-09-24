@@ -1,8 +1,11 @@
-const t = require('tap')
-const path = require('path')
+import t from 'tap'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-const { readData } = require('./read')
-const { validateConfig } = require('./validate')
+import { readData } from './read.js'
+import { validateConfig } from './validate.js'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const testDir = path.resolve(__dirname, '..', '..', 'test')
 
 t.test('validate', async t => {

@@ -1,4 +1,4 @@
-const { getEntryMetaByKey } = require('./utils')
+import { getEntryMetaByKey } from './utils.js'
 
 const getFaces = (entry, minScore) => {
   const faces = getEntryMetaByKey(entry, 'faces')
@@ -31,6 +31,9 @@ const getFaces = (entry, minScore) => {
     })
 }
 
-module.exports = {
-  getFaces
+export const faceMapper = {
+  name: 'faceMapper',
+  mapEntry(entry, media) {
+    media.faces = getFaces(entry, 0.7)
+  }
 }

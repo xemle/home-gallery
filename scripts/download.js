@@ -1,14 +1,14 @@
-const fs = require('fs').promises
-const { createWriteStream, createReadStream } = require('fs')
-const path = require('path')
-const fetch = require('node-fetch')
-const { createGunzip } = require('zlib')
-const tar = require('tar-fs')
-const zip = require('extract-zip')
+import fs from 'fs/promises'
+import { createWriteStream, createReadStream } from 'fs'
+import path from 'path'
+import fetch from 'node-fetch'
+import { createGunzip } from 'zlib'
+import tar from 'tar-fs'
+import zip from 'extract-zip'
 
-const exists = async file => fs.access(file).then(() => true).catch(() => false)
+export const exists = async file => fs.access(file).then(() => true).catch(() => false)
 
-const downloadFile = async (url, file) => {
+export const downloadFile = async (url, file) => {
   await fs.mkdir(path.dirname(file), { recursive: true })
   const res = await fetch(url)
 
@@ -21,7 +21,7 @@ const downloadFile = async (url, file) => {
   })
 }
 
-const extractTarGz = async (file, dir, ignore) => {
+export const extractTarGz = async (file, dir, ignore) => {
   const allowAll = () => false
   return new Promise((resolve, reject) => {
     createReadStream(file)
@@ -34,11 +34,11 @@ const extractTarGz = async (file, dir, ignore) => {
   })
 }
 
-const extractZip = async (file, dir) => {
+export const extractZip = async (file, dir) => {
   return zip(file, {dir})
 }
 
-const extractArchive = async (file, dir) => {
+export const extractArchive = async (file, dir) => {
   await fs.mkdir(dir, {recursive: true})
 
   if (file.match(/\.tar\.gz$/)) {
@@ -48,11 +48,4 @@ const extractArchive = async (file, dir) => {
   } else {
     console.log(`Unsupported archive ${path.basename(file)}`)
   }
-}
-
-module.exports = {
-  exists,
-  extractArchive,
-  extractTarGz,
-  downloadFile
 }

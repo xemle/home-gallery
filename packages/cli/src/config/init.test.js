@@ -1,11 +1,13 @@
-const t = require('tap')
-const os = require('os')
-const fs = require('fs/promises')
-const path = require('path')
-const YAML = require('yaml')
+import t from 'tap'
+import os from 'os'
+import fs from 'fs/promises'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import YAML from 'yaml'
 
-const { initConfig } = require('./init')
+import { initConfig } from './init.js'
 
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const readYaml = async file => fs.readFile(file, 'utf-8').then(data => YAML.parse(data))
 const y2o = yaml => YAML.parse(yaml)
 

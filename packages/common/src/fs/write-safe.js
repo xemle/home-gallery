@@ -1,11 +1,11 @@
-const fs = require('fs');
-const path = require('path');
-const mkdir = require('./mkdirp');
+import fs from 'fs';
+import path from 'path';
+import { mkdirp } from './mkdirp.js';
 
-const writeSafe = (filename, data, cb) => {
+export const writeSafe = (filename, data, cb) => {
   fs.writeFile(filename, data, (err) => {
     if (err && err.code === 'ENOENT') {
-      mkdir(path.dirname(filename), (err) => {
+      mkdirp(path.dirname(filename), (err) => {
         if (err) {
           return cb(err);
         }
@@ -16,5 +16,3 @@ const writeSafe = (filename, data, cb) => {
     }
   });
 }
-
-module.exports = writeSafe;

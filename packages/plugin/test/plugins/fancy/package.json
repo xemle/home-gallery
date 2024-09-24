@@ -1,0 +1,6 @@
+{
+  "name": "fancy",
+  "description": "fancy plugin for HomeGallery",
+  "version": "1.0",
+  "main": "index.js"
+}

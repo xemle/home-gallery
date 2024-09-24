@@ -1,7 +1,9 @@
-const log = require('@home-gallery/logger')('export.query');
-const { filterEntriesByQuery, createStringifyEntryCache } = require('@home-gallery/query');
+import Logger from '@home-gallery/logger'
 
-const applyQuery = (database, query, cb) => {
+const log = Logger('export.query');
+import { filterEntriesByQuery, createStringifyEntryCache } from '@home-gallery/query';
+
+export const applyQuery = (database, query, cb) => {
   if (!query) {
     return cb(null, database);
   }
@@ -20,4 +22,3 @@ const applyQuery = (database, query, cb) => {
     })
 }
 
-module.exports = applyQuery;

@@ -1,12 +1,13 @@
-const { Buffer } = require('buffer')
-const fs = require('fs').promises
-const heicDecode = require('heic-decode')
+import { Buffer } from 'buffer'
+import fs from 'fs/promises'
+import path from 'path'
+import heicDecode from 'heic-decode'
 
-const { promisify } = require('@home-gallery/common')
-const log = require('@home-gallery/logger')('extractor.image.heic')
-const { toPipe, conditionalTask } = require('../../stream/task')
+import Logger from '@home-gallery/logger'
 
-const { useExternalImageResizer } = require('./image-resizer')
+import { toPlugin } from '../pluginUtils.js';
+
+const log = Logger('extractor.image.heic')
 
 let sharp
 let jpegJs
@@ -14,8 +15,6 @@ let jpegJs
 const imageTypes = ['rawImage']
 
 const rawPreviewSuffix = 'raw-preview.jpg'
-
-const maxSize = 1920
 
 const sharpJpgOptions = {
   quality: 90,
@@ -37,19 +36,42 @@ const isHeic = matchExt(/hei[cf]/)
 
 const hasJpg = entry => isJpg(entry) || entry.sidecars?.find(isJpg)
 
+/**
+ * @param {import('@home-gallery/types').TExtractorEntry} entry
+ * @returns {import('@home-gallery/types').TExtractorEntry | undefined}
+ */
 const findHeicEntry = entry => isHeic(entry) ? entry : entry.sidecars?.find(isHeic)
 
 const hasHeic = entry => !!findHeicEntry(entry)
 
 const arrayBuffer2Buffer = data => Buffer.from(new Uint8Array(data))
 
+/**
+ * @typedef {object} TJpgWriterOptions
+ * @prop {number} weight
+ * @prop {number} height
+ * @prop {any[]} data
+ *
+ * @typedef {callback} TJpgWriter
+ * @param {TJpgWriterOptions} options
+ * @param {number} maxSize
+ * @param {string} dst
+ * @returns {Promise<void>}
+ */
+/**
+ * @type {TJpgWriter}
+ */
 const sharpJpgWriter = async ({width, height, data}, maxSize, dst) => {
   const image = sharp(data, { raw: {width, height, channels: 4}})
   const resize = Math.max(width, height) > maxSize ? image.resize({width: maxSize, height: maxSize, fit: 'inside'}) : image
   return resize.jpeg(sharpJpgOptions).toFile(dst)
 }
 
-const createFallbackJpgWriter = imageResizer => async ({width, height, data}, maxSize, dst) => {
+/**
+ * @param {import('@home-gallery/types').TStorage} storage
+ * @param {import('./image-resizer.js').ImageResizer} imageResizer
+ */
+const createFallbackJpgWriter = (storage, imageResizer) => async ({width, height, data}, maxSize, dst) => {
   const t0 = Date.now()
   const result = jpegJs.encode({width, height, data}, sharpJpgOptions.quality)
   log.debug(t0, `Encoded raw image data (${width}x${height}) to JPEG via jpeg-js`)
@@ -58,15 +80,23 @@ const createFallbackJpgWriter = imageResizer => async ({width, height, data}, ma
   }
 
   const t1 = Date.now()
-  const tmp = `${dst}.tmp.jpg`
-  return fs.writeFile(tmp, result.data)
-    .then(() => imageResizer(tmp, dst, maxSize))
+  const localDir = await storage.createLocalDir()
+  const tmpFile = path.resolve(localDir.dir, 'heic-resize.jpg')
+  return fs.writeFile(tmpFile, result.data)
+    .then(() => imageResizer(tmpFile, dst, maxSize))
     .then(() => {
       log.debug(t1, `Resized heic preview to ${maxSize}`)
-      return fs.unlink(tmp)
     })
+    .finally(() => localDir.release())
 }
 
+/**
+ * @param {string} src
+ * @param {number} maxSize
+ * @param {string} dst
+ * @param {TJpgWriter} jpgWriter
+ * @returns {Promise<void>}
+ */
 const convertHeic = async (src, maxSize, dst, jpgWriter) => {
   const t0 = Date.now()
   return fs.readFile(src)
@@ -77,29 +107,48 @@ const convertHeic = async (src, maxSize, dst, jpgWriter) => {
     })
 }
 
-const initJpgWriter = (config, imageResizer) => {
-  if (!useExternalImageResizer(config)) {
-    try {
-      sharp = require('sharp')
-      return sharpJpgWriter
-    } catch (e) {
-      log.warn(e, `Could not load sharp to write JPG`)
-    }
-  }
-  if (!sharp) {
-    jpegJs = require('jpeg-js')
-    log.warn(`Use slower jpeg-js to write JPG`)
-    return createFallbackJpgWriter(imageResizer)
+/**
+ * @param {import('./image-resizer.js').ImageResizer} imageResizer
+ * @param {boolean} isNativeImageResizer
+ * @returns {Promise<TJpgWriter>}
+ */
+const initJpgWriter = async (storage, imageResizer, isNativeImageResizer) => {
+  if (!isNativeImageResizer) {
+    return import('sharp')
+      .then(lib => {
+        sharp = lib.default
+        log.debug(`Use sharp as HEIC JPEG writer`)
+        return sharpJpgWriter
+      })
+      .catch(e => {
+        log.warn(e, `Could not load sharp to write JPG`)
+        return import('jpeg-js')
+          .then(lib => {
+            jpegJs = lib
+            log.warn(`Use slower jpeg-js to write JPG`)
+            return createFallbackJpgWriter(storage, imageResizer)
+          })
+      })
+  } else {
+    return import('jpeg-js')
+      .then(lib => {
+        jpegJs = lib
+        log.warn(`Use slower jpeg-js to write JPG`)
+        return createFallbackJpgWriter(storage, imageResizer)
+      })
   }
 }
 
-function heicPreview(storage, extractor, config) {
-  const { imageResizer, imagePreviewSizes: previewSizes } = extractor
-
-  const jpgWriter = initJpgWriter(config, promisify(imageResizer))
+/**
+ * @param {import('@home-gallery/types').TStorage} storage
+ * @param {number[]} imagePreviewSizes
+ * @param {TJpgWriter} jpgWriter
+ * @returns {import('stream').Transform}
+ */
+export async function heicPreview(storage, imagePreviewSizes, jpgWriter) {
 
   const test = entry => {
-    if (!imageTypes.includes(entry.type) || hasJpg(entry) || storage.hasEntryFile(entry, rawPreviewSuffix)) {
+    if (!imageTypes.includes(entry.type) || hasJpg(entry) || storage.hasFile(entry, rawPreviewSuffix)) {
       return false
     }
     if (hasHeic(entry)) {
@@ -108,25 +157,51 @@ function heicPreview(storage, extractor, config) {
     return false
   }
 
-  const task = (entry, cb) => {
+  const task = async (entry) => {
     const t0 = Date.now()
 
     const heicEntry = findHeicEntry(entry)
-    const dst = storage.getEntryFilename(entry, rawPreviewSuffix)
-    convertHeic(heicEntry.src, Math.max(...previewSizes) || 1920, dst, jpgWriter)
+    const src = await heicEntry.getFile()
+    const localFile = await storage.createLocalFile(entry, rawPreviewSuffix)
+    const maxSize = Math.max(...imagePreviewSizes) || 1920
+    return convertHeic(src, maxSize, localFile.file, jpgWriter)
+      .then(() => localFile.commit())
       .then(() => {
-        storage.addEntryFilename(entry, rawPreviewSuffix)
         log.debug(t0, `Created jpg preview image from heic image of ${entry}`)
-        cb()
       })
       .catch(err => {
-        log.error(err, `Failed to convert heic image of ${entry}`)
-        cb()
+        return localFile.release()
+          .finally(() => {
+            log.error(err, `Failed to convert heic image of ${entry}`)
+          })
       })
   }
 
-  return toPipe(conditionalTask(test, task))
-
+  return {
+    test,
+    task
+  }
 }
 
-module.exports = heicPreview
+/**
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns {import('@home-gallery/types').TExtractor}
+ */
+const heicPlugin = manager => ({
+  name: 'heic',
+  phase: 'raw',
+  /**
+   * @param {import('@home-gallery/types').TStorage} storage
+   */
+  async create(storage) {
+    const context = manager.getContext()
+    const { imageResizer, isNativeImageResizer, imagePreviewSizes } = context
+    const jpgWriter = await initJpgWriter(storage, imageResizer, isNativeImageResizer)
+
+    return heicPreview(storage, imagePreviewSizes, jpgWriter)
+  },
+})
+
+const plugin = toPlugin(heicPlugin, 'heicPreviewExtractor', ['imageResizeExtractor'])
+
+export default plugin

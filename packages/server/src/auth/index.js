@@ -1,7 +1,10 @@
-const { rules2WhitelistRules, defaultIpWhitelistRules, isWhitelistIp } = require('./ip')
-const { users2UserMap, matchesUser } = require('./user')
+import { rules2WhitelistRules, isWhitelistIp } from './ip.js'
+export { defaultIpWhitelistRules } from './ip.js'
+import { users2UserMap, matchesUser } from './user.js'
 
-const log = require('@home-gallery/logger')('server.auth');
+import Logger from '@home-gallery/logger'
+
+const log = Logger('server.auth');
 
 const getCredentials = req => {
   if (!req.headers.authorization) {
@@ -14,15 +17,15 @@ const getCredentials = req => {
   return []
 }
 
-const augmentReqByUserMiddleware = () => (req, _, next) => {
-  const [login] = getCredentials(req)
-  if (login) {
-    req.user = login
+export const augmentReqByUserMiddleware = () => (req, _, next) => {
+  const [username] = getCredentials(req)
+  if (username) {
+    req.username = username
   }
   next()
 }
 
-const createBasicAuthMiddleware = (users, rules) => {
+export const createBasicAuthMiddleware = (users, rules) => {
   const userMap = users2UserMap(users)
   const whitelistRules = rules2WhitelistRules(rules || [])
 
@@ -31,26 +34,21 @@ const createBasicAuthMiddleware = (users, rules) => {
 
   return (req, res, next) => {
     const clientIp = req.ip
-    if (isWhitelistIp(whitelistRules, clientIp)) {
+    req.ignoreAuth = isWhitelistIp(whitelistRules, clientIp)
+    if (req.ignoreAuth) {
       return next()
     }
 
-    const [login, password] = getCredentials(req)
-    if (!login) {
+    const [username, password] = getCredentials(req)
+    if (!username) {
       log.debug(`Block client with ip ${clientIp}. Request authentication`)
-    } else if (matchesUser(userMap, login, password)) {
+    } else if (matchesUser(userMap, username, password)) {
       return next()
     } else {
-      log.info(`Invalid credentials for user '${login}'. Block client with ip ${clientIp}. Request authentication`)
+      log.info(`Invalid credentials for user '${username}'. Block client with ip ${clientIp}. Request authentication`)
     }
 
     res.set('WWW-Authenticate', 'Basic realm="HomeGallery"')
     res.status(401).send('Authentication required')
   }
-}
-
-module.exports = {
-  augmentReqByUserMiddleware,
-  createBasicAuthMiddleware,
-  defaultIpWhitelistRules
 }
