@@ -11,7 +11,7 @@ export const MediaViewImage = (props) => {
   const imgRect = useClientRect(imgRef);
   const [faceRects, setFaceRects] = useState([]);
   const [objectRects, setObjectRects] = useState([]);
-  const { showDetails } = props;
+  const { showAnnotations } = props;
   const { id, shortId, previews, faces, objects } = props.media;
   const navigate = useNavigate();
   const previewSize = usePreviewSize()
@@ -38,7 +38,7 @@ export const MediaViewImage = (props) => {
 
   useEffect(() => {
     const e = imgRef.current;
-    if (!e || !imgRect || !showDetails) {
+    if (!e || !imgRect || !showAnnotations) {
       return;
     }
     let { x, y, width, height } = imgRect;
@@ -85,15 +85,15 @@ export const MediaViewImage = (props) => {
         </div>
       );
     }))
-  }, [imgRef, imgRect, src, showDetails])
+  }, [imgRef, imgRect, src, showAnnotations])
 
   return (
     <>
       <div className="relative w-full h-full">
         <img ref={imgRef} className="absolute object-contain w-full h-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" src={smallUrl} />
         <img className="absolute object-contain w-full h-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" src={src} />
-        {showDetails && objectRects}
-        {showDetails && faceRects}
+        {showAnnotations && objectRects}
+        {showAnnotations && faceRects}
       </div>
     </>
   )

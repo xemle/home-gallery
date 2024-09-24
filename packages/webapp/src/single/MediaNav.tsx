@@ -95,6 +95,11 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
           </a>
         }
         { current &&
+          <a onClick={() => dispatch({type: 'toggleAnnotations'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show object and face annotations (a)">
+            <FontAwesomeIcon icon={icons.faUsersViewfinder} className={iconClass}/>
+          </a>
+        }
+        { current &&
           <a onClick={() => dispatch({type: 'toggleDetails'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show detail info (i)">
             <FontAwesomeIcon icon={icons.faInfo} className={iconClass}/>
           </a>
