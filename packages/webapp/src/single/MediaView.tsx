@@ -190,7 +190,7 @@ export const MediaView = () => {
         <div className="flex flex-col w-screen md:flex-row h-dvh">
           <div className={classNames('w-full', {'h-1/2 flex-shrink-0 md:flex-shrink md:h-full': showDetails, 'h-full': !showDetails})}>
             <div className="relative w-full h-full overflow-hidden">
-              {!hideNavigation &&
+              {!hideNavigation && showNavigation &&
                 <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} dispatch={dispatch} />
               }
               {isImage &&
