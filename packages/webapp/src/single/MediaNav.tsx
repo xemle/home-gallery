@@ -10,9 +10,6 @@ import { usePreviewSize } from "./usePreviewSize";
 import { classNames } from '../utils/class-names'
 
 export const MediaNav = ({current, prev, next, listLocation, showNavigation, dispatch}) => {
-  const [faceRects] = useState([]);
-  const [objectRects] = useState([]);
-
   const query = useSearchStore(state => state.query);
   const previewSize = usePreviewSize()
 
