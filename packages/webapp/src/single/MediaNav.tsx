@@ -97,12 +97,7 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
             <FontAwesomeIcon icon={icons.faClock} className={iconClass}/>
           </a>
         }
-        { (faceRects || objectRects) &&
-          <a onClick={() => dispatch({type: 'toggleRects'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show objects (o)">
-            <FontAwesomeIcon icon={icons.faUsersViewfinder} className={iconClass}/>
-          </a>
-        }
-        { current &&
+        { (current && (current?.faces?.length > 0 || current?.objects?.length > 0)) && 
           <a onClick={() => dispatch({type: 'toggleAnnotations'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show object and face annotations (a)">
             <FontAwesomeIcon icon={icons.faUsersViewfinder} className={iconClass}/>
           </a>
