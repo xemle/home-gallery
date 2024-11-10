@@ -142,7 +142,7 @@ const createRemoveFile = (validIdMap, stats, purgeOptions) => {
       .then(() => {
         stats.removedFiles++
         stats.removedFileSize += fileStat.size
-        log.debug(`Removed orphan file ${path.join(dir, file)} with ${humanize(fileStat.size)}${options.dryRunSuffix}`)
+        log.debug(`Removed orphan file ${path.join(dir, file)} with ${humanize(fileStat.size)}${purgeOptions.dryRunSuffix}`)
       })
       .catch(err => log.warn(err, `Could not remove orphan file ${path.join(dir, file)}: ${err}`))
   }
