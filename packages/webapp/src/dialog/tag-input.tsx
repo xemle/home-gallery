@@ -42,7 +42,7 @@ export interface TagInputProps {
   dispatch: Function
 }
 
-export const TagInput : FunctionComponent<TagInputProps> = ({value, tags, withRemove: withRemove, suggestions, showSuggestions, dispatch}) => {
+export const TagInput : FunctionComponent<TagInputProps> = ({value, tags, withRemove: withRemove, suggestions, showSuggestions, dispatch, onSubmit, onCancel}) => {
   const ref = useRef<HTMLElement>(null)
 
   const handleKeyDown = (ev: KeyboardEvent<HTMLInputElement>) => {
@@ -58,10 +58,17 @@ export const TagInput : FunctionComponent<TagInputProps> = ({value, tags, withRe
         ev.preventDefault()
         return dispatch({type: 'addTag', value})
       }
+      onSubmit(ev);
     } else if (ev.key == 'Backspace' && value.length == 0) {
       return dispatch({type: 'removeLastTag'})
     } else if (ev.key == 'Escape') {
-      return dispatch({type: 'clearSuggentions'})
+      value = value.replace(/(^\s+|\s+$)/g, '')
+      if (value.length) {
+        return dispatch({type: 'clearSuggentions'})
+      }
+      else {
+        onCancel();
+      }
     } else if (ev.key == 'ArrowDown') {
       ev.preventDefault()
       return dispatch({type: 'nextSuggestion'})

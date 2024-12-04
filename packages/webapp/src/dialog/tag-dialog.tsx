@@ -117,7 +117,7 @@ export const MultiTagDialog = ({onCancel, onSubmit}: TagDialogProps) => {
           <a className="w-6 h-6 ml-1 hover:cursor-pointer" onClick={() => setShowHelp(show => !show)} title="Show help for tag input"><FontAwesomeIcon icon={icons.faQuestionCircle} className="text-gray-500 hover:text-gray-300"/></a>
         </label>
         <MultiTagHelp show={showHelp} setShow={setShowHelp} />
-        <TagInput tags={state.tags} withRemove={true} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={state.inputValue} />
+        <TagInput tags={state.tags} withRemove={true} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={state.inputValue} onSubmit={submitHandler} onCancel={onCancel} />
         <RecentTags tags={recentTags} dispatch={dispatch} />
         <UsedTags title="Tags of selected media:" tags={selectedTags} initialCount={15} dispatch={dispatch} />
         <UsedTags title="Most used tags:" tags={allTags} initialCount={5} dispatch={dispatch} />
@@ -158,7 +158,7 @@ export const SingleTagDialog = ({tags, onCancel, onSubmit}: TagDialogProps) => {
           <a className="w-6 h-6 ml-1 hover:cursor-pointer" onClick={() => setShowHelp(show => !show)} title="Show help for tag input"><FontAwesomeIcon icon={icons.faQuestionCircle} className="text-gray-500 hover:text-gray-300"/></a>
         </label>
         <SingleTagHelp show={showHelp} setShow={setShowHelp} />
-        <TagInput tags={state.tags} withRemove={false} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={state.inputValue} />
+        <TagInput tags={state.tags} withRemove={false} suggestions={state.suggestions} showSuggestions={state.showSuggestions} dispatch={dispatch} value={state.inputValue} onSubmit={submitHandler} onCancel={onCancel} />
         <RecentTags tags={recentTags} dispatch={dispatch} />
         <UsedTags title="Most used tags:" tags={allTags} initialCount={5} dispatch={dispatch} />
       </div>
