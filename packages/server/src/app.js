@@ -75,6 +75,11 @@ export function createApp(context) {
   router.use(getAuthMiddleware(config))
 
   router.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
+  for (const source of config.sources) {
+    let idx = source.index;
+    idx = idx.substring(idx.lastIndexOf('/'), idx.lastIndexOf('.'));
+    router.use('/originals' + idx, express.static(source.dir, {index: false, maxAge: '2d', immutable: true, fallthrough: true}));
+  }
 
   const pluginApi = browserPlugin(context, '/plugins/')
   router.use('/plugins', pluginApi.static)
