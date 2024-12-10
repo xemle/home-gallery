@@ -136,11 +136,20 @@ export const Details = ({entry, dispatch}) => {
               <FontAwesomeIcon icon={icons.faIdCard} className="text-gray-300"/>
             </div>
             <div>
-              <p>{mainFilename}</p>
+              <p>
+                <a href={`originals/${entry.files[0].index}/${entry.files[0].filename}`} target="_blank">
+                  {mainFilename}
+                </a>
+              </p>
               <p>{simpleSearchLink(entry.type, 'type', entry.type)} {entry.id.substring(0, 7)}</p>
-              <p>{entry.duration > 0 && (
-                <>{humanizeDuration(entry.duration)}, </>
-              )}{entry.width}x{entry.height}</p>
+              <p>
+                {entry.duration > 0 && (
+                  <>{humanizeDuration(entry.duration)}, </>
+                )}
+                <a href={`originals/${entry.files[0].index}/${entry.files[0].filename}`} target="_blank">
+                  {entry.width}x{entry.height}
+                </a>
+              </p>
             </div>
           </div>
           <div className="flex">
