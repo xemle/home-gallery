@@ -11,10 +11,6 @@ import { checksum } from './checksum.js';
 import { createFilter } from './filter/index.js';
 import { createJournal, readJournal as readJournalAsync, removeJournal as removeJournalAsync } from './journal.js'
 
-const asyncReadIndex = promisify(readIndex)
-const asyncCreateIndex = promisify(createIndex)
-const asyncUpdateIndex = promisify(updateIndex)
-const asyncWriteIndex = promisify(writeIndex)
 const asyncChecksum = promisify(checksum)
 
 const log = Logger('index')
@@ -23,10 +19,10 @@ const isLimitExeeded = filter => typeof filter.limitExceeded == 'function' ? fil
 
 const asyncCreateOrUpdate = async (directory, filename, options) => {
   const now = new Date();
-  const fileIndex = await asyncReadIndex(filename)
+  const fileIndex = await readIndex(filename)
   const filter = await createFilter(fileIndex.data, options)
-  const fsEntries = await asyncCreateIndex(directory, {...options, filter})
-  const [entries, changes] = await asyncUpdateIndex(fileIndex.data, fsEntries, options.matcherFn)
+  const fsEntries = await createIndex(directory, {...options, filter})
+  const [entries, changes] = await updateIndex(fileIndex.data, fsEntries, options.matcherFn)
   const limitExceeded = isLimitExeeded(filter)
 
   if (!changes) {
@@ -42,7 +38,7 @@ const asyncCreateOrUpdate = async (directory, filename, options) => {
   if (options.dryRun) {
     return [newIndex, limitExceeded, changes]
   }
-  const writeIndex = await asyncWriteIndex(filename, newIndex);
+  const writeIndex = await writeIndex(filename, newIndex);
   return [writeIndex, limitExceeded, changes]
 }
 
@@ -56,7 +52,7 @@ const asyncUpdateChecksum = async (filename, index, withChecksum, isDryRun) => {
 
   if (checksumChanges && checksumChanges.length && !isDryRun) {
     const t0 = Date.now()
-    index = await asyncWriteIndex(filename, updateIndex);
+    index = await writeIndex(filename, updateIndex);
     log.info(t0, `File index was saved to ${filename} and ${checksumChanges.length} entries have new checkums/ids`)
   }
   if (interrupted) {

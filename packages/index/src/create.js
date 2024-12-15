@@ -1,10 +1,13 @@
 import path from 'path';
 
 import Logger from '@home-gallery/logger'
+import { promisify } from '@home-gallery/common';
 
 const log = Logger('index.create');
 
 import { walkDir } from './walker.js';
+
+const asyncWalkDir = promisify(walkDir)
 
 const createFilesMapper = (excludeIfPresent) => {
   if (!excludeIfPresent) {
@@ -19,10 +22,10 @@ const createFilesMapper = (excludeIfPresent) => {
   }
 }
 
-export const createIndex = (dir, options, cb) => {
+export const createIndex = async (dir, options) => {
   const entries = [];
   const t0 = Date.now();
-  walkDir(dir, createFilesMapper(options.excludeIfPresent), (filename, stat) => {
+  return walkDir(dir, createFilesMapper(options.excludeIfPresent), (filename, stat) => {
     const relativeFilename = path.relative(dir, filename);
     if (!options.filter(relativeFilename, stat)) {
       return false;
@@ -38,12 +41,13 @@ export const createIndex = (dir, options, cb) => {
       fileType: stat.isDirectory() ? 'd' : (stat.isFile() ? 'f' : (stat.isSymbolicLink() ? 'l' : 'o'))
     }));
     return true;
-  }, (err) => {
-    if (err) {
-      log.error(`Could not read files in ${dir}: ${err}`);
-      return cb(err);
-    } 
+  })
+  .then(entries => {
     log.info(t0, `Read ${entries.length} files in ${dir}`);
-    cb(null, entries);
+    return entries
+  })
+  .catch(err => {
+    log.error(err, `Could not read files in ${dir}: ${err}`);
+    throw err
   });
 }

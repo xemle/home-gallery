@@ -30,11 +30,11 @@ const initialChanges = entries => {
   }
 }
 
-export const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
+export const updateIndex = async (fileEntries, fsEntries, matcherFn) => {
   const t0 = Date.now();
   if (!fileEntries.length) {
     log.info(`Initiate index with ${fsEntries.length} entries`);
-    return cb(null, fsEntries, initialChanges(fsEntries));
+    return [fsEntries, initialChanges(fsEntries)];
   }
 
   const fileEntryMap = toMap(fileEntries, e => e.filename);
@@ -50,7 +50,7 @@ export const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
 
   if (hasNoChanges(onlyFileKeys, onlyFsKeys, changedKeys)) {
     log.info(t0, `No changes found`);
-    return cb(null, fileEntries, false);
+    return [fileEntries, false];
   }
 
   setPrevSha1sum(changedKeys, fileEntryMap, fsEntryMap)
@@ -65,5 +65,5 @@ export const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
     changes: changedKeys.map(key => fsEntryMap[key]),
     removes: onlyFileKeys.map(key => fileEntryMap[key])
   }
-  cb(null, updatedEntries, changes);
+  return [updatedEntries, changes]
 }
