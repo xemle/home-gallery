@@ -28,7 +28,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "@getgauge/cli": "^1.5.4",
+    "@getgauge/cli": "^1.6.10",
     "@home-gallery/types": "file:packages/types",
     "@react-leaflet/core": "^2.0.0",
     "@types/glob-to-regexp": "^0.4.0",
