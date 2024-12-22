@@ -2,6 +2,13 @@ import { readJsonGzip, promisify } from '@home-gallery/common';
 
 const asyncReadJsonGzip = promisify(readJsonGzip)
 
+/**
+ * @typedef {import('./types.d').IIndex} IIndex
+ */
+/**
+ * @param {string} filename
+ * @returns {Promise<IIndex>}
+ */
 export const readIndex = async (filename) => {
   return asyncReadJsonGzip(filename)
     .then(index => {

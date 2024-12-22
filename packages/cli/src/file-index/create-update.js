@@ -83,32 +83,22 @@ const command = {
         journal: argv.journal
       }
 
-      return new Promise((resolve, reject) => {
-        update(argv.directory, argv.index, options, (err, _, limitExceeded) => {
-          if (err) {
-            reject(err)
-          }
-
-          resolve(limitExceeded)
-          return limitExceeded
-        })
-      })
+      const [_, __, limitExceeded] = await update(argv.directory, argv.index, options)
+      return limitExceeded
     }
 
     run()
       .then(limitExceeded => {
         if (limitExceeded) {
-          log.info(`Index created and file limit exceeded`)
+          log.info(`File limit exceeded on file index update`)
           process.exit(1)
-        } else {
-          log.info(`Index created`)
         }
       })
       .catch(err => {
         if (err && err.code == 'EUSERABORT') {
           log.warn(`Index creation aborted: ${err}`)
         } else if (err) {
-          log.error(err, `Failed to create index: ${err}`)
+          log.error(err, `Failed to update file index: ${err}`)
         }
         process.exit(2)
       })

@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "module": "es2022",
+    "allowJs": true,
+    "outDir": "./dist",
+    "target": "es2022"
+  },
+  "include": ["./src/**/*"]
+}

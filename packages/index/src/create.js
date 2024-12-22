@@ -7,6 +7,16 @@ const log = Logger('index.create');
 
 import { walkDir } from './walker.js';
 
+/**
+ * @typedef {import('./types.d').IIndex} IIndex
+ */
+/**
+ * @typedef {import('./types.d').IIndexEntry} IIndexEntry
+ */
+/**
+ * @typedef {import('./types.d').IIndexOptions} IIndexOptions
+ */
+/** @type {(dir: string, cb: any) => Promise<IIndexEntry[]>} */
 const asyncWalkDir = promisify(walkDir)
 
 const createFilesMapper = (excludeIfPresent) => {
@@ -22,10 +32,16 @@ const createFilesMapper = (excludeIfPresent) => {
   }
 }
 
+/**
+ * @param {string} dir
+ * @param {import('./types.d').IIndexOptions} options
+ * @returns {Promise<IIndex>}
+ */
 export const createIndex = async (dir, options) => {
+  /** @type {IIndexEntry[]} */
   const entries = [];
   const t0 = Date.now();
-  return walkDir(dir, createFilesMapper(options.excludeIfPresent), (filename, stat) => {
+  return asyncWalkDir(dir, createFilesMapper(options.excludeIfPresent), (filename, stat) => {
     const relativeFilename = path.relative(dir, filename);
     if (!options.filter(relativeFilename, stat)) {
       return false;
@@ -42,7 +58,7 @@ export const createIndex = async (dir, options) => {
     }));
     return true;
   })
-  .then(entries => {
+  .then(() => {
     log.info(t0, `Read ${entries.length} files in ${dir}`);
     return entries
   })

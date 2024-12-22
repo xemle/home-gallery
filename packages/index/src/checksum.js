@@ -44,27 +44,35 @@ const createSha1 = (filename, progress, cb) => {
 
 };
 
-export const checksum = (index, sha1sumDate, cb) => {
-  const fileEntries = index.data.filter(e => e.isFile);
-  const missingChecksumEntries = fileEntries.filter(e => !e.sha1sum);
+/** @typedef {import('./types.d').IIndexEntry} IIndexEntry */
+/**
+ * 
+ * @param {string} directory 
+ * @param {IIndexEntry[]} entries 
+ * @param {IIndexEntry[]} checksumEntries 
+ * @param {string} sha1sumDate 
+ * @param {(err: Error | null, updatedEntries: IIndexEntry[], interrupted: boolean) => void} cb 
+ * @returns 
+ */
+export const checksum = (directory, entries, checksumEntries, sha1sumDate, cb) => {
   let interrupted = false;
   const t0 = Date.now();
 
-  if (!missingChecksumEntries.length) {
-    return cb(null, index, false, interrupted);
+  const updatedEntries = []
+  if (!checksumEntries.length) {
+    return cb(null, updatedEntries, interrupted);
   }
 
-  const totalBytes = fileEntries.reduce((all, entry) => all + entry.size, 0);
-  const missingBytes = missingChecksumEntries.reduce((all, entry) => all + entry.size, 0);
-  const updatedEntries = []
+  const totalBytes = entries.reduce((all, entry) => all + entry.size, 0);
+  const missingBytes = checksumEntries.reduce((all, entry) => all + entry.size, 0);
   let bytesCalculated = 0;
-  log.info(`Calculating ids for ${missingChecksumEntries.length} entries with ${humanize(missingBytes)} of total size ${humanize(totalBytes)} (${percent(missingBytes, totalBytes)})`);
+  log.info(`Calculating ids for ${checksumEntries.length} entries with ${humanize(missingBytes)} of total size ${humanize(totalBytes)} (${percent(missingBytes, totalBytes)})`);
 
   const gracefulShutdown = () => {
     if (!interrupted) {
       log.warn(`Graceful shutdown. Ids of ${humanize(bytesCalculated)} (${percent(bytesCalculated, missingBytes)}) were calculated, ${percent(totalBytes - missingBytes + bytesCalculated, totalBytes)} of ${humanize(totalBytes)} are done. Please be patient to avoid data loss!`);
       interrupted = true;
-      cb(null, index, updatedEntries, interrupted);
+      cb(null, updatedEntries, interrupted);
     } else {
       log.warn(`Shutdown in progress. Please be patient to avoid data loss!`);
     }
@@ -73,14 +81,14 @@ export const checksum = (index, sha1sumDate, cb) => {
 
   const progressLog = createByteProgressLog(missingBytes, 30 * 1000)
 
-  const calculateAll = (base, entries, updatedEntries, done) => {
+  const calculateAll = (entries, i, done) => {
     if (interrupted) {
       return;
-    } else if (!entries.length) {
-      return done(null, updatedEntries);
+    } else if (i >= entries.length) {
+      return done(null);
     }
-    const entry = entries.shift();
-    const filename = path.join(base, entry.filename);
+    const entry = entries[i++];
+    const filename = path.join(directory, entry.filename);
 
     const t0 = Date.now()
     createSha1(filename, progressLog, (err, sha1sum) => {
@@ -88,7 +96,7 @@ export const checksum = (index, sha1sumDate, cb) => {
         return;
       } else if (err) {
         log.warn(err, `Could not create checksum of ${filename}: ${err}. Continue.`)
-        return calculateAll(base, entries, updatedEntries, done);
+        return calculateAll(entries, i, done);
       }
       entry.sha1sum = sha1sum;
       entry.sha1sumDate = sha1sumDate;
@@ -96,16 +104,16 @@ export const checksum = (index, sha1sumDate, cb) => {
 
       bytesCalculated += entry.size;
       log.debug({duration: Date.now() - t0, bytes: entry.size}, `Calculated id ${sha1sum.substr(0, 7)}... for ${entry.filename} with ${humanize(entry.size)} (${bps(entry.size, t0)})`);
-      calculateAll(base, entries, updatedEntries, done);
+      calculateAll(entries, i, done);
     })
   }
 
-  calculateAll(index.base, missingChecksumEntries, updatedEntries, (err, updatedEntries) => {
+  calculateAll(checksumEntries, 0, (err) => {
     process.off('SIGINT', gracefulShutdown);
     if (err) {
       return cb(err);
     }
     log.info(t0, `All ids of ${humanize(totalBytes)} are calculated. Calculated ids of ${humanize(bytesCalculated)} (${(100 * bytesCalculated / totalBytes).toFixed(1)}%)`);
-    cb(null, index, updatedEntries, interrupted);
+    cb(null, updatedEntries, interrupted);
   });
 }

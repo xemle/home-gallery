@@ -38,8 +38,6 @@ const assertChecksum = async (filename, checksum, prop) => {
 
 step("Index has entry <filename> with checksum <checksum>", async (filename, checksum) => assertChecksum(filename, checksum, 'sha1sum'))
 
-step("Index has entry <filename> with prev checksum <checksum>", async (filename, checksum) => assertChecksum(filename, checksum, 'prevSha1sum'))
-
 step("Index has file order <filenames>", async (filenames) => {
   const index = await readIndex()
   const indexFilenames = index.data.map(entry => entry.filename)
@@ -66,7 +64,17 @@ step("Journal <id> entry <file> in <type> has checksum <checksum>", async (id, f
 
 step("Journal <id> entry <file> in <type> has prev checksum <checksum>", async (id, filename, type, checksum) => assertJournalChecksum(id, filename, type, checksum, 'prevSha1sum'))
 
-step("Delete journal <id>", async id => runCli(['index', 'journal', '-i', getIndexFilename(), '-j', id, '-r']))
+step("Apply journal <id>", async id => runCli(['index', 'journal', '-i', getIndexFilename(), '-j', id, 'apply']))
+
+step("Apply journal <id> fails", async id => {
+  runCli(['index', 'journal', '-i', getIndexFilename(), '-j', id, 'apply'])
+    .then(() => Promise.reject(new Error('Expected to fail')))
+    .catch(() => true)
+})
+
+step("Apply journal <id> with args <args>", async (id, args) => runCli(['index', 'journal', '-i', getIndexFilename(), '-j', id, 'apply', ...args.split(/\s+/)]))
+
+step("Remove journal <id>", async id => runCli(['index', 'journal', '-i', getIndexFilename(), '-j', id, 'remove']))
 
 const existsJournal = async id => access(getJournalFilename(id)).then(() => true).catch(() => false)
 

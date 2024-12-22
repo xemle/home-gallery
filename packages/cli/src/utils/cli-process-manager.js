@@ -14,8 +14,8 @@ export class CliProcessManager extends ProcessManager {
     process.once('SIGINT', () => this.stopped = true)
   }
 
-  async runCli(args, options) {
-    if (this.isStopped) {
+  async runCli(args, options, force = false) {
+    if (this.isStopped && !force) {
       return
     }
     const { env, nodeArgs, terminateTimeout } = {...defaultOptions, ...options}

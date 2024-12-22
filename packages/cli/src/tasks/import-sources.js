@@ -33,18 +33,35 @@ const updateIndices = async (sources, options) => {
   }
 }
 
-const deleteJournal = async (source, options) => {
+const applyJournal = async (source, options) => {
   const { journal } = options
-  const args = ['index', 'journal', '--index', source.index, '--journal', journal, '-r']
+  const args = ['index', 'journal', '--index', source.index, '--journal', journal, 'apply']
   await pm.runCli(args, {env: options.configEnv})
 }
 
-const deleteJournals = async (sources, options) => {
+const applyJournals = async (sources, options) => {
   if (!options.journal) {
     return
   }
+  log.debug(`Applying file index journals`)
   for (const source of sources) {
-    await deleteJournal(source, options);
+    await applyJournal(source, options);
+  }
+}
+
+const removeJournal = async (source, options, force) => {
+  const { journal } = options
+  const args = ['index', 'journal', '--index', source.index, '--journal', journal, 'remove']
+  await pm.runCli(args, {env: options.configEnv}, force)
+}
+
+const removeJournals = async (sources, options, force) => {
+  if (!options.journal) {
+    return
+  }
+  log.debug(`Removing file index journals`)
+  for (const source of sources) {
+    await removeJournal(source, options, force)
   }
 }
 
@@ -84,7 +101,7 @@ const catchIndexLimitExceeded = ({code}) => {
   if (code == 1) {
     return true
   }
-  throw new Error(`Exit code was ${code}`)
+  throw new Error(`Updating file index failed. Exit code is ${code}`)
 }
 
 const generateId = len => {
@@ -118,8 +135,12 @@ export const importSources = async (sources, options) => {
       .then(() => processing = false)
       .catch(catchIndexLimitExceeded)
     await extract(sources, importOptions)
-    await createDatabase(sources, importOptions)
-    await deleteJournals(sources, importOptions)
+      .then(() => createDatabase(sources, importOptions))
+      .then(() => applyJournals(sources, importOptions))
+      .catch(err => {
+        log.warn(err, `Import failed: ${err}`)
+        return removeJournals(sources, importOptions, true)
+      })
 
     if (processing) {
       log.info(`New chunk of media is processed and becomes ready to browse. Continue with next chunk to process...`)
