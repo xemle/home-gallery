@@ -72,15 +72,16 @@ export function statIndex(indexFilename, cb) {
   }
 
   const t0 = Date.now();
-  readIndex(indexFilename, (err, index) => {
-    if (err) {
+  readIndex(indexFilename)
+    .then(index => {
+      index.data.forEach(countEntry)
+      log.info(t0, `Read stats of ${indexFilename}`);
+      stats.extensions.sort();
+      stats.unknownExtensions.sort();
+      cb(null, stats)
+    })
+    .catch(err => {
       log.error(`Failed to read index file ${indexFilename}: ${err}`);
-      return cb(err);
-    } 
-    index.data.forEach(countEntry)
-    log.info(t0, `Read stats of ${indexFilename}`);
-    stats.extensions.sort();
-    stats.unknownExtensions.sort();
-    cb(null, stats);
-  })
+      cb(err)
+    })
 }

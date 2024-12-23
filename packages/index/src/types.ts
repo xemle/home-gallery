@@ -1,9 +1,12 @@
+import * as fs from 'fs'
+
 export type IIndexEntry = {
   dev: number
-  inode: number
+  ino: number
   filename: string
   size: number
-  created: number
+  ctimeMs: number
+  created: string
   sha1sum: string
   sha1sumDate: string
   prevSha1sum?: string
@@ -13,6 +16,8 @@ export type IIndexEntry = {
   isOther: boolean
   fileType: string
 }
+
+export type IIndexEntryMap = Record<string, IIndexEntry>
 
 export type IIndex = {
   type: string
@@ -40,4 +45,21 @@ export type IIndexOptions = {
   checksum?: boolean
   journal?: string,
   keepJournal?: boolean
+  matcherFn?: IIndexEntryMatcherFn
+  filter?: IWalkerFileHandler
+  addLimits?: string
+  excludeIfPresent?: string
+  maxFilesize?: string
+  keepKnownFiles?: boolean
+  exclude?: string[]
+  excludeFromFile?: string
 }
+
+export type IIndexEntryMatcherFn = (one: IIndexEntry, other: IIndexEntry) => boolean
+
+/**
+ * @param filename Filename
+ * @param stat File stats
+ * @returns {boolean} skip file handling. If file is a directory skip file walking
+ */
+export type IWalkerFileHandler = (filename: string, stat: fs.Stats) => boolean

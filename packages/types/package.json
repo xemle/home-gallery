@@ -10,9 +10,9 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm-run-all build:types",
-    "build:types": "npx tsc -d --emitDeclarationOnly",
+    "build:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck",
     "watch": "npm-run-all -p watch:types",
-    "watch:types": "npx tsc -d --emitDeclarationOnly --watch"
+    "watch:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck --watch"
   },
   "keywords": [
     "HomeGallery",

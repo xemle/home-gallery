@@ -8,7 +8,7 @@ const log = Logger('index.checksum');
 import { humanizeBytes as humanize } from '@home-gallery/common';
 import { bps, percent, remainingTime, humanizeDuration } from './format.js'
 
-const createByteProgressLog = (totalBytes, intervalMs) => {
+const createByteProgressLog = (totalBytes: number, intervalMs: number) => {
   const startTime = Date.now()
   let last = startTime
   let lastWritten = 0

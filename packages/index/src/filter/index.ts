@@ -3,6 +3,7 @@ import { fileFilter, promisify } from '@home-gallery/common'
 import { createFilesizeFilter } from './filesize-filter.js'
 import { createFilterChain } from './filter-chain.js'
 import { createLimitFilter } from './limit-filter.js'
+import { IIndexEntry, IIndexOptions, IWalkerFileHandler } from '../types.js'
 
 const asyncFileFilter = promisify(fileFilter)
 
@@ -14,8 +15,8 @@ const createFilename2Entry = (entries) => {
     }, {})
 }
 
-export const createFilter = async (entries, options) => {
-  const filters = []
+export async function createFilter(entries: IIndexEntry[], options: IIndexOptions): Promise<IWalkerFileHandler> {
+  const filters: IWalkerFileHandler[] = []
   const filename2Entry = createFilename2Entry(entries)
 
   if (options.maxFilesize) {

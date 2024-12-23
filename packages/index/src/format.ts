@@ -1,6 +1,6 @@
 import { humanizeBytes as humanize } from '@home-gallery/common'
 
-const pad = (v, l, c) => {
+const pad = (v: string | number, l: number, c = '0'): string => {
   v = '' + v
   l = l || v.length
   c = c || '0'
@@ -10,11 +10,11 @@ const pad = (v, l, c) => {
   return v
 }
 
-export const percent = (current, total, precision) => (100 * current / total).toFixed(precision || 1) + '%'
+export const percent = (current: number, total: number, precision = 1): string => (100 * current / total).toFixed(precision || 1) + '%'
 
-export const bps = (bytes, startTime) => humanize(bytes / Math.max(0.001, (Date.now() - startTime) / 1000)) + '/s'
+export const bps = (bytes: number, startTime: number) => humanize(bytes / Math.max(0.001, (Date.now() - startTime) / 1000)) + '/s'
 
-export const humanizeDuration = duration => {
+export const humanizeDuration = (duration: number): string => {
   if (duration <= 0) {
     return '0ms'
   } else if (duration < 800) {
@@ -37,9 +37,9 @@ export const humanizeDuration = duration => {
   }
 }
 
-export const remainingTime = (startTime, current, total) => {
+export const remainingTime = (startTime: number, current: number, total: number): number => {
   if (!total || total < current) {
-    return '0s'
+    return 0
   }
   const elapsedTime = Math.max(0, Date.now() - startTime)
   const estimatedTotalTime = elapsedTime / (current / total)
