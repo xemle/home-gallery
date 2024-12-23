@@ -64,10 +64,10 @@ export function createApp(context) {
   const app = express();
   app.disable('x-powered-by')
   app.enable('trust proxy')
+  app.use(augmentReqByUserMiddleware())
   app.use(loggerMiddleware())
 
   const router = express.Router()
-  router.use(augmentReqByUserMiddleware())
   router.use(cors());
   router.use(compression({ filter: shouldCompress }))
 
