@@ -78,7 +78,15 @@ export const Details = ({entry, dispatch}) => {
     ]
   }
 
-  const mainFilename = entry.files[0].filename.replace(/.*[/\\]/g, '')
+  const mainFileData = entry.files[0];
+  const mainFilename = mainFileData.filename.replace(/.*[/\\]/g, '')
+  const sourceConfig = appConfig.sources.find((value) => value && value.index === mainFileData.index);
+  const sourceLink = (text, withIcon = false) => {
+    if (!sourceConfig || sourceConfig.downloadable === false) return text;
+    return <a href={`sources/${mainFileData.index}/${mainFileData.filename}`} target="_blank">
+      {text} {withIcon ? <FontAwesomeIcon icon={icons.faArrowUpRightFromSquare} className="text-gray-300"/> : ''}
+    </a>
+  };
 
   const hasAddress = entry => entry.road || entry.city || entry.country
 
@@ -137,18 +145,14 @@ export const Details = ({entry, dispatch}) => {
             </div>
             <div>
               <p>
-                <a href={`originals/${entry.files[0].index}/${entry.files[0].filename}`} target="_blank">
-                  {mainFilename}
-                </a>
+                {sourceLink(mainFilename)}
               </p>
               <p>{simpleSearchLink(entry.type, 'type', entry.type)} {entry.id.substring(0, 7)}</p>
               <p>
                 {entry.duration > 0 && (
                   <>{humanizeDuration(entry.duration)}, </>
                 )}
-                <a href={`originals/${entry.files[0].index}/${entry.files[0].filename}`} target="_blank">
-                  {entry.width}x{entry.height}
-                </a>
+                {sourceLink(`${entry.width}x${entry.height}`, true)}
               </p>
             </div>
           </div>

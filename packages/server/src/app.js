@@ -76,9 +76,13 @@ export function createApp(context) {
 
   router.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
   for (const source of config.sources) {
-    let idx = source.index;
-    idx = idx.substring(idx.lastIndexOf('/'), idx.lastIndexOf('.'));
-    router.use('/originals' + idx, express.static(source.dir, {index: false, maxAge: '2d', immutable: true, fallthrough: true}));
+    if (!source.downloadable || source.offline) {
+      // If the source can't be downloaded or is offline we skip it
+      continue;
+    }
+    const basename = path.basename(source.index);
+    const idx = basename.replace(/\.[^.]+$/, '');
+    router.use('/sources/' + idx, express.static(source.dir, {index: false, maxAge: '2d', immutable: true, fallthrough: true}));
   }
 
   const pluginApi = browserPlugin(context, '/plugins/')
@@ -109,12 +113,24 @@ export function createApp(context) {
     const disabled = config?.webapp?.disabled || []
     const plugins = pluginApi.pluginEntries
     const entries = await getFirstEntries(50, req)
+    const sources = config.sources.map((value) => { 
+      // Don't return sources which we don't want to make downloadable
+      // (this is mainly to not make the index name available in the UI)
+      if (!value.downloadable || value.offline) {
+        return null;
+      }
+      return { 
+        downloadable: true,
+        index: path.basename(value.index).replace(/\.[^.]+$/, '')
+      } 
+    });
     return {
       disabled: !!req.username ? [...disabled, 'pwa'] : disabled,
       pluginManager: {
         plugins
       },
       entries,
+      sources,
     }
   }
 
