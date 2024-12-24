@@ -12,6 +12,7 @@ import useBodyDimensions from '../utils/useBodyDimensions';
 import { useDeviceType, DeviceType } from "../utils/useDeviceType";
 import { fluent } from "./fluent";
 import { MultiTagDialogProvider } from "../dialog/tag-dialog-provider";
+import { Fab } from "../overlay/Overlay";
 
 const NAV_HEIGHT = 44
 const BOTTOM_MARGIN = 4
@@ -76,6 +77,7 @@ export const List = () => {
               topDateItems={topDateItems} />
             <FluentList rows={rows} padding={padding} />
           </div>
+          <Fab />
         </>
       </MultiTagDialogProvider>
     </>
