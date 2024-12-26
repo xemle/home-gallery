@@ -74,8 +74,8 @@ const SlideShow = ({closeCb}) => {
 		setNextIdx(selectNewLayout(nextIdx));
 	}
 
-	const createInterval = () => {
-		return setInterval(() => {
+	const createTimeout = () => {
+		return setTimeout(() => {
 			setIsFading(true);
 		}, entryTimeout)
 	}
@@ -96,12 +96,17 @@ const SlideShow = ({closeCb}) => {
 	useEffect(() => {
 		setNextIdx(selectNewLayout(nextIdx));
 		setIsFading(true);
-		let timer = createInterval();
+	}, []);
+
+	useEffect(() => {
+		if (isFading) return;
+
+		const timer = createTimeout();
 
 		return () => {
 			clearTimeout(timer);
-		}
-	}, []);
+		};
+	}, [isFading]);
 
 	const divKeyUp = (event) => {
 		switch (event.key) {
