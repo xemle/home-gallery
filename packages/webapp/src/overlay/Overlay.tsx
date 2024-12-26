@@ -11,7 +11,7 @@ import { DoubleVLayout } from "./DoubleVLayout";
 const SlideShow = ({closeCb}) => {
 	const divRef = useRef<HTMLDivElement>(null);
 	const entries = useEntryStore(state => state.entries);
-	const entryTimeout = 10 * 1000; // TODO: move to a configuration
+	const slideTimeout = 60 * 1000; // TODO: move to a configuration
 	const getRandomIdx = () => Math.floor(Math.random() * entries.length);
 	const previewSize = usePreviewSize();
 	const layoutHistory = useRef<any[]>([]);
@@ -77,7 +77,7 @@ const SlideShow = ({closeCb}) => {
 	const createTimeout = () => {
 		return setTimeout(() => {
 			setIsFading(true);
-		}, entryTimeout)
+		}, slideTimeout)
 	}
 
 	const onDivClick = (event) => {
