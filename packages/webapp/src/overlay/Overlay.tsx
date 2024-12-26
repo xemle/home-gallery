@@ -5,6 +5,8 @@ import { useState, useEffect, useRef } from "react";
 import { useEntryStore } from "../store/entry-store";
 import { usePreviewSize } from "../single/usePreviewSize";
 import { getHigherPreviewUrl } from '../utils/preview';
+import { SingleLayout } from "./SingleLayout";
+import { DoubleVLayout } from "./DoubleVLayout";
 
 const SlideShow = ({closeCb}) => {
 	const divRef = useRef<HTMLDivElement>(null);
@@ -12,25 +14,65 @@ const SlideShow = ({closeCb}) => {
 	const entryTimeout = 10 * 1000; // TODO: move to a configuration
 	const getRandomIdx = () => Math.floor(Math.random() * entries.length);
 	const previewSize = usePreviewSize();
-	const [largeUrlState, setLargeUrlState] = useState('');
+	const layoutHistory = useRef<any[]>([]);
+	const [currentLayout, setCurrentLayout] = useState<any>(null);
+	const [nextLayout, setNextLayout] = useState<any>(null);
+	const [isFading, setIsFading] = useState(false);
 
 	const selectNewEntry = () => {
 		const entry = entries[getRandomIdx()];
+		return getHigherPreviewUrl(entry.previews, previewSize);
+	}
 
-		const largeUrl = getHigherPreviewUrl(entry.previews, previewSize);
-		setLargeUrlState(largeUrl || '');
+	const getLayoutComponent = (name: string, entries: any[]) => {
+		switch (name) {
+			case 'SingleLayout':
+				return <SingleLayout entries={entries} />;
+			case 'DoubleVLayout':
+				return <DoubleVLayout entries={entries} />;
+		
+			default:
+				break;
+		}
+	}
+
+	const selectNewLayout = () => {
+		// TODO: Move to the each *Layout.tsx file to have the data in one place
+		const layouts = [
+			{name: 'SingleLayout', entriesCount: 1},
+			{name: 'DoubleVLayout', entriesCount: 2},
+		];
+		const {name: newLayoutName, entriesCount} = layouts[Math.floor(Math.random() * layouts.length)];
+		const newLayoutData: any = {
+			component: newLayoutName,
+			entries: []
+		};
+
+		for (let index = 0; index < entriesCount; index++) {
+			newLayoutData.entries.push(selectNewEntry());
+		}
+		const newLayoutComponent = getLayoutComponent(newLayoutName, newLayoutData.entries);
+
+		layoutHistory.current.push(newLayoutData);
+		setNextLayout(newLayoutComponent);
+	}
+
+	const transitionEnd = () => {
+		setCurrentLayout(nextLayout);
+		setIsFading(false);
+		selectNewLayout();
 	}
 
 	const createInterval = () => {
 		return setInterval(() => {
-			selectNewEntry();
+			setIsFading(true);
 		}, entryTimeout)
 	}
 
 	const onDivClick = (event) => {
 		event.preventDefault();
 		// TODO: reset interval so the new entry lasts the full timeout
-		selectNewEntry();
+		setIsFading(true);
 	}
 
 	useEffect(() => {
@@ -41,7 +83,8 @@ const SlideShow = ({closeCb}) => {
 	}, [divRef.current]);
 
 	useEffect(() => {
-		selectNewEntry();
+		selectNewLayout();
+		setIsFading(true);
 		let timer = createInterval();
 
 		return () => {
@@ -58,7 +101,15 @@ const SlideShow = ({closeCb}) => {
 
 	return (
 		<div ref={divRef} className={`fixed top-0 z-50 bg-black h-full w-full`} tabIndex={0} onKeyUp={divKeyUp} onClick={onDivClick}>
-			<img className="absolute object-contain w-full h-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" src={largeUrlState} />
+			<div className={`absolute top-0 h-full w-full z-50 ${isFading ? 'toFadeOut fadeOut' : 'opacity-1'}`} onTransitionEnd={transitionEnd}>
+				{currentLayout}
+			</div>
+			<div className={`absolute top-0 h-full w-full z-40 ${isFading ? 'toFadeIn fadeIn' : 'opacity-0'}`}>
+				{nextLayout}
+			</div>
+			<div className={`absolute top-0 h-full w-full z-40 ${isFading ? 'hidden' : ''}`}>
+				{currentLayout}
+			</div>
 		</div>
 	)
 }
