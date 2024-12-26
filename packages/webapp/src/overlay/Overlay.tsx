@@ -18,6 +18,7 @@ const SlideShow = ({closeCb}) => {
 	const [currentLayout, setCurrentLayout] = useState<any>(null);
 	const [nextLayout, setNextLayout] = useState<any>(null);
 	const [isFading, setIsFading] = useState(false);
+	const [nextIdx, setNextIdx] = useState(0);
 
 	const selectNewEntry = () => {
 		const entry = entries[getRandomIdx()];
@@ -36,12 +37,21 @@ const SlideShow = ({closeCb}) => {
 		}
 	}
 
-	const selectNewLayout = () => {
+	const selectNewLayout = (idx: number) => {
 		// TODO: Move to the each *Layout.tsx file to have the data in one place
 		const layouts = [
 			{name: 'SingleLayout', entriesCount: 1},
 			{name: 'DoubleVLayout', entriesCount: 2},
 		];
+
+		const history = layoutHistory.current;
+		if (idx >= 0 && idx < history.length) {
+			const layoutFromHistory = history[idx];
+			const newLayoutComponent = getLayoutComponent(layoutFromHistory.component, layoutFromHistory.entries);
+			setNextLayout(newLayoutComponent);
+			return Math.min(idx + 1, layoutHistory.current.length);
+		}
+
 		const {name: newLayoutName, entriesCount} = layouts[Math.floor(Math.random() * layouts.length)];
 		const newLayoutData: any = {
 			component: newLayoutName,
@@ -55,12 +65,13 @@ const SlideShow = ({closeCb}) => {
 
 		layoutHistory.current.push(newLayoutData);
 		setNextLayout(newLayoutComponent);
+		return layoutHistory.current.length;
 	}
 
 	const transitionEnd = () => {
 		setCurrentLayout(nextLayout);
 		setIsFading(false);
-		selectNewLayout();
+		setNextIdx(selectNewLayout(nextIdx));
 	}
 
 	const createInterval = () => {
@@ -83,7 +94,7 @@ const SlideShow = ({closeCb}) => {
 	}, [divRef.current]);
 
 	useEffect(() => {
-		selectNewLayout();
+		setNextIdx(selectNewLayout(nextIdx));
 		setIsFading(true);
 		let timer = createInterval();
 
@@ -93,10 +104,24 @@ const SlideShow = ({closeCb}) => {
 	}, []);
 
 	const divKeyUp = (event) => {
-		if (event.key !== 'Escape') {
-			return;
+		switch (event.key) {
+			case 'Escape':
+				closeCb();
+				break;
+			case 'ArrowLeft':
+				setNextIdx(selectNewLayout(Math.max(nextIdx - 3, 0)));
+				setIsFading(true);
+				break;
+			case ' ':
+			case 'ArrowRight':
+				setNextIdx(selectNewLayout(Math.min(nextIdx - 1, layoutHistory.current.length)));
+				setIsFading(true);
+				break;
+		
+			default:
+				break;
 		}
-		closeCb();
+		
 	}
 
 	return (
