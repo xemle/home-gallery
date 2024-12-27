@@ -82,8 +82,15 @@ const SlideShow = ({closeCb}) => {
 
 	const onDivClick = (event) => {
 		event.preventDefault();
-		// TODO: reset interval so the new entry lasts the full timeout
 		setIsFading(true);
+	}
+
+	const divDoubleClick = (event) => {
+		if (!document.fullscreenElement) {
+			document.documentElement.requestFullscreen();
+		} else if (document.exitFullscreen) {
+			document.exitFullscreen();
+		}
 	}
 
 	useEffect(() => {
@@ -130,7 +137,7 @@ const SlideShow = ({closeCb}) => {
 	}
 
 	return (
-		<div ref={divRef} className={`fixed top-0 z-50 bg-black h-full w-full`} tabIndex={0} onKeyUp={divKeyUp} onClick={onDivClick}>
+		<div ref={divRef} className={`fixed top-0 z-50 bg-black h-full w-full`} tabIndex={0} onKeyUp={divKeyUp} onClick={onDivClick} onDoubleClick={divDoubleClick}>
 			<div className={`absolute top-0 h-full w-full z-50 ${isFading ? 'toFadeOut fadeOut' : 'opacity-1'}`} onTransitionEnd={transitionEnd}>
 				{currentLayout}
 			</div>
@@ -153,7 +160,7 @@ export const Fab = () => {
 	return (
 		<>
 		{slideShowActive ? <SlideShow closeCb={toogleSlideShow}/> : null}
-		<div className="bg-primary h-16 w-16 rounded-full p-0.5 rounded-br-md fixed bottom-5 right-5 flex items-center justify-center cursor-pointer">
+		<div className="bg-black h-16 w-16 rounded-full p-0.5 fixed bottom-5 right-5 flex items-center justify-center cursor-pointer">
 			<div
 				onClick={toogleSlideShow}
 				className={`rounded-full w-full h-full flex items-center justify-center`}
