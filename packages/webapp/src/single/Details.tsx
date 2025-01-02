@@ -55,6 +55,7 @@ export const Details = ({entry, dispatch}) => {
 
   const mapFile = file => {
     const indexTerm = queryTerm('index', file.index)
+    const isDownloadable = !!appConfig.sources?.find((source) => source.downloadable && source.index === file.index);
 
     const filename = file.filename
     const links: React.JSX.Element[] = []
@@ -74,19 +75,17 @@ export const Details = ({entry, dispatch}) => {
       simpleSearchLink(file.index, `index:${file.index}`),
       sepSpan(':'),
       ...links,
-      ` ${humanizeBytes(file.size)}`
+      ` ${humanizeBytes(file.size)}`,
+      isDownloadable && (
+        <a href={`sources/${file.index}/${file.filename.replaceAll(/\\/g, '/')}`} target="_blank" className="px-1 text-gray-300 break-all rounded hover:cursor-pointer hover:bg-gray-600 hover:text-gray-200" title={`Click to download original file ${file.filename}`}>
+          download <FontAwesomeIcon icon={icons.faArrowUpRightFromSquare} className="pl-1 text-gray-400 hover:text-gray-200"/>
+        </a>
+      ),
     ]
   }
 
   const mainFileData = entry.files[0];
   const mainFilename = mainFileData.filename.replace(/.*[/\\]/g, '')
-  const sourceConfig = appConfig.sources.find((value) => value && value.index === mainFileData.index);
-  const sourceLink = (text, withIcon = false) => {
-    if (!sourceConfig || sourceConfig.downloadable === false) return text;
-    return <a href={`sources/${mainFileData.index}/${mainFileData.filename}`} target="_blank">
-      {text} {withIcon ? <FontAwesomeIcon icon={icons.faArrowUpRightFromSquare} className="text-gray-300"/> : ''}
-    </a>
-  };
 
   const hasAddress = entry => entry.road || entry.city || entry.country
 
@@ -144,16 +143,11 @@ export const Details = ({entry, dispatch}) => {
               <FontAwesomeIcon icon={icons.faIdCard} className="text-gray-300"/>
             </div>
             <div>
-              <p>
-                {sourceLink(mainFilename)}
-              </p>
+              <p>{mainFilename}</p>
               <p>{simpleSearchLink(entry.type, 'type', entry.type)} {entry.id.substring(0, 7)}</p>
-              <p>
-                {entry.duration > 0 && (
-                  <>{humanizeDuration(entry.duration)}, </>
-                )}
-                {sourceLink(`${entry.width}x${entry.height}`, true)}
-              </p>
+              <p>{entry.duration > 0 && (
+                <>{humanizeDuration(entry.duration)}, </>
+              )}{entry.width}x{entry.height}</p>
             </div>
           </div>
           <div className="flex">
