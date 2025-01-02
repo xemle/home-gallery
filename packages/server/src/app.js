@@ -82,6 +82,7 @@ export function createApp(context) {
     }
     const basename = path.basename(source.index);
     const idx = basename.replace(/\.[^.]+$/, '');
+    log.warn(`Enable source directory ${source.dir} to access original files`)
     router.use('/sources/' + idx, express.static(source.dir, {index: false, maxAge: '2d', immutable: true, fallthrough: true}));
   }
 
