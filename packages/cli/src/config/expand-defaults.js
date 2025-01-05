@@ -30,6 +30,7 @@ export const expandConfigDefaults = (config, env) => {
       config.sources[i] = Object.assign({
         index: '{configDir}/{configPrefix}{basename(dir)}.idx',
         offline: false,
+        downloadable: false,
         excludeIfPresent: '.galleryignore'
       }, source)
     }

@@ -2,7 +2,7 @@ import pinoHttp from 'pino-http'
 import logger from '@home-gallery/logger'
 
 export const loggerMiddleware = () => {
-  const customMessage = log => `${log.statusCode} ${log.req.method} ${log.req.url} ${Date.now() - log[pinoHttp.startTime]}ms`
+  const customMessage = log => `${log.statusCode} ${log.req.method} ${log.req.baseUrl}${log.req.url} ${Date.now() - log[pinoHttp.startTime]}ms`
 
   return pinoHttp({
     logger: logger('server.request'),

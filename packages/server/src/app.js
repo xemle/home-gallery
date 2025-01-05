@@ -9,6 +9,7 @@ import { loggerMiddleware } from './logger-middleware.js'
 import { databaseApi } from './api/database/index.js';
 import { treeApi } from './api/database/tree/index.js';
 import { eventsApi } from './api/events/index.js';
+import { getSourcesApi } from './api/sources.js';
 import { webapp } from './webapp.js';
 import { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
 import { isIndex, skipIf } from './utils.js'
@@ -90,6 +91,7 @@ export function createApp(context) {
   router.post('/api/events', pushEvent);
   router.get('/api/database.json', readDatabase);
   router.get('/api/database/tree/:hash', readTree);
+  router.use('/api/sources', getSourcesApi(config))
 
   if (config.server.remoteConsoleToken) {
     const { console } = debugApi({remoteConsoleToken: config.server?.remoteConsoleToken})
@@ -104,12 +106,22 @@ export function createApp(context) {
     const disabled = config?.webapp?.disabled || []
     const plugins = pluginApi.pluginEntries
     const entries = await getFirstEntries(50, req)
+    const sources = config.sources
+      .filter(source => source.downloadable && !source.offline)
+      .map(source => {
+        const indexName = path.basename(source.index).replace(/\.[^.]+$/, '')
+        return {
+          indexName,
+          downloadable: true,
+        }
+    });
     return {
       disabled: !!req.username ? [...disabled, 'pwa'] : disabled,
       pluginManager: {
         plugins
       },
       entries,
+      sources,
     }
   }
 
