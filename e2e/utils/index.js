@@ -394,15 +394,19 @@ const getSegement = (object, key) => {
 
 const getConfigValue = async (key) => {
   const config = await readConfig().catch(() => ({}))
-  const [segment, name] = getSegement(config, key)
-  return segment[name]
+  return resolveProperty(config, key)
 }
 
 const setConfigValue = async (key, value) => {
   const config = await readConfig()
 
-  const [segment, name] = getSegement(config, key)
-  segment[name] = value
+  const pos = key.lastIndexOf('.')
+  if (pos >= 0) {
+    const prop = resolveProperty(config, key.substring(0, pos))
+    prop[key.substring(pos + 1)] = value
+  } else {
+    config[key] = value
+  }
 
   await writeConfig(config)
 }
