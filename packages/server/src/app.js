@@ -106,8 +106,7 @@ export function createApp(context) {
     const disabled = config?.webapp?.disabled || []
     const plugins = pluginApi.pluginEntries
     const entries = await getFirstEntries(50, req)
-    const sources = config.sources
-      .filter(source => source.downloadable && !source.offline)
+    const sources = (config.sources || []).filter(source => source.downloadable && !source.offline)
       .map(source => {
         const indexName = path.basename(source.index).replace(/\.[^.]+$/, '')
         return {
