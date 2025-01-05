@@ -1,7 +1,8 @@
-import fs from 'fs';
+import * as fs from 'fs';
 import path from 'path';
 
 import Logger from '@home-gallery/logger'
+import { IWalkerFileHandler } from './types.js';
 
 const log = Logger('index.walker');
 
@@ -13,8 +14,15 @@ function handleReaddirError(dir, err, done) {
   return done(err);
 }
 
-function readFileStats(dir, files, cb) {
-  const fileStats = [];
+type IFilenameMapper = (files: string[]) => string[]
+type IWalkerDone = (err?: Error) => void
+type IFilenameStat = {
+  filename: string
+  stat: fs.Stats
+}
+
+function readFileStats(dir: string, files: string[], cb: (err: Error | null, fileStats?: IFilenameStat[]) => void) {
+  const fileStats: IFilenameStat[] = [];
   let countDownLatch = files.length;
   let hasError = false;
 
@@ -43,7 +51,7 @@ function readFileStats(dir, files, cb) {
   })
 }
 
-function walkFiles(dir, filesMapper, fileStats, cb, done) {
+function walkFiles(dir: string, filesMapper: IFilenameMapper, fileStats: IFilenameStat[], cb: IWalkerFileHandler, done: IWalkerDone) {
   while (fileStats.length) {
     const { filename, stat } = fileStats.pop();
 
@@ -71,7 +79,7 @@ function byDirDescNameAsc(a, b) {
   }
 }
 
-export function walkDir(dir, filesMapper, cb, done) {
+export function walkDir(dir: string, filesMapper: IFilenameMapper, cb: IWalkerFileHandler, done: IWalkerDone) {
   fs.readdir(dir, (err, files) => {
     if (err) {
       return handleReaddirError(dir, err, done);

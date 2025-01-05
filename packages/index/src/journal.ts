@@ -10,6 +10,7 @@ const { mapName2Sidecars, getSidecarsByFilename } = sidecars
 
 import { readIndex } from './read.js'
 import { writeIndex } from './write.js'
+import { IIndex, IIndexChanges, IIndexEntry, IIndexJournal, IIndexOptions } from './types.js';
 
 const mkdirAsync = promisify(mkdir)
 const writeJsonGzipAsync = promisify(writeJsonGzip)
@@ -20,37 +21,24 @@ const readJsonGzipAsync = promisify(readJsonGzip)
  */
 const JOURNAL_TYPE = 'home-gallery/file-index-journal@1.2'
 
-/** @typedef {import('./types.d').IIndexEntry} IIndexEntry */
+export function getJournalFilename(indexFilename: string, journal: string) {
+  return `${indexFilename}.${journal}.journal`
+}
 
-export const getJournalFilename = (indexFilename, journal) => `${indexFilename}.${journal}.journal`
+function fileToString(file: IIndexEntry) {
+  return `${file.sha1sum ? file.sha1sum.slice(0, 7) : '0000000'}:${file.filename}`
+}
 
-/**
- * @param {IIndexEntry} file
- * @returns {string}
- */
-const fileToString = file => `${file.sha1sum ? file.sha1sum.slice(0, 7) : '0000000'}:${file.filename}`
+function bySize(a: IIndexEntry, b: IIndexEntry) {
+  return b.size - a.size
+}
 
-/**
- * @param {IIndexEntry} a
- * @param {IIndexEntry} b
- * @returns {number}
- */
-const bySize = (a, b) => b.size - a.size
+function byFilename(a: IIndexEntry, b: IIndexEntry) {
+  return a.filename.localeCompare(b.filename)
+}
 
-/**
- * @param {IIndexEntry} a
- * @param {IIndexEntry} b
- * @returns {number}
- */
-const byFilename = (a, b) => a.filename.localeCompare(b.filename)
-
-/**
- * @param {Record<string, IIndexEntry[]>} result
- * @param {IIndexEntry} entry
- * @returns {Record<string, IIndexEntry[]>}
- */
-const toDirReducer = (result, entry) => {
-  if (entry.fileType != 'f')  {
+function toDirReducer(result: Record<string, IIndexEntry[]>, entry: IIndexEntry): Record<string, IIndexEntry[]> {
+  if (entry.fileType != 'f') {
     return result
   }
   const dir = path.dirname(entry.filename)
@@ -62,7 +50,7 @@ const toDirReducer = (result, entry) => {
   return result
 }
 
-const getChangeType = (journal, filename) => {
+function getChangeType(journal: IIndexChanges, filename: string): 'added' | 'changed' | 'removed' {
   let entry = journal.changes.find(entry => entry.filename == filename)
   if (entry) {
     return 'changed'
@@ -75,11 +63,7 @@ const getChangeType = (journal, filename) => {
   }
 }
 
-/**
- * @param {IIndexEntry} entries
- * @param {import('./types.d').IIndexChanges} changes
- */
-const addChangesForSidecars = (entries, changes) => {
+function addChangesForSidecars(entries: IIndexEntry[], changes: IIndexChanges) {
   const t0 = Date.now()
   const dir2indexEntries = entries.reduce(toDirReducer, {})
   const dir2indexEntriesWithRemoves = changes.removes.reduce(toDirReducer, dir2indexEntries)
@@ -122,13 +106,7 @@ const addChangesForSidecars = (entries, changes) => {
   log.debug(t0, `Added ${changedEntries.length} affected sidecars entries to file changes`)
 }
 
-/**
- * @param {IIndexEntry[]} updatedEntries
- * @param {import('./types.d').IIndexChanges | false} changes
- * @param {IIndexEntry[]} updatedChecksumEntries
- * @returns {import('./types.d').IIndexChanges}
- */
-const createJournalChange = (updatedEntries, changes, updatedChecksumEntries) => {
+function createJournalChange(updatedEntries: IIndexEntry[], changes: IIndexChanges, updatedChecksumEntries: IIndexEntry[]): IIndexChanges {
   const result = {
     adds: changes?.adds || [],
     changes: changes?.changes || [],
@@ -146,21 +124,12 @@ const createJournalChange = (updatedEntries, changes, updatedChecksumEntries) =>
   return result
 }
 
-const writeJournal = async (filename, data) => {
+async function writeJournal(filename: string, data: IIndexJournal) {
   await mkdirAsync(path.dirname(filename))
   return writeJsonGzipAsync(filename, data)
 }
 
-/**
- * @param {string} indexFilename
- * @param {import('./types.d').IIndex} index
- * @param {IIndexEntry[]} updatedEntries
- * @param {import('./types.d').IIndexChanges | false} changes
- * @param {IIndexEntry[]} updatedChecksumEntries
- * @param {import('./types.d').IIndexOptions} options
- * @returns {Promise<import('./types.d').IIndexJournal>}
- */
-export const createJournal = async (indexFilename, index, updatedEntries, changes, updatedChecksumEntries, options) => {
+export async function createJournal(indexFilename: string, index: IIndex, updatedEntries: IIndexEntry[], changes: IIndexChanges, updatedChecksumEntries: IIndexEntry[], options: IIndexOptions): Promise<IIndexJournal> {
   /** @type {import('./types.d').IIndexJournal} */
   const journal = {
     type: JOURNAL_TYPE,
@@ -180,7 +149,7 @@ export const createJournal = async (indexFilename, index, updatedEntries, change
   return journal
 }
 
-export const readJournal = async (indexFilename, journal) => {
+export async function readJournal(indexFilename: string, journal: string) {
   const journalFilename = getJournalFilename(indexFilename, journal)
   const data = await readJsonGzipAsync(journalFilename)
   if (data.type != JOURNAL_TYPE) {
@@ -189,18 +158,12 @@ export const readJournal = async (indexFilename, journal) => {
   return data
 }
 
-/**
- * @param {import('./types.d').IIndex} index
- * @param {import('./types.d').IIndexJournal} journal
- * @returns {IIndexEntry[]}
- */
-const applyJournalEntries = (index, journal) => {
-  /** @type {(e: IIndexEntry) => string} */
-  let mapJournalFilename = e => e.filename
-  /** @type {(e: IIndexEntry) => string} */
-  let mapIndexFilename = e => e.filename
-  /** @type {(e: IIndexEntry) => string} */
-  let toIndexFilename = e => e.filename
+type IIndexEntryFilename = (e: IIndexEntry) => string
+
+function applyJournalEntries(index: IIndex, journal: IIndexJournal): IIndexEntry[] {
+  let mapJournalFilename: IIndexEntryFilename = e => e.filename
+  let mapIndexFilename: IIndexEntryFilename = e => e.filename
+  let toIndexFilename: IIndexEntryFilename = e => e.filename
 
   const isSameBase = index.base == journal.base
   if (!isSameBase) {
@@ -220,25 +183,21 @@ const applyJournalEntries = (index, journal) => {
 
   if (isSameBase) {
     // Remove prevSha1sum from change entry
-    const changes = journal.data.changes.map(({prevSha1sum, ...entry}) => entry)
+    const changes = journal.data.changes.map(({ prevSha1sum, ...entry }) => entry)
     entries.push(...changes)
     entries.push(...journal.data.adds)
   } else {
     // Remove prevSha1sum from change entry and map new base
-    const changes = journal.data.changes.map(({prevSha1sum, ...entry}) => ({...entry, filename: toIndexFilename(entry.filename)}))
+    const changes = journal.data.changes.map(({ prevSha1sum, ...entry }) => ({ ...entry, filename: toIndexFilename(entry) }))
     entries.push(...changes)
-    const adds = journal.data.adds.map(e => ({...e, filename: toIndexFilename(e)}))
+    const adds = journal.data.adds.map(e => ({ ...e, filename: toIndexFilename(e) }))
     entries.push(...adds)
   }
 
   return entries
 }
 
-/**
- * @param {string} indexFilename
- * @param {import('./types.d').IIndexOptions} options
- */
-export const applyJournal = async (indexFilename, options) => {
+export async function applyJournal(indexFilename: string, options: IIndexOptions) {
   if (!options.journal) {
     throw new Error(`Journal id is empty for file index ${indexFilename}`)
   }
@@ -254,7 +213,7 @@ export const applyJournal = async (indexFilename, options) => {
   const journal = await readJournal(indexFilename, options.journal)
   const indexExists = await access(indexFilename).then(() => true, () => false)
   if (!indexExists) {
-    const index = writeIndex(journal.base, indexFilename, journal.data.adds, options)
+    const index = await writeIndex(journal.base, indexFilename, journal.data.adds, options)
     log.info(`Created new file index ${indexFilename} from journal ${options.journal} with ${index.data.length} entries`)
     return index
   }
@@ -286,18 +245,12 @@ export const applyJournal = async (indexFilename, options) => {
   return newIndex
 }
 
-/**
- *
- * @param {string} indexFilename
- * @param {import('./types.d').IIndexOptions} journal
- * @returns
- */
-export const removeJournal = async (indexFilename, options) => {
+export async function removeJournal(indexFilename: string, options: IIndexOptions): Promise<void> {
   const journalFilename = getJournalFilename(indexFilename, options.journal)
 
   const exists = await access(journalFilename).then(() => true).catch(() => false)
   if (!exists) {
-    log.warn(`No journal ${journal} found for file index ${indexFilename}. Skip removal`)
+    log.warn(`No journal ${options.journal} found for file index ${indexFilename}. Skip removal`)
     return
   }
   if (!options.dryRun) {

@@ -38,10 +38,18 @@ For add limits of 200,500,1.25,8000 the progress of index entries would be
 ...
  */
 import Logger from '@home-gallery/logger'
+import { IIndexEntry, IWalkerFileHandler } from '../types.js';
 
 const log = Logger('index.filter.limit');
 
-const getLimitValues = addLimits => {
+type IAddLimits = {
+  initial: number
+  offset: number
+  factor: number
+  max: number
+}
+
+const getLimitValues = (addLimits: string): IAddLimits => {
   const limits = addLimits.split(',')
   return {
     initial: +limits[0] || 200,
@@ -51,7 +59,7 @@ const getLimitValues = addLimits => {
   }
 }
 
-export const getNewFileLimit = (entryCount, addLimits) => {
+export function getNewFileLimit(entryCount: number, addLimits: string): number {
   const {initial, offset, factor, max} = getLimitValues(addLimits);
   if (entryCount == 0) {
     return initial;
@@ -60,7 +68,11 @@ export const getNewFileLimit = (entryCount, addLimits) => {
   }
 }
 
-export const createLimitFilter = (entryCount, filename2Entry, addLimits, filter) => {
+type IWalkerFileLimitHandler = IWalkerFileHandler & {
+  limitExceeded: () => true
+}
+
+export function createLimitFilter(entryCount: number, filename2Entry: Record<string, IIndexEntry>, addLimits: string, filter): IWalkerFileLimitHandler {
   if (!addLimits) {
     return filter;
   }
@@ -85,5 +97,5 @@ export const createLimitFilter = (entryCount, filename2Entry, addLimits, filter)
   }
 
   limitFilter.limitExceeded = () => count >= fileLimit;
-  return limitFilter
+  return limitFilter as IWalkerFileLimitHandler
 }

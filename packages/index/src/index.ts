@@ -11,6 +11,7 @@ import { checksum } from './checksum.js';
 import { createFilter } from './filter/index.js';
 import { createJournal, readJournal as readJournalAsync, removeJournal } from './journal.js'
 import { access } from 'fs/promises';
+import { IIndex, IIndexChanges, IIndexEntry, IIndexJournal, IIndexOptions } from './types.js';
 
 /**
  * @type {function}
@@ -23,20 +24,11 @@ const asyncChecksum = promisify(checksum)
 
 const log = Logger('index')
 
-const isLimitExeeded = filter => typeof filter.limitExceeded == 'function' ? filter.limitExceeded() : false
+function isLimitExeeded(filter: any): boolean {
+  return typeof filter.limitExceeded == 'function' ? filter.limitExceeded() : false
+}
 
-/** @typedef {import('./types.js').IIndex} IIndex */
-/** @typedef {import('./types.js').IIndexEntry} IIndexEntry */
-/** @typedef {import('./types.js').IIndexChanges} IIndexChanges */
-/** @typedef {import('./types.js').IIndexOptions} IIndexOptions */
-
-/**
- * @param {string} directory
- * @param {string} filename
- * @param {IIndexOptions} options
- * @returns {Promise<[IIndex, IIndexEntry[], IIndexChanges, boolean]>}
- */
-const asyncCreateOrUpdate = async (directory, filename, options) => {
+async function asyncCreateOrUpdate(directory: string, filename: string, options: IIndexOptions): Promise<[IIndex, IIndexEntry[], IIndexChanges, boolean]> {
   const now = new Date();
   const fileIndex = await readIndex(filename)
   const filter = await createFilter(fileIndex.data, options)
@@ -50,25 +42,15 @@ const asyncCreateOrUpdate = async (directory, filename, options) => {
   return [fileIndex, updatedEntries, changes, limitExceeded]
 }
 
-/**
- * @param {IIndexChanges | false} changes
- * @returns {IIndexChanges}
- */
-const onlyChangesWithSha1sum = (changes) => {
+function onlyChangesWithSha1sum(changes: IIndexChanges): IIndexChanges {
   return {
-    adds: changes?.adds.filter(e => e.sha1sum),
-    changes: changes?.changes.filter(e => e.sha1sum),
-    removes: changes?.removes.filter(e => e.sha1sum),
+    adds: changes.adds.filter(e => e.sha1sum),
+    changes: changes.changes.filter(e => e.sha1sum),
+    removes: changes.removes.filter(e => e.sha1sum),
   }
 }
 
-/**
- * @param {IIndexEntry[]} updatedEntries
- * @param {IIndexChanges | false} changes
- * @param {IIndexOptions} options
- * @returns {IIndexEntry[]}
- */
-const getFileEntriesForChecksum = (updatedEntries, changes, options) => {
+function getFileEntriesForChecksum(updatedEntries: IIndexEntry[], changes: IIndexChanges, options: IIndexOptions): IIndexEntry[] {
   const fileEntries = updatedEntries.filter(e => e.isFile)
   if (!options.journal || !changes) {
     return fileEntries
@@ -86,15 +68,7 @@ const getFileEntriesForChecksum = (updatedEntries, changes, options) => {
   return journalFileEntries
 }
 
-/**
- *
- * @param {string} directory
- * @param {IIndexEntry[]} updatedEntries
- * @param {IIndexChanges} changes
- * @param {IIndexOptions} options
- * @returns {Promise<IIndexEntry[], boolean>}
- */
-const calculateChecksum = async (directory, updatedEntries, changes, options) => {
+async function calculateChecksum(directory: string, updatedEntries: IIndexEntry[], changes: IIndexChanges, options: IIndexOptions): Promise<[IIndexEntry[], boolean]> {
   if (!options.checksum) {
     return [[], false]
   }
@@ -106,19 +80,11 @@ const calculateChecksum = async (directory, updatedEntries, changes, options) =>
   return asyncChecksum(directory, fileEntries, checksumEntries, sha1sumDate)
 }
 
-/**
- * @param {import('./types.d').IIndexChanges} changes
- * @returns {boolean}
- */
-const isUnchanged = (changes) => !changes.adds.length && !changes.changes.length && !changes.removes.length
+function isUnchanged(changes: IIndexChanges): boolean {
+  return !changes.adds.length && !changes.changes.length && !changes.removes.length
+}
 
-/**
- * @param {string} directory
- * @param {string} filename
- * @param {import('./types.d').IIndexOptions} options
- * @returns
- */
-export const update = async (directory, filename, options) => {
+export async function update(directory: string, filename: string, options: IIndexOptions): Promise<[IIndex, IIndexJournal | false, boolean]> {
   const t0 = Date.now();
   log.info(`Updating file index for directory ${directory}`);
 

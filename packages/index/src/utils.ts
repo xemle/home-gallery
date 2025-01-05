@@ -1,6 +1,7 @@
 import path from 'path'
+import { IIndexEntry } from './types.js'
 
-export const getIndexName = filename => path.basename(filename).replace(/\.[^.]+$/, '')
+export const getIndexName = (filename: string): string => path.basename(filename).replace(/\.[^.]+$/, '')
 
 const unitToFactor = {
   'B': 1,
@@ -11,7 +12,7 @@ const unitToFactor = {
   'P': (1 << 30) * (1 << 20),
 }
 
-export const parseFilesize = filesize => {
+export const parseFilesize = (filesize: string): number | boolean => {
   const match = filesize.toUpperCase().match(/^(\d+(\.\d+)?)(([PTGMK])([B])?|[B])?$/)
   if (!match) {
     return false
@@ -41,7 +42,7 @@ export const parseFilesize = filesize => {
  *  2020
  *  2020/2020-09-20
  */
-export const byDirDescFileAsc = (a, b) => {
+export const byDirDescFileAsc = (a: IIndexEntry, b: IIndexEntry): number => {
   const aParts = a.filename.split(path.sep)
   const bParts = b.filename.split(path.sep)
 

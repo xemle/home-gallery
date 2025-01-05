@@ -38,7 +38,7 @@ const stripLastEntry = (data, tail) => data.endsWith(tail) ? data.substring(0, d
 const parseJsonChunks = (filename) => {
   let isHead = true
   let entryIndex = 0;
-  return Transform({
+  return new Transform({
     objectMode: true,
     transform: function (chunk, enc, next) {
       if (isHead) {
@@ -159,7 +159,7 @@ const appendStream = (nextStream) => {
   return output
 }
 
-export const readStreams = (indexFilenames, journal, cb) => {
+export const readStreams = (indexFilenames: string[], journal: string, cb) => {
   let i = 0;
   const nextStream = (cb) => {
     if (i == indexFilenames.length) {

@@ -45,7 +45,7 @@ t.test('createLimitFilter', async t => {
     'file-06',
     'file-07',
   ]
-  const results = paths.map(path => filter(path))
+  const results = paths.map(path => filter(path, null))
   const expected = [
     true,  // file-01 existing
     true,  // file-02 new

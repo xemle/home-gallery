@@ -9,7 +9,9 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpy \"src/**/!(*.test.js)\" dist",
+    "build": "npm-run-all -p build:js build:types",
+    "build:js": "node build.js",
+    "build:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck",
     "test": "tap",
     "watch": "onchange \"src/**\" -- npm run build",
     "watch:test": "tap repl w"

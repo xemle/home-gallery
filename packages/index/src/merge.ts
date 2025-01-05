@@ -1,8 +1,9 @@
 import Logger from '@home-gallery/logger'
+import { IIndexEntryMap, IIndexEntryMatcherFn } from './types.js';
 
 const log = Logger('index.merge');
 
-export const mergeIndex = (fileEntryMap, fsEntryMap, commonKeys, matcherFn) => {
+export function mergeIndex(fileEntryMap: IIndexEntryMap, fsEntryMap: IIndexEntryMap, commonKeys: string[], matcherFn: IIndexEntryMatcherFn): [IIndexEntryMap, string[]] {
   const t0 = Date.now();
   let changedKeys = [];
 
@@ -24,5 +25,5 @@ export const mergeIndex = (fileEntryMap, fsEntryMap, commonKeys, matcherFn) => {
   }, {});
 
   log.info(t0, `Merged ${commonKeys.length} entries`);
-  return {commonEntryMap, changedKeys};
+  return [commonEntryMap, changedKeys];
 }

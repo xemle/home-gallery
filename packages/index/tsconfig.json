@@ -1,9 +1,15 @@
 {
   "compilerOptions": {
-    "module": "es2022",
+    "module": "NodeNext",
     "allowJs": true,
     "outDir": "./dist",
-    "target": "es2022"
+    "target": "es2022",
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "nodenext",
+    "typeRoots": [
+      "../../node_modules/@types"
+    ]
   },
+  "emitDeclarationOnly": true,
   "include": ["./src/**/*"]
 }

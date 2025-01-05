@@ -1,12 +1,14 @@
-export const matcherFns = {
-  size: (fileEntry, fsEntry) => {
+import { IIndexEntry, IIndexEntryMatcherFn } from "./types.js";
+
+export const matcherFns: Record<string, IIndexEntryMatcherFn> = {
+  size: (fileEntry: IIndexEntry, fsEntry: IIndexEntry) => {
     if (fileEntry.size === fsEntry.size &&
       fileEntry.fileType === fsEntry.fileType) {
       return true;
     }
     return false;
   },
-  'size-ctime': (fileEntry, fsEntry) => {
+  'size-ctime': (fileEntry: IIndexEntry, fsEntry: IIndexEntry) => {
     if (fileEntry.size === fsEntry.size &&
       fileEntry.fileType === fsEntry.fileType &&
       fileEntry.ctimeMs === fsEntry.ctimeMs) {
@@ -14,7 +16,7 @@ export const matcherFns = {
     }
     return false;
   },
-  'size-ctime-inode': (fileEntry, fsEntry) => {
+  'size-ctime-inode': (fileEntry: IIndexEntry, fsEntry: IIndexEntry) => {
     if (fileEntry.size === fsEntry.size &&
       fileEntry.fileType === fsEntry.fileType &&
       fileEntry.ctimeMs === fsEntry.ctimeMs &&

@@ -3,26 +3,23 @@ import Logger from '@home-gallery/logger'
 const log = Logger('index.update');
 
 import { mergeIndex }  from './merge.js';
+import { IIndexChanges, IIndexEntry, IIndexEntryMatcherFn } from './types.js';
 
-/**
- * @template T
- * @param {T[]} values
- * @param {(e: T) => string} keyFn
- * @returns {Record<String, T>}
- */
-const toMap = (values, keyFn) => values.reduce((result, value) => {
-  const key = keyFn(value)
-  if (!key) {
-    log.info(`Could not find key for ${value}`)
-  } else {
-    result[key] = value
-  }
-  return result
-}, {})
+function toMap<T>(values: T[], keyFn: (item: T) => string): Record<string, T> {
+  return values.reduce((result, value) => {
+    const key = keyFn(value)
+    if (!key) {
+      log.info(`Could not find key for ${value}`)
+    } else {
+      result[key] = value
+    }
+    return result
+  }, {})
+}
 
-const hasNoChanges = (onlyFileKeys, onlyFsKeys, changedKeys) => !onlyFileKeys.length && !onlyFsKeys.length && !changedKeys.length
+const hasNoChanges = (onlyFileKeys: string[], onlyFsKeys: string[], changedKeys: string[]) => !onlyFileKeys.length && !onlyFsKeys.length && !changedKeys.length
 
-const initialChanges = entries => {
+const initialChanges = (entries: IIndexEntry[]): IIndexChanges => {
   return {
     adds: entries,
     changes: [],
@@ -30,16 +27,7 @@ const initialChanges = entries => {
   }
 }
 
-/** @typedef {import('./types.d').IIndexEntry} IIndexEntry */
-/** @typedef {import('./types.d').IIndexChanges} IIndexChanges */
-/**
- *
- * @param {IIndexEntry[]} fileEntries
- * @param {IIndexEntry[]} fsEntries
- * @param {*} matcherFn
- * @returns {Promise<[IIndexEntry[], IIndexChanges]>}
- */
-export const updateIndex = async (fileEntries, fsEntries, matcherFn) => {
+export const updateIndex = async (fileEntries: IIndexEntry[], fsEntries: IIndexEntry[], matcherFn: IIndexEntryMatcherFn): Promise<[IIndexEntry[], IIndexChanges]> => {
   const t0 = Date.now();
   if (!fileEntries.length) {
     log.info(`Initiate index with ${fsEntries.length} entries`);
@@ -55,7 +43,7 @@ export const updateIndex = async (fileEntries, fsEntries, matcherFn) => {
   const onlyFsKeys = fsKeys.filter(key => !fileEntryMap[key]);
   const commonKeys = fileKeys.filter(key => fsEntryMap[key]);
 
-  const { commonEntryMap, changedKeys } = mergeIndex(fileEntryMap, fsEntryMap, commonKeys, matcherFn);
+  const [ commonEntryMap, changedKeys ] = mergeIndex(fileEntryMap, fsEntryMap, commonKeys, matcherFn);
 
   if (hasNoChanges(onlyFileKeys, onlyFsKeys, changedKeys)) {
     log.info(t0, `No changes found`);
