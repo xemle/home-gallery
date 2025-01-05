@@ -9,6 +9,7 @@ import { loggerMiddleware } from './logger-middleware.js'
 import { databaseApi } from './api/database/index.js';
 import { treeApi } from './api/database/tree/index.js';
 import { eventsApi } from './api/events/index.js';
+import { getSourcesApi } from './api/sources.js';
 import { webapp } from './webapp.js';
 import { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
 import { isIndex, skipIf } from './utils.js'
@@ -75,16 +76,6 @@ export function createApp(context) {
   router.use(getAuthMiddleware(config))
 
   router.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
-  for (const source of config.sources) {
-    if (!source.downloadable || source.offline) {
-      // If the source can't be downloaded or is offline we skip it
-      continue;
-    }
-    const basename = path.basename(source.index);
-    const idx = basename.replace(/\.[^.]+$/, '');
-    log.warn(`Enable source directory ${source.dir} to access original files`)
-    router.use('/sources/' + idx, express.static(source.dir, {index: false, maxAge: '2d', immutable: true, fallthrough: true}));
-  }
 
   const pluginApi = browserPlugin(context, '/plugins/')
   router.use('/plugins', pluginApi.static)
@@ -100,6 +91,7 @@ export function createApp(context) {
   router.post('/api/events', pushEvent);
   router.get('/api/database.json', readDatabase);
   router.get('/api/database/tree/:hash', readTree);
+  router.use('/api/sources', getSourcesApi(config))
 
   if (config.server.remoteConsoleToken) {
     const { console } = debugApi({remoteConsoleToken: config.server?.remoteConsoleToken})
@@ -114,16 +106,14 @@ export function createApp(context) {
     const disabled = config?.webapp?.disabled || []
     const plugins = pluginApi.pluginEntries
     const entries = await getFirstEntries(50, req)
-    const sources = config.sources.map((value) => { 
-      // Don't return sources which we don't want to make downloadable
-      // (this is mainly to not make the index name available in the UI)
-      if (!value.downloadable || value.offline) {
-        return null;
-      }
-      return { 
-        downloadable: true,
-        index: path.basename(value.index).replace(/\.[^.]+$/, '')
-      } 
+    const sources = config.sources
+      .filter(source => source.downloadable && !source.offline)
+      .map(source => {
+        const indexName = path.basename(source.index).replace(/\.[^.]+$/, '')
+        return {
+          indexName,
+          downloadable: true,
+        }
     });
     return {
       disabled: !!req.username ? [...disabled, 'pwa'] : disabled,

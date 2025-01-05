@@ -335,18 +335,29 @@ const assertDeep = (value, expected, path = '.') => {
   }
 }
 
-const resolveProperty = (value, path) => {
+const resolveProperty = (value, path, create) => {
   const parts = path.split('.')
   let i = 0
   while (i < parts.length && value) {
     const part = parts[i++]
     const [orig, name, _, index] = part.match(/^([a-zA-Z]+)(\[(\d+)\])?$/)
+    if (index && value[name] && !Array.isArray(value[name])) {
+      return undefined
+    }
+
+    if (!value[name] && create) {
+      value[name] = index ? [] : {}
+    }
+    if (index && !value[name][+index] && create) {
+      value[name][+index] = {}
+    }
+
+    value = value[name]
     if (index) {
-      value = Array.isArray(value[name]) ? value[name][+index] : undefined
-    } else {
-      value = value[part]
+      value = value[+index]
     }
   }
+
   return value
 }
 
@@ -394,15 +405,23 @@ const getSegement = (object, key) => {
 
 const getConfigValue = async (key) => {
   const config = await readConfig().catch(() => ({}))
-  const [segment, name] = getSegement(config, key)
-  return segment[name]
+  return resolveProperty(config, key)
 }
 
 const setConfigValue = async (key, value) => {
   const config = await readConfig()
 
-  const [segment, name] = getSegement(config, key)
-  segment[name] = value
+  const pos = key.lastIndexOf('.')
+  if (pos < 0) {
+    config[key] = value
+  } else {
+    const path = key.substring(0, pos)
+    const prop = resolveProperty(config, path, true)
+    const name = key.substring(pos + 1)
+    if (prop) {
+      prop[name] = value
+    }
+  }
 
   await writeConfig(config)
 }

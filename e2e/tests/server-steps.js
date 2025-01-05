@@ -265,6 +265,7 @@ step("Stop server", async () => {
 step("Request file <file>", async (file) => {
   return fetchFacade(file)
     .then(res => {
+      gauge.dataStore.scenarioStore.put('response.headers', res.headers)
       gauge.dataStore.scenarioStore.put('response.status', res.status)
       if (res.ok && res.headers.get('Content-Type') && res.headers.get('Content-Type').startsWith('application/json')) {
         return res.json().then(body => {
@@ -281,6 +282,12 @@ step("Request file <file>", async (file) => {
 step("Response status is <status>", async (status) => {
   const responseStatus = gauge.dataStore.scenarioStore.get('response.status')
   assert(responseStatus == status, `Expected response status ${status} but was ${responseStatus}`)
+})
+
+step("Response content type is <mime>", async (mime) => {
+  const headers = gauge.dataStore.scenarioStore.get('response.headers')
+  const contentType = headers && headers.get('Content-Type')
+  assert(contentType == mime, `Expected response content type ${mime} but was ${contentType}`)
 })
 
 step("Response body has property <property> with value <value>", async (property, value) => {

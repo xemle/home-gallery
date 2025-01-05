@@ -23,7 +23,6 @@ const proxy = createProxyMiddleware({
 app.use(compression())
 app.use('/api/', proxy)
 app.use('/files/', proxy)
-app.use('/sources/', proxy)
 app.use('/plugins/', proxy)
 
 app.set('etag', 'weak')
