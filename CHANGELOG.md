@@ -11,8 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - webapp: Feature flag for sources to download original files
 
+### Changed
+
+- index: Apply file index journal after successful database update
+
 ### Fixed
 
+- server: Fix user on server log
 - storage: Log error on storage purge
 
 ## [1.18.0] - 2024-09-24

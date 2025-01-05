@@ -2,6 +2,9 @@ import Logger from '@home-gallery/logger'
 
 const log = Logger('cli.index.journal')
 
+import apply from './journal-apply.js'
+import remove from './journal-remove.js'
+
 const command = {
   command: 'journal',
   describe: 'Journal operations',
@@ -20,31 +23,36 @@ const command = {
         alias: 'r',
         boolean: true,
         describe: 'Removes the journal'
-      }
+      },
+      'dry-run': {
+        alias: 'n',
+        describe: 'Do not perform any writes'
+      },      
     })
+    .command(apply)
+    .command(remove)
     .demandOption(['index', 'journal'])
   },
   handler: (argv) => {
-    const indexFilename = argv.index;
-    const journal = argv.journal;
-    const remove = argv.remove;
-
-    if (!remove) {
-      log.info('Only remove option is currentyl supported. Nothing to do')
-      return
+    if (!argv.remove) {
+      log.info('No option selects. use command: index journal apply or index journal remove')
     }
+    log.info('Deprecated remove option. Use command: index journal remove')
 
     const run = async () => {
       const { removeJournal } = await import('@home-gallery/index')
 
-      return new Promise((resolve, reject) => {
-        removeJournal(indexFilename, journal, err => err ? reject(err) : resolve())
-      })
+      const indexFilename = argv.index
+      const options = {
+        dryRun: argv.dryRun,
+        journal: argv.journal
+      }
+      return removeJournal(indexFilename, options)
     }
 
     run()
       .then(() => {
-        log.info(`Removed journal ${journal} from file index ${indexFilename}`)
+        log.info(`Removed file index journal ${journal} from file index ${indexFilename}`)
       })
       .catch(err => {
         log.warn(err, `Could not remove journal ${journal} from file index ${indexFilename}: ${err}`)

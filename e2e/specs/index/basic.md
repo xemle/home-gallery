@@ -38,4 +38,3 @@ Tags: index
 * Update index
 * Index has "2" entries
 * Index has entry "IMG_2915.JPG" with checksum "e928ea5b77aaec8fb2080383e270340d2e7fe36e"
-* Index has entry "IMG_2915.JPG" with prev checksum "96419bb03fb2a041ff265e27cfccc4be8b04346d"

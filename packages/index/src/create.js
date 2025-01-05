@@ -1,10 +1,23 @@
 import path from 'path';
 
 import Logger from '@home-gallery/logger'
+import { promisify } from '@home-gallery/common';
 
 const log = Logger('index.create');
 
 import { walkDir } from './walker.js';
+
+/**
+ * @typedef {import('./types.d').IIndex} IIndex
+ */
+/**
+ * @typedef {import('./types.d').IIndexEntry} IIndexEntry
+ */
+/**
+ * @typedef {import('./types.d').IIndexOptions} IIndexOptions
+ */
+/** @type {(dir: string, cb: any) => Promise<IIndexEntry[]>} */
+const asyncWalkDir = promisify(walkDir)
 
 const createFilesMapper = (excludeIfPresent) => {
   if (!excludeIfPresent) {
@@ -19,10 +32,16 @@ const createFilesMapper = (excludeIfPresent) => {
   }
 }
 
-export const createIndex = (dir, options, cb) => {
+/**
+ * @param {string} dir
+ * @param {import('./types.d').IIndexOptions} options
+ * @returns {Promise<IIndex>}
+ */
+export const createIndex = async (dir, options) => {
+  /** @type {IIndexEntry[]} */
   const entries = [];
   const t0 = Date.now();
-  walkDir(dir, createFilesMapper(options.excludeIfPresent), (filename, stat) => {
+  return asyncWalkDir(dir, createFilesMapper(options.excludeIfPresent), (filename, stat) => {
     const relativeFilename = path.relative(dir, filename);
     if (!options.filter(relativeFilename, stat)) {
       return false;
@@ -38,12 +57,13 @@ export const createIndex = (dir, options, cb) => {
       fileType: stat.isDirectory() ? 'd' : (stat.isFile() ? 'f' : (stat.isSymbolicLink() ? 'l' : 'o'))
     }));
     return true;
-  }, (err) => {
-    if (err) {
-      log.error(`Could not read files in ${dir}: ${err}`);
-      return cb(err);
-    } 
+  })
+  .then(() => {
     log.info(t0, `Read ${entries.length} files in ${dir}`);
-    cb(null, entries);
+    return entries
+  })
+  .catch(err => {
+    log.error(err, `Could not read files in ${dir}: ${err}`);
+    throw err
   });
 }

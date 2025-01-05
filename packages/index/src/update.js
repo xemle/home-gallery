@@ -4,6 +4,12 @@ const log = Logger('index.update');
 
 import { mergeIndex }  from './merge.js';
 
+/**
+ * @template T
+ * @param {T[]} values
+ * @param {(e: T) => string} keyFn
+ * @returns {Record<String, T>}
+ */
 const toMap = (values, keyFn) => values.reduce((result, value) => {
   const key = keyFn(value)
   if (!key) {
@@ -16,12 +22,6 @@ const toMap = (values, keyFn) => values.reduce((result, value) => {
 
 const hasNoChanges = (onlyFileKeys, onlyFsKeys, changedKeys) => !onlyFileKeys.length && !onlyFsKeys.length && !changedKeys.length
 
-const setPrevSha1sum = (keys, fileEntryMap, fsEntryMap) => keys.forEach(key => {
-  const fsEntry = fsEntryMap[key]
-  const fileEntry = fileEntryMap[key]
-  fsEntry.prevSha1sum = fileEntry.sha1sum
-})
-
 const initialChanges = entries => {
   return {
     adds: entries,
@@ -30,11 +30,20 @@ const initialChanges = entries => {
   }
 }
 
-export const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
+/** @typedef {import('./types.d').IIndexEntry} IIndexEntry */
+/** @typedef {import('./types.d').IIndexChanges} IIndexChanges */
+/**
+ *
+ * @param {IIndexEntry[]} fileEntries
+ * @param {IIndexEntry[]} fsEntries
+ * @param {*} matcherFn
+ * @returns {Promise<[IIndexEntry[], IIndexChanges]>}
+ */
+export const updateIndex = async (fileEntries, fsEntries, matcherFn) => {
   const t0 = Date.now();
   if (!fileEntries.length) {
     log.info(`Initiate index with ${fsEntries.length} entries`);
-    return cb(null, fsEntries, initialChanges(fsEntries));
+    return [fsEntries, initialChanges(fsEntries)];
   }
 
   const fileEntryMap = toMap(fileEntries, e => e.filename);
@@ -50,20 +59,31 @@ export const updateIndex = (fileEntries, fsEntries, matcherFn, cb) => {
 
   if (hasNoChanges(onlyFileKeys, onlyFsKeys, changedKeys)) {
     log.info(t0, `No changes found`);
-    return cb(null, fileEntries, false);
+    return [fileEntries, initialChanges([])];
   }
 
-  setPrevSha1sum(changedKeys, fileEntryMap, fsEntryMap)
   const updatedEntryKeys = commonKeys.concat(onlyFsKeys);
   const updatedEntries = updatedEntryKeys.map(key => commonEntryMap[key] || fsEntryMap[key]);
 
-  log.info(t0, `Index merged of ${updatedEntryKeys.length} entries (${onlyFsKeys.length} added, ${changedKeys.length} changed, ${onlyFileKeys.length} deleted)`)
-  log.info(`Changes:\n\t${onlyFsKeys.map(f => `A ${f}`).concat(changedKeys.map(f => `C ${f}`)).concat(onlyFileKeys.map(f => `D ${f}`)).join('\n\t')}`)
-
   const changes = {
     adds: onlyFsKeys.map(key => fsEntryMap[key]),
-    changes: changedKeys.map(key => fsEntryMap[key]),
+    changes: changedKeys.map(key => ({...fsEntryMap[key], sha1sum: '', prevSha1sum: fileEntryMap[key].sha1sum || ''})),
     removes: onlyFileKeys.map(key => fileEntryMap[key])
   }
-  cb(null, updatedEntries, changes);
+
+  log.info(t0, `Index merged of ${updatedEntryKeys.length} entries (${onlyFsKeys.length} added, ${changedKeys.length} changed, ${onlyFileKeys.length} deleted)`)
+
+  const logChanges = {
+    adds: onlyFileKeys,
+    changes: changedKeys,
+    removes: onlyFileKeys
+  }
+  const changeLines = [
+    ...onlyFsKeys.map(f => `A ${f}`),
+    ...changedKeys.map(f => `C ${f}`),
+    ...onlyFileKeys.map(f => `D ${f}`)
+  ]
+  log.info(logChanges, `Changes:\n\t${changeLines.join('\n\t')}`)
+
+  return [updatedEntries, changes]
 }

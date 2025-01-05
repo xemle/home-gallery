@@ -9,6 +9,12 @@ import { mergeLogStream } from './merge-log-stream.js'
 let instance;
 
 const hasFirstArgNumber = inputArgs => inputArgs.length >= 2 && typeof inputArgs[0] == 'number'
+const splitErrorStackLines = inputArgs => {
+  if (inputArgs.length < 2 || typeof inputArgs[0].message != 'string' || typeof inputArgs[0].stack != 'string') {
+    return
+  }
+  inputArgs[0].stack = inputArgs[0].stack.split('\n')
+}
 
 const createInstance = options => {
   options = options || {}
@@ -21,6 +27,7 @@ const createInstance = options => {
           const startTime = inputArgs.shift()
           return method.apply(this, [{duration: Date.now() - startTime}, ...inputArgs])
         }
+        splitErrorStackLines(inputArgs)
         return method.apply(this, inputArgs)
       }
     },
