@@ -17,8 +17,10 @@ const getFractionNumber = (exif, prop) => {
     result[`${prop}Divider`] = +match[2]
   } else if (typeof exif[prop] === 'number') {
     result[`${prop}Value`] = exif[prop]
+  } else {
+    result[`${prop}Value`] = +exif[prop]
   }
-  result[`${prop}Value`] = +exif[prop]
+  return result
 }
 
 const widthHeight = (entry, exif) => {
@@ -72,7 +74,7 @@ const getExif = (entry) => {
     make: exif.Make || 'unknown',
     model: exif.Model || 'unknown',
     iso: exif.ISO,
-    aperture: exif.ApertureValue,
+    aperture: exif.ApertureValue || exif.Aperture,
     exposureMode: exif.ExposureMode,
     focalLength: exif.FocalLength ? +(exif.FocalLength.replace(' mm', '')) : -1,
     focalLength33mm: exif.FocalLengthIn35mmFormat ? +(exif.FocalLengthIn35mmFormat.replace(' mm', '')) : -1,

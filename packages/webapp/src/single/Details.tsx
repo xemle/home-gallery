@@ -248,7 +248,7 @@ export const Details = ({entry, dispatch}) => {
                   )}
                 </p>
               )}
-              <p>ISO {entry.iso}, Aperture {entry.aperture}</p>
+              <p>ISO {entry.iso}, Aperture {entry.aperture}, Shutter Speed {entry.ShutterSpeedRaw}, Focal Length {entry.focalLength}mm</p>
             </div>
           </div>
           {entry.objects.length > 0 && (
