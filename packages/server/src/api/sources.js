@@ -1,5 +1,7 @@
-import express from 'express'
+import { stat, statSync } from 'fs'
 import path from 'path'
+
+import express from 'express'
 
 import Logger from '@home-gallery/logger'
 import { sendError } from './error/index.js'
@@ -20,6 +22,11 @@ export function getSourcesApi(config) {
       return {indexName, dir}
     })
 
+  const indexNameToDir = downloadableSources.reduce((result, {indexName, dir}) => {
+    result[indexName] = dir
+    return result
+  }, {})
+
   const router = express.Router()
   router.get('/', (_, res) => {
     res.json({
@@ -27,21 +34,33 @@ export function getSourcesApi(config) {
     })
   })
 
-  for (const downloadableSource of downloadableSources) {
-    const { indexName, dir } = downloadableSource
-    log.warn(`Enable source directory ${dir} at /${indexName} to access original files`)
-    router.use(`/${indexName}`, express.static(dir, staticConfig))
-  }
-
-  router.use('/', (req, res) => {
-    const pos = req.path.indexOf('/', 1)
-    if (pos > 0) {
-      const indexName = req.path.substring(1, pos)
-      const filename = req.path.substring(pos + 1)
-      return sendError(res, 404, `File ${filename} for index ${indexName} not found`)
-    }
-    return sendError(res, 404, `Resource not found`)
-  })
+  router.use('/', createStaticIndex(indexNameToDir))
 
   return router
+}
+
+function createStaticIndex(indexNameToDir) {
+  return (req, res) => {
+    if (req.method != 'GET') {
+      return sendError(res, 405, `Method is not allowed`)
+    }
+
+    const parts = req.path.substring(1).split('/').map(decodeURI)
+    const indexName = parts.shift()
+    const dir = indexNameToDir[indexName]
+
+    if (!dir || !parts.length) {
+      return sendError(res, 404, `File not found`)
+    }
+
+    const file = path.resolve(dir, ...parts)
+    const filename = parts.join('/')
+    stat(file, (err, stats) => {
+      if (err || !stats.isFile()) {
+        return sendError(res, 404, `File ${filename} for index ${indexName} not found`)
+      }
+      log.trace({indexName, dir, filename}, `Send original file ${filename} from index ${indexName}`)
+      return res.sendFile(file)
+    })
+  }
 }
