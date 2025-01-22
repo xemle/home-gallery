@@ -40,7 +40,7 @@ const copy = async (src: Readable, dst: string, appending: boolean = true) => {
   return new Promise((resolve, reject) => {
     src
       .pipe(createWriteStream(dst, { flags: appending ? 'a' : 'w'}))
-      .on('finish', resolve)
+      .on('finish', () => resolve(undefined))
       .on('error', reject)
   })
 }
