@@ -13,7 +13,7 @@ or enjoy the [food images](https://demo.home-gallery.org/similar/c7f8a3bf0142fc9
 Ask questions on [gitter.im](https://gitter.im/home-gallery/community) or [Discord](https://discord.gg/kbvmvadCwe).
 
 Do you like HomeGallery? Does it solve your media problem?
-Would you like to help? Please read the [CONTRIBUTING](CONTRIBUTING.md) guidlines and
+Would you like to help? Please read the [CONTRIBUTING](CONTRIBUTING.md) guidelines and
 support this project through any recurring financial support to my
 [patreon.com/xemle](https://www.patreon.com/xemle) or one time support to my
 [paypal.me/xemle](https://paypal.me/xemle) account. Thank you in advance.
@@ -44,7 +44,7 @@ support this project through any recurring financial support to my
 * Serve your local data without usage of cloud services
 * One user only - all files are served
 * View your own photos and videos from mobile phones
-* Serve all your images from multiple media source directories (hard drive, camara files, mobile phone files, etc)
+* Serve all your images from multiple media source directories (hard drive, camera files, mobile phone files, etc)
 
 ## Quickstart
 
@@ -115,8 +115,8 @@ See [docs.home-gallery.org](https://docs.home-gallery.org) for general documenta
 - GEO location reverse lookups
 - Simple mobile app through [PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps) support
 - Tagging, single and multi selection
-- Support of read only and offline media sources. Once the preview files are generated and their meta data are extraced, the original sources are not touched and required any more. So media from offline disk need to be extracted only once and the disk can stay offline on next runs
-- Media are identified by their content. Duplicated media (identical files byte-by-byte) are only processed once. Renaming is supported without recalulating previews etc.
+- Support of read only and offline media sources. Once the preview files are generated and their meta data are extracted, the original sources are not touched and required any more. So media from offline disk need to be extracted only once and the disk can stay offline on next runs
+- Media are identified by their content. Duplicated media (identical files byte-by-byte) are only processed once. Renaming is supported without recalculating previews etc.
 - Fast file changes detection such as add, removes, renames or moves
 - Static web gallery site export such as the [demo gallery](https://demo.home-gallery.org)
 - Meta data export to XMP sidecar files
@@ -142,18 +142,18 @@ See [installation](https://docs.home-gallery.org/install) section for usage.
 
 # External Services and Privacy
 
-The goal of HomeGallery is to use as less public serivces as possible
+The goal of HomeGallery is to use as less public services as possible
 due sensitive private image data. It tries to use service which can
-be deployed local. However the setup requires technical knowlege and
+be deployed local. However the setup requires technical knowledge and
 technical maintenance. Following services are called:
 
-For geo reverse lookups (geo coordinates to addess), HomeGallery
+For geo reverse lookups (geo coordinates to address), HomeGallery
 queries the [Nominatim Service](https://nominatim.openstreetmap.org/reverse)
 from [OpenStreetMap](https://openstreetmap.org). Only geo coordinates
 are transmitted.
 
 For reverse image lookups (similar image search), object detection and face
-recogintion, HomeGallery uses the
+recognition, HomeGallery uses the
 its own public API at `api.home-gallery.org`. This public API supports
 low powered devices such as the SoC Raspberry PI and all preview images are
 send to this public API by default. No images or privacy data are kept.
@@ -183,7 +183,7 @@ npm install
 npm run build
 ```
 
-In some cornor cases you might also need essential build tools to compile library
+In some corner cases you might also need essential build tools to compile library
 bindings.
 
 * make
