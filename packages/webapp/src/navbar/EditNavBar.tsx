@@ -37,7 +37,7 @@ export const EditNavBar = ({showDialog}) => {
       action: reset
     },
     {
-      icon: icons.faFolder,
+      icon: icons.faListCheck,
       text: 'All',
       action: selectAll
     },
@@ -52,7 +52,7 @@ export const EditNavBar = ({showDialog}) => {
       action: toggleShowSelected
     },
     {
-      icon: icons.faCheck,
+      icon: icons.faFileEdit,
       text: `Edit ${selecedCount} media`,
       smText: `${selecedCount}`,
       action: showDialog
