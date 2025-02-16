@@ -83,7 +83,10 @@ Object.assign(Logger, {
   addPretty: (level = 'info') => instance && createPrettyStream(instance, level),
   addFile: (filename, level, cb) => instance && createFileStream(instance, filename, level, cb),
   addJson: (level = 'info') => instance && createJsonStream(instance, level),
-  mergeLog: (readable) => instance && mergeLogStream(instance, readable),
+  /**
+   * @param {Function} jsonLogMapper Optional json mapper
+   */
+  mergeLog: (readable, jsonLogMapper = false) => instance && mergeLogStream(instance, readable, jsonLogMapper),
 })
 
 export {

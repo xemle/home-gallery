@@ -1,4 +1,4 @@
-import { pipeline, Writable } from 'stream'
+import { pipeline, Transform, PassThrough, Writable } from 'stream'
 
 import { splitStream } from './utils/split-stream.js'
 
@@ -12,12 +12,37 @@ const logWriteable = logWrite => {
   })
 }
 
-export const mergeLogStream = (rootLogger, readable) => {
+const createLogMapper = (jsonLogMapper) => {
+  if (!jsonLogMapper) {
+    return new PassThrough()
+  }
+
+  function transform(chunk, _, cb) {
+    try {
+      const json = JSON.parse(chunk)
+      const log = jsonLogMapper(json)
+      const data = JSON.stringify(log)
+      json = null
+      log = null
+      return cb(null, data)
+    } catch (e) {
+      return cb(null, chunk)
+    }
+  }
+
+  return new Transform({
+    objectMode: true,
+    transform,
+  })
+}
+
+export const mergeLogStream = (rootLogger, readable, jsonLogMapper) => {
   readable.setEncoding('utf8')
 
   pipeline(
     readable,
     splitStream(),
+    createLogMapper(jsonLogMapper),
     logWriteable(rootLogger.write),
     err => {
       if (err) {
