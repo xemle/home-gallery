@@ -80,7 +80,7 @@ const command = {
       (yargs) => yargs,
       (argv) => load(argv.config, true, argv.autoConfig)
           .then(configOptions => {
-            runServer(configOptions)
+            return runServer(configOptions)
           })
           .then(() => log.info(`Have a good day...`))
           .catch(err => log.error(err, `Error: ${err}`))
