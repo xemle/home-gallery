@@ -101,6 +101,11 @@ const command = {
         string: true,
         describe: 'Enable remote console with given debug auth token'
       },
+      'import-sources': {
+        boolean: true,
+        default: true,
+        describe: 'Import source files on start'
+      },
       'watch-sources': {
         boolean: true,
         default: true,
@@ -127,6 +132,7 @@ const command = {
       remoteConsoleToken: 'server.removeConsoleToken',
       user: {path: 'server.auth.users', type: 'add', map: mapUsers},
       ipWhitelistRule: {path: 'server.auth.rules', map: mapRules},
+      importSources: {path: 'server.importSources'},
       watchSources: {path: 'server.watchSources'}
     }
 

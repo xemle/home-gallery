@@ -179,6 +179,9 @@ sources:
   #prefix: /
   # Prefix path for browser only. basePath is Overwritten by prefix
   #basePath: /
+  # Import sources on server start
+  #importSources: true
+  # Watch sources and import files on changes
   #watchSources: true
 
 #

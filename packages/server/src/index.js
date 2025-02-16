@@ -96,12 +96,16 @@ export async function startServer(options) {
       })
       .on('listening', () => resolve(server))
     }).then(async server => {
-      const { watchSources, openBrowser } = config.server
+      const { importSources, watchSources, openBrowser } = config.server
       const url = serverUrl(config)
       log.info(`Your own Home Gallery is running at ${url}`);
       initDatabase();
-      if (watchSources) {
-        const watcher = spawnCli('run import --initial --update --watch'.split(' '), getConfigEnv(options))
+      if (importSources) {
+        const args = 'run import --initial --update'.split(' ');
+        if (watchSources) {
+          args.push('--watch')
+        }
+        const watcher = spawnCli(args, getConfigEnv(options))
         context.processManager.addProcess(watcher, 15 * 1000)
       }
       if (openBrowser) {

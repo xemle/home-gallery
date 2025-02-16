@@ -76,7 +76,7 @@ const startServer = async (args = []) => {
 
 step("Start server", startServer)
 
-step("Start only server", () => startServer(['--no-watch-sources']))
+step("Start only server", () => startServer(['--no-import-sources']))
 
 step("Start server with args <args>", async (args) => {
   const argList = args.split(/\s+/)

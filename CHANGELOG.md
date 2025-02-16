@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- server: Add option flag --import-sources
+
 ### Fixed
 
 - extractor: Fix video extraction for webm
