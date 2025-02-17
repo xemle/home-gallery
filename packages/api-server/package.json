@@ -33,6 +33,6 @@
     "express": "^4.17.1",
     "jpeg-js": "^0.4.3",
     "morgan": "^1.10.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^3.3.2"
   }
 }
