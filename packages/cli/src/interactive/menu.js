@@ -78,7 +78,7 @@ export const menu = {
         incrementalUpdate: command == 'increment',
         smallFiles: command == 'initialSmall'
       }
-      const allOptions = { ...options, importOptions }
+      const allOptions = { ...options, ...importOptions }
       await importSources(sources, allOptions)
       return 'main'
     }
