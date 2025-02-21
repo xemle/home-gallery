@@ -130,14 +130,13 @@ async function writeJournal(filename: string, data: IIndexJournal) {
 }
 
 export async function createJournal(indexFilename: string, index: IIndex, updatedEntries: IIndexEntry[], changes: IIndexChanges, updatedChecksumEntries: IIndexEntry[], options: IIndexOptions): Promise<IIndexJournal> {
-  /** @type {import('./types.d').IIndexJournal} */
   const journal = {
     type: JOURNAL_TYPE,
     created: new Date().toISOString(),
     base: index.base,
     indexCreated: index.created,
     data: createJournalChange(updatedEntries, changes, updatedChecksumEntries)
-  }
+  } as IIndexJournal
 
   if (options.dryRun) {
     return journal
@@ -209,7 +208,6 @@ export async function applyJournal(indexFilename: string, options: IIndexOptions
     throw new Error(`Journal ${options.journal} for file index ${indexFilename} does not exist`)
   }
 
-  /** @type {import('./types.d').IIndexJournal} */
   const journal = await readJournal(indexFilename, options.journal)
   const indexExists = await access(indexFilename).then(() => true, () => false)
   if (!indexExists) {

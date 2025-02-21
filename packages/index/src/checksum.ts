@@ -7,6 +7,7 @@ import Logger from '@home-gallery/logger'
 const log = Logger('index.checksum');
 import { humanizeBytes as humanize } from '@home-gallery/common';
 import { bps, percent, remainingTime, humanizeDuration } from './format.js'
+import { IIndexEntry } from './types.js';
 
 const createByteProgressLog = (totalBytes: number, intervalMs: number) => {
   const startTime = Date.now()
@@ -44,21 +45,11 @@ const createSha1 = (filename, progress, cb) => {
 
 };
 
-/** @typedef {import('./types.d').IIndexEntry} IIndexEntry */
-/**
- * 
- * @param {string} directory 
- * @param {IIndexEntry[]} entries 
- * @param {IIndexEntry[]} checksumEntries 
- * @param {string} sha1sumDate 
- * @param {(err: Error | null, updatedEntries: IIndexEntry[], interrupted: boolean) => void} cb 
- * @returns 
- */
-export const checksum = (directory, entries, checksumEntries, sha1sumDate, cb) => {
+export const checksum = (directory: string, entries: IIndexEntry[], checksumEntries: IIndexEntry[], sha1sumDate: string, cb: (err: Error | null, entries?: IIndexEntry[], interrupted?: boolean) => void) => {
   let interrupted = false;
   const t0 = Date.now();
 
-  const updatedEntries = []
+  const updatedEntries: IIndexEntry[] = []
   if (!checksumEntries.length) {
     return cb(null, updatedEntries, interrupted);
   }

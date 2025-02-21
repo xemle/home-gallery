@@ -35,7 +35,6 @@ async function asyncCreateOrUpdate(directory: string, filename: string, options:
   const fsEntries = await createIndex(directory, {...options, filter})
 
   const [updatedEntries, changes] = await updateIndex(fileIndex.data, fsEntries, options.matcherFn)
-  /** @type {boolean} */
   const limitExceeded = isLimitExeeded(filter)
   log.info(now, `Collected file index changes`)
 
@@ -75,7 +74,6 @@ async function calculateChecksum(directory: string, updatedEntries: IIndexEntry[
 
   const fileEntries = getFileEntriesForChecksum(updatedEntries, changes, options)
   const checksumEntries = fileEntries.filter(e => !e.sha1sum)
-  /** @type {string} */
   const sha1sumDate = new Date().toISOString()
   return asyncChecksum(directory, fileEntries, checksumEntries, sha1sumDate)
 }
