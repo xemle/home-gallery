@@ -155,7 +155,7 @@ export async function readJournal(indexFilename: string, journal: string) {
   if (data.type != JOURNAL_TYPE) {
     throw new Error(`Invalid journal type ${data.type} of file ${indexFilename}`)
   }
-  return data
+  return data as IIndexJournal
 }
 
 type IIndexEntryFilename = (e: IIndexEntry) => string
@@ -222,14 +222,22 @@ export async function applyJournal(indexFilename: string, options: IIndexOptions
   if (journal.indexCreated != index.created) {
     throw new Error(`Creation date missmatch: File index was created ${index.created} but journal is for ${journal.indexCreated}`)
   }
-  if (index.base != journal.base) {
+
+  let newIndex = index
+  const hasBaseChanges = index.base != journal.base
+  const hasEntryChanges = journal.data?.adds?.length > 0 || journal.data?.changes?.length > 0 || journal.data?.removes?.length > 0
+  const hasChanges = hasBaseChanges || hasEntryChanges
+  if (hasBaseChanges) {
     log.warn(`Changing file index base directory from ${index.base} to ${journal.base}`)
   }
 
-  const entries = await applyJournalEntries(index, journal)
-  const newIndex = await writeIndex(journal.base, indexFilename, entries, options)
-  log.info(`Applied journal journal ${options.journal} with ${journal.data.adds.length} adds, ${journal.data.changes.length} changes and ${journal.data.removes.length} removes to file index ${indexFilename} having now ${newIndex.data.length} entries`)
-
+  if (hasChanges) {
+    const entries = await applyJournalEntries(index, journal)
+    newIndex = await writeIndex(journal.base, indexFilename, entries, options)
+    log.info(`Applied journal ${options.journal} with ${journal.data.adds.length} adds, ${journal.data.changes.length} changes and ${journal.data.removes.length} removes to file index ${indexFilename} having now ${newIndex.data.length} entries`)
+  } else {
+    log.info(`Journal ${options.journal} has no data. Skip apply`)
+  }
 
   if (options.keepJournal) {
     log.info(`Keeping journal ${options.journal} for file index ${indexFilename}`)
@@ -238,10 +246,8 @@ export async function applyJournal(indexFilename: string, options: IIndexOptions
 
   if (!options.dryRun) {
     await unlink(journalFilename)
-    log.debug(`Removed applied journal file ${journalFilename}`)
-  } else {
-    log.debug(`Removed applied journal file ${journalFilename} (dry run)`)
   }
+  log.debug(`Removed ${hasChanges ? 'applied' : 'empty'} journal file ${journalFilename}${options.dryRun ? ' (dry run)' : ''}`)
   return newIndex
 }
 
