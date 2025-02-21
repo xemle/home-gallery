@@ -129,11 +129,11 @@ async function writeJournal(filename: string, data: IIndexJournal) {
   return writeJsonGzipAsync(filename, data)
 }
 
-export async function createJournal(indexFilename: string, index: IIndex, updatedEntries: IIndexEntry[], changes: IIndexChanges, updatedChecksumEntries: IIndexEntry[], options: IIndexOptions): Promise<IIndexJournal> {
+export async function createJournal(directory: string, indexFilename: string, index: IIndex, updatedEntries: IIndexEntry[], changes: IIndexChanges, updatedChecksumEntries: IIndexEntry[], options: IIndexOptions): Promise<IIndexJournal> {
   const journal = {
     type: JOURNAL_TYPE,
     created: new Date().toISOString(),
-    base: index.base,
+    base: directory,
     indexCreated: index.created,
     data: createJournalChange(updatedEntries, changes, updatedChecksumEntries)
   } as IIndexJournal

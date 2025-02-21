@@ -95,7 +95,7 @@ export async function update(directory: string, filename: string, options: IInde
       log.info(t0, `No file changes in directory ${directory}`)
       return [index, false, limitExceeded]
     }
-    const journal = await createJournal(filename, index, updatedEntries, changes, updatedChecksumEntries, options)
+    const journal = await createJournal(directory, filename, index, updatedEntries, changes, updatedChecksumEntries, options)
     log.info(t0, `Created empty file index journal for unchanged directory ${directory}`);
     return [index, journal, limitExceeded]
   }
@@ -113,7 +113,7 @@ export async function update(directory: string, filename: string, options: IInde
     newIndex = await writeIndex(directory, filename, [], options)
   }
   const journalChanges = options.checksum && interrupted ? onlyChangesWithSha1sum(changes) : changes
-  const journal = await createJournal(filename, newIndex, updatedEntries, journalChanges, updatedChecksumEntries, options)
+  const journal = await createJournal(directory, filename, newIndex, updatedEntries, journalChanges, updatedChecksumEntries, options)
   log.info(t0, `Created file index journal for directory ${directory}`);
   return [newIndex, journal, limitExceeded]
 }
