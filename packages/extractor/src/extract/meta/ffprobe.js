@@ -1,6 +1,5 @@
-import ffprobeBin from 'ffprobe';
-
 import Logger from '@home-gallery/logger'
+import { spawn } from '@home-gallery/common'
 
 import { getFfprobePath, getFfmpegPath } from '../utils/ffmpeg-path.js'
 
@@ -18,27 +17,48 @@ export function ffprobe(storage, ffprobePath) {
   const task = async (entry) => {
     const t0 = Date.now();
     const src = await entry.getFile()
-    return new Promise((resolve, reject) => {
-      ffprobeBin(src, { path: ffprobePath }, (err, data) => {
-        if (err) {
-          return reject(err)
-        }
-        resolve(data)
+    return callFfprobe(ffprobePath, src)
+      .then(data => storage.writeFile(entry, ffprobeSuffix, data))
+      .then(() => {
+        log.debug(t0, `Extracted video meta data from ${entry}`);
       })
-    })
-    .then(data => storage.writeFile(entry, ffprobeSuffix, data))
-    .then(() => {
-      log.debug(t0, `Extracted video meta data from ${entry}`);
-    })
-    .catch(err => {
-      log.warn(err, `Could not extract video meta data from ${entry}: ${err}`);
-    })
+      .catch(err => {
+        log.warn(err, `Could not extract video meta data from ${entry}: ${err}`);
+      })
   }
 
   return {
     test,
     task
   }
+}
+
+async function callFfprobe(ffprobePath, src) {
+  const args = '-v quiet -print_format json -show_format -show_streams'.split(' ')
+  args.push(src)
+  return new Promise((resolve, reject) => {
+    const stdout = []
+    const stderr = []
+
+    const ffprobe = spawn(ffprobePath, args, { stdio: 'pipe' })
+    ffprobe.once('exit', code => {
+      if (code) {
+        const lastLine = stderr.join('').split('\n').filter(Boolean).pop()
+        reject(new Error(`Failed to run ffprobe. Exit code is ${code}: ${lastLine}`))
+        return
+      }
+      const out = stdout.join('')
+      try {
+        const json = JSON.parse(out)
+        return resolve(json)
+      } catch (e) {
+        reject(new Error(`Failed to parse out as json: ${out}`, {cause: e}))
+      }
+    })
+
+    ffprobe.stdout.on('data', data => stdout.push(data.toString()))
+    ffprobe.stderr.on('data', data => stderr.push(data.toString()))
+  })
 }
 
 /**

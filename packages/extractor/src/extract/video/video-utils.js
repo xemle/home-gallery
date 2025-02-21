@@ -3,6 +3,17 @@ export const getVideoStream = (entry) => {
   return streams?.find(stream => stream.codec_type == 'video')
 }
 
+export const getVideoDuration = (entry) => {
+  const videoStream = getVideoStream(entry)
+  if (videoStream?.duration > 0) {
+    return videoStream?.duration
+  }
+  if (videoStream && entry.meta?.ffprobe?.format?.duration > 0) {
+    return +entry.meta?.ffprobe?.format?.duration
+  }
+  return 0
+}
+
 export const isPortraitVideo = (video) => {
   const displayMatrix = video?.side_data_list?.find(sideData => sideData.side_data_type == 'Display Matrix')
   return [-90, 90].includes(displayMatrix?.rotation)

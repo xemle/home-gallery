@@ -1,6 +1,6 @@
 import t from 'tap'
 
-import { getVideoStream, isPortraitVideo, fixRotatedScale, getFfmpegArgs } from './video-utils.js'
+import { getVideoStream, isPortraitVideo, fixRotatedScale, getFfmpegArgs, getVideoDuration } from './video-utils.js'
 
 t.test('getVideoStream', async t => {
   t.test('success', async t => {
@@ -33,6 +33,60 @@ t.test('getVideoStream', async t => {
     }
     const video = getVideoStream(entry)
     t.match(video, null)
+  })
+})
+
+t.test('getVideoDuration', async t => {
+  t.test('by stream', async t => {
+    const entry = {
+      meta: {
+        ffprobe: {
+          streams: [
+            {
+              codec_type: 'video',
+              duration: 23
+            }
+          ]
+        }
+      }
+    }
+    t.match(getVideoDuration(entry), 23)
+  })
+
+  t.test('by format', async t => {
+    const entry = {
+      meta: {
+        ffprobe: {
+          streams: [
+            {
+              codec_type: 'video'
+            }
+          ],
+          format: {
+            duration: "23"
+          }
+        }
+      }
+    }
+    t.match(getVideoDuration(entry), 23)
+  })
+
+  t.test('for audio', async t => {
+    const entry = {
+      meta: {
+        ffprobe: {
+          streams: [
+            {
+              codec_type: 'audio'
+            }
+          ],
+          format: {
+            duration: "23"
+          }
+        }
+      }
+    }
+    t.match(getVideoDuration(entry), 0)
   })
 })
 

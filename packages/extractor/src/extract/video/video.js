@@ -3,7 +3,7 @@ import ffmpeg from 'fluent-ffmpeg';
 import Logger from '@home-gallery/logger'
 import { humanizeBytes, humanizeDuration } from '@home-gallery/common';
 
-import { getFfmpegArgs, getVideoStream } from './video-utils.js'
+import { getFfmpegArgs, getVideoStream, getVideoDuration } from './video-utils.js'
 import { toPlugin } from '../pluginUtils.js';
 
 const log = Logger('extractor.video');
@@ -59,10 +59,12 @@ const createVideoConverter = (ffmpegPath, ffprobePath, options) => {
  */
 async function video(storage, videoConverter, videoSuffix) {
 
-  const test = entry => entry.type === 'video' && !storage.hasFile(entry, videoSuffix) && getVideoStream(entry)?.duration > 0;
+  const test = entry => entry.type === 'video' && !storage.hasFile(entry, videoSuffix) && getVideoDuration(entry) > 0;
 
   const task = async (entry) => {
-    const {width, height, duration} = getVideoStream(entry)
+    const videoStream = getVideoStream(entry)
+    const {width, height} = videoStream
+    const duration = getVideoDuration(entry)
     const logData = {video: {width, height, duration, size: entry.size}}
     log.debug(logData, `Starting video conversion of ${entry} (${width}x${height}, ${humanizeDuration(duration)}, ${humanizeBytes(entry.size)})`)
 

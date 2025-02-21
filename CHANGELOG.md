@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- extractor: Fix video extraction for webm
 - server: Fix download original files with whitespace
 
 ## [1.19.0] - 2025-01-05
