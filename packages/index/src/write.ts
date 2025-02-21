@@ -11,7 +11,7 @@ export const writeIndex = async (directory: string, filename: string, entries: I
   const index = {
     type: 'home-gallery/fileindex@1.0',
     created: new Date().toISOString(),
-    base: path.resolve(directory),
+    base: directory,
     data: entries.sort(byDirDescFileAsc)
   }
   if (options.dryRun) {
