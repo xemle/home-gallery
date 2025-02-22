@@ -26,11 +26,11 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm-run-all -p build:js build:types",
-    "build:js": "node build.js",
+    "build:js": "dev-cli build",
     "build:types": "npx tsc -d --emitDeclarationOnly",
     "test": "tap",
     "watch": "npm-run-all -p watch:js watch:types",
-    "watch:js": "node build.js --watch",
+    "watch:js": "dev-cli build --watch",
     "watch:types": "npx tsc -d --emitDeclarationOnly --watch",
     "watch:test": "tap repl w"
   },
@@ -44,6 +44,7 @@
     "yaml": "^1.10.2"
   },
   "devDependencies": {
+    "@home-gallery/dev-tools": "file:../dev-tools",
     "glob": "^11.0.0",
     "npm-run-all": "^4.1.5",
     "rimraf": "^6.0.1",
