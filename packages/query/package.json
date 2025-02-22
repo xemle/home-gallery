@@ -10,7 +10,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "compile": "nearleyc -o src/parser/grammar.js src/parser/grammar.ne",
-    "build": "cpy \"src/**/!(*.test.js|*.ne)\" dist",
+    "build": "dev-cli build",
     "watch": "npm-run-all -p watch:js watch:nearley",
     "watch:js": "onchange \"src/**/*.js\" --delay 500 -- npm run build",
     "watch:nearley": "onchange \"src/parser/*.ne\" --delay 500 -- npm run compile",

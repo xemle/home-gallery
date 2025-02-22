@@ -12,6 +12,7 @@
     "test:e2e": "gauge -d e2e run specs"
   },
   "bin": {
+    "dev-cli": "./bin/dev-cli.js",
     "gallery": "./gallery.js"
   },
   "keywords": [],

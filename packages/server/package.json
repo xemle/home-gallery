@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpy \"src/**/!(*.test.js|*.ne)\" dist",
+    "build": "dev-cli build",
     "postbuild": "cpy \"../webapp/dist/**\" dist/public",
     "serve": "node index.js",
     "watch": "onchange -d 200 \"src/**\" -- npm run build",

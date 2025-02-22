@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpy \"src/**/!(*.test.js)\" dist",
+    "build": "dev-cli build",
     "postbuild": "cpy \"../webapp/dist/**\" dist/public",
     "test": "tap ",
     "watch": "onchange \"src/**\" -- npm run build",
@@ -37,7 +37,7 @@
     "@home-gallery/webapp": "file:../webapp",
     "archiver": "^5.0.0",
     "async": "^3.2.0",
-    "glob": "^7.1.6",
+    "glob": "^11.0.0",
     "rimraf": "^3.0.2"
   }
 }

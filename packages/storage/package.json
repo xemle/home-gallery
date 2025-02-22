@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpy \"src/**\" dist",
+    "build": "dev-cli build",
     "watch": "onchange \"src/**\" -- npm run build"
   },
   "keywords": [

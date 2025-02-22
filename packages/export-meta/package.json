@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build": "cpy \"src/**/!(*.test.js)\" dist",
+    "build": "dev-cli build",
     "test": "tap ",
     "watch": "onchange -d 1000 \"src/**\" -- npm run build",
     "watch:test": "tap repl w"
