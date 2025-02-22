@@ -51,6 +51,7 @@ jobs:
           rm -rf packages/api-server
           node scripts/disable-dependency.js api-server
           npm install --force
+          npm link
 
       - name: Build packages
         id: build
