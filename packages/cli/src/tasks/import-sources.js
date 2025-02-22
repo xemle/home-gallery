@@ -97,7 +97,12 @@ export const createDatabase = async (sources, options) => {
   await pm.runCli(args, {env: options.configEnv, terminateTimeout: 2000, nodeArgs});
 }
 
-const catchIndexLimitExceeded = ({code}) => {
+const catchIndexLimitExceeded = (err) => {
+  const { code } = err
+  if (typeof code != 'number') {
+    throw new Error(`Updating file index failed: ${err}`, {cause: err})
+  }
+
   if (code == 1) {
     return true
   }
