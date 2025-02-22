@@ -12,7 +12,7 @@
     "compile": "nearleyc -o src/parser/grammar.js src/parser/grammar.ne",
     "build": "dev-cli build",
     "watch": "npm-run-all -p watch:js watch:nearley",
-    "watch:js": "onchange \"src/**/*.js\" --delay 500 -- npm run build",
+    "watch:js": "dev-cli build --watch",
     "watch:nearley": "onchange \"src/parser/*.ne\" --delay 500 -- npm run compile",
     "test": "tap",
     "watch:test": "tap repl w"
@@ -31,5 +31,8 @@
   "dependencies": {
     "moo": "^0.5.1",
     "nearley": "^2.20.1"
+  },
+  "devDependencies": {
+    "@home-gallery/dev-tools": "file:../dev-tools"
   }
 }

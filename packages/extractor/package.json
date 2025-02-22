@@ -11,7 +11,7 @@
     "clean": "rimraf dist",
     "build": "dev-cli build",
     "test": "tap",
-    "watch": "onchange \"src/**\" -- npm run build",
+    "watch": "dev-cli build --watch",
     "watch:test": "tap repl w"
   },
   "keywords": [
@@ -42,5 +42,8 @@
     "node-vibrant": "^3.1.5",
     "request": "^2.88.2",
     "sharp": "^0.32.4"
+  },
+  "devDependencies": {
+    "@home-gallery/dev-tools": "file:../dev-tools"
   }
 }

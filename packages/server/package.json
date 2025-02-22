@@ -12,7 +12,7 @@
     "build": "dev-cli build",
     "postbuild": "cpy \"../webapp/dist/**\" dist/public",
     "serve": "node index.js",
-    "watch": "onchange -d 200 \"src/**\" -- npm run build",
+    "watch": "dev-cli build --watch",
     "test": "tap",
     "watch:test": "tap repl w"
   },
@@ -44,6 +44,7 @@
     "uuid": "^8.0.0"
   },
   "devDependencies": {
+    "@home-gallery/dev-tools": "file:../dev-tools",
     "@home-gallery/webapp": "file:../webapp"
   }
 }

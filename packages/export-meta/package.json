@@ -11,7 +11,7 @@
     "clean": "rimraf dist",
     "build": "dev-cli build",
     "test": "tap ",
-    "watch": "onchange -d 1000 \"src/**\" -- npm run build",
+    "watch": "dev-cli build --watch",
     "watch:test": "tap repl w"
   },
   "keywords": [
@@ -35,5 +35,8 @@
     "@home-gallery/events": "file:../events",
     "@home-gallery/logger": "file:../logger",
     "exiftool-vendored": "^24.2.0"
+  },
+  "devDependencies": {
+    "@home-gallery/dev-tools": "file:../dev-tools"
   }
 }

@@ -14,7 +14,7 @@
     "clean": "rimraf dist",
     "build": "dev-cli build",
     "test": "tap",
-    "watch": "onchange \"src/**/*.[mc]?js\" --delay 500 -- npm run build",
+    "watch": "dev-cli build --watch",
     "watch:test": "tap repl w"
   },
   "keywords": [
@@ -32,5 +32,8 @@
     "chalk": "^4.1.2",
     "pino": "^8.11.0",
     "pino-pretty": "^10.0.0"
+  },
+  "devDependencies": {
+    "@home-gallery/dev-tools": "file:../dev-tools"
   }
 }

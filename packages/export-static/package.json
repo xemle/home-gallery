@@ -12,7 +12,7 @@
     "build": "dev-cli build",
     "postbuild": "cpy \"../webapp/dist/**\" dist/public",
     "test": "tap ",
-    "watch": "onchange \"src/**\" -- npm run build",
+    "watch": "dev-cli build --watch",
     "watch:test": "tap repl w"
   },
   "keywords": [
@@ -39,5 +39,8 @@
     "async": "^3.2.0",
     "glob": "^11.0.0",
     "rimraf": "^3.0.2"
+  },
+  "devDependencies": {
+    "@home-gallery/dev-tools": "file:../dev-tools"
   }
 }

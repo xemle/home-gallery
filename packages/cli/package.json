@@ -19,7 +19,7 @@
     "clean": "rimraf dist",
     "build": "dev-cli build",
     "test": "tap",
-    "watch": "onchange \"src/**\" -- npm run build",
+    "watch": "dev-cli build --watch",
     "watch:test": "tap repl w"
   },
   "dependencies": {
@@ -36,5 +36,8 @@
     "enquirer": "^2.3.6",
     "yaml": "^1.10.2",
     "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@home-gallery/dev-tools": "file:../dev-tools"
   }
 }

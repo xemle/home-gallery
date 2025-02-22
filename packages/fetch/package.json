@@ -10,7 +10,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "dev-cli build",
-    "watch": "onchange \"src/**\" -- npm run build"
+    "watch": "dev-cli build --watch"
   },
   "keywords": [
     "HomeGallery",
@@ -32,5 +32,8 @@
     "@home-gallery/query": "file:../query",
     "@home-gallery/storage": "file:../storage",
     "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@home-gallery/dev-tools": "file:../dev-tools"
   }
 }

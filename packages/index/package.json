@@ -13,7 +13,7 @@
     "build:js": "dev-cli build",
     "build:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck",
     "test": "tap",
-    "watch": "onchange \"src/**\" -- npm run build:js",
+    "watch": "dev-cli build --watch",
     "watch:test": "tap repl w"
   },
   "keywords": [
@@ -33,5 +33,8 @@
     "@home-gallery/common": "file:../common",
     "@home-gallery/logger": "file:../logger",
     "split2": "^4.1.0"
+  },
+  "devDependencies": {
+    "@home-gallery/dev-tools": "file:../dev-tools"
   }
 }
