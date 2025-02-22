@@ -69,7 +69,7 @@ const getExif = (entry) => {
     tz: exif.tz,
     width,
     height,
-    orientation: exif.Orientation,
+    orientation: exif.Orientation || 1,
     duration: exif.MediaDuration || exif.Duration || 0,
     make: exif.Make || 'unknown',
     model: exif.Model || 'unknown',
@@ -78,7 +78,6 @@ const getExif = (entry) => {
     exposureMode: exif.ExposureMode,
     focalLength: exif.FocalLength ? +(exif.FocalLength.replace(' mm', '')) : -1,
     focalLength33mm: exif.FocalLengthIn35mmFormat ? +(exif.FocalLengthIn35mmFormat.replace(' mm', '')) : -1,
-    orientation: exif.Orientation || 1,
     whiteBalance: exif.WhiteBalance
   }, getExposerTime(), getShutterSpeed())
 }

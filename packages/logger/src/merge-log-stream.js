@@ -19,8 +19,8 @@ const createLogMapper = (jsonLogMapper) => {
 
   function transform(chunk, _, cb) {
     try {
-      const json = JSON.parse(chunk)
-      const log = jsonLogMapper(json)
+      let json = JSON.parse(chunk)
+      let log = jsonLogMapper(json)
       const data = JSON.stringify(log)
       json = null
       log = null
