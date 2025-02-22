@@ -1,5 +1,5 @@
 import path from 'path';
-import glob from 'glob';
+import { glob } from 'glob';
 import { fileURLToPath } from 'url'
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
@@ -17,18 +17,18 @@ export const copyWebapp = (database, dir, basePath, cb) => {
   glob('**/*', {
     cwd: srcDir,
     dot: true
-  }, (err, files) => {
-    if (err) {
-      log.error(err, `Could not collect webapp sources of ${srcDir}: ${err}`);
-      return cb(err);
-    }
+  }).then(files => {
     forEach(files, (filename, cb) => copyFile(filename, srcDir, dstDir, cb), (err) => {
       if (err) {
         log.error(err, `Could not copy webapp sources to ${dstDir}: ${err}`)
         return cb(err);
       }
-      log.info(t0, `Copied webapp sources to ${dstDir}`);
+      log.info(t0, `Copied ${files.length} webapp sources to ${dstDir}`);
       cb(null, database, dir, basePath);
     })
+  })
+  .catch(err => {
+    log.error(err, `Could not collect webapp sources of ${srcDir}: ${err}`);
+    return cb(err);
   })
 }
