@@ -11,8 +11,7 @@ WORKDIR /build
 
 RUN node scripts/disable-dependency.js api-server && \
   if [[ -n "$NO_SHARP" || "$TARGETPLATFORM" == "linux/arm/v6" || "$TARGETPLATFORM" == "linux/arm/v7" ]]; then node scripts/disable-dependency.js --prefix=packages/extractor sharp ; fi && \
-  npm install --no-audit --loglevel verbose && \
-  npm link
+  npm install --no-audit --loglevel verbose
 
 RUN npm run build --loglevel verbose
 RUN node scripts/bundle.js --bundle-file=bundle-docker.yml && \
