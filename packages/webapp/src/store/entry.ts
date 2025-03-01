@@ -14,4 +14,5 @@ export interface Entry {
   textCache?: string | false
   similarityHash: string
   faces?: any[],
+  previews: any[],
 }
