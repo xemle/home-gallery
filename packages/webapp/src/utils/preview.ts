@@ -1,6 +1,11 @@
 export const getPreviewSize = preview => {
-  const match = preview.match(/image-preview-(\d+)\./)
-  return match ? +match[1] : 0
+  const prefix = 'image-preview-'
+  const pos = preview.indexOf(prefix) + prefix.length
+  const end = preview.indexOf('.', pos)
+  if (end - pos < 1) {
+    return 0
+  }
+  return +preview.substring(pos, end)
 }
 
 export const byPreviewSize = (a, b) => getPreviewSize(b) - getPreviewSize(a)

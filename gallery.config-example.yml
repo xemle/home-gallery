@@ -183,6 +183,10 @@ sources:
   #importSources: true
   # Watch sources and import files on changes
   #watchSources: true
+  #api:
+    #tree:
+      #monthGroupSize: 4
+      #irgnoreRecentYears: 4
 
 #
 # Webapp configuration
@@ -194,6 +198,7 @@ sources:
     #- serverEvents
     #- pwa
     #- offlineDatabase
+    #- worker
 
 #
 # Plugin settings

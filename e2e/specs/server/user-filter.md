@@ -20,14 +20,16 @@ Tags: server,auth,filter
 
 ## Different users with tree API
 
+Tags: tree
+
 * Request file "/api/database/tree/root.json"
-* Response body has property "hash" with value "d99773cdc1b0b264dc194c8f6044e359720320ff"
+* Response body has property "hash" with value "dead07e165bb37f1812951e37d7b9ca04d57edf9"
 * Set user "guest" with password "guest"
 * Request file "/api/database/tree/root.json"
-* Response body has property "hash" with value "3d1c5290bdde236db11179bbc840f7a431d32fa7"
+* Response body has property "hash" with value "1b53740c62493ab439dcd8e6a70e2f2ae67ed5f4"
 * Set user "admin" with password "admin"
 * Request file "/api/database/tree/root.json"
-* Response body has property "hash" with value "e43f6a2e96a2e541942368ebd010a2e592786c58"
+* Response body has property "hash" with value "10434d2d511659983e12c38baccf5b5d51acd28e"
 
 ## Different users with app state in index.html
 
