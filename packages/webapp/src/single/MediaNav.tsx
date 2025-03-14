@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as icons from '@fortawesome/free-solid-svg-icons'
 
@@ -94,7 +94,7 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
             <FontAwesomeIcon icon={icons.faClock} className={iconClass}/>
           </a>
         }
-        { current &&
+        { (current && (current?.faces?.length > 0 || current?.objects?.length > 0)) && 
           <a onClick={() => dispatch({type: 'toggleAnnotations'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show object and face annotations (a)">
             <FontAwesomeIcon icon={icons.faUsersViewfinder} className={iconClass}/>
           </a>
