@@ -12,6 +12,7 @@ export interface EntryStore {
 
   reset: () => void
   addEntries: (entries: Entry[]) => void
+  removeEntries: (entries: Entry[]) => void
   setEntries: (entries: Entry[]) => void
 }
 
@@ -46,6 +47,26 @@ const slice = (set) => ({
     return {
       ...state,
       id2Entries: mergedId2Entries,
+      allEntries
+    }
+  }),
+  removeEntries: (entries: Entry[]) => set((state) => {
+    if (!entries.length) {
+      return state
+    }
+    const entryIds = entries.map(entry => entry.id)
+    const mapEntries = Object.entries(state.id2Entries).filter(([id]) => !entryIds.includes(id))
+
+    const id2Entries = Object.fromEntries(mapEntries)
+    const allEntries = mapEntries.map(([_, entry]) => entry) as Entry[]
+
+    // sort all entries by id. Entries should be search by binary search
+    allEntries.sort((a: Entry, b: Entry) => a.id <= b.id ? -1 : 1)
+
+    // SearchStore will listen to allEntries changes and updates entries
+    return {
+      ...state,
+      id2Entries,
       allEntries
     }
   }),

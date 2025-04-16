@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - server: Add option flag --import-sources
 
+### Changed
+
+- webapp: Load offline db in chronlogical order, latest first
+- webapp: Improve offline db performance
+
 ### Fixed
 
 - extractor: Fix video extraction for webm
