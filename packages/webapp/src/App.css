@@ -3,3 +3,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.toFadeOut {
+	opacity: 1;
+}
+.fadeOut {
+	opacity: 0;
+	transition: opacity 1s ease-in-out;
+}
+
+.toFadeIn {
+	opacity: 0;
+}
+.fadeIn {
+	opacity: 1;
+	transition: opacity 1s ease-in-out;
+}
