@@ -10,7 +10,6 @@ import { AppRoutes } from "./AppRoutes";
 import { AppContextProvider } from "./AppContext";
 import LoadDatabaseAndEvents from "./init/LoadDatabaseAndEvents";
 
-
 export const Main = () => {
   const base = document.querySelector('base')?.getAttribute('href') || '/';
   // Browser router should serve base path /pictures/ by url path /pictures

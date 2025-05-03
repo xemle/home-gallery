@@ -30,13 +30,13 @@ export const ViewNavBar = ({disableEdit}) => {
       disabled: false,
     },
     {
-      icon: icons.faClock,
+      icon: icons.faCalendarDays,
       text: 'Years',
       action: () => navigate('/years'),
       disabled: false,
     },
     {
-      icon: icons.faPlay,
+      icon: icons.faVideo,
       text: 'Videos',
       action: () => navigate('/search/type:video'),
       disabled: false,

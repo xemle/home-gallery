@@ -182,8 +182,6 @@ export const MediaView = () => {
     dispatch({type: 'list'})
   }
 
-  console.log('Media object', current, showDetails);
-
   return (
     <>
       <SingleTagDialogProvider>
