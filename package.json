@@ -79,12 +79,12 @@
   },
   "dependencies": {
     "@home-gallery/api-server": "file:packages/api-server",
-    "@home-gallery/dev-tools": "file:packages/dev-tools",
     "@home-gallery/bundle": "file:packages/bundle",
     "@home-gallery/cast": "file:packages/cast",
     "@home-gallery/cli": "file:packages/cli",
     "@home-gallery/common": "file:packages/common",
     "@home-gallery/database": "file:packages/database",
+    "@home-gallery/dev-tools": "file:packages/dev-tools",
     "@home-gallery/events": "file:packages/events",
     "@home-gallery/export-meta": "file:packages/export-meta",
     "@home-gallery/export-static": "file:packages/export-static",

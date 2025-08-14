@@ -10,10 +10,16 @@
   <link rel="apple-touch-icon" href="logo192.png" />
   <meta name="theme-color" content="#909090" />
   <link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials">
-  <link rel="stylesheet" href="App.css">
+  <link rel="stylesheet" href="/src/App.css">
   <title>Home Gallery</title>
+  <script type="module" type="text/template">
+    import RefreshRuntime from "/@react-refresh"
+    RefreshRuntime.injectIntoGlobalHook(window)
+    window.$RefreshReg$ = () => {}
+    window.$RefreshSig$ = () => (type) => type
+    window.__vite_plugin_react_preamble_installed__ = true
+  </script>
   <script src="/remote-console.js"></script>
-  <script src="//localhost:35729/livereload.js?snipver=1"></script>
   <style>
     #app-loader {
       height: 100vh;
@@ -88,7 +94,7 @@
     </div>
   </div>
   <script>window.__homeGallery={}</script>
-  <script defer src="App.js" type="text/javascript"></script>
+  <script type="module" src="/src/App.ts" type="text/javascript"></script>
   <script>
     ((window, navigator, config) => {
       const isLocal = ['127.0.0.1', 'localhost'].includes(location.hostname)

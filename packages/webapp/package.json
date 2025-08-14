@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Web application frontend of HomeGallery",
   "main": "index.js",
+  "type": "module",
   "files": [
     "dist"
   ],
@@ -22,7 +23,10 @@
     "watch:css": "tailwindcss -i src/App.css --watch -o dist/App.css",
     "watch:html": "onchange \"src/*.html\" -- npm run copy:html",
     "watch:sw": "onchange \"workbox-config.js\" -- npm run build:sw",
-    "dev": "npm-run-all -s clean -p build:dev -p copy:html serve watch"
+    "dev": "npm-run-all -s clean -p build:dev -p copy:html serve watch",
+    "vite:start": "vite",
+    "vite:build": "vite build",
+    "vite:serve": "vite preview"
   },
   "keywords": [
     "HomeGallery",

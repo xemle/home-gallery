@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import { useState, useEffect, useContext, FC } from 'react'
 import { LocationContext } from './LocationContext'
 import { useLocation } from 'react-router-dom'
@@ -15,10 +15,10 @@ const hasChanges = (currentLocation: Location, lastLocation: Location) => {
     currentLocation.hash != lastLocation.hash
 }
 
-export const LastLocationProvider = ({children}) => {
+export function LastLocationProvider({children}: {children: ReactNode}): JSX.Element {
   const location = useLocation()
 
-  const [lastLocation, setLastLocation] = useState<Location>()
+  const [lastLocation, setLastLocation] = useState<Location>(location)
   const [_, setCurrentLocation] = useState(location)
 
   useEffect(() => {

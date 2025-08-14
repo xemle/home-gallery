@@ -1,16 +1,23 @@
 {
   "compilerOptions": {
-      "target": "es2015",
-      "module": "es2015",
-      "jsx": "react",
-      "moduleResolution": "node",
-      "lib": [
-          "dom",
-          "es5",
-          "es6"
-      ]
+    "target": "es2022",
+    "module": "es2022",
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "lib": [
+      "dom",
+      "es2022"
+    ],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true
   },
   "include": [
-      "src/**/*.{ts,tsx}"
+    "src"
   ]
 }
