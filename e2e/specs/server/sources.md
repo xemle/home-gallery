@@ -28,6 +28,19 @@ Tags: server,sources,download
 * Response status is "200"
 * Response content type is "image/jpeg"
 
+## With basePath
+
+* Set config "sources[0].downloadable" to "true"
+* Set config "server.prefix" to "/gallery"
+* Add file "index/images/DJI_0035.JPG"
+* Update database
+* Start only server
+* Request file "/gallery/api/sources"
+* Response body has property "data[0].indexName" with value "files"
+* Request file "/gallery/api/sources/files/DJI_0035.JPG"
+* Response status is "200"
+* Response content type is "image/jpeg"
+
 ## Not found
 
 * Set config "sources[0].downloadable" to "true"

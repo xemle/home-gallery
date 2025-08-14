@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- webapp: Fix source download with prefix
 - extractor: Fix video extraction for webm
 - server: Fix download original files with whitespace
 
