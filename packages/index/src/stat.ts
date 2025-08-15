@@ -17,8 +17,8 @@ export function statIndex(indexFilename, cb) {
     others: 0,
     totalSize: 0,
     fileTypes: {},
-    extensions: [],
-    unknownExtensions: [],
+    extensions: [] as string[],
+    unknownExtensions: [] as string[],
   }
 
   const incFileType = (entry, type) => {
@@ -42,29 +42,30 @@ export function statIndex(indexFilename, cb) {
       stats.files++;
       stats.totalSize += entry.size;
       const basename = path.basename(entry.filename);
-      const parts = basename.match(/(.+)\.([^.]+)$/);
+      const pos = basename.lastIndexOf('.');
+      if (pos < 0 || pos >= basename.length - 1) {
+        return
+      }
+      const ext = basename.substring(pos + 1).toLowerCase();
       
-      if (parts) {
-        const ext = parts[2].toLowerCase();
-        if (stats.extensions.indexOf(ext) < 0) {
-          stats.extensions.push(ext);
-        }
+      if (stats.extensions.indexOf(ext) < 0) {
+        stats.extensions.push(ext);
+      }
 
-        let found = false;
+      let found = false;
 
-        Object.keys(fileTypes).forEach(type => {
-          if (fileTypes[type].indexOf(ext) < 0) {
-            return;
-          }
-          found = true;
-          incFileType(entry, type);
-        })
-        if (!found) {
-          if (stats.unknownExtensions.indexOf(ext) < 0) {
-            stats.unknownExtensions.push(ext);
-          }
-          incFileType(entry, 'unknown');
+      Object.keys(fileTypes).forEach(type => {
+        if (fileTypes[type].indexOf(ext) < 0) {
+          return;
         }
+        found = true;
+        incFileType(entry, type);
+      })
+      if (!found) {
+        if (stats.unknownExtensions.indexOf(ext) < 0) {
+          stats.unknownExtensions.push(ext);
+        }
+        incFileType(entry, 'unknown');
       }
     } else {
       stats.others++;

@@ -8,7 +8,7 @@ export type IIndexEntry = {
   ctimeMs: number
   created: string
   sha1sum: string
-  sha1sumDate: string
+  sha1sumDate: string | null
   prevSha1sum?: string
   isDirectory: boolean
   isFile: boolean
@@ -45,9 +45,9 @@ export type IIndexOptions = {
   checksum?: boolean
   journal?: string,
   keepJournal?: boolean
-  matcherFn?: IIndexEntryMatcherFn
-  filter?: IWalkerFileHandler
-  addLimits?: string
+  matcherFn: IIndexEntryMatcherFn
+  filter: IWalkerFileHandler
+  addLimits: string
   excludeIfPresent?: string
   maxFilesize?: string
   keepKnownFiles?: boolean

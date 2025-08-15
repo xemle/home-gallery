@@ -28,5 +28,5 @@ export async function createFilter(entries: IIndexEntry[], options: IIndexOption
     filters.push(excludeFilter)
   }
 
-  return createLimitFilter(entries.length, filename2Entry, options.addLimits, createFilterChain(filters))
+  return createLimitFilter(entries.length, filename2Entry, options.addLimits || '200,500,1.25,8000', createFilterChain(filters))
 }

@@ -68,24 +68,24 @@ function addChangesForSidecars(entries: IIndexEntry[], changes: IIndexChanges) {
   const dir2indexEntries = entries.reduce(toDirReducer, {})
   const dir2indexEntriesWithRemoves = changes.removes.reduce(toDirReducer, dir2indexEntries)
 
-  const dir2journalEntries = changes.adds.reduce(toDirReducer, {})
+  const dir2journalEntries: Record<string, IIndexEntry[]> = changes.adds.reduce(toDirReducer, {})
   changes.changes.reduce(toDirReducer, dir2journalEntries)
   changes.removes.reduce(toDirReducer, dir2journalEntries)
 
   const removedFilenames = changes.removes.map(entry => entry.filename)
 
-  const changedEntries = []
+  const changedEntries: IIndexEntry[] = []
   const journalEntryDirs = Object.keys(dir2journalEntries)
   for (const dir of journalEntryDirs) {
     const entries = dir2indexEntriesWithRemoves[dir].sort(bySize)
-    const name2sidecars = mapName2Sidecars(entries)
+    const name2sidecars = mapName2Sidecars(entries) as Record<string, IIndexEntry[]>
 
     const journalFilenames = dir2journalEntries[dir].map(entry => entry.filename)
 
     const isPristineFile = filename => !journalFilenames.includes(filename) && !removedFilenames.includes(filename)
 
     for (const filename of journalFilenames) {
-      const sidecars = getSidecarsByFilename(name2sidecars, filename)
+      const sidecars: IIndexEntry[] = getSidecarsByFilename(name2sidecars, filename)
       if (!sidecars) {
         return
       }
@@ -142,7 +142,7 @@ export async function createJournal(directory: string, indexFilename: string, in
     return journal
   }
 
-  const journalFilename = getJournalFilename(indexFilename, options.journal)
+  const journalFilename = getJournalFilename(indexFilename, options.journal!)
   await writeJournal(journalFilename, journal)
   log.debug(`Journal ${journalFilename} created`)
   return journal
@@ -250,7 +250,7 @@ export async function applyJournal(indexFilename: string, options: IIndexOptions
 }
 
 export async function removeJournal(indexFilename: string, options: IIndexOptions): Promise<void> {
-  const journalFilename = getJournalFilename(indexFilename, options.journal)
+  const journalFilename = getJournalFilename(indexFilename, options.journal!)
 
   const exists = await access(journalFilename).then(() => true).catch(() => false)
   if (!exists) {

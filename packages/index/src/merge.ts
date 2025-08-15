@@ -5,7 +5,7 @@ const log = Logger('index.merge');
 
 export function mergeIndex(fileEntryMap: IIndexEntryMap, fsEntryMap: IIndexEntryMap, commonKeys: string[], matcherFn: IIndexEntryMatcherFn): [IIndexEntryMap, string[]] {
   const t0 = Date.now();
-  let changedKeys = [];
+  let changedKeys: string[] = [];
 
   const commonEntries = commonKeys.map(key => {
     const fileEntry = fileEntryMap[key];

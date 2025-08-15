@@ -62,7 +62,6 @@ const parseJsonChunks = (filename) => {
       }
       this.push(entry)
       entry = null;
-      entryJson = null;
       chunk = null;
       entryIndex++;
       next()

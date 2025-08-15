@@ -14,7 +14,7 @@ function spaces(count) {
 
 // type, count (%), size (%)
 export function prettyPrint(stats) {
-  const table = [];
+  const table: string[][] = [];
   table.push(['type', 'count', '', 'size', '']);
   table.push(['directories:', stats.directories, '', '', '']);
   table.push(['files:', stats.files, '', humanize(stats.totalSize), '']);
