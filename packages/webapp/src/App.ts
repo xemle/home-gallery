@@ -1,6 +1,7 @@
 import * as React from "react";
 import { createRoot } from 'react-dom/client';
 import { Main } from "./Main";
+import "./App.css";
 
 const setVerticalHeight = () => {
   // We execute the same script as before
