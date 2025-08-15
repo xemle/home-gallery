@@ -10,7 +10,6 @@ if (command == 'build') {
   build(args).catch(handleError)
 }
 
-
 async function build(args) {
   const watch = args.indexOf('--watch') >= 0
 
@@ -20,19 +19,21 @@ async function build(args) {
     }
   })
 
-  const targets = [
-    {
-      entryPoints: files,
-      sourcemap: true,
-      platform: 'node',
-      target: 'es2022',
-      format: 'esm',
-      outdir: 'dist',
-      watch: watch
-    }
-  ]
+  const buildOptions ={
+    entryPoints: files,
+    sourcemap: true,
+    platform: 'node',
+    target: 'es2022',
+    format: 'esm',
+    outdir: 'dist'
+  }
 
-  return Promise.all(targets.map(target => esbuild.build(target)))
+  if (watch) {
+    let ctx = await esbuild.context(buildOptions)
+    return ctx.watch()
+  }
+
+  return esbuild.build(buildOptions)
     .catch(cause => { throw new Error(`Build failed: ${cause}`, {cause}) })
 }
 

@@ -19,7 +19,7 @@
     "directory": "packages/dev-tools"
   },
   "dependencies": {
-    "esbuild": "^0.15.13",
-    "glob": "^11.0.0"
+    "esbuild": "^0.25.9",
+    "glob": "^11.0.3"
   }
 }
