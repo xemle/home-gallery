@@ -58,7 +58,7 @@ export const MediaViewImage = (props) => {
       height = fixedHeight
     }
 
-    setFaceRects(faces.map((face, i) => {
+    setFaceRects((faces || []).map((face, i) => {
       const style: React.CSSProperties = {
         top: `${(y + face.y * height).toFixed()}px`,
         left: `${(x + face.x * width).toFixed()}px`,
@@ -72,7 +72,7 @@ export const MediaViewImage = (props) => {
       );
     }))
 
-    setObjectRects(objects.map((object, i) => {
+    setObjectRects((objects || []).map((object, i) => {
       const style: React.CSSProperties = {
         top: `${(y + object.y * height).toFixed()}px`,
         left: `${(x + object.x * width).toFixed()}px`,
@@ -92,8 +92,8 @@ export const MediaViewImage = (props) => {
       <div className="relative w-full h-full">
         <img ref={imgRef} className="absolute object-contain w-full h-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" src={smallUrl} />
         <img className="absolute object-contain w-full h-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" src={src} />
-        {showAnnotations && objectRects}
-        {showAnnotations && faceRects}
+        {showAnnotations && objects?.length > 0 && objectRects}
+        {showAnnotations && faces?.length > 0 && faceRects}
       </div>
     </>
   )
