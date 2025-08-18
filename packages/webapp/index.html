@@ -10,10 +10,9 @@
   <link rel="apple-touch-icon" href="logo192.png" />
   <meta name="theme-color" content="#909090" />
   <link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials">
-  <link rel="stylesheet" href="App.css">
+  <!-- <link rel="stylesheet" href="/src/App.css"> -->
   <title>Home Gallery</title>
-  <script src="/remote-console.js"></script>
-  <script src="//localhost:35729/livereload.js?snipver=1"></script>
+  <script type="module" src="/src/remote-console.js"></script>
   <style>
     #app-loader {
       height: 100vh;
@@ -88,46 +87,7 @@
     </div>
   </div>
   <script>window.__homeGallery={}</script>
-  <script defer src="App.js" type="text/javascript"></script>
-  <script>
-    ((window, navigator, config) => {
-      const isLocal = ['127.0.0.1', 'localhost'].includes(location.hostname)
-      const searchParams = new URLSearchParams(location.search?.substring(1))
-      const disabledFeatures = [...(config.disabled || []), ...searchParams.getAll('disabled')]
-
-      if (!('serviceWorker' in navigator) || isLocal || disabledFeatures.includes('pwa')) {
-        console.log('Feature PWA is disabled')
-        return
-      }
-
-      const onLoad = () => {
-        const worker = new URL('service-worker.js', document.baseURI || '/').href;
-        navigator.serviceWorker.register(worker)
-          .then(registration => {
-            registration.onupdatefound = () => {
-              const installingWorker = registration.installing;
-              if (installingWorker == null) {
-                return;
-              }
-              installingWorker.onstatechange = () => {
-                if (installingWorker.state === 'installed') {
-                  if (navigator.serviceWorker.controller) {
-                    console.log(`New content is available and will be used when all tabs for this page are closed.`);
-                  } else {
-                    console.log('Content is cached for offline use.');
-                  }
-                }
-              };
-            };
-          })
-          .catch(error => {
-            console.error('Error during service worker registration:', error);
-          });
-      }
-
-      window.addEventListener('load', onLoad);
-    })(window, navigator, window.__homeGallery || {})
-  </script>
+  <script type="module" src="/src/App.ts" type="text/javascript"></script>
 </body>
 
 </html>

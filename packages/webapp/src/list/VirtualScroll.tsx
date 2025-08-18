@@ -113,8 +113,7 @@ const binarySearch = (items: IVirtualScrollRow[], low: number, high: number, val
   return binarySearch(items, mid, high, value);
 }
 
-export const VirtualScroll = forwardRef((props, ref) => {
-  const {items, padding, children} = props;
+export const VirtualScroll = ({ref, items, padding, children}) => {
   const [scrollTop, setScrollTop] = useScrollTop();
   const height = useHeight();
   const scrollSpeed = useScrollSpeed();
@@ -176,4 +175,4 @@ export const VirtualScroll = forwardRef((props, ref) => {
       {renderItems}
     </div>
   )
-})
+}

@@ -34,7 +34,7 @@ export class BrowserPluginLoader {
 
   async loadPlugins() {
     for (const entry of this.pluginEntries) {
-      await import(entry)
+      await import(/* @vite-ignore */ entry)
         .then(pluginModule => {
           return this.addPlugin(pluginModule.default, entry)
         })

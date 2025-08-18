@@ -52,12 +52,12 @@ const encodeUrl = (url: string) => url.replace(/[\/]/g, char => encodeURICompone
 
 const hotkeysToAction = {
   'home': 'first',
-  'left,j,backspace': 'prev',
-  'ctrl+left': 'prev-10',
-  'ctrl+shift+left': 'prev-100',
-  'right,k,space': 'next',
-  'ctrl+right': 'next-10',
-  'ctrl+shift+right': 'next-100',
+  'arrowleft,j,backspace': 'prev',
+  'ctrl+arrowleft': 'prev-10',
+  'ctrl+shift+arrowleft': 'prev-100',
+  'arrowright,k,space': 'next',
+  'ctrl+arrowright': 'next-10',
+  'ctrl+shift+arrowright': 'next-100',
   'end': 'last',
   'esc': 'list',
   'i': 'toggleDetails',
@@ -67,6 +67,14 @@ const hotkeysToAction = {
   't': 'toggleNavigation',
   'm': 'map'
 }
+
+const allHotkeys = Object.keys(hotkeysToAction).join(',')
+const hotkeyToAction = Object.entries(hotkeysToAction).reduce((result, [hotkeys, action]) => {
+  hotkeys.split(',').forEach(hotkey => {
+    result[hotkey] = action
+  })
+  return result
+}, {})
 
 export const MediaView = () => {
   let { id } = useParams();
@@ -158,17 +166,12 @@ export const MediaView = () => {
     }
   }
 
-  useHotkeys(Object.keys(hotkeysToAction).join(','), (ev, handler) => {
-    const found = Object.keys(hotkeysToAction).find(hotkey => {
-      const keys = hotkey.split(',')
-      const found = keys.find(key => handler.key == key)
-      if (found) {
-        console.log(`Catch hotkey ${found} for ${hotkeysToAction[hotkey]}`)
-        dispatch({type: hotkeysToAction[hotkey]})
-        return true
-      }
-    })
-    if (found) {
+  useHotkeys(allHotkeys, (ev, handler) => {
+    const handlerKey = (handler.ctrl ? 'ctrl+' : '') + (handler.shift ? 'shift+' : '') + (handler.alt ? 'alt+' : '') + (handler.keys || []).join('+')
+    const action = hotkeyToAction[handlerKey]
+    if (action) {
+      console.log(`Catch hotkey ${handlerKey} for action ${action}`)
+      dispatch({type: action})
       ev.preventDefault()
     }
   }, [index, showDetails, showAnnotations, showNavigation])

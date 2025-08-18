@@ -53,7 +53,7 @@ function readFileStats(dir: string, files: string[], cb: (err: Error | null, fil
 
 function walkFiles(dir: string, filesMapper: IFilenameMapper, fileStats: IFilenameStat[], cb: IWalkerFileHandler, done: IWalkerDone) {
   while (fileStats.length) {
-    const { filename, stat } = fileStats.pop();
+    const { filename, stat } = fileStats.pop()!;
 
     const readDirectory = cb(filename, stat);
 
@@ -95,6 +95,9 @@ export function walkDir(dir: string, filesMapper: IFilenameMapper, cb: IWalkerFi
     readFileStats(dir, mappedFiles, (err, fileStats) => {
       if (err) {
         return done(err);
+      }
+      if (!fileStats?.length) {
+        return done()
       }
 
       fileStats.sort(byDirDescNameAsc);

@@ -1,15 +1,14 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "NodeNext",
+    "module": "nodenext",
     "allowJs": true,
+    "noImplicitAny": false,
     "outDir": "./dist",
     "target": "es2022",
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "nodenext",
-    "typeRoots": [
-      "../../node_modules/@types"
-    ]
   },
   "emitDeclarationOnly": true,
+  "skipLibCheck": true,
   "include": ["./src/**/*"]
 }

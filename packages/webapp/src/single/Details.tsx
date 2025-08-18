@@ -251,7 +251,7 @@ export const Details = ({entry, dispatch}) => {
               <p>ISO {entry.iso}, Aperture {entry.aperture}, Shutter Speed {entry.ShutterSpeedRaw}, Focal Length {entry.focalLength}mm</p>
             </div>
           </div>
-          {entry.objects.length > 0 && (
+          {entry.objects?.length > 0 && (
             <div className="flex">
               <div className="flex-shrink-0 w-8">
                 <FontAwesomeIcon icon={icons.faShapes} className="text-gray-300"/>
@@ -263,7 +263,7 @@ export const Details = ({entry, dispatch}) => {
               </div>
             </div>
           )}
-          {entry.faces.length > 0 && (
+          {entry.faces?.length > 0 && (
             <div className="flex">
               <div className="flex-shrink-0 w-8">
                 <FontAwesomeIcon icon={icons.faUser} className="text-gray-300"/>
