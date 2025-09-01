@@ -194,7 +194,8 @@ export function createOfflineDatabase(baseUrl, onEntriesSize = 5000) {
   }
 
   async function _fetchTree(hash): Promise<Treelike> {
-    return fetch(`${baseUrl}/api/database/tree/${hash}.json`)
+    const treeUrl = new URL(`api/database/tree/${hash}.json`, baseUrl)
+    return fetch(treeUrl)
       .then(res => {
         if (res.status < 200 || res.status >= 300) {
           throw new Error(`Failed to fetch tree ${hash}`)

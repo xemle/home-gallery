@@ -6,10 +6,10 @@ import { eventBus, fetchAll } from '../api/ApiService';
 
 import { createOfflineDatabase } from '../offline';
 import { useEntryStore } from '../store/entry-store';
-import { toAbsoluteUrl } from '../utils/fetch-json-worker';
 import { toNativeFactory } from '../utils/to-worker';
 import { useAppConfig } from '../utils/useAppConfig';
 import { useOnEntries } from './useOnEntries';
+import { toAbsoluteUrl } from '../utils/toAbsoluteUrl';
 
 export const useLoadDatabase = () => {
   const removeEntries = useEntryStore(state => state.removeEntries);
@@ -35,7 +35,7 @@ export const useLoadDatabase = () => {
         onEntries,
         onRemoveEntries: removeEntries
       }
-      const baseUrl = toAbsoluteUrl('/').replaceAll(/\/+$/g, '')
+      const baseUrl = toAbsoluteUrl()
       const args = [baseUrl, 5000]
       const offlineDb = toNativeFactory('offlineDatabase', createOfflineDatabase, args, handlers)
       await offlineDb('open')

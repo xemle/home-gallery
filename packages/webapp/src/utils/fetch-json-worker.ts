@@ -1,6 +1,5 @@
 import { toWorker } from './to-worker'
-
-export const toAbsoluteUrl = (url: string) : string => (new URL(url, document?.baseURI || '/')).href
+import { toAbsoluteUrl } from './toAbsoluteUrl'
 
 const fetchWorker = toWorker('fetch', (url, init) => {
   return fetch(url, init || {})

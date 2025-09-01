@@ -1,6 +1,7 @@
 import { Event, EventListener } from '@home-gallery/events'
 import { fetchJsonWorker } from '../utils/fetch-json-worker'
 import { byPreviewSize } from '../utils/preview'
+import { toAbsoluteUrl } from '../utils/toAbsoluteUrl'
 
 export const mapEntriesForBrowser = entry => {
   entry.shortId = entry.id.substring(0, 12)
@@ -84,7 +85,7 @@ export interface ServerEvent {
 export declare type ServerEventListener = (event: ServerEvent) => void;
 
 export const eventStream = (onEvent) => {
-  const events = new EventSource(`api/events/stream`);
+  const events = new EventSource(toAbsoluteUrl('api/events/stream'));
 
   events.addEventListener('open', () => {
     eventSourceReconnectTimeout = 1000;
@@ -113,7 +114,7 @@ export const eventStream = (onEvent) => {
 export const pushEvent = async (event: Event) => {
   console.log(`push event `, event);
 
-  const response = await fetch(`api/events`, {
+  const response = await fetch(toAbsoluteUrl(`api/events`), {
     method: 'POST',
     mode: 'cors',
     headers: {

@@ -20,7 +20,8 @@
   const logMethods = ['debug', 'log', 'info', 'warn', 'error']
 
   const send = (method, ...args) => {
-    fetch('/api/debug/console', {
+    const url = new URL('api/debug/console', document?.baseURI || 'http://localhost:3000')
+    fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
