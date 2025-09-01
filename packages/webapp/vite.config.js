@@ -17,6 +17,7 @@ const proxy = Object.fromEntries(serverUrls.map(prefix => [prefix, {
 
 export default defineConfig(() => {
   return {
+    base: '',
     build: {
       outDir: 'dist',
       sourcemap: true,

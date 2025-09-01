@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - webapp: Use vite as build tool
 
+### Fixed
+
+- webapp: Fix custom prefix path with vite build
+
 ## [1.20.0] - 2025-08-14
 
 ### Added
