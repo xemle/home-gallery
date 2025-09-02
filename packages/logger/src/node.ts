@@ -16,15 +16,18 @@ const splitErrorStackLines = inputArgs => {
   inputArgs[0].stack = inputArgs[0].stack.split('\n')
 }
 
+type CustomMultiStream = pino.MultiStreamRes & {lastLevel?: number, add: (stream: pino.MultiStreamRes) => void}
+
 const createInstance = options => {
   options = options || {}
-  const ms = pino.multistream([])
+  const ms = pino.multistream([]) as CustomMultiStream
   const logger = pino({
     level: 'trace',
     hooks: {
       logMethod (inputArgs, method) {
         if (hasFirstArgNumber(inputArgs)) {
-          const startTime = inputArgs.shift()
+          const startTime: number = +(inputArgs.shift() || "0")
+          // @ts-ignore
           return method.apply(this, [{duration: Date.now() - startTime}, ...inputArgs])
         }
         splitErrorStackLines(inputArgs)

@@ -1,6 +1,7 @@
 export class Splitter {
   buf = ''
   end = 0
+  sep: string
 
   constructor(sep = '\n') {
     this.sep = sep
