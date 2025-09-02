@@ -31,9 +31,9 @@
     "directory": "packages/logger"
   },
   "dependencies": {
-    "chalk": "^4.1.2",
-    "pino": "^8.11.0",
-    "pino-pretty": "^10.0.0"
+    "chalk": "^5.6.0",
+    "pino": "^9.9.0",
+    "pino-pretty": "^13.1.1"
   },
   "devDependencies": {
     "@home-gallery/dev-tools": "file:../dev-tools"
