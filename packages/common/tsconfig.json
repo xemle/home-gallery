@@ -3,12 +3,15 @@
   "compilerOptions": {
     "module": "nodenext",
     "allowJs": true,
+    "checkJs": true,
     "noImplicitAny": false,
     "outDir": "./dist",
+    "rootDir": "./src",
     "target": "es2022",
     "allowSyntheticDefaultImports": true,
   },
   "emitDeclarationOnly": true,
   "skipLibCheck": true,
-  "include": ["./src/**/*"]
+  "include": ["src"],
+  "exclude": ["**/*.test.ts"]
 }

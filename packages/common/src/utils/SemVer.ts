@@ -1,9 +1,11 @@
 export class SemVer {
 
-  /**
-   * @param {string} version semantic version
-   */
-  constructor(version) {
+  major: number
+  minor: number
+  patch: number
+  versionDepth: number
+
+  constructor(version: string) {
     const versions = version.split('.').map(v => +v)
     this.versionDepth = versions.length || 1
     this.major = typeof versions[0] == 'number' ? versions[0] : 1
@@ -19,28 +21,19 @@ export class SemVer {
     return this.versionDepth > 2
   }
 
-  /**
-   * @param {SemVer} other 
-   */
-  gt(other) {
+  gt(other: SemVer) {
     return this.major > other.major
       || (this.major == other.major && ((!this.hasMinor() && other.hasMinor()) || (this.hasMinor() && other.hasMinor() && this.minor > other.minor)))
       || (this.major == other.major && this.minor == other.minor && ((!this.hasPatch() && other.hasPatch()) || (this.hasPatch() && other.hasPatch() && this.patch > other.patch)))
   }
 
-  /**
-   * @param {SemVer} other 
-   */
-  ge(other) {
+  ge(other: SemVer) {
     return this.major > other.major
       || (this.major == other.major && (!this.hasMinor() || !other.hasMinor() || this.minor > other.minor))
       || (this.major == other.major && this.minor == other.minor && (!this.hasPatch() || !other.hasPatch() || this.patch >= other.patch))
-}
+  }
 
-  /**
-   * @param {SemVer} other 
-   */
-  isCompatible(other) {
+  isCompatible(other: SemVer) {
     return this.major == other.major && (!this.hasMinor() || !other.hasMinor() || this.minor >= other.minor)
   }
 

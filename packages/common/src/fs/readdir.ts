@@ -1,7 +1,7 @@
-import fs from 'fs';
+import {readdir, mkdir} from 'fs';
 
 export function readDir(dir, cb) {
-  fs.readdir(dir, (err, files) => {
+  readdir(dir, (err, files) => {
     if (err) {
       return cb(err);
     }
@@ -10,7 +10,7 @@ export function readDir(dir, cb) {
 }
 
 function createDir(dir, cb) {
-  mkdir(dir, (err) => {
+  mkdir(dir, {recursive: true}, (err) => {
     if (err) {
       cb(err);
     } else {

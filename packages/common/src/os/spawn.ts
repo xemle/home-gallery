@@ -1,8 +1,8 @@
-import { spawn as spawnOrig} from 'child_process'
+import { SpawnOptionsWithoutStdio, spawn as spawnOrig} from 'child_process'
 
 import { rateLimit } from '../utils/index.js'
 
-const spawnDefaults = { shell: false, windowsHide: true, stdio: ['pipe', 'pipe', 'inherit'] }
+const spawnDefaults: SpawnOptionsWithoutStdio = { shell: false, windowsHide: true, stdio: 'pipe' }
 
 /**
  * On ctrl+c the SIGINT (2) signal is emitted to the process group while
@@ -24,7 +24,7 @@ const forwardSignal = (child, signal) => {
   child.on('exit', () => process.off(signal, forward))
 }
 
-export const spawn = (command, args = [], options = {}) => {
+export const spawn = (command, args = [], options: {env?: Record<string, string>} = {}) => {
   const env = {...process.env, ...options.env}
   const child = spawnOrig(command, args, {...spawnDefaults, ...options, env})
   forwardSignal(child, 'SIGINT')

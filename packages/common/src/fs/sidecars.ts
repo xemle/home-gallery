@@ -1,8 +1,15 @@
-const bySize = (a, b) => a.size < b.size ? 1 : -1
 
-const byFilename = (a, b) => a.filename < b.filename ? -1 : 1
+type ISlimEntry = {
+  filename: string
+  size: number
+  sidecars?: ISlimEntry[]
+}
 
-const parseNameExt = filename => {
+const bySize = (a: ISlimEntry, b: ISlimEntry) => a.size < b.size ? 1 : -1
+
+const byFilename = (a: ISlimEntry, b: ISlimEntry) => a.filename < b.filename ? -1 : 1
+
+const parseNameExt = (filename: string) => {
   const lastSlash = filename.lastIndexOf('/')
   const lastBackslash = filename.lastIndexOf('\\')
 
@@ -21,7 +28,8 @@ const parseNameExt = filename => {
   }
 }
 
-function toPrimaryEntry(entries) {
+
+function toPrimaryEntry(entries: ISlimEntry[]): ISlimEntry {
   const primary = entries[0]
   if (entries.length > 1) {
     primary.sidecars = entries.slice(1)
@@ -36,8 +44,8 @@ function toPrimaryEntry(entries) {
  *
  * Example: IMG_2635.AVI, IMG_2635.THM, IMG_2635.AVI.xmp -> group(IMG_2635)
  */
-export const mapName2Sidecars = entries => {
-  const result = {}
+export const mapName2Sidecars = (entries: ISlimEntry[]) => {
+  const result: Record<string, ISlimEntry[]> = {}
   entries.sort(bySize).forEach(entry => {
     const { name, ext } = parseNameExt(entry.filename)
     const { name: name2, ext: ext2 } = parseNameExt(name)
@@ -52,7 +60,7 @@ export const mapName2Sidecars = entries => {
   return result
 }
 
-export const groupSidecarFiles = entries => {
+export const groupSidecarFiles = (entries: ISlimEntry[]) => {
   const name2Sidecars = mapName2Sidecars(entries)
 
   const sidecarEntries = Object.values(name2Sidecars).map(toPrimaryEntry);
@@ -70,8 +78,8 @@ export const getSidecarsByFilename = (name2sidecars, filename) => {
   return false
 }
 
-export const ungroupSidecarFiles = entry => {
-  const result = []
+export const ungroupSidecarFiles = (entry: ISlimEntry) => {
+  const result: ISlimEntry[] = []
   if (entry.sidecars?.length) {
     result.push(...entry.sidecars)
     entry.sidecars.splice(0, entry.sidecars.length)
