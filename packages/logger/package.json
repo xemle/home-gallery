@@ -12,7 +12,9 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build": "dev-cli build",
+    "build": "npm-run-all -p build:js build:types",
+    "build:js": "dev-cli build",
+    "build:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck",
     "test": "tap",
     "watch": "dev-cli build --watch",
     "watch:test": "tap repl w"
