@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "allowJs": true,
+    "noImplicitAny": false,
+    "outDir": "./dist",
+    "target": "es2022",
+    "allowSyntheticDefaultImports": true,
+  },
+  "emitDeclarationOnly": true,
+  "skipLibCheck": true,
+  "include": ["./src/**/*"]
+}
