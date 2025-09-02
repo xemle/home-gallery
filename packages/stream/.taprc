@@ -2,4 +2,4 @@ disable-coverage: true
 allow-empty-coverage: true
 allow-incomplete-coverage: true
 include:
-  - 'src/**/*.test.js'
+  - 'src/**/*.test.ts'
