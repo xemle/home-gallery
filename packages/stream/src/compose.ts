@@ -6,7 +6,7 @@ import { pipeline, Transform} from 'stream'
  * @param {Transform} streams
  * @returns {Transform} Composed stream
  */
-export const compose = (streams: Transform[]) => {
+export const compose = (...streams: Transform[]) => {
   const first = streams[0]
 
   const last = pipeline(
