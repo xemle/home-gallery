@@ -1,12 +1,11 @@
 import { Transform } from 'stream'
 
 export const parseJson = () => {
-  const chunks = [];
-  return Transform({
+  const chunks: Buffer[] = [];
+  return new Transform({
     objectMode: true,
-    transform: function (chunk, enc, next) {
+    transform: function (chunk: Buffer, enc, next) {
       chunks.push(chunk)
-      chunk = null
       next()
     },
     flush: function(next) {

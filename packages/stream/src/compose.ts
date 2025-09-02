@@ -6,13 +6,14 @@ import { pipeline, Transform} from 'stream'
  * @param {Transform} streams
  * @returns {Transform} Composed stream
  */
-export const compose = (...streams) => {
+export const compose = (streams: Transform[]) => {
   const first = streams[0]
 
   const last = pipeline(
+    // @ts-ignore
     ...streams,
     function emptyErrorHandler() {}
-  )
+  ) as Transform
 
   const stream = new Transform({
     writableObjectMode: first.writableObjectMode,

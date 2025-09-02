@@ -1,9 +1,15 @@
 import { through } from './through.js';
 
+type TQueueEntry = {
+  that: any,
+  entry: any,
+  callback: () => void
+}
+
 export function throttleAsync({passThrough, task, rateLimitMs, startLimitAfterTask}) {
   let last = 0;
   let isTaskRunning = false;
-  const queue = [];
+  const queue: TQueueEntry[] = [];
 
   const next = () => {
     const now = Date.now();

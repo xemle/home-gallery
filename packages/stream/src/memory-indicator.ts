@@ -6,7 +6,7 @@ const log = Logger('stream.memory');
 export function memoryIndicator({name, intervalMs}) {
   intervalMs = intervalMs || 1000 * 10;
 
-  let lastOutput = false;
+  let lastOutput: number | false = false;
 
   return through(function (data, _, cb) {
     const now = Date.now();
