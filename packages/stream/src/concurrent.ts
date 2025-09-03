@@ -5,6 +5,13 @@ const log = Logger('stream.concurrent');
 
 const noop = () => through((entry, _, cb) => cb(null, entry))
 
+type TQueueEntry = {
+  entry: any,
+  done: () => void,
+  isFlush?: boolean,
+  count?: number
+}
+
 export const concurrent = (concurrent, countOffset) => {
   concurrent = typeof concurrent == 'undefined' ? 0 : +concurrent
   countOffset = +countOffset || 0
@@ -19,7 +26,7 @@ export const concurrent = (concurrent, countOffset) => {
 
   let count = 0;
   let runningTasks = 0;
-  const queue = [];
+  const queue: TQueueEntry[] = [];
 
   const next = () => {
     if (!queue.length || runningTasks >= concurrent) {
@@ -27,11 +34,11 @@ export const concurrent = (concurrent, countOffset) => {
     }
 
     const head = queue.shift();
-    if (!head.isFlush) {
+    if (!head!.isFlush) {
       //log.info(`Start processing entry ${head.entry} (#${head.count})`)
       runningTasks++;
     }
-    head.done();
+    head!.done();
   }
 
   const queueEntry = through((entry, _, cb) => {

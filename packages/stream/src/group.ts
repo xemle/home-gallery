@@ -1,8 +1,8 @@
 import { through } from './through.js';
 
-export function group({keyFn, eager, maxCount}) {
-  let groups = {};
-  let lastKey = false;
+export function group({keyFn, eager, maxCount}: {keyFn: (entry: any) => string, eager?: boolean, maxCount?: number}) {
+  let groups = {} as Record<string, any[]>;
+  let lastKey: string | boolean = false;
   let count = 0
 
   const flush = (readable) => {
@@ -25,7 +25,7 @@ export function group({keyFn, eager, maxCount}) {
     groups[key].push(entry);
     lastKey = key;
     count++
-    if (maxCount > 0 && count == maxCount) {
+    if (maxCount && maxCount > 0 && count == maxCount) {
       flush(this);
     }
     cb();

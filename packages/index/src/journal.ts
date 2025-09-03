@@ -150,7 +150,7 @@ export async function createJournal(directory: string, indexFilename: string, in
 
 export async function readJournal(indexFilename: string, journal: string) {
   const journalFilename = getJournalFilename(indexFilename, journal)
-  const data = await readJsonGzipAsync(journalFilename)
+  const data = await readJsonGzipAsync(journalFilename) as IIndexJournal
   if (data.type != JOURNAL_TYPE) {
     throw new Error(`Invalid journal type ${data.type} of file ${indexFilename}`)
   }

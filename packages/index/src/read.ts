@@ -1,7 +1,7 @@
 import { readJsonGzip, promisify } from '@home-gallery/common';
-import { IIndex } from './types.js'
+import { IIndex, IIndexEntry } from './types.js'
 
-const asyncReadJsonGzip = promisify(readJsonGzip)
+const asyncReadJsonGzip = promisify(readJsonGzip) as (filename: string) => Promise<IIndex>
 
 export async function readIndex(filename: string): Promise<IIndex> {
   return asyncReadJsonGzip(filename)
@@ -13,7 +13,7 @@ export async function readIndex(filename: string): Promise<IIndex> {
     })
     .catch(err => {
       if (err?.code === 'ENOENT') {
-        return {data: []}
+        return {data: [] as IIndexEntry[]} as IIndex
       }
       throw err
   });

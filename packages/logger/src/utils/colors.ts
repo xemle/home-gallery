@@ -53,4 +53,4 @@ const color256Fns = Object.assign({}, color16Fns, {
   moduleColorFn: module => chalk.ansi256(colors256[moduleHash(module) % colors256.length]).bold,
 })
 
-export const colorFns = !chalk.supportsColor ? colorNoneFns : (chalk.supportsColor.level < 2 ? color16Fns : color256Fns)
+export const colorFns = chalk.level == 0 ? colorNoneFns : (chalk.level < 2 ? color16Fns : color256Fns)

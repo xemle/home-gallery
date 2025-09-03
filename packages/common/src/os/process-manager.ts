@@ -1,18 +1,22 @@
+import { ChildProcess } from "child_process"
+
 class Process {
   stopped = false
   exitCode = 0
+  child: ChildProcess
+  terminateTimeout: number
 
-  constructor (child, terminateTimeout = 1000) {
+  constructor (child: ChildProcess, terminateTimeout = 1000) {
     this.child = child
     this.terminateTimeout = terminateTimeout
 
     this.child.on('exit', (code) => {
       this.stopped = true
-      this.exitCode = code
+      this.exitCode = code || 0
     })
   }
 
-  async kill(signal = 'SIGINT') {
+  async kill(signal: NodeJS.Signals = 'SIGINT') {
     if (this.stopped) {
       return Promise.resolve(this.exitCode)
     }
@@ -34,7 +38,7 @@ class Process {
 
 export class ProcessManager {
   isStopped = false
-  processes = []
+  processes: Process[] = []
 
   addProcess(child, {terminateTimeout}) {
     const p = new Process(child, terminateTimeout)
@@ -45,7 +49,7 @@ export class ProcessManager {
     })
   }
 
-  async killAll(signal = 'SIGINT') {
+  async killAll(signal: NodeJS.Signals = 'SIGINT') {
     this.isStopped = true
     if (this.processes.length === 0) {
       return Promise.resolve()

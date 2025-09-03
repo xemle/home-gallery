@@ -1,7 +1,7 @@
 import { through } from './through.js';
 
 export const toList = () => {
-  const list = [];
+  const list: any[] = [];
   return through(function (entry, _, cb) {
     list.push(entry);
     cb();

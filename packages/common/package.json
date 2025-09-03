@@ -12,7 +12,9 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build": "dev-cli build",
+    "build": "npm-run-all -p build:js build:types",
+    "build:js": "dev-cli build",
+    "build:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck",
     "test": "tap",
     "watch": "dev-cli build --watch",
     "watch:test": "tap repl w"
@@ -32,7 +34,8 @@
   },
   "dependencies": {
     "@home-gallery/logger": "file:../logger",
-    "ignore": "^5.1.4"
+    "@home-gallery/stream": "file:../stream",
+    "ignore": "^7.0.5"
   },
   "devDependencies": {
     "@home-gallery/dev-tools": "file:../dev-tools"

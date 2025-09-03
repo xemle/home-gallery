@@ -1,8 +1,16 @@
 import { through } from './through.js';
 
+type TQueueEntry = {
+  entry: any,
+  done: () => void,
+  running: boolean,
+  completed: boolean,
+  isFlush: boolean
+}
+
 export const parallel = ({testSync, test, task, concurrent}) => {
   let runningTasks = 0;
-  const queue = [];
+  const queue: TQueueEntry[] = [];
 
   if (!testSync && !test) {
     test = (_, cb) => cb(true)
@@ -13,7 +21,7 @@ export const parallel = ({testSync, test, task, concurrent}) => {
   const consumeHead = () => {
     while (queue.length && queue[0].completed) {
       const head = queue.shift();
-      head.done();
+      head!.done();
     }
     next();
   }

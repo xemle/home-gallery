@@ -13,7 +13,7 @@ const levels = {
 
 const isNumber = v => typeof v == 'number'
 
-const pad = (v, l, c) => {
+const pad = (v, l, c = '0') => {
   v = '' + v
   l = l || 1
   c = c || '0'
@@ -52,7 +52,7 @@ const createStream = () => {
     hideObject: true,
     messageFormat: (log, messageKey) => {
       const msg = log[messageKey]
-      const level = levels[log.level] || levels['30']
+      const level = levels[log.level as string] || levels['30']
 
       return [
         log.module ? colorFns.moduleColorFn(log.module)(log.module) + ' ' : '',

@@ -29,7 +29,7 @@ export const createFileStream = (rootLogger, filename, level, cb) => {
     if (err && cb) {
       cb(err)
     } else if (err) {
-      rootLogger.error(err, `Could not create file logger for ${fileanme}: ${err}`)
+      rootLogger.error(err, `Could not create file logger for ${filename}: ${err}`)
     } else {
       rootLogger.add({ level: level || 'info', stream: stream })
       cb && cb()

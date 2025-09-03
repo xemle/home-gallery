@@ -1,6 +1,6 @@
-export const lruCache = (keyFn, loadCache, lruSize) => {
-  const cache = {};
-  const lruKeys = [];
+export function lruCache<V, K extends string>(keyFn: (item: V) => K, loadCache: (item: V, cb: (err: Error | null, data: V) => void) => void, lruSize: number) {
+  const cache = {} as Record<K, V>;
+  const lruKeys: K[] = [];
 
   const updateLruKeys = (key) => {
     const index = lruKeys.indexOf(key);
@@ -8,7 +8,7 @@ export const lruCache = (keyFn, loadCache, lruSize) => {
       lruKeys.splice(index, 1);
     } else if (index < 0 && lruKeys.length >= lruSize) {
       const dropKey = lruKeys.pop();
-      delete cache[dropKey];
+      delete cache[dropKey!];
     }
     if (index != 0) {
       lruKeys.unshift(key);
