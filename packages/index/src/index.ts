@@ -20,7 +20,7 @@ import { IIndex, IIndexChanges, IIndexEntry, IIndexJournal, IIndexOptions } from
  * @param {IIndexEntry[]} checksumEntries
  * @return {Promise<IIndexEntry[], boolean>}
  */
-const asyncChecksum = promisify(checksum)
+const asyncChecksum = promisify(checksum) as (directory: string, entries: IIndexEntry[], checksumEntries: IIndexEntry[], sha1sumDate: string) => Promise<[IIndexEntry[], boolean]>
 
 const log = Logger('index')
 

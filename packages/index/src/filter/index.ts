@@ -5,7 +5,7 @@ import { createFilterChain } from './filter-chain.js'
 import { createLimitFilter } from './limit-filter.js'
 import { IIndexEntry, IIndexOptions, IWalkerFileHandler } from '../types.js'
 
-const asyncFileFilter = promisify(fileFilter)
+const asyncFileFilter = promisify(fileFilter) as (patterns?: string[], fromFile?: string) => Promise<IWalkerFileHandler>
 
 const createFilename2Entry = (entries) => {
   return entries
