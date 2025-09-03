@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "@home-gallery/dev-tools": "file:../dev-tools",
-    "@home-gallery/logger": "file:../logger",
-    "@home-gallery/common": "file:../common"
+    "@home-gallery/logger": "file:../logger"
   }
 }

@@ -4,7 +4,6 @@ import { access, mkdir, unlink, rename } from 'fs/promises'
 import { Transform } from 'stream'
 
 import Logger from '@home-gallery/logger'
-import { createTmpFile } from '@home-gallery/common'
 
 const log = Logger('stream.atomicWriteStream')
 
@@ -73,4 +72,14 @@ export const wrapRenameStream = (writeable, tmp, filename) => {
   })
 
   return stream
+}
+
+export async function createTmpFile(filename: string) {
+  const dir = path.dirname(filename)
+  access(dir).catch(() => mkdir(dir, {recursive: true}))
+
+  const rnd = Math.floor(Math.random() * 1e6)
+  const tmpFilename = path.join(dir, `.${path.basename(filename)}-${rnd}.tmp`)
+
+  return access(tmpFilename).then(() => createTmpFile(filename), () => tmpFilename)
 }

@@ -5,9 +5,7 @@ import { tmpdir } from 'os'
 import { pipeline } from 'stream/promises'
 import { Readable, Transform } from 'stream'
 
-import { createTmpFile } from '@home-gallery/common'
-
-import { createAtomicWriteStream, wrapRenameStream } from './createAtomicWriteStream.js'
+import { createAtomicWriteStream, wrapRenameStream, createTmpFile } from './createAtomicWriteStream.js'
 
 t.only('createAtomicWriteStream', async t => {
   t.test('basic', async t => {
