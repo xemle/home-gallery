@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@home-gallery/logger": "file:../logger",
+    "@home-gallery/stream": "file:../stream",
     "ignore": "^7.0.5"
   },
   "devDependencies": {
