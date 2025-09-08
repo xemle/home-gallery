@@ -30,4 +30,3 @@ export const useAppConfig = () => {
     return result as AppConfig
   }, [])
 }
-

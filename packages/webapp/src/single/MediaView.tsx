@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import Hammer from 'hammerjs';
 import { useHotkeys } from 'react-hotkeys-hook';
-
+import { useAppConfig } from "../utils/useAppConfig";
 import { useEntryStore } from "../store/entry-store";
 import { useSearchStore } from "../store/search-store";
 import { useSingleViewStore } from "../store/single-view-store";
@@ -77,6 +77,7 @@ const hotkeyToAction = Object.entries(hotkeysToAction).reduce((result, [hotkeys,
 }, {})
 
 export const MediaView = () => {
+  const appConfig = useAppConfig();
   let { id } = useParams();
   let location = useLocation();
   const navigate = useNavigate();
@@ -169,7 +170,13 @@ export const MediaView = () => {
     const handlerKey = (handler.ctrl ? 'ctrl+' : '') + (handler.shift ? 'shift+' : '') + (handler.alt ? 'alt+' : '') + (handler.keys || []).join('+')
     const action = hotkeyToAction[handlerKey]
     if (action) {
-      console.log(`Catch hotkey ${handlerKey} for action ${action}`)
+      if ((action === 'prev' || action === 'next' || action.startsWith('prev-') || action.startsWith('next-')) && appConfig.removedViewerNav) return;
+      if (action === 'list' && appConfig.removedViewerStream) return;
+      if (action === 'map' && appConfig.removedViewerMap) return;
+      if (action === 'chronology' && appConfig.removedViewerLeaf) return;
+      if (action === 'similar' && appConfig.removedViewerAI) return;
+      if (action === 'toggleDetails' && appConfig.removedViewerInfo) return;
+      if (action === 'toggleAnnotations' && appConfig.removedViewerAI) return;
       dispatch({type: action})
       ev.preventDefault()
     }
