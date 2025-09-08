@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { type AppConfig } from "./AppConfig";
 
 const defaultConfig: AppConfig = {
+  HQzoom: false,
   disabled: [],
   pluginManager: {
     plugins: []

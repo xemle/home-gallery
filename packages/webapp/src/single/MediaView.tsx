@@ -204,7 +204,7 @@ export const MediaView = () => {
               }
               {isImage &&
                 <Zoomable key={key} childWidth={current.width} childHeight={current.height} onSwipe={onSwipe} onZoom={setZoomFactor}>
-                  <MediaViewImage key={key} media={current} next={next} prev={prev} showAnnotations={showAnnotations} zoomFactor={zoomFactor}/>
+                  <MediaViewImage key={key} media={current} next={next} prev={prev} showAnnotations={showAnnotations} hqZoom={appConfig.HQzoom} zoomFactor={zoomFactor}/>
                 </Zoomable>
               }
               {isVideo &&
