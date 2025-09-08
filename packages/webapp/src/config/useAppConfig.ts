@@ -10,6 +10,7 @@ const defaultConfig: AppConfig = {
    *
    * A feature will be expanded to `disabledEdit: true`
    */
+  HQzoom: false,
   disabled: [],
   removed: [],
   pluginManager: {
