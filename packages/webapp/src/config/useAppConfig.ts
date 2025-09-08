@@ -1,4 +1,4 @@
-import { type AppConfig } from "./AppConfig";
+import type { WebAppFeatureFlags, AppConfig } from "./AppConfig";
 
 const defaultConfig: AppConfig = {
   /**
@@ -11,6 +11,7 @@ const defaultConfig: AppConfig = {
    * A feature will be expanded to `disabledEdit: true`
    */
   disabled: [],
+  removed: [],
   pluginManager: {
     plugins: []
   },
@@ -19,6 +20,7 @@ const defaultConfig: AppConfig = {
 
 export const useAppConfig = () => {
   const injectedConfig = window['__homeGallery'] || {};
+  const webappConfig = injectedConfig.webapp || {};
 
   const pluginManager = {
     ...defaultConfig.pluginManager,
@@ -28,17 +30,17 @@ export const useAppConfig = () => {
   const result = {
     ...defaultConfig,
     ...injectedConfig,
+    ...webappConfig,
     pluginManager
-  }
+  } as AppConfig
 
   const searchParams = new URLSearchParams(location.search?.substring(1) || '')
-  result.disabled.push(...searchParams.getAll('disabled').filter(v => !!v))
 
-  result.disabled.forEach((feature: string) => {
-    const name = `disabled${feature[0].toUpperCase()}${feature.slice(1)}`
-    result[name] = true
-  })
+  result.disabled = [
+    ...(defaultConfig.disabled || []),
+    ...(webappConfig.disabled || []),
+    ...searchParams.getAll('disabled').filter(v => !!v)
+  ] as WebAppFeatureFlags
 
   return result as AppConfig
 }
-
