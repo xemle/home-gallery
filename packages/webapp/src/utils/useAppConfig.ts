@@ -1,5 +1,5 @@
 const defaultConfig = {
-  /**
+   /**
    * List of disabled features
    *
    * - edit: No edit menu button
@@ -9,6 +9,7 @@ const defaultConfig = {
    * A feature will be expanded to `disabledEdit: true`
    */
   disabled: [],
+  removed: [],
   pluginManager: {
     plugins: []
   },
@@ -17,6 +18,7 @@ const defaultConfig = {
 
 export const useAppConfig = () => {
   const injectedConfig = window['__homeGallery'] || {};
+  const webappConfig = injectedConfig.webapp || {};
 
   const pluginManager = {
     ...defaultConfig.pluginManager,
@@ -26,17 +28,33 @@ export const useAppConfig = () => {
   const result = {
     ...defaultConfig,
     ...injectedConfig,
+    ...webappConfig,
     pluginManager
   }
 
   const searchParams = new URLSearchParams(location.search?.substring(1) || '')
-  result.disabled.push(...searchParams.getAll('disabled').filter(v => !!v))
+
+  result.disabled = [
+    ...(defaultConfig.disabled || []),
+    ...(injectedConfig.disabled || []),
+    ...(webappConfig.disabled || []),
+    ...searchParams.getAll('disabled').filter(v => !!v)
+  ]
+
+  result.removed = [
+    ...(defaultConfig.removed || []),
+    ...(injectedConfig.removed || []),
+    ...(webappConfig.removed || []),
+    ...searchParams.getAll('removed').filter(v => !!v)
+  ]
 
   result.disabled.forEach((feature: string) => {
-    const name = `disabled${feature[0].toUpperCase()}${feature.slice(1)}`
-    result[name] = true
+    result[`disabled${feature[0].toUpperCase()}${feature.slice(1)}`] = true
   })
 
+	result.removed.forEach((feature: string) => {
+	  const name = `removed${feature[0].toUpperCase()}${feature.slice(1)}`
+	  result[name] = true
+	})
   return result
 }
-
