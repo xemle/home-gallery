@@ -97,6 +97,8 @@ export const MediaView = () => {
   const setShowNavigation = useSingleViewStore(actions => actions.setShowNavigation);
 
   const [hideNavigation, setHideNavigation] = useState(false)
+  
+  const [zoomFactor, setZoomFactor] = useState(1);
 
   let index = findEntryIndex(location, entries, id);
 
@@ -110,7 +112,7 @@ export const MediaView = () => {
 
   const key = current ? current.id : (Math.random() * 100000).toFixed(0);
   const scaleSize = scaleDimensions(current, dimensions);
-  console.log(scaleSize, dimensions, current);
+  //console.log(scaleSize, dimensions, current);
 
   useEffect(() => { id && setLastId(id) }, [id])
   useEffect(() => { index >= 0 && setLastIndex(index) }, [index])
@@ -192,8 +194,8 @@ export const MediaView = () => {
     dispatch({type: 'list'})
   }
 
-  console.log('Media object', current, showDetails);
-
+  //console.log('Media object', current, showDetails);
+  //console.log(appConfig)
   return (
     <>
       <SingleTagDialogProvider>
@@ -204,8 +206,8 @@ export const MediaView = () => {
                 <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} dispatch={dispatch} />
               }
               {isImage &&
-                <Zoomable key={key} childWidth={current.width} childHeight={current.height} onSwipe={onSwipe}>
-                  <MediaViewImage key={key} media={current} next={next} prev={prev} showAnnotations={showAnnotations}/>
+                <Zoomable key={key} childWidth={current.width} childHeight={current.height} onSwipe={onSwipe} onZoom={(scale) => setZoomFactor(scale)}>
+                  <MediaViewImage key={key} media={current} next={next} prev={prev} showAnnotations={showAnnotations} hqZoom={appConfig.HQzoom} zoomFactor={zoomFactor}/>
                 </Zoomable>
               }
               {isVideo &&

@@ -8,6 +8,7 @@ const defaultConfig = {
    *
    * A feature will be expanded to `disabledEdit: true`
    */
+  HQzoom: false,
   disabled: [],
   removed: [],
   pluginManager: {
