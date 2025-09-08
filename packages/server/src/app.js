@@ -104,6 +104,7 @@ export function createApp(context) {
 
   const getWebAppState = async (req) => {
     const disabled = config?.webapp?.disabled || []
+	const removed = config?.webapp?.removed || []
     const plugins = pluginApi.pluginEntries
     const entries = await getFirstEntries(50, req)
     const sources = (config.sources || []).filter(source => source.downloadable && !source.offline)
@@ -116,6 +117,7 @@ export function createApp(context) {
     });
     return {
       disabled: !!req.username ? [...disabled, 'pwa'] : disabled,
+	  removed,
       pluginManager: {
         plugins
       },
