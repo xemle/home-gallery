@@ -81,6 +81,11 @@ export const ViewNavBar = ({disableEdit}) => {
   
   return (
     <>
+      {appConfig.titleMessage && (
+        <span className="text-gray-300 mr-3 whitespace-nowrap">
+          {appConfig.titleMessage}
+        </span>
+      )}
       {finalItems.map((item, key) => (
         <NavItem key={key} onClick={item.action} icon={item.icon} text={item.text} disabled={item.disabled} />
       ))}

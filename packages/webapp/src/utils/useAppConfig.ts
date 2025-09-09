@@ -8,6 +8,7 @@ const defaultConfig = {
    *
    * A feature will be expanded to `disabledEdit: true`
    */
+  titleMessage: "",
   metaTags: false,
   metaTagsPath: false,
   siteTitle: "My Gallery",
