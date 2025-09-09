@@ -87,6 +87,7 @@ export function createApp(context) {
   router.get('/api/database', readDatabase);
   router.get('/api/events', readEvents);
   const getWebAppState = async (req) => {
+	const basePath =  config.server.basePath || "/"
     const titleMessage = config?.webapp?.titleMessage || ""
     const metaTags = config?.webapp?.metaTags || false
     const metaTagsPath = config?.webapp?.metaTagsPath || false
@@ -103,6 +104,7 @@ export function createApp(context) {
       })
     const db = await getDatabase() // <--- include full DB here
     return {
+      basePath,
       titleMessage,
       metaTags,
       metaTagsPath,

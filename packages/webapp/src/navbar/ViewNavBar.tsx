@@ -24,7 +24,8 @@ export const ViewNavBar = ({disableEdit}) => {
     'Videos': 'videos',
     'Edit': 'edit',
     'Tags': 'tags',
-    'Map': 'map'
+    'Map': 'map',
+    'Folders': 'folders'
   }
   const items = [
     {
@@ -40,6 +41,12 @@ export const ViewNavBar = ({disableEdit}) => {
       icon: icons.faClock,
       text: 'Years',
       action: () => navigate('/years'),
+      disabled: false,
+    },
+    {
+      icon: icons.faFolder,
+      text: 'Folders',
+      action: () => navigate('/folders'),
       disabled: false,
     },
     {

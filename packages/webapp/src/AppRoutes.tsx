@@ -14,6 +14,7 @@ import { Years, YearView } from './year/Years';
 import { Tags } from './tags/Tags';
 import { Map } from './map';
 import { MediaView } from './single/MediaView';
+import { Folders } from './folders/Folders';
 
 export const AppRoutes = () => {
   return (
@@ -27,7 +28,9 @@ export const AppRoutes = () => {
       <Route path="/faces/:id/:faceIndex" element={<FacesView />} />
       <Route path="/tags" element={<Tags />} />
       <Route path="/map" element={<Map />} />
+      <Route path="/folders" element={<Folders />} />  {/* <-- new */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
+
