@@ -10,7 +10,9 @@ const defaultConfig: AppConfig = {
    *
    * A feature will be expanded to `disabledEdit: true`
    */
-  siteTitle: "Home Gallery",
+  metaTags: false,
+  metaTagsPath: false,
+  siteTitle: "My Gallery",
   HQzoom: false,
   disabled: [],
   removed: [],
