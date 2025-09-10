@@ -254,7 +254,6 @@ export function Folders() {
   return (
     <>
       <NavBar disableEdit={true} />
-      <h2 className="m-4 text-sm text-gray-200">Folders</h2>
       {isWaitingForFullPack ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center" aria-busy="true" aria-live="polite">
           <div className="absolute inset-0 bg-black/50" />
