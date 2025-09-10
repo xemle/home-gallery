@@ -11,7 +11,7 @@ const log = Logger('server.sources')
 const staticConfig = {index: false, maxAge: '2h'}
 
 export function getSourcesApi(config) {
-  /** @type {{ndex: string, dir: string, offline?: boolean, downloadable?: boolean}[]} */
+  /** @type {{index: string, dir: string, offline?: boolean, downloadable?: boolean}[]} */
   const sources = config.sources || []
 
   const downloadableSources = sources
