@@ -6,7 +6,7 @@ import express from 'express'
 import Logger from '@home-gallery/logger'
 import { sendError } from './error/index.js'
 
-const log = Logger('server.sources')
+const log = Logger('server.api.sources')
 
 const staticConfig = {index: false, maxAge: '2h'}
 
@@ -21,6 +21,10 @@ export function getSourcesApi(config) {
       const indexName = basename.replace(/\.[^.]+$/, '')
       return {indexName, dir}
     })
+
+  if (downloadableSources.length) {
+    log.info(`Enable downloadable sources from indices: ${downloadableSources.map(s => s.indexName).join(', ')}`)
+  }
 
   const indexNameToDir = downloadableSources.reduce((result, {indexName, dir}) => {
     result[indexName] = dir
