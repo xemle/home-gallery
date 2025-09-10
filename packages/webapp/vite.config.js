@@ -60,6 +60,9 @@ export default defineConfig(() => {
               sizes: '512x512'
             }
           ]
+        },
+        workbox: {
+          navigateFallbackDenylist: [/\/api\//, /\/files\//],
         }
       })
     ],
