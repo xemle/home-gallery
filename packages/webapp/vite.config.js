@@ -27,8 +27,9 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'robots.txt', 'logo192.png', 'logo512.png', 'logo.svg'],
+        includeAssets: ['favicon.ico', 'logo192.png', 'logo512.png', 'logo.svg'],
         manifest: {
+          id: '/',
           name: 'HomeGallery App',
           short_name: 'HomeGallery',
           description: 'All personal photos in your pocket',
