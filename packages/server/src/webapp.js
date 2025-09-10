@@ -60,50 +60,48 @@ const injectStateMiddleware = (indexFile, getState, {
       const match = req.path.match(/^\/view\/([a-f0-9]+)/)
       if (match) {
         const shortId = match[1]
-        //console.log('[DEBUG] Matched /view/:id route, shortId=', shortId)
         const db = state.db || { data: [] }
         const media = db.data?.find(m => m.id.startsWith(shortId))
-        if (!media) {
-          //console.log('[DEBUG] No media found for shortId=', shortId)
-        } else {
-          //console.log('[DEBUG] Found media:', media)
+        if (media) {
           const fullHash = media.filenameHash || media.id
-          const availableSizes = media.previews
+          const availableSizes = (media.previews || [])
             .map(p => {
               const m = p.match(/-image-preview-(\d+)\.jpg$/)
               return m ? parseInt(m[1], 10) : null
             })
-            .filter(Boolean)
-          const largestSize = Math.max(...availableSizes)
-          const imageUrl = `${req.protocol}://${req.get('host')}${basePath.replace(/\/$/, '')}/files/${fullHash.slice(0,2)}/${fullHash.slice(2,4)}/${fullHash.slice(4)}-image-preview-${largestSize}.jpg`
+            .filter(s => s > 0)
+          const largestSize = availableSizes.length > 0 ? Math.max(...availableSizes) : null
+          let imageUrl = ''
+          if (largestSize) {
+            imageUrl = `${req.protocol}://${req.get('host')}${basePath.replace(/\/$/, '')}/files/${fullHash.slice(0,2)}/${fullHash.slice(2,4)}/${fullHash.slice(4)}-image-preview-${largestSize}.jpg`
+          }
+    
           const rawFilename = media.files?.[0]?.filename || media.originalFilename || 'Photo'
           const title = !state.metaTagsPath
-            ? rawFilename.replace(/^.*\//, '') // last dir / filename
-            : rawFilename.replace(/^.*\/([^\/]+\/[^\/]+)$/, '$1') // second-to-last dir / filename
+            ? rawFilename.replace(/^.*\//, '')
+            : rawFilename.replace(/^.*\/([^\/]+\/[^\/]+)$/, '$1')
           const themeColor = (media.vibrantColors?.[0]) || "#7289DA"
           const descriptionParts = [
-            media.model,
-            media.iso ? `ISO/${media.iso}` : '',
-            media.shutterSpeed ? `${media.shutterSpeed}s` : '',
-            media.aperture ? `f/${media.aperture}` : '',
-            media.focalLength ? `${media.focalLength}mm` : ''
-          ]
-          const description = descriptionParts.filter(Boolean).join(' | ')
+            media.model && media.model !== 'unknown' ? media.model : null,
+            media.iso > 0 ? `ISO/${media.iso}` : null,
+            media.shutterSpeed > 0 ? `${media.shutterSpeed}s` : null,
+            media.aperture > 0 ? `f/${media.aperture}` : null,
+            media.focalLength > 0 ? `${media.focalLength}mm` : null
+          ].filter(Boolean)
+    
+          const description = descriptionParts.join(' | ')
           const meta = `
-			<meta name="twitter:card" content="summary_large_image">
+			<meta name="twitter:card" content="${imageUrl ? 'summary_large_image' : 'summary'}">
 			<meta name="theme-color" content="${themeColor}">
 			<meta property="og:title" content="${title}" />
 			<meta property="og:description" content="${description}" />
-			<meta property="og:image" content="${imageUrl}" />
+			${imageUrl ? `<meta property="og:image" content="${imageUrl}" />` : ''}
 			<meta property="og:type" content="article" />
-			<meta property="og:image:height" content="1920" />
+			${imageUrl ? `<meta property="og:image:height" content="1920" />` : ''}
 			`
           const headIndex = html.indexOf('<head>')
           if (headIndex !== -1) {
             html = html.slice(0, headIndex + '<head>'.length) + meta + '\n' + html.slice(headIndex + '<head>'.length)
-            //console.log('[DEBUG] Injected meta tags for shortId=', shortId)
-          } else {
-            //console.log('[DEBUG] No <head> tag found, cannot inject meta tags')
           }
         }
       }
