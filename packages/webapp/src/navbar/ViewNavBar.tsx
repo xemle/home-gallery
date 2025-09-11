@@ -82,8 +82,8 @@ export const ViewNavBar = ({disableEdit}) => {
   const finalItems = items.map(item => {
     const key = itemKeys[item.text]
     const isRemoved = appConfig.removed?.includes(key)
-    const isDisabled = (key === 'edit' && (disableEdit || appConfig.disabledEdit))
-    return isRemoved ? null : {...item, disabled: !!isDisabled}
+    const isDisabled = appConfig.disabled?.includes(key)
+    return isRemoved ? null : { ...item, disabled: !!isDisabled }
   }).filter(Boolean)
   
   return (
