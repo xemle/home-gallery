@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import Hammer from 'hammerjs';
 import { useHotkeys } from 'react-hotkeys-hook';
-
+import { useAppConfig } from "../utils/useAppConfig";
 import { useEntryStore } from "../store/entry-store";
 import { useSearchStore } from "../store/search-store";
 import { useSingleViewStore } from "../store/single-view-store";
@@ -77,6 +77,7 @@ const hotkeyToAction = Object.entries(hotkeysToAction).reduce((result, [hotkeys,
 }, {})
 
 export const MediaView = () => {
+  const appConfig = useAppConfig();
   let { id } = useParams();
   let location = useLocation();
   const navigate = useNavigate();
@@ -96,6 +97,8 @@ export const MediaView = () => {
   const setShowNavigation = useSingleViewStore(actions => actions.setShowNavigation);
 
   const [hideNavigation, setHideNavigation] = useState(false)
+  
+  const [zoomFactor, setZoomFactor] = useState(1);
 
   let index = findEntryIndex(location, entries, id);
 
@@ -109,7 +112,7 @@ export const MediaView = () => {
 
   const key = current ? current.id : (Math.random() * 100000).toFixed(0);
   const scaleSize = scaleDimensions(current, dimensions);
-  console.log(scaleSize, dimensions, current);
+  //console.log(scaleSize, dimensions, current);
 
   useEffect(() => { id && setLastId(id) }, [id])
   useEffect(() => { index >= 0 && setLastIndex(index) }, [index])
@@ -170,7 +173,13 @@ export const MediaView = () => {
     const handlerKey = (handler.ctrl ? 'ctrl+' : '') + (handler.shift ? 'shift+' : '') + (handler.alt ? 'alt+' : '') + (handler.keys || []).join('+')
     const action = hotkeyToAction[handlerKey]
     if (action) {
-      console.log(`Catch hotkey ${handlerKey} for action ${action}`)
+      if ((action === 'prev' || action === 'next' || action.startsWith('prev-') || action.startsWith('next-')) && appConfig.removedViewerNav) return;
+      if (action === 'list' && appConfig.removedViewerStream) return;
+      if (action === 'map' && appConfig.removedViewerMap) return;
+      if (action === 'chronology' && appConfig.removedViewerLeaf) return;
+      if (action === 'similar' && appConfig.removedViewerAI) return;
+      if (action === 'toggleDetails' && appConfig.removedViewerInfo) return;
+      if (action === 'toggleAnnotations' && appConfig.removedViewerAI) return;
       dispatch({type: action})
       ev.preventDefault()
     }
@@ -185,8 +194,8 @@ export const MediaView = () => {
     dispatch({type: 'list'})
   }
 
-  console.log('Media object', current, showDetails);
-
+  //console.log('Media object', current, showDetails);
+  //console.log(appConfig)
   return (
     <>
       <SingleTagDialogProvider>
@@ -197,8 +206,8 @@ export const MediaView = () => {
                 <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} dispatch={dispatch} />
               }
               {isImage &&
-                <Zoomable key={key} childWidth={current.width} childHeight={current.height} onSwipe={onSwipe}>
-                  <MediaViewImage key={key} media={current} next={next} prev={prev} showAnnotations={showAnnotations}/>
+                <Zoomable key={key} childWidth={current.width} childHeight={current.height} onSwipe={onSwipe} onZoom={(scale) => setZoomFactor(scale)}>
+                  <MediaViewImage key={key} media={current} next={next} prev={prev} showAnnotations={showAnnotations} hqZoom={appConfig.HQzoom} zoomFactor={zoomFactor}/>
                 </Zoomable>
               }
               {isVideo &&
