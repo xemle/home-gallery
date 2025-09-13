@@ -6,7 +6,12 @@ import { createFileStream } from './file-stream.js'
 import { createJsonStream } from './json-stream.js'
 import { mergeLogStream } from './merge-log-stream.js'
 
-let instance;
+export type TCustonPinoLogger = pino.Logger & {
+  add: (stream: pino.DestinationStream | pino.StreamEntry) => void
+  write: (data: any) => void
+}
+
+let instance: TCustonPinoLogger
 
 const hasFirstArgNumber = inputArgs => inputArgs.length >= 2 && typeof inputArgs[0] == 'number'
 const splitErrorStackLines = inputArgs => {
@@ -64,14 +69,29 @@ const createInstance = options => {
     ms.write(data)
   }
 
-  return logger
+  return logger as TCustonPinoLogger
 }
 
 const isString = v => typeof v == 'string'
 
 const toOptions = options => isString(options) ? {module: options} : options
 
-function Logger(options) {
+export type TLoggerStatic = {
+  add: (stream: pino.DestinationStream | pino.StreamEntry) => void
+  addPretty: (level?: string) => void
+  addFile: (filename: string, level?: string, cb?: (err: Error) => void) => void
+  addJson: (level?: string) => void
+  mergeLog: (readable: NodeJS.ReadableStream, jsonLogMapper?: false | ((log: any) => any)) => void
+}
+
+export type TLogger = pino.Logger & TLoggerStatic
+
+export type TLoggerFactory = {
+  (options: any): TLogger
+  getInstance: () => TCustonPinoLogger,
+} & TLoggerStatic
+
+function LoggerFactory(options: any) {
   if (!instance) {
     instance = createInstance(toOptions(options))
     return instance
@@ -80,7 +100,7 @@ function Logger(options) {
   }
 }
 
-Object.assign(Logger, {
+Object.assign(LoggerFactory, {
   getInstance: () => instance,
   add: dest => instance && instance.add(dest),
   addPretty: (level = 'info') => instance && createPrettyStream(instance, level),
@@ -92,7 +112,7 @@ Object.assign(Logger, {
   mergeLog: (readable, jsonLogMapper = false) => instance && mergeLogStream(instance, readable, jsonLogMapper),
 })
 
-export {
-  Logger
-}
+export const Logger: TLoggerFactory = LoggerFactory as TLoggerFactory
+
+
 export default Logger
