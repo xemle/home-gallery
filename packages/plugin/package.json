@@ -22,7 +22,7 @@
     "clean": "rimraf dist",
     "build": "npm-run-all -p build:js build:types copy:templates",
     "build:js": "dev-cli build",
-    "build:types": "npx tsc -d --emitDeclarationOnly",
+    "build:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck",
     "copy:templates": "cpy templates dist",
     "test": "tap",
     "watch": "npm-run-all -p watch:js watch:types watch:templates watch:test",
