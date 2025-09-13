@@ -65,19 +65,16 @@ export class PluginManager implements TServerPluginManager {
         this.log.trace(`Skip initializing non-server plugin: ${ctx.plugin.name}`)
         continue
       }
-      const managerProxy = proxyRegisterForPlugin(this, this.registry, ctx.plugin)
-      await ctx.plugin.initialize(managerProxy)
-        .then((factory: unknown) => {
-          if (typeof factory == 'object') {
-            return this.registry.registerLegacyFactory(ctx.plugin, factory)
-          }
-        })
-        .then(() => {
-          ctx.initialized = true
-        })
-        .catch((err: any) => {
-          this.log.error(err, `Failed to initialize plugin ${ctx.plugin.name} (from ${ctx.file}): ${err}`)
-        })
+      try {
+        const managerProxy = proxyRegisterForPlugin(this, this.registry, ctx.plugin)
+        const factory = await ctx.plugin.initialize(managerProxy)
+        if (typeof factory == 'object') {
+          await this.registry.registerLegacyFactory(ctx.plugin, factory)
+        }
+        ctx.initialized = true
+      } catch (err) {
+        this.log.error(err, `Failed to initialize plugin ${ctx.plugin.name} (from ${ctx.file}): ${err}`)
+      }
     }
   }
 
