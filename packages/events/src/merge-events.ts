@@ -1,6 +1,6 @@
 import { PathLike } from 'fs';
 import fs from 'fs/promises';
-import { Event } from './models';
+import { Event } from './models.js';
 
 import { readEvents } from './read-events.js'
 import { writeEvents } from './append-event.js'

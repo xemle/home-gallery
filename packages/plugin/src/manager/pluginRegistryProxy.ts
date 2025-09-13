@@ -1,6 +1,6 @@
 import { TGalleryPluginManager, TPlugin } from "@home-gallery/types";
 
-import { ExtensionRegistry } from "./extensionRegistry";
+import { ExtensionRegistry } from "./extensionRegistry.js";
 
 export function proxyRegisterForPlugin(manager: TGalleryPluginManager, registry: ExtensionRegistry, plugin: TPlugin) {
   return new Proxy(manager, {

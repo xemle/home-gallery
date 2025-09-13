@@ -1,5 +1,5 @@
-import { TLogger } from './logger'
-import { TGalleryConfig } from './config'
+import { TLogger } from './logger.js'
+import { TGalleryConfig } from './config.js'
 
 export type TPlugin = {
   name: string

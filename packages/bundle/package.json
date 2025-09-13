@@ -27,27 +27,27 @@
     "clean": "rimraf dist",
     "build": "npm-run-all -p build:js build:types",
     "build:js": "dev-cli build",
-    "build:types": "npx tsc -d --emitDeclarationOnly",
+    "build:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck",
     "test": "tap",
     "watch": "npm-run-all -p watch:js watch:types",
     "watch:js": "dev-cli build --watch",
-    "watch:types": "npx tsc -d --emitDeclarationOnly --watch",
+    "watch:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck --watch",
     "watch:test": "tap repl w"
   },
   "dependencies": {
     "caxa": "^1.0.0",
     "glob-to-regexp": "^0.4.1",
     "picomatch": "^4.0.2",
-    "pino": "^7.8.0",
-    "pino-pretty": "^7.5.1",
-    "tar-fs": "^2.1.1",
-    "yaml": "^1.10.2"
+    "pino": "^9.9.5",
+    "pino-pretty": "^13.1.1",
+    "tar-fs": "^3.1.0",
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@home-gallery/dev-tools": "file:../dev-tools",
-    "glob": "^11.0.0",
+    "glob": "^11.0.3",
     "npm-run-all": "^4.1.5",
     "rimraf": "^6.0.1",
-    "typescript": "^4.2.4"
+    "typescript": "^5.9.2"
   }
 }

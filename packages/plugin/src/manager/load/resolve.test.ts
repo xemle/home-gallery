@@ -71,7 +71,7 @@ t.test('resolve', async t => {
     try {
       resolve(plugins)
       t.fail()
-    } catch (err) {
+    } catch (err: any) {
       t.same(err.name, 'acme')
       t.same(err.missingDep, 'vanilla')
     }
@@ -95,7 +95,7 @@ t.test('resolve', async t => {
     try {
       resolve(plugins)
       t.fail()
-    } catch (err) {
+    } catch (err: any) {
       t.same(err.name, 'vanilla')
       t.same(err.missingDep, 'acme@1.2')
     }

@@ -43,6 +43,7 @@ t.only('QueryExecutor', async t => {
         // Create filter on acme keyword in condition to support 'acme = value' or 'acme:value'
         if (ast.type == 'cmp' && ast.key == 'acme', ast.op == '=') {
           ast.filter = (entry: any) => {
+            // @ts-ignore
             return entry.plugin?.acme == ast?.value?.value
           }
           // The ast node could be handled. Return true to prevent further chain calls

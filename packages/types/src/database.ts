@@ -1,8 +1,8 @@
 import { Transform } from 'stream'
 
-import { TGalleryConfig } from './config'
-import { TStorageEntry } from './storage'
-import { TPlugin } from './plugin'
+import { TGalleryConfig } from './config.js'
+import { TStorageEntry } from './storage.js'
+import { TPlugin } from './plugin.js'
 
 export type TDatabaseEntry = {
   id: string,

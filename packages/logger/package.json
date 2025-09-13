@@ -5,13 +5,13 @@
   "type": "module",
   "exports": {
     ".": {
-      "node": {
-        "import": "./dist/node.js",
-        "types": "./dist/node.d.ts"
-      },
-      "default": {
+      "browser": {
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts"
+      },
+      "default": {
+        "import": "./dist/node.js",
+        "types": "./dist/node.d.ts"
       }
     },
     "./node": {

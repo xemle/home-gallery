@@ -172,6 +172,7 @@ t.only('StreamFactory', async t => {
     const invalidExtractor: TExtractor = {
       name: 'invalid',
       phase: 'file',
+      // @ts-ignore
       async create() {
         return {
           invalid: 'This task is invalid'
