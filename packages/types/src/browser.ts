@@ -1,5 +1,5 @@
-import { TPluginManager } from "./plugin"
-import { TQueryContext, TQueryPlugin } from "./query"
+import { TPluginManager } from "./plugin.js"
+import { TQueryContext, TQueryPlugin } from "./query.js"
 
 export type TBrowserPlugin = {
   name: string

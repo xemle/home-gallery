@@ -1,7 +1,7 @@
 import { Readable, Transform } from 'stream'
 
-import { TStorage, TStorageEntry } from './storage'
-import { TPlugin } from './plugin';
+import { TStorage, TStorageEntry } from './storage.js'
+import { TPlugin } from './plugin.js';
 
 /**
  * Phases
