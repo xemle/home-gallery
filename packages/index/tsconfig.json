@@ -1,14 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "nodenext",
-    "allowJs": true,
-    "noImplicitAny": false,
     "outDir": "./dist",
-    "target": "es2022",
-    "allowSyntheticDefaultImports": true,
+    "rootDir": "./src",
   },
-  "emitDeclarationOnly": true,
-  "skipLibCheck": true,
-  "include": ["./src/**/*"]
+  "include": ["src/**/*.ts"],
 }
