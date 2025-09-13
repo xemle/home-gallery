@@ -35,3 +35,13 @@ The database mapper should only map important information to the
 database so that the browser can store and process all data of
 the complete gallery.
 {{/modules.database}}
+{{#modules.query}}
+
+## Query
+
+A search query is parsted to an abstract syntax tree (AST) which is
+evaluated to perform the final filtering for given database entries.
+
+The query plugin can transform (optimize) the query AST and adds
+custom filter and sorting capabilities to the query evaluation
+{{/modules.query}}

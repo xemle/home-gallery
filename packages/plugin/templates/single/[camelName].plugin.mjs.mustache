@@ -1,131 +1,4 @@
 // HomeGallery Plugin {{ name }}
-{{#modules.extractor}}
-
-// Extractor ---------------------------
-
-const extractor = manager => ({
-  name: '{{ camelName }}Extractor',
-  phase: '{{ modules.extractor.phase }}',
-
-  async create(storage) {
-    const pluginConfig = manager.getConfig().plugin?.{{ camelName }} || {}
-    // plugins can provide properties or functions on the context
-    const suffix = '{{ dashName }}.json'
-
-    const created = new Date().toISOString()
-    const value = '{{ name }}'
-    // Read property from plugin's configuration plugin.{{ camelName }}.property for customization
-    const property = pluginConfig.property || 'defaultValue'
-
-    const log = manager.createLogger('plugin.{{ camelName }}.extractor')
-    log.debug(`Creating {{ name }} extractor task`)
-
-    return {
-      test(entry) {
-        // Execute task if the storage file is not present
-        return !storage.hasFile(entry, suffix)
-      },
-      async task(entry) {
-        log.debug(`Processing ${entry}`)
-        const data = { created, value, property }
-        // Write plugin data to storage. Data can be a buffer, string or object
-        return storage.writeFile(entry, suffix, data)
-      }
-    }
-  }
-
-})
-{{/modules.extractor}}
-{{#modules.database}}
-
-// Database mapper ---------------------------
-
-const databaseMapper = manager => ({
-  name: '{{ camelName }}Mapper',
-  order: 1,
-
-  mapEntry(entry, media) {
-    const log = manager.createLogger('plugin.{{ camelName }}Mapper')
-    log.info(`Map database entry: ${entry}`)
-
-    {{#modules.extractor}}
-    // Use somehow the data from the extractor task
-    media.plugin.{{ camelName }} = entry.meta.{{ camelName }}
-    {{/modules.extractor}}
-    {{^modules.extractor}}
-    // Add some data
-    media.plugin.{{ camelName }} = '{{name}}'
-    {{/modules.extractor}}
-  }
-
-})
-{{/modules.database}}
-{{#modules.query}}
-
-// QueryPlugin ---------------------------
-
-const isAst = ast => ast?.type && typeof ast.col == 'number'
-
-// Check if '{{ camelCase }} = {{ name }}' is present in AST
-const has{{ className }}Cmp = ast => ast.type == 'cmp' && ast.key == '{{ camelCase }}' && ast.op == '=' && ast.value?.value == '{{ name }}'
-
-const isQuery = ast => ast.type == 'query' || ast.type == 'orderedQuery'
-
-const findAst = (ast, fn) => {
-  if (!isAst(ast)) {
-    return false
-  } else if (fn(ast)) {
-    return true
-  } else if (Array.isArray(ast.value)) {
-    return ast.value.find(child => findAst(child, fn))
-  } else if (ast.value) {
-    return findAst(ast.value, fn)
-  }
-}
-
-const insertHas{{ className }}IfNotQueried = {
-  transform(ast, context) {
-    if (isQuery(ast) && !findAst(ast, has{{ className }}Cmp)) {
-      const value = {type: 'identifier', value: '{{ name }}', col: ast.col}
-      const cmp = {type: 'cmp', key: '{{ camelName }}', op: '=', value, col: ast.col}
-      const and = {type: 'and', value: [ast.value, cmp], col: ast.col}
-      ast.value = and
-    }
-    return ast
-  }
-}
-
-const queryPlugin = manager => ({
-  name: '{{ camelName }}Query',
-  order: 1,
-  textFn(entry) {
-    return entry.plugin.{{ camelName }}?.value || ''
-  },
-  transformRules: [
-    insertHas{{ className }}IfNotQueried
-  ],
-  queryHandler(ast, context) {
-    // Create filter on {{ camelName }} keyword in condition to support '{{ camelName }} = value' or '{{ camelName }}:value'
-    if (ast.type == 'cmp' && ast.key == '{{ camelName }}' && ast.op == '=') {
-      ast.filter = (entry) => {
-        return entry.plugin?.{{ camelName }}?.value == ast?.value?.value
-      }
-      // The ast node could be handled. Return true to prevent further chain calls
-      return true
-    }
-
-    // Create custom sort key 'order by {{ camelName }}'
-    if (ast.type == 'orderKey' && ast.value == '{{ camelName }}') {
-      ast.scoreFn = e => e.plugin.{{ camelName }}.created || '0000-00-00'
-      ast.direction = 'desc'
-      return true
-    }
-
-    // Check ast and return if ast node can be resolved
-    return false
-  }
-})
-{{/modules.query}}
 
 // Plugin setup  ---------------------------
 
@@ -143,6 +16,7 @@ const plugin = {
   async initialize(manager) {
     const log = manager.createLogger('plugin.{{ camelName }}')
     log.trace(`Initialize ${this.name} plugin`)
+    const { type } = manager.getContext()
 
     {{#modules.extractor}}
     await manager.register('extractor', extractor(manager))
@@ -158,3 +32,140 @@ const plugin = {
 }
 
 export default plugin
+
+{{#modules.extractor}}
+
+// Extractor ---------------------------
+
+function extractor(manager) {
+  return {
+    name: '{{ camelName }}Extractor',
+    phase: '{{ modules.extractor.phase }}',
+
+    async create(storage) {
+      const pluginConfig = manager.getConfig().plugin?.{{ camelName }} || {}
+      // plugins can provide properties or functions on the context
+      const suffix = '{{ dashName }}.json'
+
+      const created = new Date().toISOString()
+      const value = '{{ name }}'
+      // Read property from plugin's configuration plugin.{{ camelName }}.property for customization
+      const property = pluginConfig.property || 'defaultValue'
+
+      const log = manager.createLogger('plugin.{{ camelName }}.extractor')
+      log.debug(`Creating {{ name }} extractor task`)
+
+      return {
+        test(entry) {
+          // Execute task if the storage file is not present
+          return !storage.hasFile(entry, suffix)
+        },
+        async task(entry) {
+          log.debug(`Processing ${entry}`)
+          const data = { created, value, property }
+          // Write plugin data to storage. Data can be a buffer, string or object
+          return storage.writeFile(entry, suffix, data)
+        }
+      }
+    }
+  }
+}
+{{/modules.extractor}}
+{{#modules.database}}
+
+// Database mapper ---------------------------
+
+function databaseMapper(manager) {
+  return {
+    name: '{{ camelName }}Mapper',
+    order: 1,
+
+    mapEntry(entry, media) {
+      const log = manager.createLogger('plugin.{{ camelName }}Mapper')
+      log.info(`Map database entry: ${entry}`)
+
+      {{#modules.extractor}}
+      // Use somehow the data from the extractor task
+      media.plugin.{{ camelName }} = entry.meta.{{ camelName }}
+      {{/modules.extractor}}
+      {{^modules.extractor}}
+      // Add some data
+      media.plugin.{{ camelName }} = '{{name}}'
+      {{/modules.extractor}}
+    }
+
+  }
+}
+{{/modules.database}}
+{{#modules.query}}
+
+// QueryPlugin ---------------------------
+
+function queryPlugin(manager) {
+  return {
+    name: '{{ camelName }}Query',
+    order: 1,
+    textFn(entry) {
+      return entry.plugin.{{ camelName }}?.value || ''
+    },
+    transformRules: [
+      insertHas{{ className }}IfNotQueried()
+    ],
+    queryHandler(ast, context) {
+      // Create filter on {{ camelName }} keyword in condition to support '{{ camelName }} = value' or '{{ camelName }}:value'
+      if (ast.type == 'cmp' && ast.key == '{{ camelName }}' && ast.op == '=') {
+        ast.filter = (entry) => {
+          return entry.plugin?.{{ camelName }}?.value == ast?.value?.value
+        }
+        // The ast node could be handled. Return true to prevent further chain calls
+        return true
+      }
+
+      // Create custom sort key 'order by {{ camelName }}'
+      if (ast.type == 'orderKey' && ast.value == '{{ camelName }}') {
+        ast.scoreFn = e => e.plugin.{{ camelName }}.created || '0000-00-00'
+        ast.direction = 'desc'
+        return true
+      }
+
+      // Check ast and return if ast node can be resolved
+      return false
+    }
+  }
+}
+
+// Utility functions
+
+function isAst(ast) { return ast?.type && typeof ast.col == 'number' }
+
+// Check if '{{ camelCase }} = {{ name }}' is present in AST
+function has{{ className }}Cmp(ast) { return ast.type == 'cmp' && ast.key == '{{ camelCase }}' && ast.op == '=' && ast.value?.value == '{{ name }}' }
+
+function isQuery(ast) { return ast.type == 'query' || ast.type == 'orderedQuery' }
+
+function findAst(ast, fn) {
+  if (!isAst(ast)) {
+    return false
+  } else if (fn(ast)) {
+    return true
+  } else if (Array.isArray(ast.value)) {
+    return ast.value.find(child => findAst(child, fn))
+  } else if (ast.value) {
+    return findAst(ast.value, fn)
+  }
+}
+
+function insertHas{{ className }}IfNotQueried() {
+  return {
+    transform(ast, context) {
+      if (isQuery(ast) && !findAst(ast, has{{ className }}Cmp)) {
+        const value = {type: 'identifier', value: '{{ name }}', col: ast.col}
+        const cmp = {type: 'cmp', key: '{{ camelName }}', op: '=', value, col: ast.col}
+        const and = {type: 'and', value: [ast.value, cmp], col: ast.col}
+        ast.value = and
+      }
+      return ast
+    }
+  }
+}
+{{/modules.query}}
