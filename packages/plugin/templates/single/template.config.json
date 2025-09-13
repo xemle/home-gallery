@@ -6,6 +6,8 @@
     "extractor": [
     ],
     "database": [
+    ],
+    "query": [
     ]
   },
   "dir": false

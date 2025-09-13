@@ -3,7 +3,7 @@ import path from 'path'
 import os from 'os'
 import t from 'tap'
 
-import Logger from '@home-gallery/logger'
+import Logger from '@home-gallery/logger/node'
 
 import { createPlugin } from './index.js'
 import { PluginManager } from '../manager/index.js'

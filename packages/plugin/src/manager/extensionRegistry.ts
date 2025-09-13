@@ -25,6 +25,9 @@ export class ExtensionRegistry {
   }
 
   async register(plugin: TPlugin, type: TExtenstionType, extension: TExtensionBase & any) {
+    if (!extension?.name) {
+      throw new Error(`Plugin extension of type ${type} has no name of plugin ${plugin.name}`)
+    }
     if (this.disabledExtensions.includes(`${plugin.name}.${extension.name}`)) {
       this.log.info(`Plugin extension ${plugin.name}.${extension.name} is disabled. Skip extension registration`)
       return

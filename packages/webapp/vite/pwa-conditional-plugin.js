@@ -20,7 +20,7 @@ const script = `<script>
  * @param {{disabled?: boolean}} options
  */
 export default (options = {}) => ({
-  name: 'pwa-conditional',
+  name: 'gallery:pwa-conditional',
   enforce: "post",
   apply: "build",
   transformIndexHtml: {
