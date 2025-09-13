@@ -3,7 +3,18 @@
   "version": "1.0.0",
   "description": "User events",
   "type": "module",
-  "export": "./dist/index.js",
+  "exports": {
+    ".": {
+      "browser": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      },
+      "default": {
+        "import": "./dist/node.js",
+        "types": "./dist/node.d.ts"
+      }
+    }
+  },
   "files": [
     "dist"
   ],
@@ -28,12 +39,6 @@
     "type": "git",
     "url": "https://github.com/xemle/home-gallery.git",
     "directory": "packages/events"
-  },
-  "exports": {
-    ".": {
-      "node": "./dist/node.js",
-      "browser": "./dist/index.js"
-    }
   },
   "types": "./dist/node.d.ts",
   "dependencies": {
