@@ -3,7 +3,7 @@ import path from 'path';
 import url from 'url'
 
 import { TGalleryConfig, TLogger, TPlugin } from "@home-gallery/types";
-import { Logger } from "@home-gallery/logger";
+import Logger from "@home-gallery/logger";
 
 import { TPluginContext } from "../types.js";
 import { PluginSchema } from '../pluginSchemas.js';

@@ -5,9 +5,13 @@
   "type": "module",
   "main": "dist/index.js",
   "exports": {
-    ".": {
-      "node": "./dist/node.js",
-      "browser": "./dist/index.js"
+    "browser": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "node": {
+      "import": "./dist/node.js",
+      "types": "./dist/node.d.ts"
     }
   },
   "files": [
@@ -42,13 +46,14 @@
   "types": "./dist/node.d.ts",
   "dependencies": {
     "@home-gallery/common": "file:../common",
+    "@home-gallery/logger": "file:../logger",
     "@home-gallery/query": "file:../query",
     "@home-gallery/stream": "file:../stream",
+    "@home-gallery/types": "file:../types",
     "mustache": "4.2.0",
     "yup": "^1.4.0"
   },
   "devDependencies": {
-    "@home-gallery/dev-tools": "file:../dev-tools",
-    "@home-gallery/types": "file:../types"
+    "@home-gallery/dev-tools": "file:../dev-tools"
   }
 }
