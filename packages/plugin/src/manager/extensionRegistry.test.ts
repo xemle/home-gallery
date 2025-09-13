@@ -13,7 +13,6 @@ t.only('ExtensionRegistry', async t => {
       name: 'Acme',
       version: '1.0',
       async initialize() {
-        return {}
       }
     }
 
@@ -32,7 +31,6 @@ t.only('ExtensionRegistry', async t => {
       name: 'Acme',
       version: '1.0',
       async initialize() {
-        return {}
       }
     }
 
@@ -50,7 +48,6 @@ t.only('ExtensionRegistry', async t => {
       name: 'Acme',
       version: '1.0',
       async initialize() {
-        return {}
       }
     }
 
