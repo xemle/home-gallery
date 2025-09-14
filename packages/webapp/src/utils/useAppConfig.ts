@@ -1,10 +1,21 @@
 type TAppConfig = {
   title?: string
   entries?: string[]
-  disabled?: string[]
+
   pluginManager?: {
     plugins: string[]
   }
+
+  disabled?: string[]
+
+  // Optional page flags
+  disabledYearsPage?: boolean
+  disabledVideosPage?: boolean
+  disabledSimilarPage?: boolean
+  disabledFacesPage?: boolean
+  disabledMapPage?: boolean
+  disabledTagsPage?: boolean
+  disabledEditPage?: boolean
 } & Record<string, any>
 
 const defaultConfig: TAppConfig = {
@@ -59,6 +70,7 @@ export const useAppConfig = () => {
     ...searchParams.getAll('removed').filter(v => !!v)
   ]
 
+  // Map disabled features to boolean flags
   result.disabled.forEach((feature: string) => {
     result[`disabled${feature[0].toUpperCase()}${feature.slice(1)}`] = true
   })
