@@ -8,9 +8,7 @@ const defaultConfig = {
    *
    * A feature will be expanded to `disabledEdit: true`
    */
-  metaTags: false,
-  metaTagsPath: false,
-  siteTitle: "My Gallery",
+  siteTitle: "Home Gallery",
   HQzoom: false,
   disabled: [],
   removed: [],

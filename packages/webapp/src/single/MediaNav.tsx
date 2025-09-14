@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as icons from '@fortawesome/free-solid-svg-icons'
 
 import { useSearchStore } from "../store/search-store";
-import { useAppConfig } from "../utils/useAppConfig";
+import { useAppConfig } from "../utils/useAppConfig"; // <-- added
 
 import { getHigherPreviewUrl, getLowerPreviewUrl } from '../utils/preview'
 import { usePreviewSize } from "./usePreviewSize";
@@ -13,7 +13,7 @@ import { classNames } from '../utils/class-names'
 export const MediaNav = ({current, prev, next, listLocation, showNavigation, dispatch}) => {
   const query = useSearchStore(state => state.query);
   const previewSize = usePreviewSize()
-  const appConfig = useAppConfig()
+  const appConfig = useAppConfig() // <-- added
 
   const loadImage = async (url: string | false) => {
     return new Promise((resolve) => {
