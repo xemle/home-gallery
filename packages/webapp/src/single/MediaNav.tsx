@@ -83,12 +83,12 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
             <FontAwesomeIcon icon={icons.faTh} className={iconClass}/>
           </a>
         }
-        {!appConfig.removedViewerMap && hasGeo &&
+        {!appConfig.disabledMapPage && hasGeo &&
           <a onClick={() => dispatch({type: 'map'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show map of entry (m)">
             <FontAwesomeIcon icon={icons.faMap} className={iconClass}/>
           </a>
         }
-        {!appConfig.removedViewerLeaf && current?.similarityHash &&
+        {!appConfig.disabledSimilarPage && current?.similarityHash &&
           <a onClick={() => dispatch({type: 'similar'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show similar images (s)">
             <FontAwesomeIcon icon={icons.faSeedling} className={iconClass}/>
           </a>
@@ -98,7 +98,7 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
             <FontAwesomeIcon icon={icons.faClock} className={iconClass}/>
           </a>
         }
-        {!appConfig.removedViewerAI && current && (current.faces?.length > 0 || current.objects?.length > 0) &&
+        {!appConfig.disabledFacesPage && current && (current.faces?.length > 0 || current.objects?.length > 0) &&
           <a onClick={() => dispatch({type: 'toggleAnnotations'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show object and face annotations (a)">
             <FontAwesomeIcon icon={icons.faUsersViewfinder} className={iconClass}/>
           </a>

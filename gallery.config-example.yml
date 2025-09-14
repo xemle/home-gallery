@@ -201,6 +201,14 @@ sources:
     #- pwa
     #- offlineDatabase
     #- worker
+    # disable pages
+    #- yearsPage
+    #- videosPage
+    #- similarPage
+    #- facesPage
+    #- tagsPage
+    #- mapPage
+    #- editPage
 
 #
 # Plugin settings
