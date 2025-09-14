@@ -192,6 +192,8 @@ sources:
 # Webapp configuration
 #
 #webapp:
+  # Site title
+  #title: 'Home Gallery'
   # Disabled webapp features
   #disabled:
     #- edit
