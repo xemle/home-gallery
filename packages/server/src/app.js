@@ -104,7 +104,6 @@ export function createApp(context) {
 
   const getWebAppState = async (req) => {
 	const HQzoom = config?.webapp?.HQzoom || false
-	const siteTitle = config?.webapp?.siteTitle || 'Home Gallery'
     const disabled = config?.webapp?.disabled || []
 	const removed = config?.webapp?.removed || []
     const plugins = pluginApi.pluginEntries
@@ -126,7 +125,7 @@ export function createApp(context) {
       },
       entries,
       sources,
-	  siteTitle: config?.webapp?.siteTitle || 'Home Gallery'
+      title: config?.webapp?.title || 'Home Gallery'
     }
   }
 
