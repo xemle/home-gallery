@@ -2,9 +2,7 @@ import { useMemo } from "react";
 import { type AppConfig } from "./AppConfig";
 
 const defaultConfig: AppConfig = {
-  metaTags: false,
-  metaTagsPath: false,
-  siteTitle: "My Gallery",
+  siteTitle: "Home Gallery",
   HQzoom: false,
   disabled: [],
   pluginManager: {
