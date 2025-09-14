@@ -18,7 +18,14 @@ export const ViewNavBar = ({disableEdit}) => {
   const navigate = useNavigate();
   const listLocation = useListLocation()
   const appConfig = useAppConfig()
-
+  const itemKeys = {
+    'Show All': 'globe',
+    'Years': 'years',
+    'Videos': 'videos',
+    'Edit': 'edit',
+    'Tags': 'tags',
+    'Map': 'map'
+  }
   const items = [
     {
       icon: icons.faGlobe,
@@ -65,10 +72,16 @@ export const ViewNavBar = ({disableEdit}) => {
       disabled: false,
     },
   ]
-
+  const finalItems = items.map(item => {
+    const key = itemKeys[item.text]
+    const isRemoved = appConfig.removed?.includes(key)
+    const isDisabled = (key === 'edit' && (disableEdit || appConfig.disabledEdit))
+    return isRemoved ? null : {...item, disabled: !!isDisabled}
+  }).filter(Boolean)
+  
   return (
     <>
-      {items.map((item, key) => (
+      {finalItems.map((item, key) => (
         <NavItem key={key} onClick={item.action} icon={item.icon} text={item.text} disabled={item.disabled} />
       ))}
     </>
