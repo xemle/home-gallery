@@ -1,4 +1,13 @@
-const defaultConfig = {
+type TAppConfig = {
+  title?: string
+  entries?: string[]
+  disabled?: string[]
+  pluginManager?: {
+    plugins: string[]
+  }
+} & Record<string, any>
+
+const defaultConfig: TAppConfig = {
    /**
    * List of disabled features
    *
@@ -58,5 +67,5 @@ export const useAppConfig = () => {
 	  const name = `removed${feature[0].toUpperCase()}${feature.slice(1)}`
 	  result[name] = true
 	})
-  return result
+  return result as TAppConfig
 }
