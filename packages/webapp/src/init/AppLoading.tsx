@@ -50,10 +50,10 @@ export const AppLoading : React.FC<{state: TAppLoadingProps}> = ({state}) => {
   const appConfig = useAppConfig();
 
   useEffect(() => {
-    if (appConfig.siteTitle) {
-      document.title = appConfig.siteTitle;
+    if (appConfig.title) {
+      document.title = appConfig.title;
     }
-  }, [appConfig.siteTitle]);
+  }, []);
 
   return (
     <div id="app-loader">

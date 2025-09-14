@@ -8,7 +8,7 @@ const defaultConfig = {
    *
    * A feature will be expanded to `disabledEdit: true`
    */
-  siteTitle: "Home Gallery",
+  title: 'Home Gallery',
   HQzoom: false,
   disabled: [],
   removed: [],
