@@ -1,6 +1,7 @@
 import { Client, DefaultMediaReceiver } from 'castv2-client';
 
 import Logger from '@home-gallery/logger'
+import { TCastEntry, TCastPlayer } from './types.js';
 
 const log = Logger('cast.player')
 
@@ -21,7 +22,7 @@ const startCast = async (host, cb) => {
   });
 }
 
-const startCastAsync = async (host) => {
+const startCastAsync = async (host): Promise<[TCastPlayer, any]> => {
   const t0 = Date.now()
   log.debug(`Starting player`)
   return new Promise((resolve, reject) => {
@@ -36,7 +37,7 @@ const startCastAsync = async (host) => {
   })
 }
 
-const createVideo = ({title, video, image}) => {
+const createVideo = ({title, video, image}: TCastEntry) => {
   return {
     contentId: video,
     contentType: 'video/mp4',
@@ -51,7 +52,7 @@ const createVideo = ({title, video, image}) => {
   }
 }
 
-const createImage = ({image}) => {
+const createImage = ({image}: TCastEntry) => {
   return {
     contentId: image,
     contentType: 'image/jpg',
@@ -68,7 +69,7 @@ const isVideo = url => url && url.match(/\.mp4$/)
 
 const createMedia = entry => entry.type == 'video' ? createVideo(entry) : createImage(entry)
 
-export const slideshow = async (host, entries, options = {}) => {
+export const slideshow = async (host, entries, options: {delay?: number, random?: boolean} = {}) => {
   const [player] = await startCastAsync(host)
 
   let i = 0

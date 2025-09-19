@@ -2,6 +2,7 @@
 import mdns from 'multicast-dns'
 
 import Logger from '@home-gallery/logger'
+import { TCastDevice } from './types.js'
 
 const log = Logger('cast.dns')
 
@@ -46,9 +47,9 @@ const toCastDevice = additionals => {
 export const scan = onDevice => {
   const browser = mdns()
 
-  const devices = []
+  const devices: TCastDevice[] = []
 
-  const handleDevice = device => {
+  const handleDevice = (device: TCastDevice) => {
     const isKnown = devices.find(knownDevice => knownDevice.id == device.id)
     if (isKnown) {
       log.trace(`Found known device ${device.name} at ${device.host}`)
@@ -76,7 +77,7 @@ export const scan = onDevice => {
   })
 }
 
-export const scanFirst = async (timeout) => {
+export const scanFirst = async (timeout): Promise<TCastDevice> => {
   let found = false
   return new Promise((resolve, reject) => {
     let timer
@@ -93,7 +94,7 @@ export const scanFirst = async (timeout) => {
       }
       found = true
       clearTimeout(timer)
-      resolve(device)
+      resolve(device as TCastDevice)
     })
   })
 }
