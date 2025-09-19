@@ -18,7 +18,7 @@ const proxyCb = ({serverUrl, port, host, sessionId}: TProxyConfig, cb) => {
     target: serverUrl,
     changeOrigin: true,
     secure: false,
-    pathRewrite: path => path.replace(`/${sessionId}/files`, '/files')
+    pathRewrite: path => '/files' + path,
   }));
 
   const server = app.listen(port, host, (err) => {
