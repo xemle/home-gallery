@@ -4,14 +4,29 @@ const script = `<script>
     const isLocal = location.hostname == 'localhost' || location.hostname == '127.0.0.1'
     const isDisabled = (config.disabled || []).includes('pwa')
 
-    if (!hasSW || isLocal || isDisabled) {
-      return
+    const register = hasSW && !isLocal && !isDisabled
+    const unregister = hasSW && (isLocal || isDisabled)
+
+    if (register) {
+      console.log('Enable PWA ServiceWorker')
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js', { scope: './' })
+      })
     }
 
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js', { scope: './' })
-    })
-  })(__homeGallery || {})
+    if (unregister) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        if (registrations.length) {
+          console.log('Unregister PWA ServiceWorker')
+        }
+        for(const registration of registrations) {
+          registration.unregister()
+        }
+      }).catch(err => {
+        console.error('Unregistration of PWA ServiceWorker failed: ', err)
+      })
+    }
+  })(window.__homeGallery || {})
 </script>`
 
 /**
