@@ -10,6 +10,7 @@ import { scanFirst } from './scanner.js'
 import { slideshow } from './player.js'
 import { proxy } from './proxy.js'
 import { getPreview } from './utils.js'
+import { TCastEntry, TCastOptions, TDatabaseEntry } from './types.js'
 
 export { scanFirst } from './scanner.js'
 export { slideshow } from './player.js'
@@ -18,17 +19,18 @@ export const defaultProxyPort = 38891
 const getIp = () => {
   const interfaces = os.networkInterfaces()
   const ips = Object.values(interfaces)
+    .filter(l => !!l)
     .reduce((r, l) => r.concat(l), [])
     .filter(iface => iface.family == 'IPv4' && !iface.internal)
     .map(iface => iface.address)
   log.debug(`Found IPs: ${ips.join(', ')}`)
-  return ips.shift()
+  return ips.shift() || '127.0.0.1'
 }
 
 const createSessionId = len => {
   let s = ''
   while (s.length < len) {
-    const c = String.fromCharCode((Math.random() * 255).toFixed())
+    const c = String.fromCharCode(+(Math.random() * 255).toFixed())
     if (c.match(/[-A-Za-z0-9]/)) {
       s += c
     }
@@ -36,9 +38,9 @@ const createSessionId = len => {
   return s
 }
 
-const byDate = reverse => {
+const byDate = (reverse: boolean) => {
   const reverseFactor = reverse ? -1 : 1
-  return (a, b) => {
+  return (a: { date: string }, b: { date: string}) => {
     if (a.date < b.date) {
       return -1 * reverseFactor
     } else if (a.date > b.date) {
@@ -48,7 +50,7 @@ const byDate = reverse => {
   }
 }
 
-const extractMedia = (entries, maxPreviewSize, baseUrl) => {
+const extractMedia = (entries: TDatabaseEntry[], maxPreviewSize, baseUrl): TCastEntry[] => {
   return entries.reduce((result, entry) => {
     const image = getPreview(entry, 'image', maxPreviewSize) || getPreview(entry, 'image')
     const title = path.parse(entry.files[0].filename).name
@@ -78,17 +80,17 @@ const extractMedia = (entries, maxPreviewSize, baseUrl) => {
       })
     }
     return result
-  }, [])
+  }, [] as TCastEntry[])
 }
 
-export const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure, random, reverse, delay, maxPreviewSize} = {}) => {
+export const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure, random, reverse, delay, maxPreviewSize}: TCastOptions) => {
   const remote = {
     url: serverUrl,
     insecure,
     query,
   }
   const [database, device] = await Promise.all([
-    fetchRemote(remote),
+    fetchRemote(remote) as Promise<{data: TDatabaseEntry[]}>,
     scanFirst(10 * 1000)
   ])
 
@@ -103,7 +105,7 @@ export const cast = async ({serverUrl, query, useProxy, proxyIp, port, insecure,
     log.info(`Started HTTP file proxy ${baseUrl}`)
   }
 
-  const entries = extractMedia(database.data.sort(byDate(reverse)), maxPreviewSize || 1920, baseUrl)
+  const entries = extractMedia(database.data.sort(byDate(!!reverse)), maxPreviewSize || 1920, baseUrl)
   log.info(`Start slideshow to device ${device.name} at ${device.host} with ${entries.length} entries`)
   await slideshow(device.host, entries, { random, delay })
 }

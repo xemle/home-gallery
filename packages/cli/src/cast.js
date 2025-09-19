@@ -73,7 +73,7 @@ const command = {
     }
     const t0 = Date.now();
     return import('@home-gallery/cast')
-      .then(cast => cast(options))
+      .then(({cast}) => cast(options))
       .then(() => {
         log.info(t0, `Cast from gallery ${options.serverUrl}`)
       })

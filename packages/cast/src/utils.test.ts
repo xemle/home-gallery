@@ -1,6 +1,7 @@
 import t from 'tap'
 
 import { getPreview } from './utils.js'
+import { TDatabaseEntry } from './types.js'
 
 t.test('getPreview', async t => {
   t.test('basic', async t => {
@@ -11,7 +12,7 @@ t.test('getPreview', async t => {
         '01/23/345-image-preview-1280.jpg',
         '01/23/345-image-preview-1920.jpg'
       ]
-    }
+    } as TDatabaseEntry
     t.match(getPreview(entry, 'image', 1280), '01/23/345-image-preview-1280.jpg')
   })
 
@@ -22,7 +23,7 @@ t.test('getPreview', async t => {
         '01/23/345-image-preview-600.jpg',
         '01/23/345-video-preview-720.jpg',
       ]
-    }
+    } as TDatabaseEntry
     t.match(getPreview(entry, 'image', 1280), '01/23/345-image-preview-600.jpg')
   })
 
@@ -33,7 +34,7 @@ t.test('getPreview', async t => {
         '01/23/345-image-preview-600.jpg',
         '01/23/345-video-preview-720.jpg',
       ]
-    }
+    } as TDatabaseEntry
     t.match(getPreview(entry, 'video', 1280), '01/23/345-video-preview-720.jpg')
   })
 
@@ -45,7 +46,7 @@ t.test('getPreview', async t => {
         '01/23/345-image-preview-1280.jpg',
         '01/23/345-image-preview-1920.jpg'
       ]
-    }
+    } as TDatabaseEntry
     t.match(getPreview(entry, 'image'), '01/23/345-image-preview-1920.jpg')
   })
 
