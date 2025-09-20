@@ -1,6 +1,8 @@
 import { spawn } from 'child_process'
 import fetch from 'node-fetch'
 
+import logger from './src/utils/logger.js';
+
 export const runCli = (command, args = [], options = {}, onExit = () => true) => {
   const env = {
     ...process.env,
@@ -11,7 +13,7 @@ export const runCli = (command, args = [], options = {}, onExit = () => true) =>
   const stderr = []
 
   child.stdout.on('data', data => {
-    console.log(data.toString('utf8'))
+    logger.info(data.toString('utf8'))
     stdout.push(data)
   })
   child.stderr.on('data', data => stderr.push(data))

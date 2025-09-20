@@ -1,14 +1,12 @@
 import pinoHttp from 'pino-http'
-import logger from '@home-gallery/logger'
 
-export const loggerMiddleware = () => {
+import logger from '../utils/logger.js'
+
+export default function loggerMiddleware() {
   const customMessage = (req, res, responseTime, err) => `${res.statusCode} ${req.method} ${req.baseUrl}${req.url} ${err ? `with error: ${err} ` : ''}${responseTime}ms`
 
   return pinoHttp({
-    logger: logger('server.request'),
-    serializers: {
-      req: req => req.raw.username ? ({...req, user: req.raw.username}) : req
-    },
+    logger,
     redact: {
       paths: ['req.headers.authorization'],
       censor: '*** (masked value)'

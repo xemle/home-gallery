@@ -2,6 +2,8 @@ import t from 'tap'
 import fetch from 'node-fetch'
 import fs from 'fs/promises'
 
+import logger from './src/utils/logger.js';
+
 import { runCli, waitForUrl } from './test-utils.js'
 
 t.test('API Server', async t => {
@@ -11,14 +13,14 @@ t.test('API Server', async t => {
 
   t.before(async () => {
     child = runCli('node', ['index.js'], { env: {PORT: '23080'}})
-    console.log(`Starting api server with pid ${child.pid}`)
+    logger.debug(`Starting api server with pid ${child.pid}`)
     await waitForUrl(`${url}/health`)
-    console.log(`Api server is up and running on ${url}`)
+    logger.info(`Api server is up and running on ${url}`)
   })
 
   t.after(async () => {
     return new Promise((resolve, rejects) => {
-      console.log(`Stop server`)
+      logger.info(`Stop server`)
       process.kill(child.pid)
       child.on('exit', code => code == 0 ? resolve() : rejects(new Error(`Server existed with code ${code}`)))
     })

@@ -1,11 +1,13 @@
 import fs from 'fs/promises';
 import path from 'path';
 
+import logger from '../../utils/logger.js';
+
 import { toArrayBuffer } from './io-utils.js';
 
 // source https://github.com/tensorflow/tfjs/blob/73a09c2357aeb2c258f7d6a52eecb341d40c9939/tfjs-node/src/io/file_system.ts
 export const loadJSONModel = async (modelPath) => {
-  console.log(`Loading model from ${modelPath}`);
+  logger.debug(`Loading model from ${modelPath}`);
   const data = await fs.readFile(modelPath, 'utf-8');
   const modelJSON = JSON.parse(data);
 

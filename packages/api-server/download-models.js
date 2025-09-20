@@ -1,3 +1,4 @@
+import logger from './src/utils/logger.js'
 import { getModelConfig, modelDir } from './src/model-config.js'
 import { downloadModels } from './src/tensorflow/index.js'
 
@@ -6,5 +7,5 @@ const download = async () => {
   await downloadModels(modelConfig, modelDir);
 }
 
-console.log(`Downloading required models`);
-download().then(() => console.log(`Download completed`), e => console.log(`Error: ${e}`));
+logger.info(`Downloading required models`);
+download().then(() => logger.info(`Download completed`), e => logger.error(e, `Error: ${e}`));

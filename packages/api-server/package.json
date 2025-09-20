@@ -30,9 +30,11 @@
     "@tensorflow/tfjs-converter": "3.21.0",
     "@tensorflow/tfjs-node": "3.21.1",
     "@vladmandic/face-api": "0.13.3",
-    "express": "^4.17.1",
-    "jpeg-js": "^0.4.3",
-    "morgan": "^1.10.0",
+    "express": "^5.1.0",
+    "jpeg-js": "^0.4.4",
+    "pino": "^9.9.0",
+    "pino-http": "^10.5.0",
+    "pino-pretty": "^13.1.1",
     "node-fetch": "^3.3.2"
   }
 }

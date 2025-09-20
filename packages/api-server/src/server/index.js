@@ -1,27 +1,31 @@
 import express from 'express';
-import morgan from 'morgan';
+
+import logger from '../utils/logger.js';
+
+import loggerMiddleware from './logger-middleware.js';
 
 export const server = async ({port}) => {
   const app = express();
 
   app.set('x-powered-by', false);
-  app.use(morgan('dev'));
+  app.use(loggerMiddleware());
 
   return new Promise(resolve => {
     let server;
 
     const shutDown = () => {
-      console.log(`Stopping server`)
+      logger.debug(`Stopping server`)
       server?.close(() => {
+        logger.info(`Stopped server`)
         process.exit(0);
       })
     }
 
-    process.on('SIGTERM', shutDown);
-    process.on('SIGINT', shutDown);
+    process.once('SIGTERM', shutDown);
+    process.once('SIGINT', shutDown);
 
     server = app.listen(port, () => {
-      console.log(`Listen on port http://localhost:${port}`);
+      logger.info(`Listen on port http://localhost:${port}`);
       resolve(app);
     });
   });
