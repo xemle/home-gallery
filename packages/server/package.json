@@ -35,13 +35,13 @@
     "@home-gallery/logger": "file:../logger",
     "@home-gallery/plugin": "file:../plugin",
     "@home-gallery/query": "file:../query",
-    "compression": "^1.7.4",
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
-    "express": "^4.17.1",
+    "express": "^5.1.0",
     "memory-cache": "^0.2.0",
-    "open": "^8.2.1",
-    "pino-http": "^6.6.0",
-    "uuid": "^8.0.0"
+    "open": "^10.2.0",
+    "pino-http": "^10.5.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@home-gallery/dev-tools": "file:../dev-tools",

@@ -2,7 +2,7 @@ import pinoHttp from 'pino-http'
 import logger from '@home-gallery/logger'
 
 export const loggerMiddleware = () => {
-  const customMessage = log => `${log.statusCode} ${log.req.method} ${log.req.baseUrl}${log.req.url} ${Date.now() - log[pinoHttp.startTime]}ms`
+  const customMessage = (req, res, responseTime, err) => `${res.statusCode} ${req.method} ${req.baseUrl}${req.url} ${err ? `with error: ${err} ` : ''}${responseTime}ms`
 
   return pinoHttp({
     logger: logger('server.request'),
@@ -13,7 +13,7 @@ export const loggerMiddleware = () => {
       paths: ['req.headers.authorization'],
       censor: '*** (masked value)'
     },
-    customLogLevel: (res, err) => {
+    customLogLevel: (req, res, err) => {
       if (res.statusCode >= 400 && res.statusCode < 500) {
         return 'warn'
       } else if (res.statusCode >= 300 && res.statusCode < 400) {
@@ -26,6 +26,6 @@ export const loggerMiddleware = () => {
       return 'debug' // default log level
     },
     customSuccessMessage: customMessage,
-    customErrorMessage: (err, o) => customMessage(o)
+    customErrorMessage: (req, res, err, responseTime) => customMessage(req, res, responseTime, err)
   })
 }
