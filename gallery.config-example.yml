@@ -196,12 +196,13 @@ sources:
   #title: 'Home Gallery'
   # Disabled webapp features
   #disabled:
+    ## feature flags
     #- edit
     #- serverEvents
     #- pwa
     #- offlineDatabase
     #- worker
-    # disable pages
+    ## UI flags
     #- yearsPage
     #- videosPage
     #- similarPage
@@ -209,6 +210,7 @@ sources:
     #- tagsPage
     #- mapPage
     #- editPage
+    #- detailPage
 
 #
 # Plugin settings
