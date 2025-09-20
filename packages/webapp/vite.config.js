@@ -70,9 +70,29 @@ export default defineConfig(() => {
       }),
       pwaConditionalPlugin({ disabled: false }),
       injectAppState({
-        disabled: false,
+        // See gallery.config-example.yml for all available options
+        disabled: [
+          /* feature flags */
+          // 'edit',
+          // 'serverEvents',
+          // 'pwa',
+          // 'offlineDatabase',
+          // 'worker',
+          /* UI flags */
+          // 'yearsPage',
+          // 'videosPage',
+          // 'similarPage',
+          // 'facesPage',
+          // 'tagsPage',
+          // 'mapPage',
+          // 'editPage',
+          // 'detailPage',
+        ],
         state: {
-          sources: [{ indexName: "Camera roll", downloadable: true }]
+          sources: [
+            // enable downloadable sources
+            //{ indexName: "Camera roll", downloadable: true }
+          ]
         }
       })
     ],
