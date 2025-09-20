@@ -1,3 +1,4 @@
+import logger from '../utils/logger.js';
 import { loadTensorflow } from './load-tensorflow.js';
 
 import { initFaceApi } from './models/face-api.js';
@@ -12,7 +13,7 @@ export const downloadModels = async (modelConfigs, cacheDir) => {
 export const load = async (backend, modelConfigs, modelDir) => {
   let t0 = Date.now();
   const tf = await loadTensorflow(backend);
-  console.log(`Load tensorflow with ${backend} backend in ${Date.now() - t0}ms`)
+  logger.info(`Load tensorflow with ${backend} backend in ${Date.now() - t0}ms`)
 
   const toTensor = (buffer, width, height) => {
     const channels = 3;
@@ -21,15 +22,15 @@ export const load = async (backend, modelConfigs, modelDir) => {
   
   t0 = Date.now();
   const { infer } = await initMobileNet(modelConfigs.mobileNet, modelDir);
-  console.log(`Loaded mobilenet model in ${Date.now() - t0}ms`)
+  logger.info(`Loaded mobilenet model in ${Date.now() - t0}ms`)
 
   t0 = Date.now();
   const { detect: faceDetect } = await initFaceApi(modelConfigs.faceApi);
-  console.log(`Loaded faceapi model in ${Date.now() - t0}ms`)
+  logger.info(`Loaded faceapi model in ${Date.now() - t0}ms`)
 
   t0 = Date.now();
   const { detect: cocoDetect }  = await initCocoSsd(modelConfigs.cocoSsd, modelDir);
-  console.log(`Loaded coco ssd model in ${Date.now() - t0}ms`)
+  logger.info(`Loaded coco ssd model in ${Date.now() - t0}ms`)
 
   return {
     embeddings: async (buffer, width, height) => {

@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 
 import { exists } from './exists.js';
+import logger from './logger.js';
 
 export const SEC_MS = 1000;
 export const MIN_MS = 60 * SEC_MS;
@@ -27,7 +28,7 @@ export const dirLock = async (lockFile, timeout, cb) => {
   // Lock download for shared directory in scaled docker environments
   const lockExists = await exists(lockFile);
   if (lockExists) {
-    console.log(`Lock file ${lockFile} exists. Wait for lock release`);
+    logger.warn(`Lock file ${lockFile} exists. Wait for lock release`);
   }
   await aquireLock(lockFile, timeout)
     .then(cb)

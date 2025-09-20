@@ -1,3 +1,4 @@
+import logger from './src/utils/logger.js'
 import { run } from './src/index.js'
 
-run().then(() => console.log(`Server is up and running`), e => console.log(`Error: ${e}`, e));
+run().then(() => logger.info(`Server is up and running`), e => logger.info(`Error: ${e}`, e));

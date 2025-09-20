@@ -1,3 +1,5 @@
+import logger from '../utils/logger.js';
+
 const ERROR_PAYLOAD_TO_LARGE = 413;
 
 export const binaryBodyMiddleware = (maxBytes) => {
@@ -10,7 +12,7 @@ export const binaryBodyMiddleware = (maxBytes) => {
         totalChunkBytes += chunk.length;
         if (totalChunkBytes > maxBytes) {
           const err = new Error(`Content limit of max ${maxBytes} bytes exceeded`);
-          console.log(err.message);
+          logger.error(err, err.message);
           res.status(ERROR_PAYLOAD_TO_LARGE).json({error: err.message});
           req.destroy();
         }
@@ -18,11 +20,11 @@ export const binaryBodyMiddleware = (maxBytes) => {
       .on('end', () => {
         const body = Buffer.concat(chunks);
         req.body = body;
-        console.log(`Read binary body with ${body.length} bytes`);
+        logger.debug(`Read binary body with ${body.length} bytes`);
         next();
       })
       .on('error', (e) => {
-        console.log(`Request error: ${e}`);
+        logger.error(e, `Request error: ${e}`);
         res.status(400).json({error: e});
       })
   }
