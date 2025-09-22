@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - webapp: Fix PWA settings with downloadable sources
 - webapp: Fix custom prefix path with vite build
+- cast: Fix command
 
 ## [1.20.0] - 2025-08-14
 
