@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json",
+  "title": "GalleryConfig",
+  "description": "HomeGallery configuration file",
+  "type": "object",
+  "properties": {
+    "baseDir": {
+      "description": "Base directory",
+      "type": "string",
+      "default": "~"
+    },
+    "configDir": {
+      "type": "string",
+      "default": "{baseDir}/.config/home-gal"
+    },
+    "configPrefix": {
+      "description": "file prefix for index, database and events",
+      "type": "string",
+      "default": ""
+    },
+    "cacheDir": {
+      "description": "Cache directory for storage directory and other cache files",
+      "type": "string",
+      "default": "{baseDir}/.cache/home-gallery"
+    }
+  }
+}

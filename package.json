@@ -8,8 +8,12 @@
     "postinstall": "npm --prefix e2e install",
     "clean": "pnpm -r clean",
     "build": "pnpm -r build",
+    "build:config": "npm-run-all schema:merge schema:merge:root schema:to-yaml",
     "test": "pnpm -r test",
-    "test:e2e": "gauge -d e2e run specs"
+    "test:e2e": "gauge -d e2e run specs",
+    "schema:merge": "pnpm -r schema:merge",
+    "schema:merge:root": "dev-cli schema merge",
+    "schema:to-yaml": "dev-cli schema to-yaml"
   },
   "bin": {
     "gallery": "./gallery.js"
@@ -98,5 +102,14 @@
     "@home-gallery/storage": "file:packages/storage",
     "@home-gallery/stream": "file:packages/stream",
     "@home-gallery/webapp": "file:packages/webapp"
+  },
+  "gallery": {
+    "config": {
+      "schema": "gallery.config.schema.json",
+      "includes": [
+        "packages/*/*.schema.json"
+      ],
+      "yaml": "gallery.config-example.next.yaml"
+    }
   }
 }

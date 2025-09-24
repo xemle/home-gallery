@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json",
+  "title": "HomeGallery configuration",
+  "description": "gallery configuration for webapp module",
+  "type": "object",
+  "properties": {}
+}
