@@ -1,4 +1,6 @@
-const defaultConfig = {
+import { AppConfig } from "./AppConfig";
+
+const defaultConfig: AppConfig = {
   /**
    * List of disabled features
    *
@@ -37,6 +39,6 @@ export const useAppConfig = () => {
     result[name] = true
   })
 
-  return result
+  return result as AppConfig
 }
 

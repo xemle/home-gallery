@@ -11,6 +11,7 @@
     "clean": "rimraf dist",
     "dev": "vite",
     "build": "vite build",
+    "build:schema": "run-s schema:to-type schema:merge",
     "schema:to-type": "dev-cli schema to-type",
     "schema:merge": "dev-cli schema merge",
     "serve": "vite preview"

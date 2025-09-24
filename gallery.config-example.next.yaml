@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json
+#
+# GalleryConfig
+#
+# HomeGallery configuration file
+
+
+
+# Base directory
+#
+# default: "~"
+#baseDir: "~"
+
+# default: {baseDir}/.config/home-gallery
+#configDir: {baseDir}/.config/home-gallery
+
+# file prefix for index, database and events
+#
+# default: ""
+#configPrefix: ""
+
+# Cache directory for storage directory and other cache files
+#
+# default: {baseDir}/.cache/home-gallery
+#cacheDir: {baseDir}/.cache/home-gallery
+
+#
+# AppConfig
+#
+# Configuration for webapp module
+#webapp:
+  # PluginManager
+  #pluginManager:
+    # PluginUrls
+    #
+    # List of plugin urls to load
+    #
+    # default: []
+    #plugins:
+      #- ...any string
+  # Web app feature flags
+  #
+  # List of feature flags to disable. By default all features are enabled.
+  #
+  # The feature flags can also be disabled by query param 'disabled'
+  #
+  # default: []
+  #disabled:
+    #- pwa
+    #- offlineDatabase
+    #- edit
+    #- serverEvents
+    #- worker
+    #- ...any string

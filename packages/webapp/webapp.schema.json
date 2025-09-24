@@ -1,8 +1,58 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json",
-  "title": "HomeGallery configuration",
+  "title": "WebappConfig",
   "description": "gallery configuration for webapp module",
   "type": "object",
-  "properties": {}
+  "properties": {
+    "webapp": {
+      "title": "AppConfig",
+      "description": "Configuration for webapp module",
+      "type": "object",
+      "properties": {
+        "pluginManager": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#webapp.pluginManager",
+          "title": "PluginManager",
+          "type": "object",
+          "properties": {
+            "plugins": {
+              "title": "PluginUrls",
+              "description": "List of plugin urls to load",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          }
+        },
+        "disabled": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#webapp.disabled",
+          "title": "Web app feature flags",
+          "description": "List of feature flags to disable. By default all features are enabled.\n\nThe feature flags can also be disabled by query param 'disabled'",
+          "default": [],
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "enum": [
+                  "pwa",
+                  "offlineDatabase",
+                  "edit",
+                  "serverEvents",
+                  "worker"
+                ]
+              },
+              {
+                "type": "string",
+                "minLength": 0
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
 }
