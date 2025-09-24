@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from "react"
 import { BrowserPluginManager } from "./plugin/browserPluginManager"
 import AppLoading from "./init/AppLoading"
-import { useAppConfig } from "./utils/useAppConfig"
+import { useAppConfig } from "./config/useAppConfig"
 import { TGalleryConfig, TGalleryContext } from "@home-gallery/types"
 import Logger from '@home-gallery/logger'
 import DefaultQueryPlugin from "./plugin/defaultQueryPlugin"

@@ -7,7 +7,7 @@ import { eventBus, fetchAll } from '../api/ApiService';
 import { createOfflineDatabase } from '../offline';
 import { useEntryStore } from '../store/entry-store';
 import { toNativeFactory } from '../utils/to-worker';
-import { useAppConfig } from '../utils/useAppConfig';
+import { useAppConfig } from '../config/useAppConfig';
 import { useOnEntries } from './useOnEntries';
 import { toAbsoluteUrl } from '../utils/toAbsoluteUrl';
 

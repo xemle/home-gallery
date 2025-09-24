@@ -7,7 +7,7 @@ import { humanizeDuration, humanizeBytes, formatDate } from "../utils/format";
 import { useTagDialog } from "../dialog/use-tag-dialog";
 import { addTags } from '../api/ApiService';
 import { Tag } from "../api/models";
-import { useAppConfig } from "../utils/useAppConfig";
+import { useAppConfig } from "../config/useAppConfig";
 import { classNames } from "../utils/class-names";
 
 export const Details = ({entry, dispatch}) => {
