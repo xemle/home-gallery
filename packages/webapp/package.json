@@ -11,6 +11,9 @@
     "clean": "rimraf dist",
     "dev": "vite",
     "build": "vite build",
+    "build:schema": "run-s schema:to-type schema:merge",
+    "schema:to-type": "dev-cli schema to-type",
+    "schema:merge": "dev-cli schema merge",
     "serve": "vite preview"
   },
   "keywords": [
@@ -31,5 +34,11 @@
     "@home-gallery/plugin": "file:../plugin",
     "@home-gallery/query": "file:../query",
     "@home-gallery/types": "file:../types"
+  },
+  "gallery": {
+    "config": {
+      "schema": "webapp.schema.json",
+      "type": "src/config/AppConfig.ts"
+    }
   }
 }

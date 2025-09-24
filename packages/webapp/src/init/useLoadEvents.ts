@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 import { useEventStore } from '../store/event-store'
 import { getEvents, eventStream, eventBus } from '../api/ApiService';
-import { useAppConfig } from '../utils/useAppConfig'
+import { useAppConfig } from '../config/useAppConfig'
 
 export const useLoadEvents = () => {
   const addEvents = useEventStore(state => state.addEvents);

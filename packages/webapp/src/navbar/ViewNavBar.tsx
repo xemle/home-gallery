@@ -8,7 +8,7 @@ import { useSearchStore } from "../store/search-store";
 import { useEditModeStore, ViewMode } from "../store/edit-mode-store";
 
 import useListLocation from '../utils/useListLocation'
-import { useAppConfig } from "../utils/useAppConfig";
+import { useAppConfig } from "../config/useAppConfig";
 import { NavItem } from "./NavItem";
 
 export const ViewNavBar = ({disableEdit}) => {

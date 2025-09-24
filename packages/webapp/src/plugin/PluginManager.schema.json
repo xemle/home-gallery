@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#webapp.pluginManager",
+  "title": "PluginManager",
+  "type": "object",
+  "properties": {
+    "plugins": {
+      "title": "PluginUrls",
+      "description": "List of plugin urls to load",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  }
+}
