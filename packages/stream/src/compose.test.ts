@@ -10,7 +10,7 @@ import { compose } from './compose.js'
 t.only('compose', async t => {
   t.test('basic', async t => {
     const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    const result = []
+    const result: number[] = []
 
 
     await pipeline(
@@ -35,7 +35,7 @@ t.only('compose', async t => {
 
   t.only('error in fist compose', async t => {
     const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    const result = []
+    const result: number[] = []
 
     let failed = false
     await pipeline(
@@ -61,7 +61,7 @@ t.only('compose', async t => {
 
   t.test('error in last compose', async t => {
     const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    const result = []
+    const result: number[] = []
 
     let failed = false
     await pipeline(
@@ -87,7 +87,7 @@ t.only('compose', async t => {
 
   t.only('error in first compose flush', async t => {
     const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    const result = []
+    const result: number[] = []
 
     let failed = false
     await pipeline(
@@ -114,7 +114,7 @@ t.only('compose', async t => {
 
   t.test('error in last compose flush', async t => {
     const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    const result = []
+    const result: number[] = []
 
     let failed = false
     await pipeline(

@@ -37,6 +37,7 @@ For add limits of 200,500,1.25,8000 the progress of index entries would be
 56001 (+8000)
 ...
  */
+import type { Stats } from 'fs';
 import Logger from '@home-gallery/logger'
 import { IIndexEntry, IWalkerFileHandler } from '../types.js';
 
@@ -72,16 +73,18 @@ type IWalkerFileLimitHandler = IWalkerFileHandler & {
   limitExceeded: () => true
 }
 
-export function createLimitFilter(entryCount: number, filename2Entry: Record<string, IIndexEntry>, addLimits: string, filter): IWalkerFileLimitHandler {
+export function createLimitFilter(entryCount: number, filename2Entry: Record<string, IIndexEntry>, addLimits: string, filter: IWalkerFileHandler): IWalkerFileLimitHandler {
   if (!addLimits) {
-    return filter;
+    const delegate = (filename: string, stat: Stats) => filter(filename, stat);
+    delegate.limitExceeded = () => false;
+    return delegate as IWalkerFileLimitHandler;
   }
 
   const fileLimit = getNewFileLimit(entryCount, addLimits);
   log.info(`Index has ${entryCount} entries. Set index limit to max ${fileLimit} new entries`)
 
   let count = 0;
-  const limitFilter = (filename, stat) => {
+  const limitFilter = (filename: string, stat: Stats) => {
     const result = filter(filename, stat);
     if (!result) {
       return result;

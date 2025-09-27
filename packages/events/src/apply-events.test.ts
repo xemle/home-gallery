@@ -1,6 +1,6 @@
 import t from 'tap'
 
-import { applyEvents } from './apply-events.ts';
+import { applyEvents } from './apply-events.js';
 import { Taggable } from './taggable.js';
 import { Event } from './models.js';
 

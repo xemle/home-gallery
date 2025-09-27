@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import { Entry } from './entry'
+import { type Entry } from './entry'
 import { useEntryStore } from './entry-store'
 
 export enum ViewMode {

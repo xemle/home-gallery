@@ -1,4 +1,4 @@
-import { TPlugin } from "@home-gallery/types"
+import type { TPlugin } from "@home-gallery/types"
 import Logger from "@home-gallery/logger"
 import { PluginSchema } from '@home-gallery/plugin'
 

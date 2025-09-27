@@ -5,13 +5,15 @@
   "type": "module",
   "main": "dist/index.js",
   "exports": {
-    "browser": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "node": {
-      "import": "./dist/node.js",
-      "types": "./dist/node.d.ts"
+    ".": {
+      "browser": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      },
+      "node": {
+        "import": "./dist/node.js",
+        "types": "./dist/node.d.ts"
+      }
     }
   },
   "files": [
@@ -19,10 +21,10 @@
     "templates"
   ],
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf dist *.tsbuildinfo",
     "build": "npm-run-all -p build:js build:types copy:templates",
     "build:js": "dev-cli build",
-    "build:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck",
+    "build:types": "tsc",
     "copy:templates": "cpy templates dist",
     "test": "tap",
     "watch": "npm-run-all -p watch:js watch:types watch:templates watch:test",

@@ -1,9 +1,9 @@
 import * as React from "react"
-import { useState, useRef, useEffect, Dispatch } from "react"
+import { useState, useRef, useEffect, type Dispatch } from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as icons from '@fortawesome/free-solid-svg-icons'
 
-import { ScrollbarActions } from "./state"
+import { type ScrollbarActions } from "./state"
 import { useClientHeight } from "./useClientHeight"
 
 import { useMouseDragging, useTouchDragging} from './useDragging'
@@ -11,9 +11,9 @@ import { classNames } from "../../utils/class-names"
 import { useClick } from "./useClick"
 
 const Icon = ({icon, onClick}) => {
-  const ref = useRef(null)
+  const ref = useRef<HTMLElement>(null)
 
-  let start
+  let start: number
   const handleDown = () => {
     start = Date.now()
   }
@@ -58,10 +58,10 @@ export interface ScrollbarHandleProps {
 }
 
 export const ScrollbarHandle = ({dispatch, top, visible, detailText, showDetail}: ScrollbarHandleProps) => {
-  const handleRef = useRef()
-  const thumbRef = useRef()
-  const upButton = useRef()
-  const downButton = useRef()
+  const handleRef = useRef<HTMLElement>(null)
+  const thumbRef = useRef<HTMLElement>(null)
+  const upButton = useRef<HTMLElement>(null)
+  const downButton = useRef<HTMLElement>(null)
 
   const mouseDrag = useMouseDragging(handleRef)
   const touchDrag = useTouchDragging(handleRef)

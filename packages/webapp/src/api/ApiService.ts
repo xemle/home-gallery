@@ -1,9 +1,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
-import { Event, EventAction } from '@home-gallery/events'
+import type { Event, EventAction } from '@home-gallery/events'
 import { pushEvent as pushEventApi, eventStream as eventStreamApi} from './api';
 import { UnsavedEventHandler } from './UnsavedEventHandler';
-import { Tag } from './models';
+import { type Tag } from './models';
 import { EventBus } from './EventBus';
 
 export { fetchAll, getEvents, mapEntriesForBrowser } from './api'

@@ -6,11 +6,12 @@ import * as icons from '@fortawesome/free-solid-svg-icons'
 import { humanizeDuration, humanizeBytes, formatDate } from "../utils/format";
 import { useTagDialog } from "../dialog/use-tag-dialog";
 import { addTags } from '../api/ApiService';
-import { Tag } from "../api/models";
+import { type Tag } from "../api/models";
 import { useAppConfig } from "../config/useAppConfig";
 import { classNames } from "../utils/class-names";
+import type { Entry } from "../store/entry";
 
-export const Details = ({entry, dispatch}) => {
+export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
   const appConfig = useAppConfig()
   const {openDialog, setDialogVisible} = useTagDialog()
 
@@ -18,11 +19,11 @@ export const Details = ({entry, dispatch}) => {
     return (<></>)
   }
 
-  const dispatchSearch = (query) => {
+  const dispatchSearch = (query: string) => {
     dispatch({type: 'search', query})
   }
 
-  const escapeSearchValue = value => /[\s+]/.test(value) ? `"${value}"` : value
+  const escapeSearchValue = (value: string) => /[\s+]/.test(value) ? `"${value}"` : value
 
   const queryTerm = (key, value, op?) => {
     let query

@@ -18,7 +18,7 @@ import { createExtractorPlugin, testEntryStream } from '../test-utils.js'
 Logger.addPretty('trace')
 const log = Logger('plugin.streamFactory.test')
 
-const stringifyName = name => `${name || 'test'}`
+const stringifyName = (name: string) => `${name || 'test'}`
   .replaceAll(/[^A-Za-z0-9]+/g, '-') // all special chars to -
   .replaceAll(/(^[-]+|[-]+$)/g, '') // trim - chars
 
@@ -144,7 +144,7 @@ t.only('StreamFactory', async t => {
       name: 'acme',
       phase: 'file',
       async create() {
-        return through((entry, _, cb) => {
+        return through((entry: TExtractorEntry, _: any, cb: (err?: any, result?: any) => void) =>  {
           if (1 < +entry.sha1sum) {
             entry.meta.acme = 'bar'
           }
@@ -201,7 +201,7 @@ t.only('StreamFactory', async t => {
       name: 'acme',
       phase: 'file',
       async create() {
-        return through((entry, _, cb) => {
+        return through((entry: any, _: any, cb: (err?: any, result?: any) => void) => {
           if (1 < +entry.sha1sum) {
             entry.meta.acme = 'bar'
           }

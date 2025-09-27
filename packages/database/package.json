@@ -8,7 +8,7 @@
     "dist"
   ],
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf dist *.tsbuildinfo",
     "build": "dev-cli build",
     "test": "tap",
     "watch": "dev-cli build --watch",

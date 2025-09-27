@@ -1,4 +1,4 @@
-import { AppConfig } from "./AppConfig";
+import { type AppConfig } from "./AppConfig";
 
 const defaultConfig: AppConfig = {
   /**

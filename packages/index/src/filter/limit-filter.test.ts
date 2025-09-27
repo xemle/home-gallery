@@ -1,4 +1,5 @@
 import t from 'tap'
+import type { Stats } from 'fs';
 
 import { getNewFileLimit, createLimitFilter } from './limit-filter.js'
 
@@ -45,7 +46,7 @@ t.test('createLimitFilter', async t => {
     'file-06',
     'file-07',
   ]
-  const results = paths.map(path => filter(path, null))
+  const results = paths.map(path => filter(path, {} as Stats))
   const expected = [
     true,  // file-01 existing
     true,  // file-02 new

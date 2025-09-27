@@ -3,7 +3,7 @@ import { pipeline } from 'stream/promises'
 
 import Logger from '@home-gallery/logger'
 import { toList, write } from '@home-gallery/stream'
-import { TExtractorStream, TExtractorFunction, TExtractor, TPlugin, TDatabaseMapperStream, TDabaseMapperFunction, TDatabaseMapper, TExtractorEntry, TStorageEntry, TQueryPlugin, TQueryAst, TQueryContext, TAst, TPluginManager, TPluginEnvironment } from '@home-gallery/types'
+import { TExtractorStream, TExtractorFunction, TExtractor, TPlugin, TDatabaseMapperStream, TDabaseMapperFunction, TDatabaseMapper, TExtractorEntry, TStorageEntry, TQueryPlugin, TQueryAst, TQueryContext, TAst, TPluginManager, TPluginEnvironment, TDatabaseEntry } from '@home-gallery/types'
 
 Logger.addPretty('trace')
 const log = Logger('testUtils')
@@ -29,7 +29,7 @@ export async function testEntryStream(streams: TExtractorStream[]) {
 }
 
 export async function testDatabaseMapperStream(stream: TDatabaseMapperStream) {
-  let data
+  let data: TDatabaseEntry[] = []
 
   const entries: Partial<TStorageEntry>[] = [
     {sha1sum: '1', type: 'image', files: [], meta: {}}, 

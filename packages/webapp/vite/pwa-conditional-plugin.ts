@@ -1,3 +1,5 @@
+import { Plugin } from 'vite'
+
 const script = `<script>
   (function(config) {
     const hasSW = 'serviceWorker' in navigator
@@ -29,12 +31,16 @@ const script = `<script>
   })(window.__homeGallery || {})
 </script>`
 
+type pwaConditionalPluginOptions = {
+  disabled?: boolean
+}
+
 /**
  * Customize the PWA integration of vite-plugin-pwa to make it conditional and integrate it with gallery config
  * 
  * @param {{disabled?: boolean}} options
  */
-export default (options = {}) => ({
+export default (options: pwaConditionalPluginOptions = {}): Plugin => ({
   name: 'gallery:pwa-conditional',
   enforce: "post",
   apply: "build",

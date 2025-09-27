@@ -1,7 +1,7 @@
 import { useReducer } from "react"
 
-import { Tag } from "../api/models"
-import { TagSuggestion, getSuggestions } from "./suggestion"
+import { type Tag } from "../api/models"
+import { type TagSuggestion, getSuggestions } from "./suggestion"
 
 export interface TagDialogState {
   inputValue: string,

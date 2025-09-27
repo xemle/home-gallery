@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
 import { useLogger, usePluginManager } from '../AppContext'
 import { useEntryStore } from '../store/entry-store'
-import { TQueryContext } from '@home-gallery/types'
+import type { TQueryContext } from '@home-gallery/types'
 import { stringifyEntry } from '@home-gallery/query'
 import { useSearchStore } from '../store/search-store'
 import { findAllEntriesByIdPrefix } from '../utils/findAllEntriesByIdPrefix'
-import { Entry } from '../store/entry'
+import { type Entry } from '../store/entry'
 
 /**
  * Bind entry store and search store with plugin manager and its executeQuery()

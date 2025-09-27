@@ -1,6 +1,6 @@
 import { Transform } from "stream";
 
-import { TExtractorEntry, TExtractorFunction, TExtractor, TExtractorStream, TExtractorTask, TPlugin, TPluginManager, TStorage, TExtractorStreamTearDown, TPluginExtension } from "@home-gallery/types";
+import type { TExtractorEntry, TExtractorFunction, TExtractor, TExtractorStream, TExtractorTask, TPlugin, TPluginManager, TStorage, TExtractorStreamTearDown, TPluginExtension } from "@home-gallery/types";
 import { through } from "@home-gallery/stream";
 import Logger from "@home-gallery/logger";
 
@@ -22,7 +22,7 @@ export class ExtractorStreamFactory {
       Promise.resolve(task(entry))
         .then(() => cb(null, entry))
         .catch((err: any) => {
-          cb(new Error(`Extractor function task ${extractor.name} for phase ${extractor.phase} failed `, {cause: err}))
+          cb(new Error(`Extractor function task ${extractor.name} for phase ${extractor.phase} failed `, { cause: err }))
         })
     })
   }

@@ -1,4 +1,4 @@
-import { Event, EventListener } from '@home-gallery/events'
+import type { Event, EventListener } from '@home-gallery/events'
 
 export class UnsavedEventHandler {
   unsavedEvents: Event[] = [];

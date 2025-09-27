@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 import { applyEvents, Event } from '@home-gallery/events'
 
-import { Entry } from './entry'
+import { type Entry } from './entry'
 import { useEntryStore } from './entry-store'
 
 

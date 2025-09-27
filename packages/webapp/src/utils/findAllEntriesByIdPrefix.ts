@@ -1,4 +1,4 @@
-import { Entry } from "../store/entry";
+import { type Entry } from "../store/entry";
 
 export const findAllEntriesByIdPrefix = (entries: Entry[], idPrefix: string) => {
   if (!entries?.length) {
