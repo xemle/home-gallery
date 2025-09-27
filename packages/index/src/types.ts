@@ -1,4 +1,4 @@
-import * as fs from 'fs'
+import type { Stats } from 'fs';
 
 export type IIndexEntry = {
   dev: number
@@ -62,4 +62,4 @@ export type IIndexEntryMatcherFn = (one: IIndexEntry, other: IIndexEntry) => boo
  * @param stat File stats
  * @returns {boolean} skip file handling. If file is a directory skip file walking
  */
-export type IWalkerFileHandler = (filename: string, stat: fs.Stats) => boolean
+export type IWalkerFileHandler = (filename: string, stat: Stats) => boolean

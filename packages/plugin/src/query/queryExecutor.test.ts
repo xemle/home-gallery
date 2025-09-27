@@ -144,9 +144,9 @@ t.only('QueryExecutor', async t => {
   t.only('add custom condition conditionaly', async t => {
     const executor = new QueryExecutor()
 
-    const isAst = ast => ast?.type && typeof ast.col == 'number'
+    const isAst = (ast: any): boolean => ast?.type && typeof ast.col == 'number'
 
-    const findAst = (ast, fn) => {
+    const findAst = (ast: any, fn: (ast: any) => boolean) => {
       if (!isAst(ast)) {
         return false
       } else if (fn(ast)) {
@@ -154,13 +154,13 @@ t.only('QueryExecutor', async t => {
       } else if (ast.orderBy && findAst(ast.orderBy, fn)) {
         return true
       } else if (Array.isArray(ast.value)) {
-        return ast.value.find(child => findAst(child, fn))
+        return ast.value.find((child: any) => findAst(child, fn))
       } else if (ast.value) {
         return findAst(ast.value, fn)
       }
     }
 
-    const isTagTrashed = ast => ast.type == 'cmp' && ast.key == 'tag' && ast.op == '=' && ast.value?.value == 'trashed'
+    const isTagTrashed = (ast: any) => ast.type == 'cmp' && ast.key == 'tag' && ast.op == '=' && ast.value?.value == 'trashed'
 
     const insertHasNoTrashedTagIfNotQueried = {
       transform(ast: TAst, context: TQueryContext) {
@@ -197,7 +197,7 @@ t.only('QueryExecutor', async t => {
     const trashedEntries = await executor.execute(entries, 'tag = trashed', context)
 
 
-    t.same(notTrashedEntriesByDefault.map(e => e.id), ['1', '2', '4'])
+    t.same(notTrashedEntriesByDefault.map((e: any) => e.id), ['1', '2', '4'])
 
     t.same(trashedEntries.length, 1)
     t.same(trashedEntries[0].id, '3')

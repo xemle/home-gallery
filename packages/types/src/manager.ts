@@ -1,7 +1,7 @@
 import { TPluginManager, TPlugin, TPluginExtension } from './plugin.js'
 
 export type TGalleryPluginManager = TPluginManager & {
-  addPlugin(plugin: TPlugin)
+  addPlugin(plugin: TPlugin): Promise<void>
   loadPlugins(): Promise<void>
   getPlugins(): TPlugin[]
   getExtensions(): TPluginExtension[]

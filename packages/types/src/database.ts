@@ -9,7 +9,7 @@ export type TDatabaseEntry = {
   hash: string,
   type: string,
   updated: string,
-  plugin: {},
+  plugin: Record<string, any>,
   [key: string]: any
 }
 

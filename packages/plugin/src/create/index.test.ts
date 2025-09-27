@@ -13,7 +13,7 @@ const testDir = path.resolve(os.tmpdir(), 'gallery-unit', `run-${process.pid}`)
 
 Logger.addPretty('trace')
 
-const stringifyName = name => `${name || 'test'}`
+const stringifyName = (name: string) => `${name || 'test'}`
   .replaceAll(/[^A-Za-z0-9]+/g, '-') // all special chars to -
   .replaceAll(/(^[-]+|[-]+$)/g, '') // trim - chars
 
