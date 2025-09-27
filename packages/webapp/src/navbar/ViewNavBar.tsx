@@ -37,19 +37,18 @@ export const ViewNavBar = ({disableEdit}) => {
         navigate('/')
         search({type: 'none'});
       },
-      hidden: appConfig.disabledSearchAllPage,
     },
     {
       icon: icons.faClock,
       text: 'Years',
       action: () => navigate('/years'),
-      hidden: appConfig.disabledYearsPage,
+      hidden: appConfig.pages?.disabled?.includes('date'),
     },
     {
       icon: icons.faPlay,
       text: 'Videos',
       action: () => navigate('/search/type:video'),
-      hidden: appConfig.disabledVideosPage,
+      hidden: appConfig.pages?.disabled?.includes('video'),
     },
     {
       icon: icons.faPen,
@@ -60,20 +59,20 @@ export const ViewNavBar = ({disableEdit}) => {
         }
         setViewMode(viewMode === ViewMode.VIEW ? ViewMode.EDIT : ViewMode.VIEW)
       },
-      disabled: disableEdit || appConfig.disabledEdit,
-      hidden: appConfig.disabledEditPage,
+      disabled: disableEdit || appConfig.disabled?.includes('edit'),
+      hidden: appConfig.pages?.disabled?.includes('edit'),
     },
     {
       icon: icons.faTags,
       text: 'Tags',
       action: () => navigate('/tags'),
-      hidden: appConfig.disabledTagsPage,
+      hidden: appConfig.pages?.disabled?.includes('tag'),
     },
     {
       icon: icons.faMap,
       text: 'Map',
       action: () => navigate('/map', {state: {listLocation}}),
-      hidden: appConfig.disabledMapPage,
+      hidden: appConfig.pages?.disabled?.includes('map'),
     },
   ]
   

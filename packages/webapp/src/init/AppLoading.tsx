@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { useAppConfig } from "../utils/useAppConfig";
+import { useAppConfig } from "../config/useAppConfig";
 type TAppLoadingProps = {
   isLoading: boolean
   hasError: boolean

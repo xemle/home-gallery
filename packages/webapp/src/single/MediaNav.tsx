@@ -4,16 +4,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as icons from '@fortawesome/free-solid-svg-icons'
 
 import { useSearchStore } from "../store/search-store";
-import { useAppConfig } from "../utils/useAppConfig"; // <-- added
+import { useAppConfig } from "../config/useAppConfig";
 
 import { getHigherPreviewUrl, getLowerPreviewUrl } from '../utils/preview'
 import { usePreviewSize } from "./usePreviewSize";
 import { classNames } from '../utils/class-names'
+import { MediaViewDisableFlags } from "./MediaViewPage";
 
 export const MediaNav = ({current, prev, next, listLocation, showNavigation, dispatch}) => {
   const query = useSearchStore(state => state.query);
   const previewSize = usePreviewSize()
-  const appConfig = useAppConfig() // <-- added
+  const appConfig = useAppConfig()
+  const diabledFlags = appConfig.pages?.mediaView?.disabled || [] as MediaViewDisableFlags
 
   const loadImage = async (url: string | false) => {
     return new Promise((resolve) => {
@@ -83,27 +85,27 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
             <FontAwesomeIcon icon={icons.faTh} className={iconClass}/>
           </a>
         }
-        {!appConfig.disabledMapPage && hasGeo &&
+        {!diabledFlags.includes('map') && hasGeo &&
           <a onClick={() => dispatch({type: 'map'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show map of entry (m)">
             <FontAwesomeIcon icon={icons.faMap} className={iconClass}/>
           </a>
         }
-        {!appConfig.disabledSimilarPage && current?.similarityHash &&
+        {!diabledFlags.includes('similar') && current?.similarityHash &&
           <a onClick={() => dispatch({type: 'similar'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show similar images (s)">
             <FontAwesomeIcon icon={icons.faSeedling} className={iconClass}/>
           </a>
         }
-        {!appConfig.removedViewerYears && query.type != 'none' &&
+        {!appConfig.pages?.disabled?.includes('date') && query.type != 'none' &&
           <a onClick={() => dispatch({type: 'chronology'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show chronology (c)">
             <FontAwesomeIcon icon={icons.faClock} className={iconClass}/>
           </a>
         }
-        {!appConfig.disabledFacesPage && current && (current.faces?.length > 0 || current.objects?.length > 0) &&
+        {!diabledFlags.includes('annotation') && current && (current.faces?.length > 0 || current.objects?.length > 0) &&
           <a onClick={() => dispatch({type: 'toggleAnnotations'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show object and face annotations (a)">
             <FontAwesomeIcon icon={icons.faUsersViewfinder} className={iconClass}/>
           </a>
         }
-        {!appConfig.removedViewerInfo && current &&
+        {!diabledFlags.includes('detail') && current &&
           <a onClick={() => dispatch({type: 'toggleDetails'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show detail info (i)">
             <FontAwesomeIcon icon={icons.faInfo} className={iconClass}/>
           </a>

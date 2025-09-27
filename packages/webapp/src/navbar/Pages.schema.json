@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#webapp.pages",
+  "title": "Pages",
+  "description": "Customize pages",
+  "default": [],
+  "type": "object",
+  "properties": {
+    "disabled": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          { "enum": ["edit", "date", "video", "map", "tag"] },
+          { "type": "string", "minLength": 0 }
+        ]
+      }
+    }
+  }
+}

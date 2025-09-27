@@ -37,11 +37,23 @@
           "items": {
             "anyOf": [
               {
+                "description": "Flags for edition tags",
                 "enum": [
-                  "pwa",
-                  "offlineDatabase",
-                  "edit",
                   "serverEvents",
+                  "events",
+                  "edit"
+                ]
+              },
+              {
+                "description": "Enable progressive web application support",
+                "enum": [
+                  "pwa"
+                ]
+              },
+              {
+                "description": "Recommended performance features. Disable them on local dev issues",
+                "enum": [
+                  "offlineDatabase",
                   "worker"
                 ]
               },
@@ -68,6 +80,59 @@
               },
               "indexName": {
                 "type": "string"
+              }
+            }
+          }
+        },
+        "pages": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#webapp.pages",
+          "title": "Pages",
+          "description": "Customize pages",
+          "default": [],
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "edit",
+                      "date",
+                      "video",
+                      "map",
+                      "tag"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 0
+                  }
+                ]
+              }
+            },
+            "mediaView": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#webapp.pages.mediaView",
+              "title": "MediaViewPage",
+              "description": "Customize single media view",
+              "default": [],
+              "type": "object",
+              "properties": {
+                "disabled": {
+                  "title": "MediaViewDisableFlags",
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "detail",
+                      "map",
+                      "similar",
+                      "annotation",
+                      "edit"
+                    ]
+                  }
+                }
               }
             }
           }

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useAppConfig } from "../utils/useAppConfig";
+import { useAppConfig } from "../config/useAppConfig";
 
 export type THotkeyAction = {
   keys: string[]
@@ -50,16 +50,18 @@ export function useMediaViewHotkeys() {
       },
       {
         keys: ['i'],
-        action: 'toggleDetails'
+        action: 'toggleDetails',
+        disabled: appConfig.pages?.mediaView?.disabled?.includes('detail')
       },
       {
         keys: ['a'],
-        action: 'toggleAnnotations'
+        action: 'toggleAnnotations',
+        disabled: appConfig.pages?.mediaView?.disabled?.includes('annotation')
       },
       {
         keys: ['s'],
         action: 'similar',
-        disabled: appConfig.disabledSimilarPage
+        disabled: appConfig.pages?.mediaView?.disabled?.includes('similar')
       },
       {
         keys: ['c'],
@@ -72,7 +74,7 @@ export function useMediaViewHotkeys() {
       {
         keys: ['m'],
         action: 'map',
-        disabled: appConfig.disabledMapPage
+        disabled: appConfig.pages?.mediaView?.disabled?.includes('map')
       }
     ]
     const [keys, keyToAction] = allHotkeys.filter(hotkey => !hotkey.disabled).reduce(([keys, map], hotkey) => {

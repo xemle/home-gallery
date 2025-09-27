@@ -46,10 +46,14 @@
   #
   # default: []
   #disabled:
-    #- pwa
-    #- offlineDatabase
-    #- edit
+    # Flags for edition tags
     #- serverEvents
+    #- events
+    #- edit
+    # Enable progressive web application support
+    #- pwa
+    # Recommended performance features. Disable them on local dev issues
+    #- offlineDatabase
     #- worker
     #- ...any string
   # MediaSources
@@ -61,3 +65,31 @@
     # default: false
     #- downloadable: false
       #indexName: ""
+  #
+  # Pages
+  #
+  # Customize pages
+  #
+  # default: []
+  #pages:
+    #disabled:
+      #- edit
+      #- date
+      #- video
+      #- map
+      #- tag
+      #- ...any string
+    #
+    # MediaViewPage
+    #
+    # Customize single media view
+    #
+    # default: []
+    #mediaView:
+      # MediaViewDisableFlags
+      #disabled:
+        #- detail
+        #- map
+        #- similar
+        #- annotation
+        #- edit

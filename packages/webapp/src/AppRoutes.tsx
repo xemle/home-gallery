@@ -14,7 +14,7 @@ import { Years, YearView } from './year/Years';
 import { Tags } from './tags/Tags';
 import { Map } from './map';
 import { MediaView } from './single/MediaView';
-import { useAppConfig } from "./utils/useAppConfig";
+import { useAppConfig } from "./config/useAppConfig";
 
 export const AppRoutes = () => {
   const appConfig = useAppConfig();
@@ -26,12 +26,14 @@ export const AppRoutes = () => {
       <Route path="/search/:term" element={<SearchView />} />
 
       {/* Optional pages routes */}
-      {!appConfig.disabledYearsPage && <Route path="/years" element={<Years />} />}
-      {!appConfig.disabledYearsPage && <Route path="/years/:year" element={<YearView />} />}
-      {!appConfig.disabledSimilarPage && <Route path="/similar/:id" element={<SimilarView />} />}
-      {!appConfig.disabledFacesPage && <Route path="/faces/:id/:faceIndex" element={<FacesView />} />}
-      {!appConfig.disabledTagsPage && <Route path="/tags" element={<Tags />} />}
-      {!appConfig.disabledMapPage && <Route path="/map" element={<Map />} />}
+      {!appConfig.pages?.disabled?.includes('date') && <Route path="/years" element={<Years />} />}
+      {!appConfig.pages?.disabled?.includes('date') && <Route path="/years/:year" element={<YearView />} />}
+      {!appConfig.pages?.disabled?.includes('tag') && <Route path="/tags" element={<Tags />} />}
+      {!appConfig.pages?.disabled?.includes('map') && <Route path="/map" element={<Map />} />}
+
+      {/* Conditional routes */}
+      {<Route path="/similar/:id" element={<SimilarView />} />}
+      {<Route path="/faces/:id/:faceIndex" element={<FacesView />} />}
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

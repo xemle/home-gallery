@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#webapp.pages.mediaView",
+  "title": "MediaViewPage",
+  "description": "Customize single media view",
+  "default": [],
+  "type": "object",
+  "properties": {
+    "disabled": {
+      "title": "MediaViewDisableFlags",
+      "type": "array",
+      "items": {
+        "enum": ["detail", "map", "similar", "annotation", "edit"]
+      }
+    }
+  }
+}
