@@ -1,8 +1,9 @@
 import { Plugin } from 'vite'
+import type { AppConfig } from '../src/config/AppConfig.js'
 
 type InjectAppStateOptions = {
-  state?: object
-  disabled?: string[]
+  state?: AppConfig
+  disabled?: boolean
 }
 
 /**
@@ -18,7 +19,7 @@ export default (options: InjectAppStateOptions = {}): Plugin => ({
      * @returns {Promise<string>}
      */
     async handler(html) {
-      if (!options.disabled?.length || !options.state) {
+      if (options.disabled || !options.state) {
         return html
       }
       
