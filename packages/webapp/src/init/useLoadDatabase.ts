@@ -18,7 +18,7 @@ export const useLoadDatabase = () => {
   const onEntries = useOnEntries()
 
   useEffect(() => {
-    onEntries(appConfig.entries)
+    onEntries(appConfig.entries as [] || [])
 
     const onDatabaseReloaded = cb => {
       eventBus.addEventListener('server', event => {
@@ -67,7 +67,7 @@ export const useLoadDatabase = () => {
     }
 
 
-    if (appConfig.disabledOfflineDatabase) {
+    if (appConfig.disabled?.includes('offlineDatabase')) {
       console.log('Feature offline database is disabled')
       loadLegacyDatabase()
     } else {

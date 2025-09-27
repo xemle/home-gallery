@@ -7,7 +7,18 @@
   "type": "array",
   "items": {
     "anyOf": [
-      { "enum": ["pwa", "offlineDatabase", "edit", "serverEvents", "worker"] },
+      {
+        "description": "Flags for edition tags",
+        "enum": ["serverEvents", "events", "edit"]
+      },
+      {
+        "description": "Enable progressive web application support",
+        "enum": ["pwa"]
+      },
+      {
+        "description": "Recommended performance features. Disable them on local dev issues",
+        "enum": ["offlineDatabase", "worker"]
+      },
       { "type": "string", "minLength": 0 }
     ]
   }

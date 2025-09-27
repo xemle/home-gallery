@@ -9,7 +9,7 @@ import Hammer from 'hammerjs';
 import { useHotkeys } from 'react-hotkeys-hook';
 import Logger from '@home-gallery/logger'
 
-import { useAppConfig } from "../utils/useAppConfig";
+import { useAppConfig } from "../config/useAppConfig";
 import { useEntryStore } from "../store/entry-store";
 import { useSearchStore } from "../store/search-store";
 import { useSingleViewStore } from "../store/single-view-store";
@@ -25,6 +25,7 @@ import useBodyDimensions from "../utils/useBodyDimensions";
 import { classNames } from '../utils/class-names'
 import { SingleTagDialogProvider } from "../dialog/tag-dialog-provider";
 import { useMediaViewHotkeys } from "./useMediaViewHotkeys";
+import { MediaViewDisableFlags } from "./MediaViewPage";
 
 const log = Logger('MediaView')
 
@@ -57,6 +58,7 @@ const encodeUrl = (url: string) => url.replace(/[\/]/g, char => encodeURICompone
 
 export const MediaView = () => {
   const appConfig = useAppConfig();
+  const disableFlags = appConfig.pages?.mediaView?.disabled || [] as MediaViewDisableFlags
   let { id } = useParams();
   let location = useLocation();
   const navigate = useNavigate();
@@ -111,11 +113,11 @@ export const MediaView = () => {
       const negate = prevNextMatch[1] == 'prev' ? -1 : 1
       const i = Math.min(entries.length - 1, Math.max(0, index + (negate * offset)))
       viewEntry(i)
-    } else if (type === 'similar' && current?.similarityHash && !appConfig.disabledSimilarPage) {
+    } else if (type === 'similar' && current?.similarityHash && !disableFlags.includes('annotation')) {
       navigate(`/similar/${current.shortId}`);
-    } else if (type === 'toggleDetails') {
+    } else if (type === 'toggleDetails' && !disableFlags.includes('detail')) {
       setShowDetails(!showDetails);
-    } else if (type === 'toggleAnnotations') {
+    } else if (type === 'toggleAnnotations' && !disableFlags.includes('annotation')) {
       setShowAnnotations(!showAnnotations);
     } else if (type === 'toggleNavigation') {
       setShowNavigation(!showNavigation);
@@ -134,7 +136,7 @@ export const MediaView = () => {
       setHideNavigation(false);
     } else if (type == 'search') {
       navigate(`/search/${encodeUrl(action.query)}`);
-    } else if (type == 'map' && current?.latitude && current?.longitude && !appConfig.disabledMapPage) {
+    } else if (type == 'map' && current?.latitude && current?.longitude && !disableFlags.includes('map')) {
       navigate(`/map?lat=${current.latitude.toFixed(5)}&lng=${current.longitude.toFixed(5)}&zoom=14`, {state: {listLocation}})
     }
   }
