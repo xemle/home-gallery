@@ -3,16 +3,24 @@
   "version": "1.0.0",
   "description": "types",
   "type": "module",
-  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "clean": "rimraf dist",
-    "build": "npm-run-all build:types",
-    "build:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck",
-    "watch": "npm-run-all -p watch:types",
-    "watch:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck --watch"
+    "clean": "rimraf dist *.tsbuildinfo",
+    "build": "npm-run-all -p build:js build:types",
+    "build:js": "dev-cli build",
+    "build:types": "tsc"
   },
   "keywords": [
     "HomeGallery",

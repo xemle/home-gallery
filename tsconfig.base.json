@@ -1,20 +1,29 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "composite": true,
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "esModuleInterop": true,
 
+    "target": "es2022",
+    "lib": ["es2022", "dom"],
     "allowJs": true,
-    "checkJs": true,
-    "declaration": true,
+    "checkJs": false,
+
     "strict": true,
-    "noImplicitAny": false,
-
-    "sourceMap": true,
-
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "emitDeclarationOnly": true
+    "forceConsistentCasingInFileNames": true,
+
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "outDir": "./dist"
   },
-  "exclude": ["**/*.test.ts"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    {
+      "path": "packages/*/tsconfig.json"
+    }
+  ]
 }

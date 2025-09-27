@@ -19,10 +19,10 @@
     "dist"
   ],
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf dist *.tsbuildinfo",
     "build": "npm-run-all -p build:js build:types",
     "build:js": "dev-cli build",
-    "build:types": "npx tsc -d --emitDeclarationOnly --skipLibCheck",
+    "build:types": "tsc",
     "test": "tap",
     "watch": "dev-cli build --watch",
     "watch:test": "tap repl w"

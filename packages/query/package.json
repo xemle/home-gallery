@@ -8,7 +8,7 @@
     "dist"
   ],
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf dist *.tsbuildinfo",
     "compile": "nearleyc -o src/parser/grammar.js src/parser/grammar.ne",
     "build": "dev-cli build",
     "watch": "npm-run-all -p watch:js watch:nearley",
