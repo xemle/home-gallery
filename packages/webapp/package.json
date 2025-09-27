@@ -8,7 +8,7 @@
     "dist"
   ],
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf dist *.tsbuildinfo",
     "dev": "vite",
     "build": "vite build",
     "build:schema": "run-s schema:to-type schema:merge",

@@ -2,8 +2,8 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
-import pwaConditionalPlugin from './vite/pwa-conditional-plugin.js'
-import injectAppState from './vite/inject-app-state.js'
+import pwaConditionalPlugin from './vite/pwa-conditional-plugin'
+import injectAppState from './vite/inject-app-state'
 
 const proxyTarget = 'http://localhost:3000';
 const serverUrls = [
@@ -77,7 +77,7 @@ export default defineConfig(() => {
       })
     ],
     resolve: {
-      extensions: ['.ts', '.tsx']
+      extensions: ['.ts', '.tsx', '.json']
     },
     server: {
       proxy
