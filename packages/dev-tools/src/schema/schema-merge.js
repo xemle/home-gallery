@@ -40,14 +40,17 @@ export async function schemaMerge() {
   })
 
   let count = 0
+  /** @type {{path: string[], subSchema: JsonSchema}[]} */
+  const subSchemas = []
   for (const file of files) {
     /** @type {JsonSchema} */
     const subSchema = JSON.parse(await readFile(file, 'utf-8'))
     /* @type {string[]} */
     const path = getSchemaPath(subSchema)
-    insertSchema(schema, subSchema, path)
+    subSchemas.push({path, subSchema})
     count++
   }
+  insertSchemas(schema, subSchemas)
 
   await writeFile(schemaFile, JSON.stringify(schema, null, 2), 'utf-8')
   console.log(`Merged ${count} schemas into ${schemaFile}`)
@@ -72,6 +75,28 @@ function getSchemaPath(/** @type {JsonSchema} */ schema) {
   } catch (e) {
     return []
   }
+}
+
+/**
+ * @param {JsonSchemaNode} node
+ * @param {{path: string[], subSchema: JsonSchemaNode | JsonSchema}[]} subSchemas
+ * @returns
+ */
+function insertSchemas(schema, subSchemas) {
+  subSchemas.sort((a, b) => {
+    if (a.path.length != b.path.length) {
+      return a.path.length - b.path.length
+    }
+    for (let i = 0; i < a.path.length; i++) {
+      const cmp = a.path[i].localeCompare(b.path[i])
+      if (cmp != 0) {
+        return cmp
+      }
+    }
+    return 0
+  }).forEach(({path, subSchema}) => {
+    insertSchema(schema, subSchema, path)
+  })
 }
 
 /**
