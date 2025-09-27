@@ -1,5 +1,4 @@
 {
-  "extends": "@tsconfig/vite-react/tsconfig.json",
   "files": [],
   "references": [
     {
