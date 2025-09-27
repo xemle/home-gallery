@@ -1,4 +1,4 @@
-import { Entry } from "../store/entry";
+import { type Entry } from "../store/entry";
 
 type DbUpgrade = (db: IDBDatabase, oldVersion: number) => void
 

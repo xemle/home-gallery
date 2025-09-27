@@ -6,8 +6,9 @@ import { ScrollbarHandle } from './ScrollbarHandle'
 import { ScrollbarOverview } from './ScrollbarOverview'
 import { useScrollPageSpeedSimple, SimplePageSpeed } from './useScrollPageSpeed'
 
-import { initialState, reducer, ScrollbarActions, ScrollbarOverviewItem, ScrollbarState, VisibleHandle } from './state'
-import { overviewItemMapper, TopDateItem } from "./overviewItemMapper";
+import { initialState, reducer } from './state'
+import type { ScrollbarActions, ScrollbarOverviewItem, ScrollbarState, VisibleHandle } from './state'
+import { overviewItemMapper, type TopDateItem } from "./overviewItemMapper";
 
 export interface ScrollbarProps {
   containerRef: React.RefObject<any>,

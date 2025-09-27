@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { classNames } from "../utils/class-names";
 import { toKey } from "../utils/toKey";
 import { useClientRect } from "../utils/useClientRect";
-import { TagSuggestion } from "./suggestion";
+import { type TagSuggestion } from "./suggestion";
 
 export const SuggestionList = ({suggestions, input, dispatch}: {suggestions: TagSuggestion[], input: any, dispatch: Function}) => {
   const [style, setStyle] = useState({})

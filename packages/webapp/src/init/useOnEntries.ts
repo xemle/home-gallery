@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 
 import { useEntryStore } from '../store/entry-store'
 import { mapEntriesForBrowser } from '../api/ApiService';
-import { Entry } from '../store/entry';
+import { type Entry } from '../store/entry';
 
 export const useOnEntries = () => {
   const addEntries = useEntryStore(state => state.addEntries);
@@ -10,7 +10,7 @@ export const useOnEntries = () => {
   let entries: Entry[] = []
   let throttleTimer: any = null
 
-  const onEntries = useCallback(newEntries => {
+  const onEntries = useCallback((newEntries: Entry[]) => {
     if (!newEntries.length) {
       return
     }

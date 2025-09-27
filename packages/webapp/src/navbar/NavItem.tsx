@@ -1,7 +1,7 @@
 import * as React from "react"
-import { MouseEventHandler } from 'react'
+import { type MouseEventHandler } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { IconDefinition } from '@fortawesome/free-solid-svg-icons'
+import { type IconDefinition } from '@fortawesome/free-solid-svg-icons'
 
 import { classNames } from '../utils/class-names'
 

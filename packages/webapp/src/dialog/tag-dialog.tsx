@@ -7,7 +7,7 @@ import { useEventStore } from '../store/event-store'
 import { useEntryStore } from '../store/entry-store'
 import { useEditModeStore } from '../store/edit-mode-store'
 import { TagInput } from "./tag-input";
-import { Tag } from "../api/models";
+import { type Tag } from "../api/models";
 import { RecentTags } from "./recent-tags";
 import { UsedTags } from "./used-tags";
 import { MultiTagHelp, SingleTagHelp } from "./tag-dialog-help";

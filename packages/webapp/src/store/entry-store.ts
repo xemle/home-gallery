@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
-import { Entry } from './entry'
+import { type Entry } from './entry'
 
 export type Id2EntryMap = {[key: string]: Entry}
 

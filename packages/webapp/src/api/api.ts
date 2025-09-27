@@ -1,4 +1,4 @@
-import { Event, EventListener } from '@home-gallery/events'
+import type { Event, EventListener } from '@home-gallery/events'
 import { fetchJsonWorker } from '../utils/fetch-json-worker'
 import { byPreviewSize } from '../utils/preview'
 import { toAbsoluteUrl } from '../utils/toAbsoluteUrl'

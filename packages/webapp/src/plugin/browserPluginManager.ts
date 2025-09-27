@@ -1,5 +1,5 @@
 import Logger from '@home-gallery/logger'
-import { TGalleryConfig, TGalleryContext, TLogger, TPlugin, TGalleryPluginManager, TQueryContext, TPluginExtension, TQueryPlugin, TExtenstionType } from "@home-gallery/types";
+import type { TGalleryConfig, TGalleryContext, TLogger, TPlugin, TGalleryPluginManager, TQueryContext, TPluginExtension, TQueryPlugin, TExtenstionType } from "@home-gallery/types";
 import { QueryExecutor, ExtensionRegistry, QuerySchema, PluginSchema, proxyRegisterForPlugin } from '@home-gallery/plugin'
 import { BrowserPluginLoader } from './browserPluginLoader';
 

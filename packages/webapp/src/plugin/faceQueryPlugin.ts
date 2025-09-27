@@ -1,4 +1,4 @@
-import { TAst, TPlugin, TPluginManager, TQueryAst, TQueryContext, TQueryPlugin } from "@home-gallery/types";
+import type { TAst, TPlugin, TPluginManager, TQueryAst, TQueryContext, TQueryPlugin } from "@home-gallery/types";
 
 const FaceQueryPlugin: TPlugin = {
   name: 'default',

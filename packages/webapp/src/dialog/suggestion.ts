@@ -1,5 +1,5 @@
-import { Tag } from "../api/models";
-import { TextMatches, TextMatchSpread, findMatches, getMatchSpreads, mergeMatches, sortSpreads } from "./find-text";
+import { type  Tag } from "../api/models";
+import { type TextMatches, type TextMatchSpread, findMatches, getMatchSpreads, mergeMatches, sortSpreads } from "./find-text";
 
 export interface SuggestionPart {
   pos: number

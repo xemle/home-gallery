@@ -6,7 +6,7 @@ import { useEditModeStore, ViewMode } from '../store/edit-mode-store';
 import { useTagDialog } from "../dialog/use-tag-dialog";
 import { addTags } from '../api/ApiService';
 import { useDeviceType, DeviceType } from "../utils/useDeviceType";
-import { Tag } from "../api/models";
+import { type Tag } from "../api/models";
 
 import { EditNavBar } from './EditNavBar';
 import { NavItem } from './NavItem';

@@ -1,11 +1,11 @@
-import React, { FunctionComponent, KeyboardEvent, useRef } from "react";
+import React, { type FunctionComponent, type KeyboardEvent, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as icons from '@fortawesome/free-solid-svg-icons'
 
-import { Tag } from "../api/models";
+import { type Tag } from "../api/models";
 import { classNames } from '../utils/class-names'
 import { toKey } from "../utils/toKey";
-import { TagSuggestion } from "./suggestion";
+import { type TagSuggestion } from "./suggestion";
 import { SuggestionList } from "./suggestion-list";
 
 const TagList = ({tags, withRemove, dispatch}: {tags: Tag[], withRemove: boolean, dispatch}) => {

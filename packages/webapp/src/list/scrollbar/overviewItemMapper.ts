@@ -1,4 +1,4 @@
-import { ScrollbarOverviewItem } from "./state"
+import { type ScrollbarOverviewItem } from "./state"
 
 import { formatDate } from '../../utils/format'
 
@@ -24,7 +24,7 @@ const setDateValue = items => {
   const hourDiff = Math.ceil(diff / HOUR_MS)
   const dayDiff = Math.ceil(diff / DAY_MS)
 
-  let dateValueFn
+  let dateValueFn: (date: Date) => string
   if (hourDiff < 6) {
     dateValueFn = date => formatDate('%H:%M:%S', date)
   } else if (hourDiff <= 24) {

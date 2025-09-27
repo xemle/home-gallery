@@ -1,4 +1,4 @@
-import { TAst, TPlugin, TPluginManager, TQueryPlugin } from "@home-gallery/types";
+import type { TAst, TPlugin, TPluginManager, TQueryPlugin } from "@home-gallery/types";
 
 const yearQuery: TQueryPlugin = {
   name: 'year',

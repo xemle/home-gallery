@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Tag } from "../api/models";
+import { type Tag } from "../api/models";
 
 import { MultiTagDialog, SingleTagDialog } from './tag-dialog'
 

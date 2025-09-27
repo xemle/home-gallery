@@ -1,8 +1,7 @@
-import { ReactNode } from 'react';
-import { useState, useEffect, useContext, FC } from 'react'
-import { LocationContext } from './LocationContext'
-import { useLocation } from 'react-router-dom'
-import { Location } from './Location';
+import { useContext, useEffect, useState, type ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
+import { type Location } from './Location';
+import { LocationContext } from './LocationContext';
 
 export const useLastLocation = () => {
   const lastLocation = useContext(LocationContext);
