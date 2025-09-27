@@ -264,7 +264,7 @@ export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
               </div>
             </div>
           )}
-          {entry.faces?.length > 0 && (
+          {!!entry.faces && entry.faces.length > 0 && (
             <div className="flex">
               <div className="flex-shrink-0 w-8">
                 <FontAwesomeIcon icon={icons.faUser} className="text-gray-300"/>

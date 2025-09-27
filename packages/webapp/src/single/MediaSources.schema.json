@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#webapp.sources",
+  "title": "MediaSources",
+  "description": "List of downloadable media sources. This list will be injected from the server",
+  "default": [],
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "downloadable": {
+        "type": "boolean",
+        "default": false
+      },
+      "indexName": {
+        "type": "string"
+      }
+    }
+  }
+}

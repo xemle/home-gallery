@@ -38,7 +38,7 @@
     # default: []
     #plugins:
       #- ...any string
-  # Web app feature flags
+  # FeatureFlags
   #
   # List of feature flags to disable. By default all features are enabled.
   #
@@ -52,3 +52,12 @@
     #- serverEvents
     #- worker
     #- ...any string
+  # MediaSources
+  #
+  # List of downloadable media sources. This list will be injected from the server
+  #
+  # default: []
+  #sources:
+    # default: false
+    #- downloadable: false
+      #indexName: ""

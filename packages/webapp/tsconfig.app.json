@@ -8,7 +8,7 @@
     "skipLibCheck": true,
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-
+    "noImplicitAny": false,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,

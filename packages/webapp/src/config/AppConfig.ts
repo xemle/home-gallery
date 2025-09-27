@@ -14,7 +14,15 @@ export type PluginUrls = string[];
  *
  * The feature flags can also be disabled by query param 'disabled'
  */
-export type WebAppFeatureFlags = (("pwa" | "offlineDatabase" | "edit" | "serverEvents" | "worker") | string)[];
+export type FeatureFlags = (("pwa" | "offlineDatabase" | "edit" | "serverEvents" | "worker") | string)[];
+/**
+ * List of downloadable media sources. This list will be injected from the server
+ */
+export type MediaSources = {
+  downloadable?: boolean;
+  indexName?: string;
+  [k: string]: unknown;
+}[];
 
 /**
  * gallery configuration for webapp module
@@ -28,7 +36,8 @@ export interface WebappConfig {
  */
 export interface AppConfig {
   pluginManager?: PluginManager;
-  disabled?: WebAppFeatureFlags;
+  disabled?: FeatureFlags;
+  sources?: MediaSources;
   [k: string]: unknown;
 }
 export interface PluginManager {

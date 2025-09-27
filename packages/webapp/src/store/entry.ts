@@ -1,4 +1,6 @@
-export interface Entry {
+import type { TDatabaseEntry } from '@home-gallery/types'
+
+export type Entry = TDatabaseEntry & {
   id: string
   hash: string
   shortId: string
