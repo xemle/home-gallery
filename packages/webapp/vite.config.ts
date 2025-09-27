@@ -70,7 +70,8 @@ export default defineConfig(() => {
       }),
       pwaConditionalPlugin({ disabled: false }),
       injectAppState({
-        disabled: false,
+        // See gallery.config-example.yml for all available options
+        disabled: true,
         state: {
           sources: [{ indexName: "Camera roll", downloadable: true }]
         }
