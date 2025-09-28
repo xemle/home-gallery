@@ -54,7 +54,12 @@ function useMediaPreviews(media, appConfig, setState: React.Dispatch<React.SetSt
   useEffect(() => {
     const mediaPreviews: MediaPreview[] = media.previews.reduce((result: MediaPreview[], url: string) => {
       const match = url.match(/image-preview-(\d+)\./)
-      if (match) {
+      if (!match) {
+        return result
+      }
+      const size = +match[1]
+      const hasSize = !!result.find(preview => preview.size == size)
+      if (!hasSize) {
         result.push({size: +match[1], url: `files/${url}`})
       }
       return result
