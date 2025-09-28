@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useClientRect } from '../utils/useClientRect';
 
-export function MediaAnnotations({media, imgRef, src}: {media: any, imgRef: React.RefObject<HTMLImageElement>, src: string}) {
+export function MediaAnnotations({media, imgRef, src}: {media: any, imgRef: React.RefObject<HTMLImageElement | null>, src: string}) {
   const navigate = useNavigate();
   const imgRect = useClientRect(imgRef);
 
@@ -20,6 +20,7 @@ export function MediaAnnotations({media, imgRef, src}: {media: any, imgRef: Reac
     if (!e || !imgRect) {
       return;
     }
+
     let { x, y, width, height } = imgRect;
     const { naturalWidth, naturalHeight } = e
     const rectRatio = width / height

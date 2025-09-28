@@ -108,8 +108,6 @@ export const MediaView = () => {
   const isUnknown = !current || (['image', 'rawImage', 'video'].indexOf(current.type) < 0)
 
   const key = current ? current.id : (Math.random() * 100000).toFixed(0);
-  const scaleSize = scaleDimensions(current, dimensions);
-  console.log(scaleSize, dimensions, current);
 
   useEffect(() => { id && setLastId(id) }, [id])
   useEffect(() => { index >= 0 && setLastIndex(index) }, [index])
@@ -185,7 +183,7 @@ export const MediaView = () => {
     dispatch({type: 'list'})
   }
 
-  console.log('Media object', current, showDetails);
+  console.log('Media object', current);
 
   return (
     <>
