@@ -137,10 +137,13 @@ function usePreviewLoading(media, imgRef, state: MediaViewImageState, zoomFactor
 
     updatePreviewState(preview.url, true, false)
 
-    const img = new Image();
-    img.onload = () => updatePreviewState(preview.url, false, true)
+    const img = new Image()
+    const ctrl = new AbortController()
+
+    img.addEventListener('load', () => updatePreviewState(preview.url, false, true), {signal: ctrl.signal})
     img.src = preview.url
 
+    return () => ctrl.abort()
   }, [imgRect, state.mediaPreviews, zoomFactor]);
 
 }
