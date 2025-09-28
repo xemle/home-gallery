@@ -57,7 +57,7 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHei
     }
 
     const updateElementTransform = () => {
-      const scale = Math.min(5, Math.max(1, transform.scale));
+      const scale = Math.min(10, Math.max(1, transform.scale));
 
       const maxX = Math.max(0, (scale * childContainsWidth - clientRect.width) / 2);
       const maxY = Math.max(0, (scale * childContainsHeight - clientRect.height) / 2);
@@ -98,7 +98,7 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHei
         initScale = transform.scale || 1;
       }
 
-      transform.scale = Math.min(5, Math.max(1, initScale * ev.scale));
+      transform.scale = Math.min(10, Math.max(1, initScale * ev.scale));
 
       logEvent(ev);
       requestElementUpdate();
