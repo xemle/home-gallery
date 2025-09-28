@@ -29,7 +29,7 @@ export const MediaViewImage = (props) => {
   const smallUrl = getLowerPreviewUrl(previews, previewSize / 4) || ''
 
   useMediaPreviews(media, appConfig, setState)
-  usePreviewLoading(media, imgRef, state.mediaPreviews, zoomFactor, setState)
+  usePreviewLoading(media, imgRef, state, zoomFactor, setState)
 
   const src = useMemo(() => {
     const url = state.mediaPreviews
@@ -79,11 +79,11 @@ function useMediaPreviews(media, appConfig, setState: React.Dispatch<React.SetSt
   }, [media, appConfig])
 }
 
-function usePreviewLoading(media, imgRef, mediaPreviews, zoomFactor, setState: React.Dispatch<React.SetStateAction<MediaViewImageState>>) {
+function usePreviewLoading(media, imgRef, state: MediaViewImageState, zoomFactor, setState: React.Dispatch<React.SetStateAction<MediaViewImageState>>) {
   const imgRect = useClientRect(imgRef);
 
   useEffect(() => {
-    if (!mediaPreviews.length || !imgRect || !media.height || !media.width) {
+    if (!state.mediaPreviews.length || !imgRect || !media.height || !media.width) {
       return
     }
 
@@ -108,12 +108,12 @@ function usePreviewLoading(media, imgRef, mediaPreviews, zoomFactor, setState: R
       requiredSize = media.height * scale
     }
 
-    let index = mediaPreviews.findIndex(preview => preview.size >= requiredSize)
+    let index = state.mediaPreviews.findIndex(preview => preview.size >= requiredSize)
     if (index < 0) {
-      index = mediaPreviews.length - 1
+      index = state.mediaPreviews.length - 1
     }
 
-    const preview = mediaPreviews[index]
+    const preview = state.mediaPreviews[index]
     if (preview.isLoading || preview.isLoaded) {
       return
     }
@@ -126,7 +126,7 @@ function usePreviewLoading(media, imgRef, mediaPreviews, zoomFactor, setState: R
           return prev
         }
 
-        mediaPreviews = [...prev.mediaPreviews]
+        const mediaPreviews = [...prev.mediaPreviews]
         mediaPreviews.splice(index, 1, {...preview, isLoading, isLoaded})
         return {
           ...prev,
@@ -141,6 +141,6 @@ function usePreviewLoading(media, imgRef, mediaPreviews, zoomFactor, setState: R
     img.onload = () => updatePreviewState(preview.url, false, true)
     img.src = preview.url
 
-  }, [imgRect, mediaPreviews, zoomFactor]);
+  }, [imgRect, state.mediaPreviews, zoomFactor]);
 
 }
