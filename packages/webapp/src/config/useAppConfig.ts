@@ -3,7 +3,6 @@ import { type AppConfig } from "./AppConfig";
 
 const defaultConfig: AppConfig = {
   title: 'Home Gallery',
-  HQzoom: false,
   disabled: [],
   pluginManager: {
     plugins: []
