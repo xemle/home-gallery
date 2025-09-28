@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { type AppConfig } from "./AppConfig";
 
 const defaultConfig: AppConfig = {
@@ -18,27 +19,29 @@ const defaultConfig: AppConfig = {
 }
 
 export const useAppConfig = () => {
-  const injectedConfig = window['__homeGallery'] || {};
+  return useMemo(() => {
+    const injectedConfig = window['__homeGallery'] || {};
 
-  const pluginManager = {
-    ...defaultConfig.pluginManager,
-    ...injectedConfig.pluginManager
-  }
+    const pluginManager = {
+      ...defaultConfig.pluginManager,
+      ...injectedConfig.pluginManager
+    }
 
-  const result = {
-    ...defaultConfig,
-    ...injectedConfig,
-    pluginManager
-  }
+    const result = {
+      ...defaultConfig,
+      ...injectedConfig,
+      pluginManager
+    }
 
-  const searchParams = new URLSearchParams(location.search?.substring(1) || '')
-  result.disabled.push(...searchParams.getAll('disabled').filter(v => !!v))
+    const searchParams = new URLSearchParams(location.search?.substring(1) || '')
+    result.disabled.push(...searchParams.getAll('disabled').filter(v => !!v))
 
-  result.disabled.forEach((feature: string) => {
-    const name = `disabled${feature[0].toUpperCase()}${feature.slice(1)}`
-    result[name] = true
-  })
+    result.disabled.forEach((feature: string) => {
+      const name = `disabled${feature[0].toUpperCase()}${feature.slice(1)}`
+      result[name] = true
+    })
 
-  return result as AppConfig
+    return result as AppConfig
+  }, [])
 }
 
