@@ -10,34 +10,25 @@ import { useAppConfig } from "../config/useAppConfig";
 type MediaPreview = {
   size: number
   url: string
-  isLoading?: boolean
-  isLoaded?: boolean
-}
-
-type MediaViewImageState = {
-  mediaPreviews: MediaPreview[]
 }
 
 export const MediaViewImage = (props) => {
   const imgRef = useRef<HTMLImageElement>(null);
   const appConfig = useAppConfig()
-  const [state, setState] = useState<MediaViewImageState>({mediaPreviews: []})
 
-  const { media, showAnnotations, zoomFactor = 1 } = props;
+  const { media, prev, next, showAnnotations, zoomFactor = 1 } = props;
   const { previews } = props.media;
   const previewSize = usePreviewSize()
   const smallUrl = getLowerPreviewUrl(previews, previewSize / 4) || ''
 
-  useMediaPreviews(media, appConfig, setState)
-  usePreviewLoading(media, imgRef, state, zoomFactor, setState)
+  const downloadableIndices = useMemo(() => {
+    const indices = appConfig.sources?.filter(s => s.downloadable && s.indexName).map(s => s.indexName) || []
+    return indices as string[]
+  }, [appConfig])
 
-  const src = useMemo(() => {
-    const url = state.mediaPreviews
-      .filter(preview => preview.isLoaded)
-      .map(preview => preview.url)
-      .pop()
-    return url || smallUrl
-  }, [state.mediaPreviews])
+  const imgRect = useClientRect(imgRef);
+  const src = useZoomableSrc(imgRect, media, downloadableIndices, zoomFactor, smallUrl)
+  usePrevNextLoading(prev, next, imgRect)
 
   return (
     <>
@@ -50,100 +41,106 @@ export const MediaViewImage = (props) => {
   )
 }
 
-function useMediaPreviews(media, appConfig, setState: React.Dispatch<React.SetStateAction<MediaViewImageState>>) {
-  useEffect(() => {
-    const mediaPreviews: MediaPreview[] = media.previews.reduce((result: MediaPreview[], url: string) => {
-      const match = url.match(/image-preview-(\d+)\./)
-      if (!match) {
-        return result
-      }
-      const size = +match[1]
-      const hasSize = !!result.find(preview => preview.size == size)
-      if (!hasSize) {
-        result.push({size: +match[1], url: `files/${url}`})
-      }
+function getMediaPreviews(media, downloadableIndices: string[] = []) {
+  const mediaPreviews: MediaPreview[] = media.previews.reduce((result: MediaPreview[], url: string) => {
+    const match = url.match(/image-preview-(\d+)\./)
+    if (!match) {
       return result
-    }, [] as MediaPreview[])
-
-    const downloadableIndices = appConfig.sources?.filter(s => s.downloadable).map(s => s.indexName) || []
-    if (downloadableIndices.length) {
-      const file = media.files.find(file => file.type == 'image' && downloadableIndices.includes(file.index))
-      if (file) {
-        const size = Math.max(media.height, media.width)
-        mediaPreviews.push({size, url: `sources/${file.index}/${file.filename}`})
-      }
     }
+    const size = +match[1]
+    const hasSize = !!result.find(preview => preview.size == size)
+    if (!hasSize) {
+      result.push({size: +match[1], url: `files/${url}`})
+    }
+    return result
+  }, [] as MediaPreview[])
 
-    mediaPreviews.sort((a, b) => a.size - b.size)
-    setState(prev => ({...prev, mediaPreviews}))
-  }, [media, appConfig])
+  if (downloadableIndices.length) {
+    const file = media.files.find(file => file.type == 'image' && downloadableIndices.includes(file.index))
+    if (file) {
+      const size = Math.max(media.height, media.width)
+      mediaPreviews.push({size, url: `sources/${file.index}/${file.filename}`})
+    }
+  }
+
+  mediaPreviews.sort((a, b) => a.size - b.size)
+  return mediaPreviews
 }
 
-function usePreviewLoading(media, imgRef, state: MediaViewImageState, zoomFactor, setState: React.Dispatch<React.SetStateAction<MediaViewImageState>>) {
-  const imgRect = useClientRect(imgRef);
+function getRequiredSize(rect: {width: number, height: number}, media: {width: number, height: number}, zoomFactor: number = 1) {
+  const rectRatio = rect.width / rect.height
+  const mediaRatio = media.width / media.height
+
+  let rectScale: number // scale factor for image to fit into rect
+  if (rectRatio > mediaRatio) {
+    rectScale = rect.height / media.height
+  } else {
+    rectScale = rect.width / media.width
+  }
+
+  const scale = rectScale * zoomFactor * (window.devicePixelRatio || 1)
+  let requiredSize: number
+  if (mediaRatio > 1) { // landscape
+    requiredSize = media.width * scale
+  } else { // portrait
+    requiredSize = media.height * scale
+  }
+
+  return requiredSize
+}
+
+function useZoomableSrc(imgRect: DOMRect | null, media: any, downloadableIndices: string[], zoomFactor, initialSrc: string) {
+  const [src, setSrc] = useState(initialSrc)
 
   useEffect(() => {
-    if (!state.mediaPreviews.length || !imgRect || !media.height || !media.width) {
+    if (!imgRect || !media?.width || !media?.height) {
       return
     }
 
-    const {width: mediaWidth, height: mediaHeight} = media
-    const {width: rectWidth, height: rectHeight} = imgRect
-
-    const rectRatio = rectWidth / rectHeight
-    const mediaRatio = mediaWidth / mediaHeight
-
-    let rectScale: number // scale factor for image to fit into rect
-    if (rectRatio > mediaRatio) {
-      rectScale = rectHeight / mediaHeight
-    } else {
-      rectScale = rectWidth / mediaWidth
-    }
-
-    const scale = rectScale * zoomFactor * (window.devicePixelRatio || 1)
-    let requiredSize: number
-    if (mediaRatio > 1) { // landscape
-      requiredSize = media.width * scale
-    } else { // portrait
-      requiredSize = media.height * scale
-    }
-
-    let index = state.mediaPreviews.findIndex(preview => preview.size >= requiredSize)
-    if (index < 0) {
-      index = state.mediaPreviews.length - 1
-    }
-
-    const preview = state.mediaPreviews[index]
-    if (preview.isLoading || preview.isLoaded) {
+    const requiredSize = getRequiredSize(imgRect, media, zoomFactor)
+    const preview = getMediaPreviews(media, downloadableIndices).find(p => p.size >= requiredSize)
+    if (!preview || preview.url == src) {
       return
     }
 
-    function updatePreviewState(url: string, isLoading: boolean, isLoaded: boolean) {
-      setState(prev => {
-        const index = prev.mediaPreviews.findIndex(preview => preview.url == url)
-        const preview = prev.mediaPreviews[index]
-        if (index < 0) {
-          return prev
-        }
-
-        const mediaPreviews = [...prev.mediaPreviews]
-        mediaPreviews.splice(index, 1, {...preview, isLoading, isLoaded})
-        return {
-          ...prev,
-          mediaPreviews
-        }
-      });
+    function handleLoad() {
+      if (preview) {
+        setSrc(preview.url)
+      }
     }
-
-    updatePreviewState(preview.url, true, false)
 
     const img = new Image()
-    const ctrl = new AbortController()
-
-    img.addEventListener('load', () => updatePreviewState(preview.url, false, true), {signal: ctrl.signal})
+    img.addEventListener('load', handleLoad)
     img.src = preview.url
 
-    return () => ctrl.abort()
-  }, [imgRect, state.mediaPreviews, zoomFactor]);
+    return () => {
+      img.removeEventListener('load', handleLoad)
+    }
+  }, [imgRect, media, zoomFactor]);
 
+  return src
+}
+
+function usePrevNextLoading(prev, next, imgRect) {
+  useEffect(() => {
+    if (!imgRect) {
+      return
+    }
+
+    function loadPreview(media) {
+      if (!media) {
+        return
+      }
+
+      const requiredSize = getRequiredSize(imgRect, media)
+      const preview = getMediaPreviews(media).find(p => p.size >= requiredSize)
+      if (preview) {
+        const img = new Image()
+        img.src = preview.url
+      }
+    }
+
+    loadPreview(prev)
+    loadPreview(next)
+  }, [prev, next, imgRect])
 }
