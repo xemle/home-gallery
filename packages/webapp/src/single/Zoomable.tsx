@@ -22,9 +22,11 @@ type ZoomableProps = {
   childWidth: number;
   childHeight: number;
   onSwipe?: (ev: HammerInput) => void
+  onZoom?: (zoomFactor: number) => void
+  children: React.ReactElement
 }
 
-export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHeight, onSwipe, children}) => {
+export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHeight, onSwipe, onZoom, children}) => {
   const ref = useRef<HTMLDivElement>();
   const [style, setStyle] = useState({});
   const clientRect = useClientRect(ref);
@@ -53,6 +55,7 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHei
         translate: { x: 0, y: 0 },
         scale: 1,
       };
+      onZoom?.(1)
       requestElementUpdate();
     }
 
@@ -68,6 +71,7 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHei
       setStyle(style => {
         return {...style, ...{transform: cssTransform}}
       });
+      onZoom?.(scale)
       ticking = false;
     }
 

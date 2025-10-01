@@ -96,6 +96,7 @@ export const MediaView = () => {
   const setShowNavigation = useSingleViewStore(actions => actions.setShowNavigation);
 
   const [hideNavigation, setHideNavigation] = useState(false)
+  const [zoomFactor, setZoomFactor] = useState(1)
 
   let index = findEntryIndex(location, entries, id);
 
@@ -195,8 +196,8 @@ export const MediaView = () => {
                 <MediaNav index={index} current={current} prev={prev} next={next} listLocation={listLocation} showNavigation={showNavigation} dispatch={dispatch} />
               }
               {isImage &&
-                <Zoomable key={key} childWidth={current.width} childHeight={current.height} onSwipe={onSwipe}>
-                  <MediaViewImage key={key} media={current} next={next} prev={prev} showAnnotations={showAnnotations}/>
+                <Zoomable key={key} childWidth={current.width} childHeight={current.height} onSwipe={onSwipe} onZoom={setZoomFactor}>
+                  <MediaViewImage key={key} media={current} next={next} prev={prev} showAnnotations={showAnnotations} zoomFactor={zoomFactor}/>
                 </Zoomable>
               }
               {isVideo &&
