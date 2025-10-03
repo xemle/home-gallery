@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react'
 import { throttle } from './throttle'
 
+const hasReizeObserver = typeof ResizeObserver === 'function'
 const defaultRect: DOMRect = new DOMRect(0, 0, window?.innerWidth || 0, window?.innerHeight || 0)
 
 export const useClientRect = (ref: React.RefObject<HTMLElement | null>, pollingMs = 0) => {
@@ -17,26 +18,29 @@ export const useClientRect = (ref: React.RefObject<HTMLElement | null>, pollingM
     })
   }, [])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!ref.current) {
       return
     }
     updateRect()
 
-    const element = ref.current
-    const observer = new ResizeObserver(updateRect)
-    observer.observe(element)
+    if (hasReizeObserver) {
+      const element = ref.current
+      const observer = new ResizeObserver(updateRect)
+      observer.observe(element)
+
+      return () => {
+        observer.unobserve(element)
+      }
+    }
+
+    // missing ResizeObserver fallback
+    const throttledUpdate = throttle(updateRect, 1000 / 60)
+    window.addEventListener('resize', throttledUpdate)
     return () => {
-      observer.unobserve(element)
+      window.removeEventListener('resize', throttledUpdate)
     }
   }, [ref])
-
-  useEffect(() => {
-    const throttledUpdate = throttle(updateRect, 1000 / 60)
-
-    window.addEventListener('resize', throttledUpdate)
-    return () => window.removeEventListener('resize', throttledUpdate)
-  }, [])
 
   useEffect(() => {
     if (pollingMs <= 0) {

@@ -67,6 +67,18 @@ function getMediaPreviews(media, downloadableIndices: string[] = []) {
   return mediaPreviews
 }
 
+function getRequiredMediaPreview(previews: MediaPreview[], requiredSize: number) {
+  if (previews.length == 0) {
+    return null
+  }
+  const preview = previews.find(p => p.size >= requiredSize)
+  if (preview) {
+    return preview
+  }
+
+  return previews[previews.length - 1]
+}
+
 function getRequiredSize(rect: {width: number, height: number}, media: {width: number, height: number}, zoomFactor: number = 1) {
   const rectRatio = rect.width / rect.height
   const mediaRatio = media.width / media.height
@@ -98,15 +110,17 @@ function useZoomableSrc(imgRect: DOMRect | null, media: any, downloadableIndices
     }
 
     const requiredSize = getRequiredSize(imgRect, media, zoomFactor)
-    const preview = getMediaPreviews(media, downloadableIndices).find(p => p.size >= requiredSize)
+    const previews = getMediaPreviews(media, downloadableIndices)
+    const preview = getRequiredMediaPreview(previews, requiredSize)
     if (!preview || preview.url == src) {
       return
     }
 
     function handleLoad() {
-      if (preview) {
-        setSrc(preview.url)
+      if (!preview) {
+        return
       }
+      setSrc(preview.url)
     }
 
     const img = new Image()
@@ -133,7 +147,9 @@ function usePrevNextLoading(prev, next, imgRect) {
       }
 
       const requiredSize = getRequiredSize(imgRect, media)
-      const preview = getMediaPreviews(media).find(p => p.size >= requiredSize)
+      const previews = getMediaPreviews(media)
+      const preview = getRequiredMediaPreview(previews, requiredSize)
+
       if (preview) {
         const img = new Image()
         img.src = preview.url

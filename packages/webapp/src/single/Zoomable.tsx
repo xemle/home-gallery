@@ -164,8 +164,6 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHei
       }
     });
 
-    console.log('init layoutEffect');
-
     const onWheel = (ev) => {
       if (transform.scale == 1 && !ev.shiftKey) {
         return
@@ -184,7 +182,6 @@ export const Zoomable: FunctionComponent<ZoomableProps> = ({childWidth, childHei
     el.addEventListener('mousedown', onMouseDown, false)
 
     return () => {
-      console.log('reset layoutEffect');
       el.removeEventListener('wheel', onWheel)
       el.removeEventListener('mousedown', onMouseDown)
       if (!mc) {
