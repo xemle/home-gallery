@@ -14,19 +14,27 @@ import { Years, YearView } from './year/Years';
 import { Tags } from './tags/Tags';
 import { Map } from './map';
 import { MediaView } from './single/MediaView';
+import { useAppConfig } from "./config/useAppConfig";
 
 export const AppRoutes = () => {
+  const appConfig = useAppConfig();
+
   return (
     <Routes>
       <Route path="/" element={<AllView />} />
-      <Route path="/years" element={<Years />} />
-      <Route path="/years/:year" element={<YearView />} />
       <Route path="/view/:id" element={<MediaView />} />
-      <Route path="/similar/:id" element={<SimilarView />} />
       <Route path="/search/:term" element={<SearchView />} />
-      <Route path="/faces/:id/:faceIndex" element={<FacesView />} />
-      <Route path="/tags" element={<Tags />} />
-      <Route path="/map" element={<Map />} />
+
+      {/* Optional pages routes */}
+      {!appConfig.pages?.disabled?.includes('date') && <Route path="/years" element={<Years />} />}
+      {!appConfig.pages?.disabled?.includes('date') && <Route path="/years/:year" element={<YearView />} />}
+      {!appConfig.pages?.disabled?.includes('tag') && <Route path="/tags" element={<Tags />} />}
+      {!appConfig.pages?.disabled?.includes('map') && <Route path="/map" element={<Map />} />}
+
+      {/* Conditional routes */}
+      {<Route path="/similar/:id" element={<SimilarView />} />}
+      {<Route path="/faces/:id/:faceIndex" element={<FacesView />} />}
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

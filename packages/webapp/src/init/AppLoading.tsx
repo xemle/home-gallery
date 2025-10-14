@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-
+import { useAppConfig } from "../config/useAppConfig";
 type TAppLoadingProps = {
   isLoading: boolean
   hasError: boolean
@@ -47,6 +47,14 @@ const AppIcon : React.FC<{state: TAppLoadingProps}> = ({state}) => {
 }
 
 export const AppLoading : React.FC<{state: TAppLoadingProps}> = ({state}) => {
+  const appConfig = useAppConfig();
+
+  useEffect(() => {
+    if (appConfig.title) {
+      document.title = appConfig.title;
+    }
+  }, []);
+
   return (
     <div id="app-loader">
       <div className="container">
@@ -61,5 +69,6 @@ export const AppLoading : React.FC<{state: TAppLoadingProps}> = ({state}) => {
     </div>
   )
 }
+
 
 export default AppLoading

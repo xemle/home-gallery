@@ -7,7 +7,9 @@ import {
 } from "react-router-dom";
 import Hammer from 'hammerjs';
 import { useHotkeys } from 'react-hotkeys-hook';
+import Logger from '@home-gallery/logger'
 
+import { useAppConfig } from "../config/useAppConfig";
 import { useEntryStore } from "../store/entry-store";
 import { useSearchStore } from "../store/search-store";
 import { useSingleViewStore } from "../store/single-view-store";
@@ -22,6 +24,10 @@ import { Zoomable } from "./Zoomable";
 import useBodyDimensions from "../utils/useBodyDimensions";
 import { classNames } from '../utils/class-names'
 import { SingleTagDialogProvider } from "../dialog/tag-dialog-provider";
+import { useMediaViewHotkeys } from "./useMediaViewHotkeys";
+import { MediaViewDisableFlags } from "./MediaViewPage";
+
+const log = Logger('MediaView')
 
 const findEntryIndex = (location, entries, id) => {
   if (location.state?.index && entries[location.state.index]?.id.startsWith(id)) {
@@ -50,33 +56,9 @@ const scaleDimensions = (media, device) => {
 
 const encodeUrl = (url: string) => url.replace(/[\/]/g, char => encodeURIComponent(char))
 
-const hotkeysToAction = {
-  'home': 'first',
-  'arrowleft,j,backspace': 'prev',
-  'ctrl+arrowleft': 'prev-10',
-  'ctrl+shift+arrowleft': 'prev-100',
-  'arrowright,k,space': 'next',
-  'ctrl+arrowright': 'next-10',
-  'ctrl+shift+arrowright': 'next-100',
-  'end': 'last',
-  'esc': 'list',
-  'i': 'toggleDetails',
-  'a': 'toggleAnnotations',
-  's': 'similar',
-  'c': 'chronology',
-  't': 'toggleNavigation',
-  'm': 'map'
-}
-
-const allHotkeys = Object.keys(hotkeysToAction).join(',')
-const hotkeyToAction = Object.entries(hotkeysToAction).reduce((result, [hotkeys, action]) => {
-  hotkeys.split(',').forEach(hotkey => {
-    result[hotkey] = action
-  })
-  return result
-}, {})
-
 export const MediaView = () => {
+  const appConfig = useAppConfig();
+  const disableFlags = appConfig.pages?.mediaView?.disabled || [] as MediaViewDisableFlags
   let { id } = useParams();
   let location = useLocation();
   const navigate = useNavigate();
@@ -97,6 +79,8 @@ export const MediaView = () => {
 
   const [hideNavigation, setHideNavigation] = useState(false)
   const [zoomFactor, setZoomFactor] = useState(1)
+
+  const [hotkeys, hotkeyToAction] = useMediaViewHotkeys();
 
   let index = findEntryIndex(location, entries, id);
 
@@ -129,11 +113,11 @@ export const MediaView = () => {
       const negate = prevNextMatch[1] == 'prev' ? -1 : 1
       const i = Math.min(entries.length - 1, Math.max(0, index + (negate * offset)))
       viewEntry(i)
-    } else if (type === 'similar' && current?.similarityHash) {
+    } else if (type === 'similar' && current?.similarityHash && !disableFlags.includes('annotation')) {
       navigate(`/similar/${current.shortId}`);
-    } else if (type === 'toggleDetails') {
+    } else if (type === 'toggleDetails' && !disableFlags.includes('detail')) {
       setShowDetails(!showDetails);
-    } else if (type === 'toggleAnnotations') {
+    } else if (type === 'toggleAnnotations' && !disableFlags.includes('annotation')) {
       setShowAnnotations(!showAnnotations);
     } else if (type === 'toggleNavigation') {
       setShowNavigation(!showNavigation);
@@ -152,7 +136,7 @@ export const MediaView = () => {
       setHideNavigation(false);
     } else if (type == 'search') {
       navigate(`/search/${encodeUrl(action.query)}`);
-    } else if (type == 'map') {
+    } else if (type == 'map' && current?.latitude && current?.longitude && !disableFlags.includes('map')) {
       navigate(`/map?lat=${current.latitude.toFixed(5)}&lng=${current.longitude.toFixed(5)}&zoom=14`, {state: {listLocation}})
     }
   }
@@ -165,14 +149,17 @@ export const MediaView = () => {
     }
   }
 
-  useHotkeys(allHotkeys, (ev, handler) => {
+  useHotkeys(hotkeys, (ev, handler) => {
     const handlerKey = (handler.ctrl ? 'ctrl+' : '') + (handler.shift ? 'shift+' : '') + (handler.alt ? 'alt+' : '') + (handler.keys || []).join('+')
     const action = hotkeyToAction[handlerKey]
-    if (action) {
-      console.log(`Catch hotkey ${handlerKey} for action ${action}`)
-      dispatch({type: action})
-      ev.preventDefault()
+
+    if (!action) {
+      log.warn(`Hotkey action of ${handlerKey} not found`)
+      return
     }
+
+    dispatch({type: action})
+    ev.preventDefault()
   }, [index, showDetails, showAnnotations, showNavigation])
 
   const mediaVanishes = index < 0 && lastIndex >= 0 && entries.length > 0

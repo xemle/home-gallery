@@ -11,6 +11,16 @@ import useListLocation from '../utils/useListLocation'
 import { useAppConfig } from "../config/useAppConfig";
 import { NavItem } from "./NavItem";
 
+type TNavItem = {
+  icon: any
+  text: string
+  action: () => void
+  // if true the item is shown but not clickable
+  disabled?: boolean
+  // if true the item is not shown at all
+  hidden?: boolean
+}
+
 export const ViewNavBar = ({disableEdit}) => {
   const search = useSearchStore(state => state.search);
   const viewMode = useEditModeStore(state => state.viewMode);
@@ -19,7 +29,7 @@ export const ViewNavBar = ({disableEdit}) => {
   const listLocation = useListLocation()
   const appConfig = useAppConfig()
 
-  const items = [
+  const items: TNavItem[] = [
     {
       icon: icons.faGlobe,
       text: 'Show All',
@@ -27,19 +37,18 @@ export const ViewNavBar = ({disableEdit}) => {
         navigate('/')
         search({type: 'none'});
       },
-      disabled: false,
     },
     {
       icon: icons.faClock,
       text: 'Years',
       action: () => navigate('/years'),
-      disabled: false,
+      hidden: appConfig.pages?.disabled?.includes('date'),
     },
     {
       icon: icons.faPlay,
       text: 'Videos',
       action: () => navigate('/search/type:video'),
-      disabled: false,
+      hidden: appConfig.pages?.disabled?.includes('video'),
     },
     {
       icon: icons.faPen,
@@ -50,25 +59,26 @@ export const ViewNavBar = ({disableEdit}) => {
         }
         setViewMode(viewMode === ViewMode.VIEW ? ViewMode.EDIT : ViewMode.VIEW)
       },
-      disabled: disableEdit || appConfig.disabledEdit,
+      disabled: disableEdit || appConfig.disabled?.includes('edit'),
+      hidden: appConfig.pages?.disabled?.includes('edit'),
     },
     {
       icon: icons.faTags,
       text: 'Tags',
       action: () => navigate('/tags'),
-      disabled: false,
+      hidden: appConfig.pages?.disabled?.includes('tag'),
     },
     {
       icon: icons.faMap,
       text: 'Map',
       action: () => navigate('/map', {state: {listLocation}}),
-      disabled: false,
+      hidden: appConfig.pages?.disabled?.includes('map'),
     },
   ]
-
+  
   return (
     <>
-      {items.map((item, key) => (
+      {items.filter(item => !item.hidden).map((item, key) => (
         <NavItem key={key} onClick={item.action} icon={item.icon} text={item.text} disabled={item.disabled} />
       ))}
     </>

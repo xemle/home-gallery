@@ -192,13 +192,25 @@ sources:
 # Webapp configuration
 #
 #webapp:
+  # Site title
+  #title: 'Home Gallery'
   # Disabled webapp features
   #disabled:
+    ## feature flags
     #- edit
     #- serverEvents
     #- pwa
     #- offlineDatabase
     #- worker
+    ## UI flags
+    #- yearsPage
+    #- videosPage
+    #- similarPage
+    #- facesPage
+    #- tagsPage
+    #- mapPage
+    #- editPage
+    #- detailPage
 
 #
 # Plugin settings

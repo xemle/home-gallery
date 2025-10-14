@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { type AppConfig } from "./AppConfig";
 
 const defaultConfig: AppConfig = {
+  title: 'Home Gallery',
   disabled: [],
   pluginManager: {
     plugins: []
@@ -30,4 +31,3 @@ export const useAppConfig = () => {
     return result as AppConfig
   }, [])
 }
-
