@@ -82,7 +82,7 @@ export async function startServer(options) {
   context.pluginManager = pluginManager
   context.executeQuery = createQueryExecutor(pluginManager)
 
-  const { app, initDatabase } = createApp(context)
+  const { app, initDatabase } = await createApp(context)
 
   return new Promise((resolve, reject) => {
     const { key, cert, port, host } = config.server

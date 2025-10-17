@@ -59,7 +59,7 @@ const routerPrefix = basePath => {
 /**
  * @param {import('./types.js').TServerContext} context
  */
-export function createApp(context) {
+export async function createApp(context) {
   const { config } = context
   const app = express();
   app.disable('x-powered-by')
