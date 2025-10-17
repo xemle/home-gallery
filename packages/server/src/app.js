@@ -82,13 +82,10 @@ export async function createApp(context) {
 
   router.use(bodyParser.json({limit: '1mb'}))
 
-  const { read: readEvents, push: pushEvent, stream, getEvents } = eventsApi(context, config.events.file);
-  const { read: readDatabase, init: initDatabase, getFirstEntries, getDatabase } = databaseApi(context, config.database.file, getEvents);
+  await eventsApi(context)
+  const { read: readDatabase, init: initDatabase, getFirstEntries, getDatabase } = databaseApi(context, config.database.file, context.events.read);
   const { read: readTree } = treeApi(context, getDatabase);
 
-  router.get('/api/events.json', readEvents);
-  router.get('/api/events/stream', stream);
-  router.post('/api/events', pushEvent);
   router.get('/api/database.json', readDatabase);
   router.get('/api/database/tree/:hash', readTree);
   router.use('/api/sources', getSourcesApi(config))

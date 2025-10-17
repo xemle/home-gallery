@@ -13,8 +13,9 @@ import { sendError } from '../error/index.js';
  * @param {string} eventsFilename
  * @returns
  */
-export const eventsApi = (context, eventsFilename) => {
-  const { eventbus } = context
+export async function eventsApi(context) {
+  const { config, eventbus, router } = context
+  const eventsFilename = config.events.file
   let clients = [];
   let events = false;
 
@@ -154,11 +155,13 @@ export const eventsApi = (context, eventsFilename) => {
     });
   }
 
-  brideServerEvents(['server']);
-  return {
-    read,
-    stream,
-    push,
-    getEvents
-  };
+  brideServerEvents(['server'])
+
+  context.events = {
+    read: getEvents
+  }
+
+  router.get('/api/events.json', read)
+  router.post('/api/events', push)
+  router.get('/api/events/stream', stream)
 }
