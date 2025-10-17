@@ -14,7 +14,7 @@ import { webapp } from './webapp.js';
 import { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
 import { isIndex, skipIf } from './utils.js'
 import { debugApi } from './api/debug/index.js'
-import { browserPlugin } from './browser-plugins.js';
+import { browserPlugins } from './browser-plugins.js';
 import Logger from '@home-gallery/logger';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -77,8 +77,7 @@ export async function createApp(context) {
 
   router.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
 
-  const pluginApi = browserPlugin(context, '/plugins/')
-  router.use('/plugins', pluginApi.static)
+  await browserPlugins(context)
 
   router.use(bodyParser.json({limit: '1mb'}))
 
@@ -86,15 +85,7 @@ export async function createApp(context) {
   await databaseApi(context)
   await treeApi(context)
   await sourcesApi(context)
-
-  if (config.server.remoteConsoleToken) {
-    const { console } = debugApi({remoteConsoleToken: config.server?.remoteConsoleToken})
-    router.post('/api/debug/console', console);
-  }
-
-  // deprecated
-  router.get('/api/database', readDatabase);
-  router.get('/api/events', readEvents);
+  await debugApi(context)
 
   async function getWebAppState(req) {
     const disabled = config?.webapp?.disabled || []

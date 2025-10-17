@@ -4,7 +4,13 @@ const log = Logger('server.api.debug');
 
 import { sendError } from '../error/index.js';
 
-export const debugApi = ({remoteConsoleToken}) => {
+export async function debugApi(context) {
+  const { config, router } = context
+  const remoteConsoleToken = config?.server?.remoteConsoleToken
+
+  if (!remoteConsoleToken) {
+    return
+  }
 
   const generateToken = () => {
     return 'xxxxxx-xxxxxx'.replace(/x/g, () => {
@@ -44,7 +50,5 @@ export const debugApi = ({remoteConsoleToken}) => {
     res.sendStatus(201)
   }
 
-  return {
-    console,
-  };
+  router.post('/api/debug/console', console)
 }
