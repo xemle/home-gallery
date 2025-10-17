@@ -119,9 +119,11 @@ t.test('cmp', async t => {
     t.same(await execQuery('M = 8'), ['1234'], 'minute short')
   })
 
-  t.same(await execQuery('id = 1234567890'), ['1234'], 'id with equal')
-  t.same(await execQuery('id != 1234567890'), ['0987', '1223', '6718'], 'id with not equal')
-  t.same(await execQuery('id ~ 5678'), ['1234'], 'id with contains')
+  t.same(await execQuery('id = 12345'), ['1234'], 'id with equal')
+  t.same(await execQuery('id = 1234'), [], 'id with equal to short')
+  t.same(await execQuery('id != 12345'), ['0987', '1223', '6718'], 'id with not equal')
+  t.same(await execQuery('id ~ 56789'), ['1234'], 'id with contains')
+  t.same(await execQuery('id ~ 5678'), [], 'id with contains. To short')
 
   t.same(await execQuery('type = video'), ['6718'], 'type with equal')
   t.same(await execQuery('type != image'), ['6718'], 'type with not equal')
