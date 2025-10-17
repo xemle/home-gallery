@@ -9,7 +9,7 @@ import { loggerMiddleware } from './logger-middleware.js'
 import { databaseApi } from './api/database/index.js';
 import { treeApi } from './api/database/tree/index.js';
 import { eventsApi } from './api/events/index.js';
-import { getSourcesApi } from './api/sources.js';
+import { sourcesApi } from './api/sources.js';
 import { webapp } from './webapp.js';
 import { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
 import { isIndex, skipIf } from './utils.js'
@@ -85,8 +85,7 @@ export async function createApp(context) {
   await eventsApi(context)
   await databaseApi(context)
   await treeApi(context)
-
-  router.use('/api/sources', getSourcesApi(config))
+  await sourcesApi(context)
 
   if (config.server.remoteConsoleToken) {
     const { console } = debugApi({remoteConsoleToken: config.server?.remoteConsoleToken})
