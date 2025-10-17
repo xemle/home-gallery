@@ -12,10 +12,11 @@ import { eventsApi } from './api/events/index.js';
 import { sourcesApi } from './api/sources.js';
 import { webapp } from './webapp.js';
 import { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
-import { isIndex, skipIf } from './utils.js'
+import { isIndex, skipIf, browserBasePath, routerPrefix } from './utils.js'
 import { debugApi } from './api/debug/index.js'
 import { browserPlugins } from './browser-plugins.js';
 import Logger from '@home-gallery/logger';
+import { webappMiddleware } from './webapp-middleware.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const webappDir = path.join(__dirname, 'public')
@@ -38,23 +39,6 @@ const getAuthMiddleware = config => {
   }
   return (req, _, next) => next()
 }
-
-/**
- * Ensure leading and tailing slash. Allow base path with schema like http://foo.com/bar
- */
-const browserBasePath = basePath => {
-  let path = `${basePath || '/'}`
-  if (!path.startsWith('/') && path.indexOf('://') < 0) {
-    path = '/' + path
-  }
-  return path.endsWith('/') ? path : path + '/'
-}
-
-const routerPrefix = basePath => {
-  let path = browserBasePath(basePath)
-  return path.match(/[^/]\/$/) ? path.substring(0, path.length - 1) : path
-}
-
 
 /**
  * @param {import('./types.js').TServerContext} context
@@ -87,39 +71,11 @@ export async function createApp(context) {
   await sourcesApi(context)
   await debugApi(context)
 
-  async function getWebAppState(req) {
-    const disabled = config?.webapp?.disabled || []
-    const plugins = pluginApi.pluginEntries
-    const entries = await context.database.getFirstEntries(50, req)
-    const sources = (config.sources || []).filter(source => source.downloadable && !source.offline)
-      .map(source => {
-        const indexName = path.basename(source.index).replace(/\.[^.]+$/, '')
-        return {
-          indexName,
-          downloadable: true,
-        }
-    });
-    return {
-      disabled: !!req.username ? [...disabled, 'pwa'] : disabled,
-      pluginManager: {
-        plugins
-      },
-      entries,
-      sources,
-      title: config?.webapp?.title || 'Home Gallery'
-    }
-  }
+  await webappMiddleware(context)
+  await webapp(context)
 
-  const webAppOptions = {
-    basePath: browserBasePath(config.server.prefix || config.server.basePath),
-    injectRemoteConsole: !!config.server.remoteConsoleToken,
-  }
-
-  router.use(webapp(webappDir, getWebAppState, webAppOptions))
-
-  const prefix = routerPrefix(config.server.prefix)
+  const prefix = routerPrefix(config.server?.prefix)
   app.use(prefix, router)
-
 
   if (prefix != '/') {
     log.info(`Set prefix to ${prefix}`)
