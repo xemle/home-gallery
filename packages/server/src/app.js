@@ -103,7 +103,6 @@ export function createApp(context) {
   router.get('/api/events', readEvents);
 
   const getWebAppState = async (req) => {
-	const HQzoom = config?.webapp?.HQzoom || false
     const disabled = config?.webapp?.disabled || []
     const plugins = pluginApi.pluginEntries
     const entries = await getFirstEntries(50, req)
@@ -116,7 +115,6 @@ export function createApp(context) {
         }
     });
     return {
-	  HQzoom: config?.webapp?.HQzoom || false,
       disabled: !!req.username ? [...disabled, 'pwa'] : disabled,
       pluginManager: {
         plugins
