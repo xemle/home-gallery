@@ -9,8 +9,8 @@ const log = Logger('server.api.database.tree');
 /**
  * @param {import('../../../types.js').TServerContext} context
  */
-export const treeApi = (context, getDatabase) => {
-  const { config, eventbus, executeQuery } = context
+export async function treeApi(context) {
+  const { config, eventbus, router, database: { read: readDatabase }, executeQuery } = context
   const treeConfig = config?.server?.api?.tree || {}
 
   let userStores = {}
@@ -30,7 +30,7 @@ export const treeApi = (context, getDatabase) => {
   }
 
   const buildObjectStore = async (req) => {
-    const entries = getDatabase()?.data || []
+    const entries = readDatabase()?.data || []
     if (!entries.length) {
       log.debug(`Skip building object store for offline database due empty database`)
       return
@@ -77,27 +77,25 @@ export const treeApi = (context, getDatabase) => {
     }
   })
 
-  return {
-    read: async (req, res) => {
-      const hashRef = req.params.hash?.replace(/\.json$/i, '')
+  router.get('/api/database/tree/:hash', async (req, res) => {
+    const hashRef = req.params.hash?.replace(/\.json$/i, '')
 
-      const storeId = getStoreId(req)
-      if (!userStores[storeId]?.rootId) {
-        await buildObjectStore(req)
-      }
-      const rootId = userStores[storeId]?.rootId || ''
-      const hash = hashRef == 'root' ? rootId : hashRef
-      if (!hash) {
-        return sendError(res, 421, `Tree reference is missing or empty`)
-      }
-
-      const data = objectStore.getByHash(hash)
-      if (!data) {
-        return sendError(res, 404, `Object not found`)
-      }
-
-      res.set('Content-Type', 'application/json')
-      return res.send(data)
+    const storeId = getStoreId(req)
+    if (!userStores[storeId]?.rootId) {
+      await buildObjectStore(req)
     }
-  }
+    const rootId = userStores[storeId]?.rootId || ''
+    const hash = hashRef == 'root' ? rootId : hashRef
+    if (!hash) {
+      return sendError(res, 421, `Tree reference is missing or empty`)
+    }
+
+    const data = objectStore.getByHash(hash)
+    if (!data) {
+      return sendError(res, 404, `Object not found`)
+    }
+
+    res.set('Content-Type', 'application/json')
+    return res.send(data)
+  })
 }

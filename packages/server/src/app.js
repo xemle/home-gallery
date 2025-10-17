@@ -84,9 +84,8 @@ export async function createApp(context) {
 
   await eventsApi(context)
   await databaseApi(context)
-  const { read: readTree } = treeApi(context, context.database.read);
+  await treeApi(context)
 
-  router.get('/api/database/tree/:hash', readTree);
   router.use('/api/sources', getSourcesApi(config))
 
   if (config.server.remoteConsoleToken) {
