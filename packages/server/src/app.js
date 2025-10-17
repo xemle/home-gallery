@@ -61,13 +61,13 @@ const routerPrefix = basePath => {
  */
 export async function createApp(context) {
   const { config } = context
-  const app = express();
+  const app = context.app = express();
   app.disable('x-powered-by')
   app.enable('trust proxy')
   app.use(augmentReqByUserMiddleware())
   app.use(loggerMiddleware())
 
-  const router = express.Router()
+  const router = context.router = express.Router()
   router.use(cors());
   router.use(compression({ filter: shouldCompress }))
 
