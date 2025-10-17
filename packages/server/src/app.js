@@ -83,10 +83,9 @@ export async function createApp(context) {
   router.use(bodyParser.json({limit: '1mb'}))
 
   await eventsApi(context)
-  const { read: readDatabase, init: initDatabase, getFirstEntries, getDatabase } = databaseApi(context, config.database.file, context.events.read);
-  const { read: readTree } = treeApi(context, getDatabase);
+  await databaseApi(context)
+  const { read: readTree } = treeApi(context, context.database.read);
 
-  router.get('/api/database.json', readDatabase);
   router.get('/api/database/tree/:hash', readTree);
   router.use('/api/sources', getSourcesApi(config))
 
@@ -99,10 +98,10 @@ export async function createApp(context) {
   router.get('/api/database', readDatabase);
   router.get('/api/events', readEvents);
 
-  const getWebAppState = async (req) => {
+  async function getWebAppState(req) {
     const disabled = config?.webapp?.disabled || []
     const plugins = pluginApi.pluginEntries
-    const entries = await getFirstEntries(50, req)
+    const entries = await context.database.getFirstEntries(50, req)
     const sources = (config.sources || []).filter(source => source.downloadable && !source.offline)
       .map(source => {
         const indexName = path.basename(source.index).replace(/\.[^.]+$/, '')
@@ -139,7 +138,6 @@ export async function createApp(context) {
   }
 
   return {
-    app,
-    initDatabase
+    app
   }
 }

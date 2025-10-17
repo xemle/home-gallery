@@ -82,7 +82,7 @@ export async function startServer(options) {
   context.pluginManager = pluginManager
   context.executeQuery = createQueryExecutor(pluginManager)
 
-  const { app, initDatabase } = await createApp(context)
+  const { app } = await createApp(context)
 
   return new Promise((resolve, reject) => {
     const { key, cert, port, host } = config.server
@@ -99,7 +99,6 @@ export async function startServer(options) {
       const { importSources, watchSources, openBrowser } = config.server
       const url = serverUrl(config)
       log.info(`Your own Home Gallery is running at ${url}`);
-      initDatabase();
       if (importSources) {
         const args = 'run import --initial --update'.split(' ');
         if (watchSources) {

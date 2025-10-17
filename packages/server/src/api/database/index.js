@@ -12,8 +12,9 @@ const log = Logger('server.api.database');
 /**
  * @param {import('../../types.js').TServerContext} context
  */
-export function databaseApi(context, databaseFilename, getEvents) {
-  const { eventbus, executeQuery } = context
+export async function databaseApi(context) {
+  const { config, eventbus, router, events: { read: getEvents }, executeQuery } = context
+  const databaseFilename = config.database.file
   let database = false;
   const databaseCache = cache(3600);
   let entryCache = {};
@@ -61,7 +62,7 @@ export function databaseApi(context, databaseFilename, getEvents) {
   }
 
   eventbus.on('userAction', event => {
-    if (!database.data.length) {
+    if (!database?.data?.length) {
       log.warn(`Received a user action event without a database. Skip event merging for database`);
       return
     }
@@ -76,33 +77,28 @@ export function databaseApi(context, databaseFilename, getEvents) {
       action: 'updateEntries',
       entries: changedEntries
     })
-
   })
 
-  return {
-    /**
-     * @param {string} databaseFilename
-     */
-    init: () => {
-      waitReadWatch(databaseFilename, getEvents, (err, newDatabase) => {
-        if (err) {
-          log.error(err, `Could not read database file ${databaseFilename}: ${err}`)
-          return
+  waitReadWatch(databaseFilename, getEvents, (err, newDatabase) => {
+    if (err) {
+      log.error(err, `Could not read database file ${databaseFilename}: ${err}`)
+      return
+    }
+    clearCaches()
+    filterDatabase(newDatabase, '', {})
+      .then(filteredDatabase => {
+        if (filteredDatabase.data.length != newDatabase.data.length) {
+          log.info(`New database entries are filtered from ${newDatabase.data.length} to ${filteredDatabase.data.length} entries`)
         }
-        clearCaches()
-        filterDatabase(newDatabase, '', {})
-          .then(filteredDatabase => {
-            if (filteredDatabase.data.length != newDatabase.data.length) {
-              log.info(`New database entries are filtered from ${newDatabase.data.length} to ${filteredDatabase.data.length} entries`)
-            }
-            database = filteredDatabase;
-            eventbus.emit('server', {
-              action: 'databaseReloaded'
-            })
-          })
+        database = filteredDatabase;
+        eventbus.emit('server', {
+          action: 'databaseReloaded'
+        })
       })
-    },
-    getFirstEntries: async (count, req) => {
+  })
+
+  context.database = {
+    async getFirstEntries(count, req) {
       const key = `firstEntries:${req.username || ''}:${count}` + Date.now();
       if (!database?.data?.length) {
         return []
@@ -120,7 +116,10 @@ export function databaseApi(context, databaseFilename, getEvents) {
           return []
         })
     },
-    read: (req, res) => databaseCache.middleware(req, res, () => send(req, res)),
-    getDatabase: () => database
+    read() {
+      return database
+    }
   }
+
+  router.get('/api/database.json', (req, res) => databaseCache.middleware(req, res, () => send(req, res)))
 }
