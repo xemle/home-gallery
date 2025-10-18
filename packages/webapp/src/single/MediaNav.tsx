@@ -59,20 +59,20 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
   return (
     <>
       <div className={classNames('absolute z-10 top-4 right-4 flex gap-2')}>
-        {!appConfig.removedViewerStream &&
+        {!diabledFlags?.includes('nav') && 
           <a onClick={() => dispatch({type: 'list'})} className={classNames(buttonClass, itemClass, 'bg-transparent hover:bg-gray-400/40')} title="Show media stream (ESC)">
             <FontAwesomeIcon icon={icons.faXmark} className={iconClass}/>
           </a>
         }
       </div>
-      {!appConfig.removedViewerNav && prev &&
+      {!diabledFlags?.includes('nav') && prev &&
         <div className={classNames('absolute z-10 left-4 top-1/2 -translate-y-1/2', itemClass)}>
           <a onClick={() => dispatch({type: 'prev'})} className={classNames(buttonClass, buttonBgClass)} title="Show previous media (left arrow)">
             <FontAwesomeIcon icon={icons.faChevronLeft} className={iconClass}/>
           </a>
         </div>
       }
-      {!appConfig.removedViewerNav && next &&
+      {!diabledFlags?.includes('nav') && next &&
         <div className={classNames('absolute z-10 right-4 top-1/2 -translate-y-1/2', itemClass)}>
           <a onClick={() => dispatch({type: 'next'})} className={classNames(buttonClass, buttonBgClass)} title="Show next media (right arrow)">
             <FontAwesomeIcon icon={icons.faChevronRight} className={iconClass}/>
@@ -80,7 +80,7 @@ export const MediaNav = ({current, prev, next, listLocation, showNavigation, dis
         </div>
       }
       <div className={classNames('absolute z-10 bottom-4 left-1/2 -translate-x-1/2 flex gap-2')}>
-        {!appConfig.removedViewerStream && listLocation &&
+        {!diabledFlags.includes('nav') && listLocation &&
           <a onClick={() => dispatch({type: 'list'})} className={classNames(buttonClass, buttonBgClass, itemClass)} title="Show media stream (ESC)">
             <FontAwesomeIcon icon={icons.faTh} className={iconClass}/>
           </a>

@@ -29,7 +29,7 @@ export type MediaSources = {
   indexName?: string;
   [k: string]: unknown;
 }[];
-export type MediaViewDisableFlags = ("detail" | "map" | "similar" | "annotation" | "edit")[];
+export type MediaViewDisableFlags = (("detail" | "map" | "similar" | "annotation" | "edit") | "nav")[];
 
 /**
  * gallery configuration for webapp module

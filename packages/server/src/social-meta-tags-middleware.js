@@ -94,7 +94,7 @@ function disableFeatures(req, res, next) {
         disabled: [...pages?.disabled || [], 'date', 'map', 'edit', 'video', 'tag'],
         mediaView: {
           ...mediaView,
-          disabled: [...mediaView?.disabled || [], 'edit', 'map', 'similar', 'annotation'],
+          disabled: [...mediaView?.disabled || [], 'nav', 'edit', 'map', 'similar', 'annotation'],
         }
       }
     }
