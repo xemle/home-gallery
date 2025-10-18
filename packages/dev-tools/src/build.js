@@ -1,3 +1,4 @@
+import path from 'path'
 import esbuild from 'esbuild'
 import { glob } from 'glob'
 
@@ -17,10 +18,13 @@ export async function build(args) {
     platform: 'node',
     target: 'es2022',
     format: 'esm',
-    outdir: 'dist'
+    outdir: 'dist',
+    plugins: [],
   }
 
   if (watch) {
+    const name = path.basename(process.cwd())
+    buildOptions.plugins.push(watchLoggerPlugin(name))
     let ctx = await esbuild.context(buildOptions)
     return ctx.watch()
       .then(() => new Promise(() => {}))
@@ -28,4 +32,20 @@ export async function build(args) {
 
   return esbuild.build(buildOptions)
     .catch(cause => { throw new Error(`Build failed: ${cause}`, {cause}) })
+}
+
+function watchLoggerPlugin(name) {
+  return {
+    name: 'watch-logger',
+    setup(build) {
+      build.onEnd(result => {
+        const time = new Date().toLocaleTimeString()
+        if (result.errors.length > 0) {
+          console.error(`${time} [${name}] ❌ Build failed on change! ${result.errors.join('\n')}`);
+        } else {
+          console.log(`${time} [${name}] ✅ esbuild rebuilt successfully`);
+        }
+      })
+    },
+  }
 }
