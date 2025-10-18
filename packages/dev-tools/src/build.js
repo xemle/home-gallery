@@ -23,6 +23,7 @@ export async function build(args) {
   if (watch) {
     let ctx = await esbuild.context(buildOptions)
     return ctx.watch()
+      .then(() => new Promise(() => {}))
   }
 
   return esbuild.build(buildOptions)
