@@ -88,7 +88,7 @@ function disableFeatures(req, res, next) {
     ...req.webapp,
     state: {
       ...state,
-      disabled: [...state?.disabled || [], 'serverEvents', 'events', 'edit', 'offlineDatabase', 'pwa'],
+      disabled: [...state?.disabled || [], 'database', 'serverEvents', 'events', 'edit', 'pwa'],
       pages: {
         ...pages,
         disabled: [...pages?.disabled || [], 'date', 'map', 'edit', 'video', 'tag'],

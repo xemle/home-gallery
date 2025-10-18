@@ -50,6 +50,8 @@
     #- serverEvents
     #- events
     #- edit
+    # Disable database loading and use embedded entries only
+    #- database
     # Enable progressive web application support
     #- pwa
     # Recommended performance features. Disable them on local dev issues

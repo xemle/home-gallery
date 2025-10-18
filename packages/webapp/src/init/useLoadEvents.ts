@@ -17,9 +17,9 @@ export const useLoadEvents = () => {
     eventBus.addEventListener('userAction', event => addEvents([event]))
 
     if (!appConfig.disabled?.includes('serverEvents')) {
-      console.log('Feature event stream is disabled')
-    } else {
       eventStream()
+    } else {
+      console.log('Feature event stream is disabled')
     }
 
     if (!appConfig.disabled?.includes('events')) {

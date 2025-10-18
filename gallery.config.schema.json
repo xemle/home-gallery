@@ -64,6 +64,12 @@
                 ]
               },
               {
+                "description": "Disable database loading and use embedded entries only",
+                "enum": [
+                  "database"
+                ]
+              },
+              {
                 "description": "Enable progressive web application support",
                 "enum": [
                   "pwa"
