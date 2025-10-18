@@ -118,7 +118,10 @@ export async function databaseApi(context) {
     },
     read() {
       return database
-    }
+    },
+    filterDatabase(term, req) {
+      return filterDatabase(database, term, req)
+    },
   }
 
   router.get('/api/database.json', (req, res) => databaseCache.middleware(req, res, () => send(req, res)))

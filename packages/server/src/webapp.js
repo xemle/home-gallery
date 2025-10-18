@@ -21,9 +21,8 @@ export async function webapp(context) {
         res.set({
           'Content-Type': 'text/html; charset=utf-8',
           'Cache-Control': 'no-store, no-cache',
-          'Content-Length': html.length,
         })
-        res.send(html);
+        res.send(html)
       })
       .catch(err => {
         log.error(err, `Could not read index file ${indexFile}: ${err}`)

@@ -17,6 +17,7 @@ import { debugApi } from './api/debug/index.js'
 import { browserPlugins } from './browser-plugins.js';
 import Logger from '@home-gallery/logger';
 import { webappMiddleware } from './webapp-middleware.js';
+import { socialMetaTagsMiddleware } from './social-meta-tags-middleware.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const webappDir = path.join(__dirname, 'public')
@@ -72,6 +73,7 @@ export async function createApp(context) {
   await debugApi(context)
 
   await webappMiddleware(context)
+  await socialMetaTagsMiddleware(context)
   await webapp(context)
 
   const prefix = routerPrefix(config.server?.prefix)
