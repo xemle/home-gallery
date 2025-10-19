@@ -150,6 +150,8 @@ sources:
   # security configuration for https
   # key: '{configDir}/server.key'
   # cert: '{configDir}/server.crt'
+  # The public URL of the gallery instance
+  # publicUrl: https://acme.com/gallery
   # Open browser when server starts
   #openBrowser: true
   # Enable basic authentication users and ip whitelist rules which require no authentication
