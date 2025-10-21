@@ -14,7 +14,13 @@ export type PluginUrls = string[];
  *
  * The feature flags can also be disabled by query param 'disabled'
  */
-export type FeatureFlags = (("serverEvents" | "events" | "edit") | "pwa" | ("offlineDatabase" | "worker") | string)[];
+export type FeatureFlags = (
+  | ("serverEvents" | "events" | "edit")
+  | "database"
+  | "pwa"
+  | ("offlineDatabase" | "worker")
+  | string
+)[];
 /**
  * List of downloadable media sources. This list will be injected from the server
  */
@@ -23,7 +29,7 @@ export type MediaSources = {
   indexName?: string;
   [k: string]: unknown;
 }[];
-export type MediaViewDisableFlags = ("detail" | "map" | "similar" | "annotation" | "edit")[];
+export type MediaViewDisableFlags = (("detail" | "map" | "similar" | "annotation" | "edit") | "nav")[];
 
 /**
  * gallery configuration for webapp module

@@ -10,7 +10,8 @@ const log = Logger('server.api.sources')
 
 const staticConfig = {index: false, maxAge: '2h'}
 
-export function getSourcesApi(config) {
+export async function sourcesApi(context) {
+  const { config, router } = context
   /** @type {{index: string, dir: string, offline?: boolean, downloadable?: boolean}[]} */
   const sources = config.sources || []
 
@@ -31,16 +32,16 @@ export function getSourcesApi(config) {
     return result
   }, {})
 
-  const router = express.Router()
-  router.get('/', (_, res) => {
+  const sourcesRouter = express.Router()
+  sourcesRouter.get('/', (_, res) => {
     res.json({
       data: downloadableSources.map(({indexName}) => ({indexName, downloadable: true}))
     })
   })
 
-  router.use('/', createStaticIndex(indexNameToDir))
+  sourcesRouter.use('/', createStaticIndex(indexNameToDir))
 
-  return router
+  router.use('/api/sources', sourcesRouter)
 }
 
 function createStaticIndex(indexNameToDir) {

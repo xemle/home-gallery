@@ -11,6 +11,8 @@ export function useMediaViewHotkeys() {
   const appConfig = useAppConfig()
 
   const [hotkeys, hotkeysToAction] = useMemo(() => {
+    const disabledFlags = appConfig.pages?.mediaView?.disabled ?? []
+
     const allHotkeys: THotkeyAction[] = [
       {
         keys: ['home'],
@@ -46,26 +48,28 @@ export function useMediaViewHotkeys() {
       },
       {
         keys: ['esc'],
-        action: 'list'
+        action: 'list',
+        disabled: disabledFlags.includes('nav')
       },
       {
         keys: ['i'],
         action: 'toggleDetails',
-        disabled: appConfig.pages?.mediaView?.disabled?.includes('detail')
+        disabled: disabledFlags.includes('detail')
       },
       {
         keys: ['a'],
         action: 'toggleAnnotations',
-        disabled: appConfig.pages?.mediaView?.disabled?.includes('annotation')
+        disabled: disabledFlags.includes('annotation')
       },
       {
         keys: ['s'],
         action: 'similar',
-        disabled: appConfig.pages?.mediaView?.disabled?.includes('similar')
+        disabled: disabledFlags.includes('similar')
       },
       {
         keys: ['c'],
-        action: 'chronology'
+        action: 'chronology',
+        disabled: disabledFlags.includes('nav')
       },
       {
         keys: ['t'],
@@ -74,7 +78,7 @@ export function useMediaViewHotkeys() {
       {
         keys: ['m'],
         action: 'map',
-        disabled: appConfig.pages?.mediaView?.disabled?.includes('map')
+        disabled: disabledFlags.includes('map')
       }
     ]
     const [keys, keyToAction] = allHotkeys.filter(hotkey => !hotkey.disabled).reduce(([keys, map], hotkey) => {

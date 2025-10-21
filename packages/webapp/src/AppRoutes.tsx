@@ -23,6 +23,7 @@ export const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<AllView />} />
       <Route path="/view/:id" element={<MediaView />} />
+      <Route path="/share/:id" element={<MediaView />} />
       <Route path="/search/:term" element={<SearchView />} />
 
       {/* Optional pages routes */}

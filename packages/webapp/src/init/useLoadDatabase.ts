@@ -20,6 +20,10 @@ export const useLoadDatabase = () => {
   useEffect(() => {
     onEntries(appConfig.entries as [] || [])
 
+    if (appConfig.disabled?.includes('database')) {
+      return
+    }
+
     const onDatabaseReloaded = cb => {
       eventBus.addEventListener('server', event => {
         if (event.action === 'databaseReloaded') {

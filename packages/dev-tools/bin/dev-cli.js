@@ -17,11 +17,9 @@ async function run(args) {
   switch (command) {
     case 'build': {
       return build(args)
-      break
     }
     case 'schema': {
       return schema(args)
-      break
     }
     default:
       throw new Error(`Unknown command: ${command}`)

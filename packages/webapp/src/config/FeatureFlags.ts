@@ -10,4 +10,10 @@
  *
  * The feature flags can also be disabled by query param 'disabled'
  */
-export type FeatureFlags = (("serverEvents" | "events" | "edit") | "pwa" | ("offlineDatabase" | "worker") | string)[];
+export type FeatureFlags = (
+  | ("serverEvents" | "events" | "edit")
+  | "database"
+  | "pwa"
+  | ("offlineDatabase" | "worker")
+  | string
+)[];

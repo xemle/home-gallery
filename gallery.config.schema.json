@@ -64,6 +64,12 @@
                 ]
               },
               {
+                "description": "Disable database loading and use embedded entries only",
+                "enum": [
+                  "database"
+                ]
+              },
+              {
                 "description": "Enable progressive web application support",
                 "enum": [
                   "pwa"
@@ -143,12 +149,22 @@
                   "title": "MediaViewDisableFlags",
                   "type": "array",
                   "items": {
-                    "enum": [
-                      "detail",
-                      "map",
-                      "similar",
-                      "annotation",
-                      "edit"
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "detail",
+                          "map",
+                          "similar",
+                          "annotation",
+                          "edit"
+                        ]
+                      },
+                      {
+                        "description": "Disables navigation to overview, prev and next",
+                        "enum": [
+                          "nav"
+                        ]
+                      }
                     ]
                   }
                 }

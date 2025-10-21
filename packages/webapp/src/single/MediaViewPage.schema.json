@@ -10,7 +10,15 @@
       "title": "MediaViewDisableFlags",
       "type": "array",
       "items": {
-        "enum": ["detail", "map", "similar", "annotation", "edit"]
+        "anyOf": [
+          {
+            "enum": ["detail", "map", "similar", "annotation", "edit"]
+          },
+          {
+            "description": "Disables navigation to overview, prev and next",
+            "enum": ["nav"]
+          }
+        ]
       }
     }
   }
