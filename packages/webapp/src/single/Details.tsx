@@ -1,15 +1,14 @@
+import * as icons from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as React from "react";
-import { useState } from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as icons from '@fortawesome/free-solid-svg-icons'
 
-import { humanizeDuration, humanizeBytes, formatDate } from "../utils/format";
-import { useTagDialog } from "../dialog/use-tag-dialog";
 import { addTags } from '../api/ApiService';
 import { type Tag } from "../api/models";
 import { useAppConfig } from "../config/useAppConfig";
-import { classNames } from "../utils/class-names";
+import { useTagDialog } from "../dialog/use-tag-dialog";
 import type { Entry } from "../store/entry";
+import { classNames } from "../utils/class-names";
+import { formatDate, humanizeBytes, humanizeDuration } from "../utils/format";
 import { MediaViewDisableFlags } from "./MediaViewPage";
 
 export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
