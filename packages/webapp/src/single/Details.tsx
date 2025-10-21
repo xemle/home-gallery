@@ -129,6 +129,16 @@ export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
     openDialog({initialTags: origTags, onSubmit})
   }
 
+  function copyShareUrlToClipboard(e) {
+    e.preventDefault();
+    navigator.clipboard.writeText(getShareUrl());
+  }
+
+  function getShareUrl() {
+    const url = new URL("../../share/" + entry.shortId, window.location.href);
+    return url.toString();
+  }
+
   return (
     <>
       <div className="p-4">
@@ -278,6 +288,18 @@ export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
               </div>
             </div>
           )}
+          <div className="flex">
+            <div className="flex-shrink-0 w-8">
+              <FontAwesomeIcon icon={icons.faShareNodes} className="text-gray-300"/>
+            </div>
+            <div>
+              <p className="inline-flex flex-wrap gap-2">
+                  <a className="flex items-center gap-2 px-1 py-0 text-gray-500 bg-transparent border border-gray-700 rounded group inset-1 hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer active:bg-gray-600" onClick={copyShareUrlToClipboard} href={getShareUrl()} title={`Click to copy shareable link to clipboard`}>
+                    <span>Share media</span>
+                  </a>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </>
