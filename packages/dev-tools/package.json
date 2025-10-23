@@ -9,6 +9,10 @@
   "bin": {
     "dev-cli": "./bin/dev-cli.js"
   },
+  "scripts": {
+    "test": "node --test",
+    "watch:test": "node --test --watch"
+  },
   "files": [
     "bin",
     "dist"
