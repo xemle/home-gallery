@@ -48,12 +48,21 @@ export const mapName2Sidecars = (entries: ISlimEntry[]) => {
   const result: Record<string, ISlimEntry[]> = {}
   entries.sort(bySize).forEach(entry => {
     const { name, ext } = parseNameExt(entry.filename)
+    if (!ext) {
+      if (!result[name]) {
+        result[name] = [entry]
+      } else {
+        result[name].push(entry)
+      }
+      return
+    }
+
     const { name: name2, ext: ext2 } = parseNameExt(name)
-    if (ext && result[name]) {
+    if (result[name]) {
       result[name].push(entry)
     } else if (ext2 && result[name2]) {
       result[name2].push(entry)
-    } else if (ext) {
+    } else {
       result[name] = [entry]
     }
   })
