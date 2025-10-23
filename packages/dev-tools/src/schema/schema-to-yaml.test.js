@@ -343,6 +343,12 @@ test('renderYaml()', async t => {
               8080
             ]
           },
+          debug: {
+            type: 'boolean',
+            examples: [
+              true
+            ]
+          },
           limit: {
             type: 'number',
             examples: [
@@ -354,7 +360,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '#title: My Gallery\n#port: 8080\n# examples:\n#   * 50\n#   * 100\n#limit: 50')
+      assert.deepEqual(output.join('\n'), '#title: My Gallery\n#port: 8080\n#debug: true\n# examples:\n#   * 50\n#   * 100\n#limit: 50')
     })
 
     await t.test('examples', async () => {

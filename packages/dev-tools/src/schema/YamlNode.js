@@ -75,8 +75,8 @@ export class YamlNode {
     if (typeof this.schema.default != 'undefined') {
       sections.push([`default: ${this.#stringifyValue(this.schema.default)}`])
     }
-    const isNumberString = this.schema.type == 'number' || this.schema.type == 'integer' || this.schema.type == 'string'
-    if (Array.isArray(this.schema.examples) && (!isNumberString || this.schema.examples.length > 1)) {
+    const isScalar = this.schema.type == 'boolean' || this.schema.type == 'number' || this.schema.type == 'integer' || this.schema.type == 'string'
+    if (Array.isArray(this.schema.examples) && (!isScalar || this.schema.examples.length > 1)) {
       sections.push([
         (this.schema.examples.length > 1 ? 'examples:' : 'example:'),
         ...this.schema.examples.map(example => `  * ${this.#stringifyValue(example)}`)
