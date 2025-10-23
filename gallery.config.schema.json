@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json",
   "title": "GalleryConfig",
-  "description": "HomeGallery configuration file",
+  "description": "HomeGallery configuration file\n\nDefault configuration file is gallery.config.yml.\nJSON format is also supported (gallery.config.json)\n\nDirectory value examples:\n- /absolute/directory\n- relative/directory/to/current/working/dir\n- ~/directory/in/your/home\n- ./relative/directory/to/configuration/file\n\nVariable replacement example:\n\n  baseDir: '~'\n  configDir: '{baseDir}/.config/home-gallery'\n\nconfigDir is replaced to '~/.config/home-gallery' and than to '$HOME/.config/home-gallery'\n\nVariables are overwritten by environment variables\n\nVariables are baseDir, configDir, configPrefix, cacheDir and dir in sources\nor environment variables GALLERY_BASE_DIR, GALLERY_CONFIG_DIR, GALLERY_CONFIG_PREFIX, GALLERY_CACHE_DIR",
   "type": "object",
   "properties": {
     "baseDir": {

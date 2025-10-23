@@ -1,5 +1,28 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json
+#
 # HomeGallery configuration file
+#
+# Default configuration file is gallery.config.yml.
+# JSON format is also supported (gallery.config.json)
+#
+# Directory value examples:
+# - /absolute/directory
+# - relative/directory/to/current/working/dir
+# - ~/directory/in/your/home
+# - ./relative/directory/to/configuration/file
+#
+# Variable replacement example:
+#
+#   baseDir: '~'
+#   configDir: '{baseDir}/.config/home-gallery'
+#
+# configDir is replaced to '~/.config/home-gallery' and than to '$HOME/.config/home-gallery'
+#
+# Variables are overwritten by environment variables
+#
+# Variables are baseDir, configDir, configPrefix, cacheDir and dir in sources
+# or environment variables GALLERY_BASE_DIR, GALLERY_CONFIG_DIR, GALLERY_CONFIG_PREFIX, GALLERY_CACHE_DIR
+#
 
 
 # Base directory
