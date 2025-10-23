@@ -17,6 +17,7 @@ services:
     #build: .
     image: xemle/home-gallery
     environment:
+      #- NODE_OPTIONS=--max-old-space-size=4096 # On larger galleries increase memory limit
       - GALLERY_API_SERVER=http://api:3000
       - GALLERY_API_SERVER_CONCURRENT=1 # for SoC devices like Rasperry Pi. Use 5 otherwise
       - GALLERY_API_SERVER_TIMEOUT=60 # for SoC devices like Rasperry Pi. Use 30 otherwise
