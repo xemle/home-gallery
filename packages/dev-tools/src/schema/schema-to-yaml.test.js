@@ -74,6 +74,33 @@ test('renderYaml()', async t => {
 
       assert.deepEqual(output.join('\n'), 'foo:\n  baz: 0\n  #bar: true\n  #zoo: ""')
     })
+
+    await t.test('const values', async () => {
+      const output = []
+
+
+      renderYaml({
+        type: 'object',
+        properties: {
+          foo: {
+            description: 'Choose between',
+            oneOf: [
+              {
+                description: 'first option',
+                const: 'one'
+              },
+              {
+                description: 'second option',
+                const: 'two'
+              }
+            ]
+          }
+        }
+      }, output)
+
+
+      assert.deepEqual(output.join('\n'), '# Choose between\n# first option\n#foo: one\n# second option\n#foo: two')
+    })
   })
 
   await t.test('array', async t => {
@@ -433,7 +460,7 @@ test('renderYaml()', async t => {
 
   })
 
-  await t.test('full', {only: true}, async t => {
+  await t.test('full', async t => {
 
     await t.test('spacing first level for object', async () => {
       const output = []

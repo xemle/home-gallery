@@ -210,8 +210,8 @@ export class YamlNode {
       return
     }
 
-    if (Array.isArray(this.schema.oneOf || this.schema.allOf || this.schema.anyOf) && isArrayItem) {
-      this.children.forEach(child => child.render(output, isArrayItem, false))
+    if (Array.isArray(this.schema.oneOf || this.schema.allOf || this.schema.anyOf) && (isArrayItem || isObjectProperty)) {
+      this.children.forEach(child => child.render(output, isArrayItem, isObjectProperty))
       return
     }
   }
