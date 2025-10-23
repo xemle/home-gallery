@@ -32,6 +32,12 @@ export const spawnCli = (args, options = {}, nodeArgs = []) => {
 
   Logger.mergeLog(child.stdout)
 
+  child.stderr.on('data', data => {
+    const stderr = data.toString()
+    const spawnInfo = {env, command: nodeBin, args: runArgs, pid: child.pid, cmd, stderr}
+    log.error({spawn: spawnInfo}, `Cli reports error: ${stderr}`)
+  })
+
   child.once('exit', (code, signal) => {
     const spawnInfo = {env, command: nodeBin, args: runArgs, pid: child.pid, code, signal, cmd}
     log.debug({spawn: spawnInfo, duration: Date.now() - t0}, `Executed cmd ${cmd}`)
