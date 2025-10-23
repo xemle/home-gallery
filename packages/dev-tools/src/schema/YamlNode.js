@@ -95,7 +95,7 @@ export class YamlNode {
     }
 
     if (this.schema.deprecated) {
-      output.push(`${prefix} deprecated`)
+      output.push(`${prefix} *deprecated*`)
     }
     let lines = 0
     sections.forEach((section, i) => {

@@ -371,7 +371,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# deprecated\n#foo: 0')
+      assert.deepEqual(output.join('\n'), '# *deprecated*\n#foo: 0')
     })
 
     await t.test('full', async () => {
@@ -415,7 +415,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# deprecated\n# default: 3000\n#port: 3000')
+      assert.deepEqual(output.join('\n'), '# *deprecated*\n# default: 3000\n#port: 3000')
     })
 
   })
