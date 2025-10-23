@@ -46,6 +46,31 @@ test('renderYaml()', async t => {
       assert.deepEqual(output.join('\n'), '#foo:\n  #bar: true')
     })
 
+    await t.test('object array object enum', async () => {
+      const output = []
+
+
+      renderYaml({
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                bar: {
+                  enum: ['one', 'two']
+                }
+              }
+            }
+          }
+        }
+      }, output)
+
+
+      assert.deepEqual(output.join('\n'), '#foo:\n  #- bar: one # one of: one, two')
+    })
+
     await t.test('required property first', async () => {
       const output = []
 
