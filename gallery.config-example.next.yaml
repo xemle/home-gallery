@@ -115,6 +115,90 @@
     # size matcher should be used if you know what you are doing
     #matcher: size
 
+# Extractor settings
+#extractor:
+  # Exclude file patterns
+  #excludes:
+    #- ...any string
+  # Read exclude patterns from file
+  #excludeFromFile: {configDir}/excludes
+  #image:
+    # default: [1920,1280,800,320,128]
+    #previewSizes:
+      #- ...any number
+    # default: 80
+    #previewQuality: 80
+  #video:
+    # used as preview size and preview filename
+    #
+    # default: 720
+    #previewSize: 720
+    # used as target video container and preview filename
+    #
+    # default: mp4
+    #ext: mp4
+    # overwrites previewSize.
+    # E.g. -2:'min(ih,max(720,min(1080,ih*.5)))' for 720p <= height*0.5 <= 1080p or height, if height < 720
+    #
+    # default: -2:'min(720,ih)'
+    #scale: -2:'min(720,ih)'
+    # default: 30
+    #frameRate: 30
+    # default: 30
+    #maxVideoBitRate: 30
+    # default: libx264
+    #videoEncoder: libx264
+    # default: slow
+    #preset: slow
+    # default: baseline
+    #profile: baseline
+    # default: "3.0"
+    #level: "3.0"
+    # Additional ffmpeg args
+    #addFfmpegArgs:
+      #- ...any string
+    # custom ffmpeg args for video conversion, replaces all other settings such previewSize, videoEncoder, addFfmpegArgs, ...
+    #customFfmpegArgs:
+      #- ...any string
+  #apiServer:
+    # URL of the API server
+    #
+    # In docker compose this is overwritten by GALLERY_API_SERVER env
+    #
+    # default: https://api.home-gallery.org
+    #url: https://api.home-gallery.org
+    # Timeout in seconds for each API request
+    #
+    # default: 30
+    #timeout: 30
+    # Concurrent requests to API server
+    #
+    # If you use a low power device you should reduce this value to 3
+    #
+    # default: 30
+    #concurrent: 30
+    #disable:
+      #- similarDetection
+      #- objectDetection
+      #- faceDetection
+  #geoReverse:
+    # default: https://nominatim.openstreetmap.org
+    #url: https://nominatim.openstreetmap.org
+    #
+    # Preffered address language of geo code reverse lookups
+    #
+    # default: ["en","de"]
+    #addressLanguage:
+      #- ...any string
+  #useNative:
+    # use libvips to resize images
+    #- vipsthumbnail
+    # use ImageMagick to resize images
+    #- convert
+    # Use ffprobe/ffmpeg from system
+    #- ffprobe
+    #- ffmpeg
+
 # Storage settings
 #storage:
   # default: {cacheDir}/storage

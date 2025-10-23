@@ -126,6 +126,192 @@
         ]
       }
     },
+    "extractor": {
+      "description": "Extractor settings",
+      "type": "object",
+      "properties": {
+        "excludes": {
+          "description": "Exclude file patterns",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excludeFromFile": {
+          "description": "Read exclude patterns from file",
+          "examples": [
+            "{configDir}/excludes"
+          ],
+          "type": "string"
+        },
+        "image": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.image",
+          "type": "object",
+          "properties": {
+            "previewSizes": {
+              "type": "array",
+              "default": [
+                1920,
+                1280,
+                800,
+                320,
+                128
+              ],
+              "items": {
+                "type": "number"
+              }
+            },
+            "previewQuality": {
+              "type": "number",
+              "default": 80
+            }
+          }
+        },
+        "video": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.video",
+          "type": "object",
+          "properties": {
+            "previewSize": {
+              "description": "used as preview size and preview filename",
+              "type": "number",
+              "default": 720
+            },
+            "ext": {
+              "description": "used as target video container and preview filename",
+              "type": "string",
+              "default": "mp4"
+            },
+            "scale": {
+              "description": "overwrites previewSize.\nE.g. -2:'min(ih,max(720,min(1080,ih*.5)))' for 720p <= height*0.5 <= 1080p or height, if height < 720",
+              "type": "string",
+              "default": "-2:'min(720,ih)'"
+            },
+            "frameRate": {
+              "type": "number",
+              "default": 30
+            },
+            "maxVideoBitRate": {
+              "type": "number",
+              "default": 30
+            },
+            "videoEncoder": {
+              "type": "string",
+              "default": "libx264"
+            },
+            "preset": {
+              "type": "string",
+              "default": "slow"
+            },
+            "profile": {
+              "type": "string",
+              "default": "baseline"
+            },
+            "level": {
+              "type": "string",
+              "default": "3.0"
+            },
+            "addFfmpegArgs": {
+              "description": "Additional ffmpeg args",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "customFfmpegArgs": {
+              "description": "custom ffmpeg args for video conversion, replaces all other settings such previewSize, videoEncoder, addFfmpegArgs, ...",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "apiServer": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.apiServer",
+          "type": "object",
+          "properties": {
+            "url": {
+              "description": "URL of the API server\n\nIn docker compose this is overwritten by GALLERY_API_SERVER env",
+              "type": "string",
+              "default": "https://api.home-gallery.org"
+            },
+            "timeout": {
+              "description": "Timeout in seconds for each API request",
+              "type": "number",
+              "default": 30
+            },
+            "concurrent": {
+              "description": "Concurrent requests to API server\n\nIf you use a low power device you should reduce this value to 3",
+              "type": "number",
+              "default": 30
+            },
+            "disable": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "similarDetection",
+                      "objectDetection",
+                      "faceDetection"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "geoReverse": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.geoReverse",
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "default": "https://nominatim.openstreetmap.org"
+            },
+            "addressLanguage": {
+              "description": "Preffered address language of geo code reverse lookups",
+              "type": "array",
+              "default": [
+                "en",
+                "de"
+              ],
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "useNative": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.useNative",
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "description": "use libvips to resize images",
+                "const": "vipsthumbnail"
+              },
+              {
+                "description": "use ImageMagick to resize images",
+                "const": "convert"
+              },
+              {
+                "description": "Use ffprobe/ffmpeg from system",
+                "enum": [
+                  "ffprobe",
+                  "ffmpeg"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
     "storage": {
       "description": "Storage settings",
       "type": "object",

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.useNative",
+  "type": "array",
+  "items": {
+    "anyOf": [
+      {
+        "description": "use libvips to resize images",
+        "const": "vipsthumbnail"
+      },
+      {
+        "description": "use ImageMagick to resize images",
+        "const": "convert"
+      },
+      {
+        "description": "Use ffprobe/ffmpeg from system",
+        "enum": ["ffprobe", "ffmpeg" ]
+      }
+    ]
+  }
+}

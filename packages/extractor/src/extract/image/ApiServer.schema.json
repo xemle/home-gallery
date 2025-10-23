@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.apiServer",
+  "type": "object",
+  "properties": {
+    "url": {
+      "description": "URL of the API server\n\nIn docker compose this is overwritten by GALLERY_API_SERVER env",
+      "type": "string",
+      "default": "https://api.home-gallery.org"
+    },
+    "timeout": {
+      "description": "Timeout in seconds for each API request",
+      "type": "number",
+      "default": 30
+    },
+    "concurrent": {
+      "description": "Concurrent requests to API server\n\nIf you use a low power device you should reduce this value to 3",
+      "type": "number",
+      "default": 30
+    },
+    "disable": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "enum": ["similarDetection", "objectDetection", "faceDetection" ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.geoReverse",
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string",
+      "default": "https://nominatim.openstreetmap.org"
+    },
+    "addressLanguage": {
+      "description": "Preffered address language of geo code reverse lookups",
+      "type": "array",
+      "default": ["en", "de"],
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
