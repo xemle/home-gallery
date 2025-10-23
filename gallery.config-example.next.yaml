@@ -179,6 +179,34 @@
         # Disables navigation to overview, prev and next
         #- nav
 
+# Plugin manager settings
+#pluginManager:
+  #
+  # Load plugins from following directories.
+  #
+  # Each file or directory is handled as plugin
+  #
+  # example:
+  #   * plugins
+  #
+  #dirs:
+    #- ...any string
+  #
+  # List of dedicated plugin files
+  #
+  # example:
+  #   * ./my-plugin
+  #plugins:
+    #- ...any string
+  #
+  # Disable plugins by name or by name.extension
+  #
+  # examples:
+  #   * acmePlugin
+  #   * acmePlugin.exentionName
+  #disabled:
+    #- ...any string
+
 # Logger settings
 #
 # By default a console logger with info level and

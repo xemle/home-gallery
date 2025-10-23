@@ -334,6 +334,43 @@
         }
       }
     },
+    "pluginManager": {
+      "description": "Plugin manager settings",
+      "type": "object",
+      "properties": {
+        "dirs": {
+          "description": "Load plugins from following directories.\n\nEach file or directory is handled as plugin",
+          "type": "array",
+          "examples": [
+            "plugins"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "plugins": {
+          "description": "List of dedicated plugin files",
+          "type": "array",
+          "examples": [
+            "./my-plugin"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "disabled": {
+          "description": "Disable plugins by name or by name.extension",
+          "type": "array",
+          "examples": [
+            "acmePlugin",
+            "acmePlugin.exentionName"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "logger": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#logger",
