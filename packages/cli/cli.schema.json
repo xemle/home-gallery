@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json",
+  "title": "CliConfig",
+  "description": "gallery configuration for cli module",
+  "type": "object",
+  "properties": {
+    "sources": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#sources",
+      "title": "Sources",
+      "description": "Sources\n\nList of media source directories. These can be read only.\n\nAll sources are used to build the gallery database. If you need\ndifferent databases or gallery instances use different gallery\nconfigurations",
+      "default": [],
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "description": "Simple source directory with default settings",
+            "type": "string",
+            "examples": [
+              "/home/me/Photos"
+            ]
+          },
+          {
+            "description": "Source directory with custom settings",
+            "type": "object",
+            "properties": {
+              "dir": {
+                "description": "Path of source directory",
+                "type": "string",
+                "examples": [
+                  "/home/me/Photos"
+                ]
+              },
+              "index": {
+                "description": "Index filename which must be unique\n\nFor directory /mnt/photos the index file is {configDir}/photos.idx\nIf two sources have the same index file an error is raised",
+                "type": "string",
+                "default": "{configDir}/{configPrefix}{basename(dir)}.idx"
+              },
+              "excludes": {
+                "description": "All files and subdirectories are included by default.\nSet exclude patterns to ignore some files or foldes.\nLast match wins\n\nExclude patterns are using gitignore patterns (see https://git-scm.com/docs/gitignore)\n\nTo include only one subdirectory you need to use:\n- **       # exclude/ignores everything\n- !/dir    # include dir name\n- !/dir/** # include everything below /dir",
+                "type": "array",
+                "items": {
+                  "examples": [
+                    ".DS_Store",
+                    "._*",
+                    "'*.tmp'",
+                    "'*cache*'"
+                  ],
+                  "type": "string"
+                }
+              },
+              "excludeFromFile": {
+                "description": "Read exclude patterns from this file (one pattern per line)",
+                "type": "string",
+                "examples": [
+                  "{configDir}/excludes"
+                ]
+              },
+              "excludeIfPresent": {
+                "description": "If a file with this name is present in a directory, the this directory is excluded",
+                "type": "string",
+                "default": ".galleryignore"
+              },
+              "maxFileSize": {
+                "description": "Exclude big files such as videos to speedup initial setup",
+                "type": "string",
+                "examples": [
+                  "20M",
+                  "1G"
+                ]
+              },
+              "offline": {
+                "description": "If source directory/disk is offline/unmounted set it to true.\nOffline sources require an index file. Previews and meta data\nshould be extracted first before marking a source offline",
+                "type": "boolean",
+                "examples": [
+                  true
+                ]
+              },
+              "downloadable": {
+                "description": "Allows the original files to be downloaded via de webapp.\nThis adds a link to images of this source in the details view.\nSources set as `offline` won't be made available",
+                "type": "boolean",
+                "examples": [
+                  true
+                ]
+              },
+              "matcher": {
+                "description": "File matcher for checksum recalculation and detecting file changes",
+                "default": "size-ctime-inode",
+                "oneOf": [
+                  {
+                    "description": "size-ctime-inode matcher should be used if possible,\nmight not work on windows",
+                    "const": "size-ctime-inode"
+                  },
+                  {
+                    "description": "size-ctime matcher should be used if stable fs inodes are\nnot available and might not work for fuse shares",
+                    "const": "size-ctime"
+                  },
+                  {
+                    "description": "size matcher should be used if you know what you are doing",
+                    "const": "size"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

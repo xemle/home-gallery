@@ -1,44 +1,106 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json
-#
-# GalleryConfig
-#
 # HomeGallery configuration file
-
 
 
 # Base directory
 #
-# default: "~"
-#baseDir: "~"
-
+# default: ~
+#baseDir: ~
 # default: {baseDir}/.config/home-gallery
 #configDir: {baseDir}/.config/home-gallery
-
 # file prefix for index, database and events
 #
 # default: ""
 #configPrefix: ""
-
 # Cache directory for storage directory and other cache files
 #
 # default: {baseDir}/.cache/home-gallery
 #cacheDir: {baseDir}/.cache/home-gallery
 
 #
-# AppConfig
+# Sources
 #
+# List of media source directories. These can be read only.
+#
+# All sources are used to build the gallery database. If you need
+# different databases or gallery instances use different gallery
+# configurations
+#
+# default: []
+#
+#sources:
+  # Simple source directory with default settings
+  #- /home/me/Photos
+  # Source directory with custom settings
+  # [dir property] Path of source directory
+  #- dir: /home/me/Photos
+    # Index filename which must be unique
+    #
+    # For directory /mnt/photos the index file is {configDir}/photos.idx
+    # If two sources have the same index file an error is raised
+    #
+    # default: {configDir}/{configPrefix}{basename(dir)}.idx
+    #index: {configDir}/{configPrefix}{basename(dir)}.idx
+    #
+    # All files and subdirectories are included by default.
+    # Set exclude patterns to ignore some files or foldes.
+    # Last match wins
+    #
+    # Exclude patterns are using gitignore patterns (see https://git-scm.com/docs/gitignore)
+    #
+    # To include only one subdirectory you need to use:
+    # - **       # exclude/ignores everything
+    # - !/dir    # include dir name
+    # - !/dir/** # include everything below /dir
+    #
+    #excludes:
+      # examples:
+      #   * .DS_Store
+      #   * "._*"
+      #   * '*.tmp'
+      #   * '*cache*'
+      #- .DS_Store
+    # Read exclude patterns from this file (one pattern per line)
+    #excludeFromFile: {configDir}/excludes
+    # If a file with this name is present in a directory, the this directory is excluded
+    #
+    # default: .galleryignore
+    #excludeIfPresent: .galleryignore
+    # Exclude big files such as videos to speedup initial setup
+    #
+    # examples:
+    #   * 20M
+    #   * 1G
+    #maxFileSize: 20M
+    # If source directory/disk is offline/unmounted set it to true.
+    # Offline sources require an index file. Previews and meta data
+    # should be extracted first before marking a source offline
+    #offline: true
+    # Allows the original files to be downloaded via de webapp.
+    # This adds a link to images of this source in the details view.
+    # Sources set as `offline` won't be made available
+    #downloadable: true
+    # File matcher for checksum recalculation and detecting file changes
+    #
+    # default: size-ctime-inode
+    # size-ctime-inode matcher should be used if possible,
+    # might not work on windows
+    #matcher: size-ctime-inode
+    # size-ctime matcher should be used if stable fs inodes are
+    # not available and might not work for fuse shares
+    #matcher: size-ctime
+    # size matcher should be used if you know what you are doing
+    #matcher: size
+
 # Configuration for webapp module
 #webapp:
-  # PluginManager
   #pluginManager:
-    # PluginUrls
     #
     # List of plugin urls to load
     #
     # default: []
     #plugins:
       #- ...any string
-  # FeatureFlags
   #
   # List of feature flags to disable. By default all features are enabled.
   #
@@ -58,17 +120,14 @@
     #- offlineDatabase
     #- worker
     #- ...any string
-  # MediaSources
   #
   # List of downloadable media sources. This list will be injected from the server
   #
   # default: []
   #sources:
-    # default: false
+    # [downloadable property] default: false
     #- downloadable: false
       #indexName: ""
-  #
-  # Pages
   #
   # Customize pages
   #
@@ -82,13 +141,10 @@
       #- tag
       #- ...any string
     #
-    # MediaViewPage
-    #
     # Customize single media view
     #
     # default: []
     #mediaView:
-      # MediaViewDisableFlags
       #disabled:
         #- detail
         #- map
