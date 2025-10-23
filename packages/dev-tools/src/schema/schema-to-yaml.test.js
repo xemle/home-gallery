@@ -203,7 +203,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '#foo:\n  # description\n  # default: 8080\n  #- bar: 8080\n    #baz:\n      #- const\n      #- ...any number')
+      assert.deepEqual(output.join('\n'), '#foo:\n  # description\n  # [bar property] default: 8080\n  #- bar: 8080\n    #baz:\n      #- const\n      #- ...any number')
     })
   })
 
@@ -297,24 +297,37 @@ test('renderYaml()', async t => {
       assert.deepEqual(output.join('\n'), '# default: two\n#foo: two # one of: one, two, three')
     })
 
-    await t.test('examples (one)', async () => {
+    await t.test('examples (one as value for scalar)', async () => {
       const output = []
 
 
       renderYaml({
         type: 'object',
         properties: {
-          foo: {
+          title: {
             type: 'string',
             examples: [
-              'value',
+              'My Gallery'
+            ]
+          },
+          port: {
+            type: 'number',
+            examples: [
+              8080
+            ]
+          },
+          limit: {
+            type: 'number',
+            examples: [
+              50,
+              100
             ]
           }
         }
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# example:\n#   * value\n#foo: value')
+      assert.deepEqual(output.join('\n'), '#title: My Gallery\n#port: 8080\n# examples:\n#   * 50\n#   * 100\n#limit: 50')
     })
 
     await t.test('examples', async () => {
@@ -374,7 +387,7 @@ test('renderYaml()', async t => {
       assert.deepEqual(output.join('\n'), '# *deprecated*\n#foo: 0')
     })
 
-    await t.test('full', async () => {
+    await t.test('full meta', async () => {
       const output = []
 
 
@@ -395,7 +408,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# Listen port\n#\n# Socket port\n# of the server\n#\n# default: 3000\n#\n# examples:\n#   * 8080\n#   * 1234\n#\nport: 3000')
+      assert.deepEqual(output.join('\n'), '# Listen port\n#\n# Socket port\n# of the server\n#\n# default: 3000\n#\n# examples:\n#   * 8080\n#   * 1234\nport: 3000')
     })
 
     await t.test('deprecated over required', async () => {
@@ -420,4 +433,97 @@ test('renderYaml()', async t => {
 
   })
 
+  await t.test('full', {only: true}, async t => {
+
+    await t.test('spacing first level for object', async () => {
+      const output = []
+
+
+      renderYaml({
+        type: 'object',
+        description: 'Global configuration',
+        properties: {
+          basePath: {
+            type: 'string',
+            default: '~'
+          },
+          version: {
+            type: 'number',
+            default: 1
+          },
+          server: {
+            type: 'object',
+            description: 'server configuration',
+            properties: {
+              publicUrl: {
+                type: 'string',
+                default: 'http://localhost:3000'
+              },
+              port: {
+                type: 'number',
+                default: 3000
+              }
+            }
+          },
+          debug: {
+            type: 'boolean',
+            default: false
+          }
+        }
+      }, output)
+
+
+      assert.deepEqual(output.join('\n'), '# Global configuration\n\n\n# default: ~\n#basePath: ~\n# default: 1\n#version: 1\n\n# server configuration\n#server:\n  # default: http://localhost:3000\n  #publicUrl: http://localhost:3000\n  # default: 3000\n  #port: 3000\n\n# default: false\n#debug: false')
+    })
+
+    await t.test('spacing first level for arrays', async () => {
+      const output = []
+
+
+      renderYaml({
+        type: 'object',
+        properties: {
+          version: {
+            type: 'number',
+            default: 1
+          },
+          sources: {
+            type: 'array',
+            items: {
+              anyOf: [
+                {
+                  description: 'Simple path to source directory',
+                  type: 'string',
+                  examples: ['/home/me/Pictures']
+                },
+                {
+                  type: 'object',
+                  description: 'Detailed source setting',
+                  properties: {
+                    path: {
+                      description: 'Path of source directory',
+                      type: 'string',
+                      examples: ['/mnt/media/photos']
+                    },
+                    downloadable: {
+                      type: 'boolean',
+                      default: false
+                    }
+                  }
+                }
+              ],
+            }
+          },
+          debug: {
+            type: 'boolean',
+            default: false
+          }
+        }
+      }, output)
+
+
+      assert.deepEqual(output.join('\n'), '# default: 1\n#version: 1\n\n#sources:\n  # Simple path to source directory\n  #- /home/me/Pictures\n  # Detailed source setting\n  # [path property] Path of source directory\n  #- path: /mnt/media/photos\n    # default: false\n    #downloadable: false\n\n# default: false\n#debug: false')
+    })
+
+  })
 })

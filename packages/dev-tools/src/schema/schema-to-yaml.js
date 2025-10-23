@@ -44,7 +44,17 @@ export function renderYaml(schema, output) {
     output.push(...head, '', '')
   }
 
-  root.children.forEach(child => child.render(output, false, true))
+  let isPrevObjectArray = false
+  root.children.forEach((child, i) => {
+    // surround empty lines of top-level objects/arrays for better readability
+    const isObjectArray = child.schema.type == 'object' || child.schema.type == 'array'
+    if (i > 0 && (isObjectArray || isPrevObjectArray)) {
+      output.push('')
+    }
+    isPrevObjectArray = isObjectArray
+
+    child.render(output, false, true)
+  })
 }
 
 /**
@@ -78,7 +88,7 @@ function expandNode(parent, schema, name = '', depth = 0, isArrayItem = false) {
   if (Array.isArray(ofList)) {
     const of = new YamlNode(parent, schema, name, depth)
     ofList.forEach(value => {
-      expandNode(of, value, '', depth)
+      expandNode(of, value, '', depth, isArrayItem)
     })
     return
   }
