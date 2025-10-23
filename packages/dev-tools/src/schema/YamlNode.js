@@ -69,9 +69,6 @@ export class YamlNode {
   renderComment(output, isArrayItem) {
     /* @type {string[][]} */
     const sections = []
-    if (this.schema.title) {
-      sections.push([this.schema.title])
-    }
     if (this.schema.description) {
       sections.push(this.schema.description.split(/\n/))
     }

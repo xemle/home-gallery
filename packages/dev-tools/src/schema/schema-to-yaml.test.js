@@ -129,7 +129,7 @@ test('renderYaml()', async t => {
             items: {
               anyOf: [
                 { enum: ['one', 'two'] },
-                { enum: ['three'], title: 'three title' },
+                { enum: ['three'], description: 'three description' },
                 { type: 'string', minLength: 0 }
               ]
             }
@@ -138,7 +138,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '#foo:\n  #- one\n  #- two\n  # three title\n  #- three\n  #- ...any string')
+      assert.deepEqual(output.join('\n'), '#foo:\n  #- one\n  #- two\n  # three description\n  #- three\n  #- ...any string')
     })
 
     await t.test('object item', async () => {
@@ -152,7 +152,7 @@ test('renderYaml()', async t => {
             type: 'array',
             items: {
               type: 'object',
-              title: 'title',
+              description: 'description',
               properties: {
                 bar: {
                   type: 'boolean'
@@ -167,7 +167,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '#foo:\n  # title\n  #- bar: true\n    #baz: 0')
+      assert.deepEqual(output.join('\n'), '#foo:\n  # description\n  #- bar: true\n    #baz: 0')
     })
 
     await t.test('object item array', async () => {
@@ -181,7 +181,7 @@ test('renderYaml()', async t => {
             type: 'array',
             items: {
               type: 'object',
-              title: 'title',
+              description: 'description',
               properties: {
                 bar: {
                   default: 8080,
@@ -203,7 +203,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '#foo:\n  # title\n  # default: 8080\n  #- bar: 8080\n    #baz:\n      #- const\n      #- ...any number')
+      assert.deepEqual(output.join('\n'), '#foo:\n  # description\n  # default: 8080\n  #- bar: 8080\n    #baz:\n      #- const\n      #- ...any number')
     })
   })
 
@@ -226,7 +226,7 @@ test('renderYaml()', async t => {
       assert.deepEqual(output.join('\n'), '# yaml-language-server: $schema=https://schema.local/schema.json\n#foo: true')
     })
 
-    await t.test('title', async () => {
+    await t.test('title should be used only as typescript interface name', async () => {
       const output = []
 
 
@@ -234,21 +234,21 @@ test('renderYaml()', async t => {
         type: 'object',
         properties: {
           foo: {
-            title: 'foo flag',
+            title: 'fooFlag',
             type: 'boolean'
           }
         }
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# foo flag\n#foo: true')
+      assert.deepEqual(output.join('\n'), '#foo: true')
     })
 
     await t.test('head meta', async () => {
       const output = []
 
       renderYaml({
-        title: 'Root title',
+        description: 'Root description',
         type: 'object',
         properties: {
           foo: {
@@ -258,7 +258,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# Root title\n\n\n#foo: true')
+      assert.deepEqual(output.join('\n'), '# Root description\n\n\n#foo: true')
     })
 
     await t.test('description', async () => {
@@ -383,8 +383,7 @@ test('renderYaml()', async t => {
         properties: {
           port: {
             type: 'number',
-            title: 'Listen port',
-            description: 'Sockeet port\nof the server',
+            description: 'Listen port\n\nSocket port\nof the server',
             default: 3000,
             examples: [
               8080,
@@ -396,7 +395,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# Listen port\n#\n# Sockeet port\n# of the server\n#\n# default: 3000\n#\n# examples:\n#   * 8080\n#   * 1234\n#\nport: 3000')
+      assert.deepEqual(output.join('\n'), '# Listen port\n#\n# Socket port\n# of the server\n#\n# default: 3000\n#\n# examples:\n#   * 8080\n#   * 1234\n#\nport: 3000')
     })
 
     await t.test('deprecated over required', async () => {
