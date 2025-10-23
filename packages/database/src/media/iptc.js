@@ -16,13 +16,14 @@ const getIptc = (entry) => {
     .filter(entry => entry.meta.exif) // only with exif information
     .reduce((iptc, entry) => {
       const exif = entry.meta.exif
-      if (!exif.ImageDescription) {
+      const description = exif.ImageDescription?.trim()
+      if (!description) {
         return iptc
       } else if (iptc.description) {
-        log.debug(`Skip image description from ${entry}: ${exif.ImageDescription}. Description is already set`)
+        log.debug(`Skip image description from ${entry}: ${description}. Description is already set`)
       } else {
-        log.trace(`Use image description from ${entry}: ${exif.ImageDescription}`)
-        iptc.description = exif.ImageDescription
+        log.trace(`Use image description from ${entry}: ${description}`)
+        iptc.description = description
       }
       return iptc
     }, {})
