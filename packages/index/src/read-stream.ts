@@ -90,7 +90,7 @@ export const readIndexHead = (indexFilename, cb) => {
         cb(null, {indexName, ...head})
       }
     })
-    .on('err', err => {
+    .on('error', err => {
       if (!done) {
         done = true
         cb(err)
