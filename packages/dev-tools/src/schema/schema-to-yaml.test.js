@@ -385,7 +385,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '#title: My Gallery\n#port: 8080\n#debug: true\n# examples:\n#   * 50\n#   * 100\n#limit: 50')
+      assert.deepEqual(output.join('\n'), '#title: \'My Gallery\'\n#port: 8080\n#debug: true\n# examples:\n#   * 50\n#   * 100\n#limit: 50')
     })
 
     await t.test('examples', async () => {
@@ -406,7 +406,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# examples:\n#   * first is default\n#   * second\n#foo: first is default')
+      assert.deepEqual(output.join('\n'), '# examples:\n#   * \'first is default\'\n#   * second\n#foo: \'first is default\'')
     })
 
     await t.test('required', async () => {
@@ -531,7 +531,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# Global configuration\n\n\n# default: ~\n#basePath: ~\n# default: 1\n#version: 1\n\n# server configuration\n#server:\n  # default: http://localhost:3000\n  #publicUrl: http://localhost:3000\n  # default: 3000\n  #port: 3000\n\n# default: false\n#debug: false')
+      assert.deepEqual(output.join('\n'), '# Global configuration\n\n\n# default: ~\n#basePath: ~\n# default: 1\n#version: 1\n\n# server configuration\n#server:\n  # default: \'http://localhost:3000\'\n  #publicUrl: \'http://localhost:3000\'\n  # default: 3000\n  #port: 3000\n\n# default: false\n#debug: false')
     })
 
     await t.test('spacing first level for arrays', async () => {
