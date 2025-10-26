@@ -34,7 +34,7 @@ export function renderYaml(schema, output) {
 
   const root = new YamlNode(null, schema, '', 0)
   for (const [key, value] of Object.entries(schema.properties)) {
-    expandNode(root, value, key, 0)
+    expandNode(root, value, key, 0, false, true)
   }
 
   /* @type {string[]} */
@@ -44,7 +44,17 @@ export function renderYaml(schema, output) {
     output.push(...head, '', '')
   }
 
-  root.children.forEach(child => child.render(output, false, true))
+  let isPrevObjectArray = false
+  root.children.forEach((child, i) => {
+    // surround empty lines of top-level objects/arrays for better readability
+    const isObjectArray = child.schema.type == 'object' || child.schema.type == 'array'
+    if (i > 0 && (isObjectArray || isPrevObjectArray)) {
+      output.push('')
+    }
+    isPrevObjectArray = isObjectArray
+
+    child.render(output, false, true)
+  })
 }
 
 /**
@@ -54,11 +64,11 @@ export function renderYaml(schema, output) {
  * @param {number} depth
  * @param {boolean} isArrayItem
  */
-function expandNode(parent, schema, name = '', depth = 0, isArrayItem = false) {
+function expandNode(parent, schema, name = '', depth = 0, isArrayItem = false, isObjectProperty = false) {
   if (schema.type == 'object' && typeof schema.properties == 'object') {
     const object = new YamlNode(parent, schema, name, depth)
     for (const [key, value] of Object.entries(schema.properties)) {
-      expandNode(object, value, key, depth + (isArrayItem ? 0 : 1))
+      expandNode(object, value, key, depth + (isArrayItem ? 0 : 1), false, true)
     }
     return
   }
@@ -78,7 +88,7 @@ function expandNode(parent, schema, name = '', depth = 0, isArrayItem = false) {
   if (Array.isArray(ofList)) {
     const of = new YamlNode(parent, schema, name, depth)
     ofList.forEach(value => {
-      expandNode(of, value, '', depth)
+      expandNode(of, value, isObjectProperty ? name : '', depth, isArrayItem, isObjectProperty)
     })
     return
   }

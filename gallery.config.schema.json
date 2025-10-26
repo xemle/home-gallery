@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json",
   "title": "GalleryConfig",
-  "description": "HomeGallery configuration file",
+  "description": "HomeGallery configuration file\n\nDefault configuration file is gallery.config.yml.\nJSON format is also supported (gallery.config.json)\n\nDirectory value examples:\n- /absolute/directory\n- relative/directory/to/current/working/dir\n- ~/directory/in/your/home\n- ./relative/directory/to/configuration/file\n\nVariable replacement example:\n\n  baseDir: '~'\n  configDir: '{baseDir}/.config/home-gallery'\n\nconfigDir is replaced to '~/.config/home-gallery' and than to '$HOME/.config/home-gallery'\n\nVariables are overwritten by environment variables\n\nVariables are baseDir, configDir, configPrefix, cacheDir and dir in sources\nor environment variables GALLERY_BASE_DIR, GALLERY_CONFIG_DIR, GALLERY_CONFIG_PREFIX, GALLERY_CACHE_DIR",
   "type": "object",
   "properties": {
     "baseDir": {
@@ -23,6 +23,538 @@
       "description": "Cache directory for storage directory and other cache files",
       "type": "string",
       "default": "{baseDir}/.cache/home-gallery"
+    },
+    "sources": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#sources",
+      "title": "Sources",
+      "description": "Sources\n\nList of media source directories. These can be read only.\n\nAll sources are used to build the gallery database. If you need\ndifferent databases or gallery instances use different gallery\nconfigurations",
+      "default": [],
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "description": "Simple source directory with default settings",
+            "type": "string",
+            "examples": [
+              "/home/me/Photos"
+            ]
+          },
+          {
+            "description": "Source directory with custom settings",
+            "type": "object",
+            "properties": {
+              "dir": {
+                "description": "Path of source directory",
+                "type": "string",
+                "examples": [
+                  "/home/me/Photos"
+                ]
+              },
+              "index": {
+                "description": "Index filename which must be unique\n\nFor directory /mnt/photos the index file is {configDir}/photos.idx\nIf two sources have the same index file an error is raised",
+                "type": "string",
+                "default": "{configDir}/{configPrefix}{basename(dir)}.idx"
+              },
+              "excludes": {
+                "description": "All files and subdirectories are included by default.\nSet exclude patterns to ignore some files or foldes.\nLast match wins\n\nExclude patterns are using gitignore patterns (see https://git-scm.com/docs/gitignore)\n\nTo include only one subdirectory you need to use:\n- **       # exclude/ignores everything\n- !/dir    # include dir name\n- !/dir/** # include everything below /dir",
+                "type": "array",
+                "items": {
+                  "examples": [
+                    ".DS_Store",
+                    "._*",
+                    "'*.tmp'",
+                    "'*cache*'"
+                  ],
+                  "type": "string"
+                }
+              },
+              "excludeFromFile": {
+                "description": "Read exclude patterns from file (one pattern per line)",
+                "type": "string",
+                "examples": [
+                  "{configDir}/excludes"
+                ]
+              },
+              "excludeIfPresent": {
+                "description": "If a file with this name is present in a directory, the this directory is excluded",
+                "type": "string",
+                "default": ".galleryignore"
+              },
+              "maxFileSize": {
+                "description": "Exclude big files such as videos to speedup initial setup",
+                "type": "string",
+                "examples": [
+                  "20M",
+                  "1G"
+                ]
+              },
+              "offline": {
+                "description": "If source directory/disk is offline/unmounted set it to true.\nOffline sources require an index file. Previews and meta data\nshould be extracted first before marking a source offline",
+                "type": "boolean",
+                "examples": [
+                  true
+                ]
+              },
+              "downloadable": {
+                "description": "Allows the original files to be downloaded via de webapp.\nThis adds a link to images of this source in the details view.\nSources set as `offline` won't be made available",
+                "type": "boolean",
+                "examples": [
+                  true
+                ]
+              },
+              "matcher": {
+                "description": "File matcher for checksum recalculation and detecting file changes",
+                "default": "size-ctime-inode",
+                "oneOf": [
+                  {
+                    "description": "size-ctime-inode matcher should be used if possible,\nmight not work on windows",
+                    "const": "size-ctime-inode"
+                  },
+                  {
+                    "description": "size-ctime matcher should be used if stable fs inodes are\nnot available and might not work for fuse shares",
+                    "const": "size-ctime"
+                  },
+                  {
+                    "description": "size matcher should be used if you know what you are doing",
+                    "const": "size"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "extractor": {
+      "description": "Extractor settings",
+      "type": "object",
+      "properties": {
+        "excludes": {
+          "description": "Exclude file patterns",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excludeFromFile": {
+          "description": "Read exclude patterns from file",
+          "examples": [
+            "{configDir}/excludes"
+          ],
+          "type": "string"
+        },
+        "image": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.image",
+          "type": "object",
+          "properties": {
+            "previewSizes": {
+              "type": "array",
+              "default": [
+                1920,
+                1280,
+                800,
+                320,
+                128
+              ],
+              "items": {
+                "type": "number"
+              }
+            },
+            "previewQuality": {
+              "type": "number",
+              "default": 80
+            }
+          }
+        },
+        "video": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.video",
+          "type": "object",
+          "properties": {
+            "previewSize": {
+              "description": "used as preview size and preview filename",
+              "type": "number",
+              "default": 720
+            },
+            "ext": {
+              "description": "used as target video container and preview filename",
+              "type": "string",
+              "default": "mp4"
+            },
+            "scale": {
+              "description": "overwrites previewSize.\nE.g. -2:'min(ih,max(720,min(1080,ih*.5)))' for 720p <= height*0.5 <= 1080p or height, if height < 720",
+              "type": "string",
+              "default": "-2:'min(720,ih)'"
+            },
+            "frameRate": {
+              "type": "number",
+              "default": 30
+            },
+            "maxVideoBitRate": {
+              "type": "number",
+              "default": 30
+            },
+            "videoEncoder": {
+              "type": "string",
+              "default": "libx264"
+            },
+            "preset": {
+              "type": "string",
+              "default": "slow"
+            },
+            "profile": {
+              "type": "string",
+              "default": "baseline"
+            },
+            "level": {
+              "type": "string",
+              "default": "3.0"
+            },
+            "addFfmpegArgs": {
+              "description": "Additional ffmpeg args",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "customFfmpegArgs": {
+              "description": "custom ffmpeg args for video conversion, replaces all other settings such previewSize, videoEncoder, addFfmpegArgs, ...",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "apiServer": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.apiServer",
+          "type": "object",
+          "properties": {
+            "url": {
+              "description": "URL of the API server\n\nIn docker compose this is overwritten by GALLERY_API_SERVER env",
+              "type": "string",
+              "default": "https://api.home-gallery.org"
+            },
+            "timeout": {
+              "description": "Timeout in seconds for each API request",
+              "type": "number",
+              "default": 30
+            },
+            "concurrent": {
+              "description": "Concurrent requests to API server\n\nIf you use a low power device you should reduce this value to 3",
+              "type": "number",
+              "default": 30
+            },
+            "disable": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "similarDetection",
+                      "objectDetection",
+                      "faceDetection"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "geoReverse": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.geoReverse",
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "default": "https://nominatim.openstreetmap.org"
+            },
+            "addressLanguage": {
+              "description": "Preffered address language of geo code reverse lookups",
+              "type": "array",
+              "default": [
+                "en",
+                "de"
+              ],
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "useNative": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#extractor.useNative",
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "description": "use libvips to resize images",
+                "const": "vipsthumbnail"
+              },
+              {
+                "description": "use ImageMagick to resize images",
+                "const": "convert"
+              },
+              {
+                "description": "Use ffprobe/ffmpeg from system",
+                "enum": [
+                  "ffprobe",
+                  "ffmpeg"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "storage": {
+      "description": "Storage settings",
+      "type": "object",
+      "properties": {
+        "dir": {
+          "type": "string",
+          "default": "{cacheDir}/storage"
+        }
+      }
+    },
+    "database": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "default": "{configDir}/{configPrefix}database.db"
+        },
+        "maxMemory": {
+          "description": "The full database creation is memory consuming. The default value is 2048 MB.\nOn memory errors or for larger photo collections (>50000 images) 4096 MB is recommended\nUse less memory for smaller devices (e.g. Raspberry Pi Zero), e.g. 512 MB.\nNode's default memory limit is 512 MB (changeable via --max-old-space-size node arg)",
+          "type": "number",
+          "examples": [
+            2048
+          ]
+        },
+        "excludes": {
+          "type": "array",
+          "examples": [
+            "*.xmp",
+            "*.svg"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "excludeFromFile": {
+          "type": "string",
+          "examples": [
+            "{configDir}/excludes"
+          ]
+        },
+        "supportedTypes": {
+          "enum": [
+            "image",
+            "rawImage",
+            "video"
+          ]
+        }
+      }
+    },
+    "events": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "default": "{configDir}/{configPrefix}events.db"
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "properties": {
+        "port": {
+          "default": 3000,
+          "type": "number"
+        },
+        "host": {
+          "default": "0.0.0.0",
+          "type": "string"
+        },
+        "key": {
+          "description": "Optional https certificate key",
+          "examples": [
+            "{configDir}/server.key"
+          ],
+          "type": "string"
+        },
+        "cert": {
+          "description": "Optional https certificate",
+          "examples": [
+            "{configDir}/server.crt"
+          ],
+          "type": "string"
+        },
+        "prefix": {
+          "description": "Prefix of application, including basePath of http page",
+          "type": "string",
+          "examples": [
+            "/gallery"
+          ]
+        },
+        "basePath": {
+          "description": "Prefix path for browser only. basePath is Overwritten by prefix\nUse this if you use prefix by a http proxy which strips the prefix to / towards the gallery app",
+          "type": "string",
+          "examples": [
+            "/"
+          ]
+        },
+        "publicUrl": {
+          "description": "The public URL of the gallery instance",
+          "examples": [
+            "https://acme.com/gallery"
+          ],
+          "type": "string"
+        },
+        "openBrowser": {
+          "description": "Open browser when server starts",
+          "examples": [
+            true
+          ],
+          "type": "boolean"
+        },
+        "auth": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#server.auth",
+          "type": "object",
+          "description": "Enable basic authentication users and ip whitelist rules which require no authentication",
+          "properties": {
+            "public": {
+              "type": "object",
+              "properties": {
+                "filter": {
+                  "description": "Database filter for anonymous users",
+                  "type": "string",
+                  "examples": [
+                    "year >= 2024 tag:public"
+                  ]
+                }
+              }
+            },
+            "users": {
+              "description": "Passwords can be in plain text, {SHA} or {SHA256-salted}.\n\nHashed password can be generated via\n  node -e \"pw=process.argv[1];const {createHash,randomBytes}=require('crypto');salt=randomBytes(12);hash=createHash('sha256').update(salt.toString()+pw).digest('base64');console.log('{SHA256-salted}'+salt.toString('base64')+'.'+hash)\" 'password'\n  {SHA256-salted}FkcbhhcHYW0DdE9u.P9Ik9MG8ldtO0fzGB+RV186vi8PZMomsya5OWC0AEiA=\n  node -e \"pw=process.argv[1]||'';sha1=require('crypto').createHash('sha1').update(pw).digest('base64');console.log('{SHA}'+sha1)\" password\n  {SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g=",
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "description": "Simple username:password pair",
+                    "type": "object",
+                    "properties": {
+                      "johndoe": {
+                        "examples": [
+                          "s3cr3t"
+                        ],
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "description": "User object with dedicated username, password properties",
+                    "type": "object",
+                    "properties": {
+                      "username": {
+                        "type": "string",
+                        "examples": [
+                          "guest"
+                        ]
+                      },
+                      "password": {
+                        "type": "string",
+                        "examples": [
+                          "{SHA256-salted}W1jrZgK81z06YLhA.qTSmeyYtPP19ZEpGiiAyVn61nly4jqbuuGoSefzLm98="
+                        ]
+                      },
+                      "filter": {
+                        "description": "Database filter for the user",
+                        "type": "string",
+                        "examples": [
+                          "year >= 2019 not tag:private"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "rules": {
+              "description": "Rules when the request need authentication\nFirst matching rule wins.\n\nFor public gallery use\nrules:\n  - allow: localhost\n  - deny: all",
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "allow": {
+                        "description": "Allow rules without authentication like localhost",
+                        "examples": [
+                          "all",
+                          "localhost",
+                          "192.168/16"
+                        ],
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "deny": {
+                        "description": "Deny rules which hosts requires authentication like all",
+                        "examples": [
+                          "all",
+                          "localhost",
+                          "192.168/16"
+                        ],
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "importSources": {
+          "description": "Import sources on server start",
+          "type": "boolean",
+          "default": true
+        },
+        "watchSources": {
+          "description": "Watch sources and import files on changes",
+          "type": "boolean",
+          "default": true
+        },
+        "api": {
+          "type": "object",
+          "properties": {
+            "tree": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#server.api.tree",
+              "type": "object",
+              "properties": {
+                "monthGroupSize": {
+                  "type": "number",
+                  "default": 4
+                },
+                "ignoreRecentYears": {
+                  "type": "number",
+                  "default": 4
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "webapp": {
       "title": "AppConfig",
@@ -172,6 +704,108 @@
             }
           }
         }
+      }
+    },
+    "pluginManager": {
+      "description": "Plugin manager settings",
+      "type": "object",
+      "properties": {
+        "dirs": {
+          "description": "Load plugins from following directories.\n\nEach file or directory is handled as plugin",
+          "type": "array",
+          "examples": [
+            "plugins"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "plugins": {
+          "description": "List of dedicated plugin files",
+          "type": "array",
+          "examples": [
+            "./my-plugin"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "disabled": {
+          "description": "Disable plugins by name or by name.extension",
+          "type": "array",
+          "examples": [
+            "acmePlugin",
+            "acmePlugin.exentionName"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "logger": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#logger",
+      "description": "Logger settings",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "description": "Console logger",
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "console"
+              },
+              "level": {
+                "description": "Log level",
+                "default": "info",
+                "enum": [
+                  "trace",
+                  "debug",
+                  "info",
+                  "warn",
+                  "error",
+                  "fatal",
+                  "silent"
+                ]
+              },
+              "format": {
+                "description": "Use newline delimited JSON if format is set to json",
+                "const": "json"
+              }
+            }
+          },
+          {
+            "description": "File logger",
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "file"
+              },
+              "level": {
+                "description": "Log level",
+                "default": "debug",
+                "enum": [
+                  "trace",
+                  "debug",
+                  "info",
+                  "warn",
+                  "error",
+                  "fatal",
+                  "silent"
+                ]
+              },
+              "file": {
+                "description": "Log file path\n\nFile logger format is in newline delimited JSON. See http://ndjson.org",
+                "examples": [
+                  "{configDir}/{configPrefix}gallery.log"
+                ],
+                "type": "string"
+              }
+            }
+          }
+        ]
       }
     }
   }

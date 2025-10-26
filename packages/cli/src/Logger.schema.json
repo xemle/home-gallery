@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#logger",
+  "description": "Logger settings",
+  "type": "array",
+  "items": {
+    "anyOf": [
+      {
+        "description": "Console logger",
+        "type": "object",
+        "properties": {
+          "type": {
+            "const": "console"
+          },
+          "level": {
+            "description": "Log level",
+            "default": "info",
+            "enum": ["trace", "debug", "info", "warn", "error", "fatal", "silent"]
+          },
+          "format": {
+            "description": "Use newline delimited JSON if format is set to json",
+            "const": "json"
+          }
+        }
+      },
+      {
+        "description": "File logger",
+        "type": "object",
+        "properties": {
+          "type": {
+            "const": "file"
+          },
+          "level": {
+            "description": "Log level",
+            "default": "debug",
+            "enum": ["trace", "debug", "info", "warn", "error", "fatal", "silent"]
+          },
+          "file": {
+            "description": "Log file path\n\nFile logger format is in newline delimited JSON. See http://ndjson.org",
+            "examples": ["{configDir}/{configPrefix}gallery.log"],
+            "type": "string"
+          }
+        }
+
+      }
+    ]
+  }
+}

@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json",
+  "title": "CliConfig",
+  "description": "gallery configuration for cli module",
+  "type": "object",
+  "properties": {
+    "sources": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#sources",
+      "title": "Sources",
+      "description": "Sources\n\nList of media source directories. These can be read only.\n\nAll sources are used to build the gallery database. If you need\ndifferent databases or gallery instances use different gallery\nconfigurations",
+      "default": [],
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "description": "Simple source directory with default settings",
+            "type": "string",
+            "examples": [
+              "/home/me/Photos"
+            ]
+          },
+          {
+            "description": "Source directory with custom settings",
+            "type": "object",
+            "properties": {
+              "dir": {
+                "description": "Path of source directory",
+                "type": "string",
+                "examples": [
+                  "/home/me/Photos"
+                ]
+              },
+              "index": {
+                "description": "Index filename which must be unique\n\nFor directory /mnt/photos the index file is {configDir}/photos.idx\nIf two sources have the same index file an error is raised",
+                "type": "string",
+                "default": "{configDir}/{configPrefix}{basename(dir)}.idx"
+              },
+              "excludes": {
+                "description": "All files and subdirectories are included by default.\nSet exclude patterns to ignore some files or foldes.\nLast match wins\n\nExclude patterns are using gitignore patterns (see https://git-scm.com/docs/gitignore)\n\nTo include only one subdirectory you need to use:\n- **       # exclude/ignores everything\n- !/dir    # include dir name\n- !/dir/** # include everything below /dir",
+                "type": "array",
+                "items": {
+                  "examples": [
+                    ".DS_Store",
+                    "._*",
+                    "'*.tmp'",
+                    "'*cache*'"
+                  ],
+                  "type": "string"
+                }
+              },
+              "excludeFromFile": {
+                "description": "Read exclude patterns from file (one pattern per line)",
+                "type": "string",
+                "examples": [
+                  "{configDir}/excludes"
+                ]
+              },
+              "excludeIfPresent": {
+                "description": "If a file with this name is present in a directory, the this directory is excluded",
+                "type": "string",
+                "default": ".galleryignore"
+              },
+              "maxFileSize": {
+                "description": "Exclude big files such as videos to speedup initial setup",
+                "type": "string",
+                "examples": [
+                  "20M",
+                  "1G"
+                ]
+              },
+              "offline": {
+                "description": "If source directory/disk is offline/unmounted set it to true.\nOffline sources require an index file. Previews and meta data\nshould be extracted first before marking a source offline",
+                "type": "boolean",
+                "examples": [
+                  true
+                ]
+              },
+              "downloadable": {
+                "description": "Allows the original files to be downloaded via de webapp.\nThis adds a link to images of this source in the details view.\nSources set as `offline` won't be made available",
+                "type": "boolean",
+                "examples": [
+                  true
+                ]
+              },
+              "matcher": {
+                "description": "File matcher for checksum recalculation and detecting file changes",
+                "default": "size-ctime-inode",
+                "oneOf": [
+                  {
+                    "description": "size-ctime-inode matcher should be used if possible,\nmight not work on windows",
+                    "const": "size-ctime-inode"
+                  },
+                  {
+                    "description": "size-ctime matcher should be used if stable fs inodes are\nnot available and might not work for fuse shares",
+                    "const": "size-ctime"
+                  },
+                  {
+                    "description": "size matcher should be used if you know what you are doing",
+                    "const": "size"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "storage": {
+      "description": "Storage settings",
+      "type": "object",
+      "properties": {
+        "dir": {
+          "type": "string",
+          "default": "{cacheDir}/storage"
+        }
+      }
+    },
+    "database": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "default": "{configDir}/{configPrefix}database.db"
+        },
+        "maxMemory": {
+          "description": "The full database creation is memory consuming. The default value is 2048 MB.\nOn memory errors or for larger photo collections (>50000 images) 4096 MB is recommended\nUse less memory for smaller devices (e.g. Raspberry Pi Zero), e.g. 512 MB.\nNode's default memory limit is 512 MB (changeable via --max-old-space-size node arg)",
+          "type": "number",
+          "examples": [
+            2048
+          ]
+        },
+        "excludes": {
+          "type": "array",
+          "examples": [
+            "*.xmp",
+            "*.svg"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "excludeFromFile": {
+          "type": "string",
+          "examples": [
+            "{configDir}/excludes"
+          ]
+        },
+        "supportedTypes": {
+          "enum": [
+            "image",
+            "rawImage",
+            "video"
+          ]
+        }
+      }
+    },
+    "events": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "default": "{configDir}/{configPrefix}events.db"
+        }
+      }
+    },
+    "pluginManager": {
+      "description": "Plugin manager settings",
+      "type": "object",
+      "properties": {
+        "dirs": {
+          "description": "Load plugins from following directories.\n\nEach file or directory is handled as plugin",
+          "type": "array",
+          "examples": [
+            "plugins"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "plugins": {
+          "description": "List of dedicated plugin files",
+          "type": "array",
+          "examples": [
+            "./my-plugin"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "disabled": {
+          "description": "Disable plugins by name or by name.extension",
+          "type": "array",
+          "examples": [
+            "acmePlugin",
+            "acmePlugin.exentionName"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "logger": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#logger",
+      "description": "Logger settings",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "description": "Console logger",
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "console"
+              },
+              "level": {
+                "description": "Log level",
+                "default": "info",
+                "enum": [
+                  "trace",
+                  "debug",
+                  "info",
+                  "warn",
+                  "error",
+                  "fatal",
+                  "silent"
+                ]
+              },
+              "format": {
+                "description": "Use newline delimited JSON if format is set to json",
+                "const": "json"
+              }
+            }
+          },
+          {
+            "description": "File logger",
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "file"
+              },
+              "level": {
+                "description": "Log level",
+                "default": "debug",
+                "enum": [
+                  "trace",
+                  "debug",
+                  "info",
+                  "warn",
+                  "error",
+                  "fatal",
+                  "silent"
+                ]
+              },
+              "file": {
+                "description": "Log file path\n\nFile logger format is in newline delimited JSON. See http://ndjson.org",
+                "examples": [
+                  "{configDir}/{configPrefix}gallery.log"
+                ],
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

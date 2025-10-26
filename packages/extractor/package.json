@@ -10,6 +10,7 @@
   "scripts": {
     "clean": "rimraf dist *.tsbuildinfo",
     "build": "dev-cli build",
+    "schema:merge": "dev-cli schema merge",
     "test": "tap",
     "watch": "dev-cli build --watch",
     "watch:test": "tap repl w"
@@ -45,5 +46,10 @@
   },
   "devDependencies": {
     "@home-gallery/dev-tools": "file:../dev-tools"
+  },
+  "gallery": {
+    "config": {
+      "schema": "extractor.schema.json"
+    }
   }
 }

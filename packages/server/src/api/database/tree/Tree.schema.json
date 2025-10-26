@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#server.api.tree",
+  "type": "object",
+  "properties": {
+    "monthGroupSize": {
+      "type": "number",
+      "default": 4
+    },
+    "ignoreRecentYears": {
+      "type": "number",
+      "default": 4
+    }
+  }
+}

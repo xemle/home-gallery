@@ -57,7 +57,7 @@ export class YamlNode {
    * @params {boolean} isObjectProperty
    */
   render(output, isArrayItem = false, isObjectProperty = false) {
-    this.renderComment(output, isArrayItem)
+    this.renderComment(output, isArrayItem, isObjectProperty)
     this.#renderNode(output, isArrayItem, isObjectProperty)
   }
 
@@ -66,19 +66,17 @@ export class YamlNode {
    * @params {boolean} isArrayItem
    * @params {boolean} isObjectProperty
    */
-  renderComment(output, isArrayItem) {
+  renderComment(output, isArrayItem, isObjectProperty) {
     /* @type {string[][]} */
     const sections = []
-    if (this.schema.title) {
-      sections.push([this.schema.title])
-    }
     if (this.schema.description) {
       sections.push(this.schema.description.split(/\n/))
     }
     if (typeof this.schema.default != 'undefined') {
       sections.push([`default: ${this.#stringifyValue(this.schema.default)}`])
     }
-    if (Array.isArray(this.schema.examples)) {
+    const isScalar = this.schema.type == 'boolean' || this.schema.type == 'number' || this.schema.type == 'integer' || this.schema.type == 'string'
+    if (Array.isArray(this.schema.examples) && (!isScalar || this.schema.examples.length > 1)) {
       sections.push([
         (this.schema.examples.length > 1 ? 'examples:' : 'example:'),
         ...this.schema.examples.map(example => `  * ${this.#stringifyValue(example)}`)
@@ -88,33 +86,33 @@ export class YamlNode {
     const depth = Math.max(0, this.depth - (isArrayItem ? 1 : 0))
     const prefix = YamlNode.IDENT.repeat(depth) + '#'
 
-    // Add empty line in first depth
-    if (output.length > 0 && sections.length > 0 && depth == 0) {
-      output.push('')
-    }
-    // Add empty comment line for longer object section
-    if (sections.length > 1 && this.schema.type == 'object') {
-      output.push(`${prefix}`)
-    }
-
+    const lines = []
     if (this.schema.deprecated) {
-      output.push(`${prefix} deprecated`)
+      lines.push(`${prefix} *deprecated*`)
     }
-    let lines = 0
     sections.forEach((section, i) => {
       if (i > 0) {
-        output.push(prefix)
+        lines.push(prefix)
       }
       section.forEach(line => {
-        output.push(`${prefix} ${line}`.replace(/\s+$/, ''))
-        lines++
+        lines.push(`${prefix} ${line}`.replace(/\s+$/, ''))
       })
     })
 
-    // add extra empty comment line for better readability
-    if (sections.length > 2 && lines > 5 && this.schema.type != 'object') {
-      output.push(`${prefix}`)
+    if (isArrayItem && isObjectProperty && lines.length > 0) {
+      lines[0] = lines[0].replace(prefix, prefix + ` [${this.name} property]`)
     }
+
+    // add extra empty comment lines for better readability for larger objects/arrays
+    const isObjectOrArray = this.schema.type == 'object' || this.schema.type == 'array'
+    if (isObjectOrArray && (sections.length > 1 || lines.length > 4)) {
+      lines.unshift(prefix)
+    }
+    if (isObjectOrArray && (lines.length > 6)) {
+      lines.push(prefix)
+    }
+
+    output.push(...lines)
   }
 
   /**
@@ -193,8 +191,9 @@ export class YamlNode {
         return
       }
 
-      if (typeof this.schema.default != 'undefined') {
+      if (typeof this.schema.default != 'undefined' || this.schema.examples?.length) {
         output.push(prefix + this.#getDefaultValue())
+        return
       }
 
       output.push(prefix + '...any ' + this.schema.type)
@@ -202,7 +201,7 @@ export class YamlNode {
     }
 
     if (this.schema.const) {
-      if (isArrayItem) {
+      if (isArrayItem && !isObjectProperty) {
         output.push(prefix + this.#stringifyValue(this.schema.const))
         return
       }
@@ -211,15 +210,26 @@ export class YamlNode {
       return
     }
 
-    if (Array.isArray(this.schema.oneOf || this.schema.allOf || this.schema.anyOf) && isArrayItem) {
-      this.children.forEach(child => child.render(output, isArrayItem, false))
+    if (Array.isArray(this.schema.oneOf || this.schema.allOf || this.schema.anyOf) && (isArrayItem || isObjectProperty)) {
+      this.children.forEach(child => child.render(output, isArrayItem, isObjectProperty))
       return
     }
   }
 
   #stringifyValue(value) {
-    if (typeof value == 'string' && value.match(/[A-Za-z][-_.A-Za-z0-9]*/)) {
-      return value
+    if (typeof value == 'boolean' || typeof value == 'number') {
+      return String(value)
+    }
+    if (typeof value == 'string') {
+      if (value.match(/^[~/A-Za-z][-_./A-Za-z0-9]*$/)) {
+        return value
+      }
+      if (value.indexOf("'") < 0) {
+        return `'${value}'`
+      }
+      if (value.indexOf('"') < 0) {
+        return `"${value}"`
+      }
     }
     return JSON.stringify(value)
   }

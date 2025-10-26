@@ -11,6 +11,7 @@
     "clean": "rimraf dist *.tsbuildinfo",
     "build": "dev-cli build",
     "postbuild": "cpy \"../webapp/dist/**\" dist/public",
+    "schema:merge": "dev-cli schema merge",
     "serve": "node index.js",
     "watch": "dev-cli build --watch",
     "test": "tap",
@@ -46,5 +47,10 @@
   "devDependencies": {
     "@home-gallery/dev-tools": "file:../dev-tools",
     "@home-gallery/webapp": "file:../webapp"
+  },
+  "gallery": {
+    "config": {
+      "schema": "server.schema.json"
+    }
   }
 }

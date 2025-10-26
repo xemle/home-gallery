@@ -46,6 +46,31 @@ test('renderYaml()', async t => {
       assert.deepEqual(output.join('\n'), '#foo:\n  #bar: true')
     })
 
+    await t.test('object array object enum', async () => {
+      const output = []
+
+
+      renderYaml({
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                bar: {
+                  enum: ['one', 'two']
+                }
+              }
+            }
+          }
+        }
+      }, output)
+
+
+      assert.deepEqual(output.join('\n'), '#foo:\n  #- bar: one # one of: one, two')
+    })
+
     await t.test('required property first', async () => {
       const output = []
 
@@ -73,6 +98,33 @@ test('renderYaml()', async t => {
 
 
       assert.deepEqual(output.join('\n'), 'foo:\n  baz: 0\n  #bar: true\n  #zoo: ""')
+    })
+
+    await t.test('const values', async () => {
+      const output = []
+
+
+      renderYaml({
+        type: 'object',
+        properties: {
+          foo: {
+            description: 'Choose between',
+            oneOf: [
+              {
+                description: 'first option',
+                const: 'one'
+              },
+              {
+                description: 'second option',
+                const: 'two'
+              }
+            ]
+          }
+        }
+      }, output)
+
+
+      assert.deepEqual(output.join('\n'), '# Choose between\n# first option\n#foo: one\n# second option\n#foo: two')
     })
   })
 
@@ -129,7 +181,7 @@ test('renderYaml()', async t => {
             items: {
               anyOf: [
                 { enum: ['one', 'two'] },
-                { enum: ['three'], title: 'three title' },
+                { enum: ['three'], description: 'three description' },
                 { type: 'string', minLength: 0 }
               ]
             }
@@ -138,7 +190,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '#foo:\n  #- one\n  #- two\n  # three title\n  #- three\n  #- ...any string')
+      assert.deepEqual(output.join('\n'), '#foo:\n  #- one\n  #- two\n  # three description\n  #- three\n  #- ...any string')
     })
 
     await t.test('object item', async () => {
@@ -152,7 +204,7 @@ test('renderYaml()', async t => {
             type: 'array',
             items: {
               type: 'object',
-              title: 'title',
+              description: 'description',
               properties: {
                 bar: {
                   type: 'boolean'
@@ -167,7 +219,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '#foo:\n  # title\n  #- bar: true\n    #baz: 0')
+      assert.deepEqual(output.join('\n'), '#foo:\n  # description\n  #- bar: true\n    #baz: 0')
     })
 
     await t.test('object item array', async () => {
@@ -181,7 +233,7 @@ test('renderYaml()', async t => {
             type: 'array',
             items: {
               type: 'object',
-              title: 'title',
+              description: 'description',
               properties: {
                 bar: {
                   default: 8080,
@@ -203,7 +255,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '#foo:\n  # title\n  # default: 8080\n  #- bar: 8080\n    #baz:\n      #- const\n      #- ...any number')
+      assert.deepEqual(output.join('\n'), '#foo:\n  # description\n  # [bar property] default: 8080\n  #- bar: 8080\n    #baz:\n      #- const\n      #- ...any number')
     })
   })
 
@@ -226,7 +278,7 @@ test('renderYaml()', async t => {
       assert.deepEqual(output.join('\n'), '# yaml-language-server: $schema=https://schema.local/schema.json\n#foo: true')
     })
 
-    await t.test('title', async () => {
+    await t.test('title should be used only as typescript interface name', async () => {
       const output = []
 
 
@@ -234,21 +286,21 @@ test('renderYaml()', async t => {
         type: 'object',
         properties: {
           foo: {
-            title: 'foo flag',
+            title: 'fooFlag',
             type: 'boolean'
           }
         }
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# foo flag\n#foo: true')
+      assert.deepEqual(output.join('\n'), '#foo: true')
     })
 
     await t.test('head meta', async () => {
       const output = []
 
       renderYaml({
-        title: 'Root title',
+        description: 'Root description',
         type: 'object',
         properties: {
           foo: {
@@ -258,7 +310,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# Root title\n\n\n#foo: true')
+      assert.deepEqual(output.join('\n'), '# Root description\n\n\n#foo: true')
     })
 
     await t.test('description', async () => {
@@ -297,24 +349,43 @@ test('renderYaml()', async t => {
       assert.deepEqual(output.join('\n'), '# default: two\n#foo: two # one of: one, two, three')
     })
 
-    await t.test('examples (one)', async () => {
+    await t.test('examples (one as value for scalar)', async () => {
       const output = []
 
 
       renderYaml({
         type: 'object',
         properties: {
-          foo: {
+          title: {
             type: 'string',
             examples: [
-              'value',
+              'My Gallery'
+            ]
+          },
+          port: {
+            type: 'number',
+            examples: [
+              8080
+            ]
+          },
+          debug: {
+            type: 'boolean',
+            examples: [
+              true
+            ]
+          },
+          limit: {
+            type: 'number',
+            examples: [
+              50,
+              100
             ]
           }
         }
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# example:\n#   * value\n#foo: value')
+      assert.deepEqual(output.join('\n'), '#title: \'My Gallery\'\n#port: 8080\n#debug: true\n# examples:\n#   * 50\n#   * 100\n#limit: 50')
     })
 
     await t.test('examples', async () => {
@@ -335,7 +406,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# examples:\n#   * first is default\n#   * second\n#foo: first is default')
+      assert.deepEqual(output.join('\n'), '# examples:\n#   * \'first is default\'\n#   * second\n#foo: \'first is default\'')
     })
 
     await t.test('required', async () => {
@@ -371,10 +442,10 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# deprecated\n#foo: 0')
+      assert.deepEqual(output.join('\n'), '# *deprecated*\n#foo: 0')
     })
 
-    await t.test('full', async () => {
+    await t.test('full meta', async () => {
       const output = []
 
 
@@ -383,8 +454,7 @@ test('renderYaml()', async t => {
         properties: {
           port: {
             type: 'number',
-            title: 'Listen port',
-            description: 'Sockeet port\nof the server',
+            description: 'Listen port\n\nSocket port\nof the server',
             default: 3000,
             examples: [
               8080,
@@ -396,7 +466,7 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# Listen port\n#\n# Sockeet port\n# of the server\n#\n# default: 3000\n#\n# examples:\n#   * 8080\n#   * 1234\n#\nport: 3000')
+      assert.deepEqual(output.join('\n'), '# Listen port\n#\n# Socket port\n# of the server\n#\n# default: 3000\n#\n# examples:\n#   * 8080\n#   * 1234\nport: 3000')
     })
 
     await t.test('deprecated over required', async () => {
@@ -416,9 +486,102 @@ test('renderYaml()', async t => {
       }, output)
 
 
-      assert.deepEqual(output.join('\n'), '# deprecated\n# default: 3000\n#port: 3000')
+      assert.deepEqual(output.join('\n'), '# *deprecated*\n# default: 3000\n#port: 3000')
     })
 
   })
 
+  await t.test('full', async t => {
+
+    await t.test('spacing first level for object', async () => {
+      const output = []
+
+
+      renderYaml({
+        type: 'object',
+        description: 'Global configuration',
+        properties: {
+          basePath: {
+            type: 'string',
+            default: '~'
+          },
+          version: {
+            type: 'number',
+            default: 1
+          },
+          server: {
+            type: 'object',
+            description: 'server configuration',
+            properties: {
+              publicUrl: {
+                type: 'string',
+                default: 'http://localhost:3000'
+              },
+              port: {
+                type: 'number',
+                default: 3000
+              }
+            }
+          },
+          debug: {
+            type: 'boolean',
+            default: false
+          }
+        }
+      }, output)
+
+
+      assert.deepEqual(output.join('\n'), '# Global configuration\n\n\n# default: ~\n#basePath: ~\n# default: 1\n#version: 1\n\n# server configuration\n#server:\n  # default: \'http://localhost:3000\'\n  #publicUrl: \'http://localhost:3000\'\n  # default: 3000\n  #port: 3000\n\n# default: false\n#debug: false')
+    })
+
+    await t.test('spacing first level for arrays', async () => {
+      const output = []
+
+
+      renderYaml({
+        type: 'object',
+        properties: {
+          version: {
+            type: 'number',
+            default: 1
+          },
+          sources: {
+            type: 'array',
+            items: {
+              anyOf: [
+                {
+                  description: 'Simple path to source directory',
+                  type: 'string',
+                  examples: ['/home/me/Pictures']
+                },
+                {
+                  type: 'object',
+                  description: 'Detailed source setting',
+                  properties: {
+                    path: {
+                      description: 'Path of source directory',
+                      type: 'string',
+                      examples: ['/mnt/media/photos']
+                    },
+                    downloadable: {
+                      type: 'boolean',
+                      default: false
+                    }
+                  }
+                }
+              ],
+            }
+          },
+          debug: {
+            type: 'boolean',
+            default: false
+          }
+        }
+      }, output)
+
+
+      assert.deepEqual(output.join('\n'), '# default: 1\n#version: 1\n\n#sources:\n  # Simple path to source directory\n  #- /home/me/Pictures\n  # Detailed source setting\n  # [path property] Path of source directory\n  #- path: /mnt/media/photos\n    # default: false\n    #downloadable: false\n\n# default: false\n#debug: false')
+    })
+
+  })
 })
