@@ -220,8 +220,16 @@ export class YamlNode {
     if (typeof value == 'boolean' || typeof value == 'number') {
       return String(value)
     }
-    if (typeof value == 'string' && value.match(/[~/A-Za-z][-_./A-Za-z0-9]*/)) {
-      return value
+    if (typeof value == 'string') {
+      if (value.match(/^[~/A-Za-z][-_./A-Za-z0-9]*$/)) {
+        return value
+      }
+      if (value.indexOf("'") < 0) {
+        return `'${value}'`
+      }
+      if (value.indexOf('"') < 0) {
+        return `"${value}"`
+      }
     }
     return JSON.stringify(value)
   }

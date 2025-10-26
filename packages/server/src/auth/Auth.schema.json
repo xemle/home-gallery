@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#server.auth",
+  "type": "object",
+  "description": "Enable basic authentication users and ip whitelist rules which require no authentication",
+  "properties": {
+    "public": {
+      "type": "object",
+      "properties": {
+        "filter": {
+          "description": "Database filter for anonymous users",
+          "type": "string",
+          "examples": ["year >= 2024 tag:public"]
+        }
+      }
+    },
+    "users": {
+      "description": "Passwords can be in plain text, {SHA} or {SHA256-salted}.\n\nHashed password can be generated via\n  node -e \"pw=process.argv[1];const {createHash,randomBytes}=require('crypto');salt=randomBytes(12);hash=createHash('sha256').update(salt.toString()+pw).digest('base64');console.log('{SHA256-salted}'+salt.toString('base64')+'.'+hash)\" 'password'\n  {SHA256-salted}FkcbhhcHYW0DdE9u.P9Ik9MG8ldtO0fzGB+RV186vi8PZMomsya5OWC0AEiA=\n  node -e \"pw=process.argv[1]||'';sha1=require('crypto').createHash('sha1').update(pw).digest('base64');console.log('{SHA}'+sha1)\" password\n  {SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g=",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "description": "Simple username:password pair",
+            "type": "object",
+            "properties": {
+              "johndoe": {
+                "examples": ["s3cr3t"],
+                "type": "string"
+              }
+            }
+          },
+          {
+            "description": "User object with dedicated username, password properties",
+            "type": "object",
+            "properties": {
+              "username": {
+                "type": "string",
+                "examples": ["guest"]
+              },
+              "password": {
+                "type": "string",
+                "examples": ["{SHA256-salted}W1jrZgK81z06YLhA.qTSmeyYtPP19ZEpGiiAyVn61nly4jqbuuGoSefzLm98="]
+              },
+              "filter": {
+                "description": "Database filter for the user",
+                "type": "string",
+                "examples": ["year >= 2019 not tag:private"]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "rules": {
+      "description": "Rules when the request need authentication\nFirst matching rule wins.\n\nFor public gallery use\nrules:\n  - allow: localhost\n  - deny: all",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "allow": {
+                "description": "Allow rules without authentication like localhost",
+                "examples": ["all", "localhost", "192.168/16"],
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "deny": {
+                "description": "Deny rules which hosts requires authentication like all",
+                "examples": ["all", "localhost", "192.168/16"],
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
