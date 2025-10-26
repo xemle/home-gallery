@@ -394,22 +394,22 @@
     #- ...any string
 
 # Logger settings
-#
-# By default a console logger with info level and
-# a file logger with debug level is used
 #logger:
-  # Console and file loggers are available
-  # [type property] Type of logger
-  #
-  # default: console
-  #- type: console # one of: console, file
+  # Console logger
+  #- type: console
     # Log level
-    #level: trace # one of: trace, debug, info, warn, error, fatal, silent
-    # Log format (only for console logger)
+    #
+    # default: info
+    #level: info # one of: trace, debug, info, warn, error, fatal, silent
+    # Use newline delimited JSON if format is set to json
     #format: json
-    # Log file path (only for file logger)
+  # File logger
+  #- type: file
+    # Log level
+    #
+    # default: debug
+    #level: debug # one of: trace, debug, info, warn, error, fatal, silent
+    # Log file path
     #
     # File logger format is in newline delimited JSON. See http://ndjson.org
-    #
-    # default: '{configDir}/{configPrefix}gallery.log'
     #file: '{configDir}/{configPrefix}gallery.log'

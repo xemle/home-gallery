@@ -201,7 +201,7 @@ export class YamlNode {
     }
 
     if (this.schema.const) {
-      if (isArrayItem) {
+      if (isArrayItem && !isObjectProperty) {
         output.push(prefix + this.#stringifyValue(this.schema.const))
         return
       }
