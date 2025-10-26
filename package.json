@@ -109,7 +109,7 @@
       "includes": [
         "packages/*/*.schema.json"
       ],
-      "yaml": "gallery.config-example.next.yaml"
+      "yaml": "gallery.config-example.yml"
     }
   }
 }
