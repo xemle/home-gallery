@@ -14,6 +14,8 @@ import { MediaViewDisableFlags } from "./MediaViewPage";
 export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
   const appConfig = useAppConfig()
   const disabledFlags = appConfig.pages?.mediaView?.disabled || [] as MediaViewDisableFlags
+  const dateFormat = appConfig.format?.date || '%d.%m.%y'
+  const timeFormat = appConfig.format?.time || '%H:%M:%S'
   const {openDialog, setDialogVisible} = useTagDialog()
 
   if (!entry) {
@@ -168,14 +170,10 @@ export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
             </div>
             <div>
               <p>
-                {searchLink(formatDate('%d', entry.date), `year:${entry.date.substr(0, 4)} month:${entry.date.substr(5, 2)} day:${entry.date.substr(8, 2)}`)}
-                <span className="px-1">.</span>
-                {searchLink(formatDate('%m', entry.date), `year:${entry.date.substr(0, 4)} month:${entry.date.substr(5, 2)}`)}
-                <span className="px-1">.</span>
-                {searchLink(formatDate('%Y', entry.date), `year:${entry.date.substr(0, 4)}`)}
+                <DateFormat entry={entry} format={dateFormat} searchLink={searchLink}/>
               </p>
               <p>
-                {formatDate('%H:%M:%S', entry.date)}
+                {formatDate(timeFormat, entry.date)}
               </p>
             </div>
           </div>
@@ -305,3 +303,53 @@ export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
   )
 }
 
+function DateFormat({entry, format, searchLink}) {
+  const result: React.ReactNode[] = []
+
+  if (!entry?.date) {
+    return result
+  }
+
+  let last = 0;
+  let pos = format.indexOf('%', last)
+
+  while (pos >= 0 && pos < format.length - 1) {
+    if (pos > last) {
+      const head = (<span className="px-1">{format.substring(last, pos)}</span>)
+      result.push(head)
+    }
+    const code = format.substring(pos, pos + 2)
+
+    let link: React.JSX.Element | null = null
+    switch (code) {
+      case '%Y':
+        link = searchLink(formatDate(code, entry.date), `year:${entry.date.substr(0, 4)}`)
+        break
+      case '%y':
+        link = searchLink(formatDate(code, entry.date), `year:${entry.date.substr(0, 4)}`)
+        break
+      case '%m':
+        link = searchLink(formatDate(code, entry.date), `year:${entry.date.substr(0, 4)} month:${entry.date.substr(5, 2)}`)
+        break
+      case '%d':
+        link = searchLink(formatDate(code, entry.date), `year:${entry.date.substr(0, 4)} month:${entry.date.substr(5, 2)} day:${entry.date.substr(8, 2)}`)
+        break
+      default:
+        link = <span className="px-1">{formatDate(code, entry.date)}</span>
+    }
+
+    if (link) {
+      result.push(link)
+    }
+
+    last = pos + 2
+    pos = format.indexOf('%', last)
+  }
+
+  if (last < format.length) {
+    const tail = (<span className="px-1">{format.substring(last)}</span>)
+    result.push(tail)
+  }
+
+  return result
+}

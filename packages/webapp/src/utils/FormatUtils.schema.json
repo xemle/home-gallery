@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#webapp.format",
+  "title": "FormatUtils",
+  "description": "Date format as in linux date command\n  %b month name\n  %d day of month, eg 01\n  %m month, eg 12\n  %Y 4 full year, eg 2025\n  %y 2-digit year, eg 25\n  %H hour eg 18\n  %M minute, eg 06\n  %S seconds, eg 45",
+  "default": [],
+  "type": "object",
+  "properties": {
+    "date": {
+      "description": "Date format",
+      "type": "string",
+      "default": "%d.%m.%Y"
+    },
+    "monthYear": {
+      "description": "Month year format",
+      "type": "string",
+      "default": "%b %Y"
+    },
+    "year": {
+      "description": "Year format",
+      "type": "string",
+      "default": "%Y"
+    },
+    "time": {
+      "description": "time format",
+      "type": "string",
+      "default": "%H:%M:%S"
+    },
+    "hourMinute": {
+      "description": "time format with hour and minute",
+      "type": "string",
+      "default": "%H:%M"
+    }
+
+  }
+}

@@ -364,6 +364,40 @@
         #- edit
         # Disables navigation to overview, prev and next
         #- nav
+  #
+  # Date format as in linux date command
+  #   %b month name
+  #   %d day of month, eg 01
+  #   %m month, eg 12
+  #   %Y 4 full year, eg 2025
+  #   %y 2-digit year, eg 25
+  #   %H hour eg 18
+  #   %M minute, eg 06
+  #   %S seconds, eg 45
+  #
+  # default: []
+  #
+  #format:
+    # Date format
+    #
+    # default: '%d.%m.%Y'
+    #date: '%d.%m.%Y'
+    # Month year format
+    #
+    # default: '%b %Y'
+    #monthYear: '%b %Y'
+    # Year format
+    #
+    # default: '%Y'
+    #year: '%Y'
+    # time format
+    #
+    # default: '%H:%M:%S'
+    #time: '%H:%M:%S'
+    # time format with hour and minute
+    #
+    # default: '%H:%M'
+    #hourMinute: '%H:%M'
 
 # Plugin manager settings
 #pluginManager:
