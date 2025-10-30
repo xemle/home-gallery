@@ -84,7 +84,7 @@ export const ScrollbarHandle = ({dispatch, top, visible, detailText, showDetail}
   return (
     <>
       <div className={classNames('absolute right-0 mr-1 flex gap-2 items-center justify-center hover:cursor-pointer', {hidden: !visible})} ref={handleRef} style={{top: top}}>
-        {detailText && showDetail && <div className={classNames('bg-gray-800/90 px-4 py-2 rounded text-gray-300')}>{detailText}</div>}
+        {detailText && showDetail && <div className={classNames('bg-gray-800/90 px-4 py-2 rounded text-gray-300 text-nowrap')}>{detailText}</div>}
         <div className="flex flex-col gap-1 bg-gray-800 rounded" ref={thumbRef} >
           <span ref={upButton} className="px-2 py-1 group hover:bg-gray-700 hover:text-gray-300">
             <FontAwesomeIcon icon={icons.faChevronUp} className="text-gray-500 group-hover:text-gray-300"/>

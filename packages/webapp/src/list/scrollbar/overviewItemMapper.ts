@@ -1,6 +1,7 @@
 import { type ScrollbarOverviewItem } from "./state"
 
 import { formatDate } from '../../utils/format'
+import { FormatUtils } from "../../utils/FormatUtils"
 
 const isInDateOrder = items => {
   const isDesc = items[0].date > items[items.length - 1].date
@@ -17,7 +18,7 @@ const isInDateOrder = items => {
 const HOUR_MS = 1000 * 60 * 60
 const DAY_MS = HOUR_MS * 24
 
-const setDateValue = items => {
+const setDateValue =(items, format: FormatUtils) => {
   const firstDate = new Date(items[0].date)
   const lastDate = new Date(items[items.length - 1].date)
   const diff = Math.abs(lastDate.getTime() - firstDate.getTime())
@@ -26,15 +27,15 @@ const setDateValue = items => {
 
   let dateValueFn: (date: Date) => string
   if (hourDiff < 6) {
-    dateValueFn = date => formatDate('%H:%M:%S', date)
+    dateValueFn = date => formatDate(format.time || '%H:%M:%S', date)
   } else if (hourDiff <= 24) {
-    dateValueFn = date => formatDate('%H:%M', date)
+    dateValueFn = date => formatDate(format.hourMinute || '%H:%M', date)
   } else if (dayDiff < 90) {
-    dateValueFn = date => formatDate('%d.%m.%y', date)
+    dateValueFn = date => formatDate(format.date || '%d.%m.%y', date)
   } else if (dayDiff < 700) {
-    dateValueFn = date => formatDate('%b %Y', date)
+    dateValueFn = date => formatDate(format.monthYear || '%b %Y', date)
   } else {
-    dateValueFn = date => formatDate('%Y', date)
+    dateValueFn = date => formatDate(format.year || '%Y', date)
   }
 
   items.forEach(item => item.dateValue = dateValueFn(item.date))
@@ -47,7 +48,7 @@ export interface TopDateItem {
   dateValue: string
 }
 
-export const overviewItemMapper = (topDateItems: TopDateItem[], viewHeight: number, padding: number): [ScrollbarOverviewItem[], (number) => string] => {
+export const overviewItemMapper = (topDateItems: TopDateItem[], viewHeight: number, padding: number, format: FormatUtils = {}): [ScrollbarOverviewItem[], (number) => string] => {
   if (!topDateItems.length) {
     return [[], () => '']
   }
@@ -55,7 +56,7 @@ export const overviewItemMapper = (topDateItems: TopDateItem[], viewHeight: numb
   if (!isInDateOrder(topDateItems)) {
     return [[], () => '']
   }
-  setDateValue(topDateItems)
+  setDateValue(topDateItems, format)
 
   const lastItem = topDateItems[topDateItems.length - 1]
   const maxTop = (lastItem.top + lastItem.height) - viewHeight
@@ -91,7 +92,7 @@ export const overviewItemMapper = (topDateItems: TopDateItem[], viewHeight: numb
 
   const detailTextFn = (scrollTop) => {
     const lastItem = topDateItems.filter(item => item.top <= scrollTop).pop()
-    return `${lastItem?.date ? formatDate('%d.%m.%y', lastItem?.date) : ''}`
+    return `${lastItem?.date ? formatDate(format.date || '%d.%m.%y', lastItem?.date) : ''}`
   }
 
   return [overviewItems, detailTextFn]

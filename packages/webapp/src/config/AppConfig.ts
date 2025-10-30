@@ -46,6 +46,7 @@ export interface AppConfig {
   disabled?: FeatureFlags;
   sources?: MediaSources;
   pages?: Pages;
+  format?: FormatUtils;
   [k: string]: unknown;
 }
 export interface PluginManager {
@@ -65,5 +66,39 @@ export interface Pages {
  */
 export interface MediaViewPage {
   disabled?: MediaViewDisableFlags;
+  [k: string]: unknown;
+}
+/**
+ * Date format as in linux date command
+ *   %b month name
+ *   %d day of month, eg 01
+ *   %m month, eg 12
+ *   %Y 4 full year, eg 2025
+ *   %y 2-digit year, eg 25
+ *   %H hour eg 18
+ *   %M minute, eg 06
+ *   %S seconds, eg 45
+ */
+export interface FormatUtils {
+  /**
+   * Date format
+   */
+  date?: string;
+  /**
+   * Month year format
+   */
+  monthYear?: string;
+  /**
+   * Year format
+   */
+  year?: string;
+  /**
+   * time format
+   */
+  time?: string;
+  /**
+   * time format with hour and minute
+   */
+  hourMinute?: string;
   [k: string]: unknown;
 }
