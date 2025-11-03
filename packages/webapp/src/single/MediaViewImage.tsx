@@ -44,13 +44,12 @@ export const MediaViewImage = (props) => {
 function getMediaPreviews(media, downloadableIndices: string[] = []) {
   const mediaPreviews: MediaPreview[] = media.previews.reduce((result: MediaPreview[], url: string) => {
     const match = url.match(/image-preview-(\d+)\./)
-    if (!match) {
-      return result
-    }
+    if (!match) return result
+
     const size = +match[1]
-    const hasSize = !!result.find(preview => preview.size == size)
-    if (!hasSize) {
-      result.push({size: +match[1], url: `files/${url}`})
+    if (!result.find(preview => preview.size == size)) {
+      const isRemote = url.startsWith('http://') || url.startsWith('https://')
+      result.push({ size, url: isRemote ? url : `files/${url}` })
     }
     return result
   }, [] as MediaPreview[])
@@ -59,13 +58,15 @@ function getMediaPreviews(media, downloadableIndices: string[] = []) {
     const file = media.files.find(file => file.type == 'image' && downloadableIndices.includes(file.index))
     if (file) {
       const size = Math.max(media.height, media.width)
-      mediaPreviews.push({size, url: `sources/${file.index}/${file.filename}`})
+      const isRemote = file.url.startsWith('http://') || file.url.startsWith('https://')
+      mediaPreviews.push({ size, url: isRemote ? file.url : `sources/${file.index}/${file.filename}` })
     }
   }
 
   mediaPreviews.sort((a, b) => a.size - b.size)
   return mediaPreviews
 }
+
 
 function getRequiredMediaPreview(previews: MediaPreview[], requiredSize: number) {
   if (previews.length == 0) {

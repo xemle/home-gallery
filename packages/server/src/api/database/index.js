@@ -1,118 +1,129 @@
 import Logger from '@home-gallery/logger'
-
 import { applyEvents } from './events-facade.js'
-import { waitReadWatch } from './read-database.js';
-import { cache } from './cache-middleware.js';
-import { sanitizeInt } from './sanitize.js';
+import { waitReadWatch } from './read-database.js'
+import { cache } from './cache-middleware.js'
+import { sanitizeInt } from './sanitize.js'
 import { sendError } from '../error/index.js'
 import { createQueryContext } from './queryContext.js'
+import { initRemoteSources, remoteDb } from '../../remote-source.js'
 
-const log = Logger('server.api.database');
+const log = Logger('server.api.database')
 
-/**
- * @param {import('../../types.js').TServerContext} context
- */
 export async function databaseApi(context) {
   const { config, eventbus, router, events: { read: getEvents }, executeQuery } = context
   const databaseFilename = config.database.file
-  let database = false;
-  const databaseCache = cache(3600);
-  let entryCache = {};
+  let database = false
+  const databaseCache = cache(3600)
+  let entryCache = {}
 
-  /**
-   * @param {object} database
-   * @param {string} [term]
-   * @param {object} [req]
-   * @returns {Promise<object>}
-   */
-  const filterDatabase = async (database, term = '', req = {}) => {
-    /** @type {import('@home-gallery/types').TQueryContext} */
-    const queryContext = createQueryContext(context, req)
-    const data = await executeQuery(database.data, term, queryContext)
-    log.trace({ast: queryContext.ast, queryAst: queryContext.queryAst}, `Queried database with ${queryContext.stringifiedQueryAst}`)
-    return {...database, data}
+const mergeDatabases = (localDb, remoteDbs, remoteConfig) => {
+  log.info(`Merging local DB (${localDb.data.length} entries) with ${Object.keys(remoteDbs).length} remote sources`)
+  const merged = {
+    ...localDb,
+    data: [
+      ...(localDb?.data || []),
+      ...Object.entries(remoteDbs || {}).flatMap(([sourceName, r]) => {
+        const conf = remoteConfig.find(c => c.name === sourceName)
+        if (!conf) throw new Error(`No remote config found for source ${sourceName}`)
+
+        log.info(`Processing remote source: ${sourceName} with ${r.data.length} entries`)
+        const baseUrl = conf.url.replace(/\/$/, '') // trim trailing slash
+        const proxy = conf.proxy
+
+        return r.data.map(entry => {
+          log.info(`Processing remote entry: ${entry.id}`)
+
+          if (proxy) throw new Error('Proxy handling not implemented yet')
+
+          const files = entry.files.map(f => {
+            const url = `${baseUrl}/files/${f.filename}` // direct URL
+            log.info(`File rewrite: ${f.filename} -> ${url}`)
+            return { ...f, url }
+          })
+
+          const previews = entry.previews.map(p => {
+            const url = `${baseUrl}/files/${p}` // direct URL
+            log.info(`Preview rewrite: ${p} -> ${url}`)
+            return url
+          })
+
+          log.info(`Merged remote entry: ${entry.id} from source ${sourceName}`)
+          return { ...entry, files, previews }
+        })
+      })
+    ]
   }
+  log.info(`Merged database contains total ${merged.data.length} entries`)
+  return merged
+}
 
-  function send(req, res) {
-    if (!database) {
-      log.info(`Database file is not loaded yet.`);
-      return sendError(res, 404, 'Database file is not loaded yet.')
-    }
-    filterDatabase(database, req.query?.q || '', req)
-      .then(database => {
-        if (!req.query?.offset && !req.query?.limit) {
-          return res.send(database)
-        }
-        const length = database.data.length;
-        const offset = sanitizeInt(req.query.offset, 0, length, 0);
-        const limit = sanitizeInt(req.query.limit, Math.min(10, length), length, length);
-        const data = database.data.slice(offset, offset + limit);
-        res.send({type: database.type, limit, offset, ...database, data });
-      })
-      .catch(err => {
-        log.error(err, `Failed to filter database with query '${req.query?.q}': ${err}`)
-        return sendError(res, 400, `Failed to filter database with query '${req.query?.q}': ${err}`)
-      })
+
+
+  const filterDatabase = async (db, term = '', req = {}) => {
+    const queryContext = createQueryContext(context, req)
+    const data = await executeQuery(db.data, term, queryContext)
+    log.trace({ast: queryContext.ast, queryAst: queryContext.queryAst}, `Queried database with ${queryContext.stringifiedQueryAst}`)
+    log.info(`filterDatabase() result count: ${data.length} entries`)
+    return { ...db, data }
   }
 
   const clearCaches = (entries = []) => {
-    databaseCache.clear();
-    entryCache = {};
-    log.trace(`Cleared caches`);
+    databaseCache.clear()
+    entryCache = {}
+    log.trace('Cleared caches')
   }
 
   eventbus.on('userAction', event => {
-    if (!database?.data?.length) {
-      log.warn(`Received a user action event without a database. Skip event merging for database`);
-      return
-    }
+    if (!database?.data?.length) return
     const changedEntries = applyEvents(database, [event])
-    if (!changedEntries.length) {
-      log.debug(`Event did not change current database`);
-      return
-    }
-    log.debug(`Applied user action event to ${changedEntries.length} database entries`);
+    if (!changedEntries.length) return
+    log.debug(`Applied user action event to ${changedEntries.length} database entries`)
     clearCaches(changedEntries)
-    eventbus.emit('database', {
-      action: 'updateEntries',
-      entries: changedEntries
-    })
+    eventbus.emit('database', { action: 'updateEntries', entries: changedEntries })
   })
 
-  waitReadWatch(databaseFilename, getEvents, (err, newDatabase) => {
+  // --- Watch local DB and refetch remote sources each time ---
+  waitReadWatch(databaseFilename, getEvents, async (err, newDatabase) => {
     if (err) {
       log.error(err, `Could not read database file ${databaseFilename}: ${err}`)
       return
     }
     clearCaches()
-    filterDatabase(newDatabase, '', {})
-      .then(filteredDatabase => {
-        if (filteredDatabase.data.length != newDatabase.data.length) {
-          log.info(`New database entries are filtered from ${newDatabase.data.length} to ${filteredDatabase.data.length} entries`)
-        }
-        database = filteredDatabase;
-        eventbus.emit('server', {
-          action: 'databaseReloaded'
-        })
+    log.info(`Local database loaded with ${newDatabase.data.length} entries`)
+
+    // REFETCH REMOTE SOURCES
+    log.info('Fetching remote sources...')
+    await initRemoteSources(config)
+    const currentRemoteDbs = remoteDb
+
+    const merged = mergeDatabases(newDatabase, currentRemoteDbs, config.remoteSources)
+
+
+    filterDatabase(merged, '', {})
+      .then(filtered => {
+        database = filtered
+        log.info(`Database updated with merged remote entries. Total: ${database.data.length}`)
+        eventbus.emit('server', { action: 'databaseReloaded' })
+      })
+      .catch(err => {
+        log.error(err, `Failed to filter merged database: ${err}`)
       })
   })
 
+  // --- Inject merged database into context for all viewers ---
   context.database = {
     async getFirstEntries(count, req) {
-      const key = `firstEntries:${req.username || ''}:${count}` + Date.now();
-      if (!database?.data?.length) {
-        return []
-      } else if (entryCache[key]?.length) {
-        return entryCache[key]
-      }
+      const key = `firstEntries:${req.username || ''}:${count}` + Date.now()
+      if (!database?.data?.length) return []
+      if (entryCache[key]?.length) return entryCache[key]
 
       return filterDatabase(database, '', req)
-        .then(filteredDatabase => {
-          entryCache[key] = filteredDatabase.data.slice(0, count);
+        .then(filtered => {
+          entryCache[key] = filtered.data.slice(0, count)
           return entryCache[key]
         })
         .catch(err => {
-          log.warn(err, `Failed to query database for first entries. Return empty list`)
+          log.warn(err, 'Failed to query database for first entries. Return empty list')
           return []
         })
     },
@@ -121,8 +132,26 @@ export async function databaseApi(context) {
     },
     filterDatabase(term, req) {
       return filterDatabase(database, term, req)
-    },
+    }
   }
 
-  router.get('/api/database.json', (req, res) => databaseCache.middleware(req, res, () => send(req, res)))
+  // Optional API endpoint
+  router.get('/api/database.json', (req, res) => {
+    databaseCache.middleware(req, res, () => {
+      if (!database) return sendError(res, 404, 'Database not loaded yet')
+      filterDatabase(database, req.query?.q || '', req)
+        .then(db => {
+          if (!req.query?.offset && !req.query?.limit) return res.send(db)
+          const length = db.data.length
+          const offset = sanitizeInt(req.query.offset, 0, length, 0)
+          const limit = sanitizeInt(req.query.limit, Math.min(10, length), length, length)
+          const data = db.data.slice(offset, offset + limit)
+          res.send({ type: db.type, limit, offset, ...db, data })
+        })
+        .catch(err => {
+          log.error(err, `Failed to filter database for API: ${err}`)
+          sendError(res, 400, `Failed to filter database for API: ${err}`)
+        })
+    })
+  })
 }
