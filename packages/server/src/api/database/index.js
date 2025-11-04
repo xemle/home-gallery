@@ -18,6 +18,7 @@ export async function databaseApi(context) {
 
 const mergeDatabases = (localDb, remoteDbs, remoteConfig) => {
   log.info(`Merging local DB (${localDb.data.length} entries) with ${Object.keys(remoteDbs).length} remote sources`)
+
   const merged = {
     ...localDb,
     data: [
@@ -27,35 +28,38 @@ const mergeDatabases = (localDb, remoteDbs, remoteConfig) => {
         if (!conf) throw new Error(`No remote config found for source ${sourceName}`)
 
         log.info(`Processing remote source: ${sourceName} with ${r.data.length} entries`)
-        const baseUrl = conf.url.replace(/\/$/, '') // trim trailing slash
+        const baseUrl = conf.url.replace(/\/$/, '')
         const proxy = conf.proxy
+        const sourceHash = sourceName.slice(0, 8)
 
         return r.data.map(entry => {
-          log.info(`Processing remote entry: ${entry.id}`)
+          log.debug(`Processing remote entry: ${entry.id}`)
 
-          if (proxy) throw new Error('Proxy handling not implemented yet')
+          const files = entry.files.map(f => ({
+            ...f,
+            url: proxy
+              ? `remote/${sourceHash}/${f.filename}`.replace(/^\/+/, '')
+              : `${baseUrl}/${f.filename}`
+          }))
 
-          const files = entry.files.map(f => {
-            const url = `${baseUrl}/files/${f.filename}` // direct URL
-            log.info(`File rewrite: ${f.filename} -> ${url}`)
-            return { ...f, url }
-          })
+          const previews = entry.previews.map(p =>
+            proxy
+              ? `remote/${sourceHash}/${p}`.replace(/^\/+/, '')
+              : `${baseUrl}/${p}`
+          )
 
-          const previews = entry.previews.map(p => {
-            const url = `${baseUrl}/files/${p}` // direct URL
-            log.info(`Preview rewrite: ${p} -> ${url}`)
-            return url
-          })
-
-          log.info(`Merged remote entry: ${entry.id} from source ${sourceName}`)
+          log.debug(`Merged remote entry: ${entry.id} from source ${sourceName}`)
           return { ...entry, files, previews }
         })
       })
     ]
   }
+
   log.info(`Merged database contains total ${merged.data.length} entries`)
   return merged
 }
+
+
 
 
 
@@ -63,7 +67,7 @@ const mergeDatabases = (localDb, remoteDbs, remoteConfig) => {
     const queryContext = createQueryContext(context, req)
     const data = await executeQuery(db.data, term, queryContext)
     log.trace({ast: queryContext.ast, queryAst: queryContext.queryAst}, `Queried database with ${queryContext.stringifiedQueryAst}`)
-    log.info(`filterDatabase() result count: ${data.length} entries`)
+    log.debug(`filterDatabase() result count: ${data.length} entries`)
     return { ...db, data }
   }
 

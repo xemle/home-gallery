@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect, useRef, useMemo } from "react";
 
-import { getLowerPreviewUrl } from '../utils/preview'
+import { getLowerPreviewUrl, normalizePreviewUrl } from '../utils/preview'
 import { usePreviewSize } from "./usePreviewSize";
 import { useClientRect } from '../utils/useClientRect'
 import { MediaAnnotations } from "./MediaAnnotations";
@@ -42,30 +42,30 @@ export const MediaViewImage = (props) => {
 }
 
 function getMediaPreviews(media, downloadableIndices: string[] = []) {
-  const mediaPreviews: MediaPreview[] = media.previews.reduce((result: MediaPreview[], url: string) => {
+  const mediaPreviews = media.previews.reduce((result, url) => {
     const match = url.match(/image-preview-(\d+)\./)
     if (!match) return result
 
     const size = +match[1]
-    if (!result.find(preview => preview.size == size)) {
-      const isRemote = url.startsWith('http://') || url.startsWith('https://')
-      result.push({ size, url: isRemote ? url : `files/${url}` })
+    if (!result.find(preview => preview.size === size)) {
+      result.push({ size, url: normalizePreviewUrl(url) })
     }
+
     return result
-  }, [] as MediaPreview[])
+  }, [])
 
   if (downloadableIndices.length) {
-    const file = media.files.find(file => file.type == 'image' && downloadableIndices.includes(file.index))
+    const file = media.files.find(f => f.type === 'image' && downloadableIndices.includes(f.index))
     if (file) {
-      const size = Math.max(media.height, media.width)
-      const isRemote = file.url.startsWith('http://') || file.url.startsWith('https://')
-      mediaPreviews.push({ size, url: isRemote ? file.url : `sources/${file.index}/${file.filename}` })
+      const size = Math.max(media.width, media.height)
+      result.push({ size, url: normalizePreviewUrl(file.url) })
     }
   }
 
   mediaPreviews.sort((a, b) => a.size - b.size)
   return mediaPreviews
 }
+
 
 
 function getRequiredMediaPreview(previews: MediaPreview[], requiredSize: number) {
