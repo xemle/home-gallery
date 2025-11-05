@@ -1,3 +1,5 @@
+import { filterEntriesByQuery } from '../../query/src/index.js'
+
 
 import Logger from '@home-gallery/logger';
 
@@ -14,6 +16,7 @@ async function fetchRemoteDatabase(source) {
   let lastErr = null;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
+	const url = source.url.replace(/\/+$/,'') + '/api/database.json';
     log.info(`Attempt ${attempt + 1} to fetch remote database '${name}' from ${url}`);
     try {
       const controller = new AbortController();
@@ -22,8 +25,7 @@ async function fetchRemoteDatabase(source) {
         controller.abort();
       }, timeout);
 
-      log.info(`Sending fetch request to ${url}/api/database.json`);
-      const res = await fetch(`${source.url}/api/database.json`, { headers });
+	const res = await fetch(url, { headers });
 
       clearTimeout(timer);
 
@@ -35,8 +37,24 @@ async function fetchRemoteDatabase(source) {
 
       if (!data?.data) log.warn(`Remote database '${name}' has no .data array`);
       else log.info(`Remote database '${name}' contains ${data.data.length} entries`);
+		if (source.searchmask && data?.data?.length) {
+		  const beforeCount = data.data.length;
+		  log.info(`Applying searchmask '${source.searchmask}' to remote '${name}' (${beforeCount} total entries before filter)`);
 
-      return data;
+		  const { entries } = await filterEntriesByQuery(data.data, source.searchmask);
+		  const afterCount = entries.length;
+		  const discarded = beforeCount - afterCount;
+
+		  data.data = entries;
+
+		  log.info(`Filtered remote '${name}' with searchmask '${source.searchmask}':`);
+		  log.info(`  Entries before: ${beforeCount}`);
+		  log.info(`  Entries after:  ${afterCount}`);
+		  log.info(`  Matched:        ${afterCount}`);
+		  log.info(`  Discarded:      ${discarded}`);
+		}
+
+		return data;
     } catch (err) {
       lastErr = err;
       log.error(err, `Fetch attempt ${attempt + 1} failed for remote source '${name}'`);

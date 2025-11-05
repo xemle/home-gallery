@@ -9,7 +9,7 @@ let remoteSourcesMap = {} // hash -> baseURL
 
 export default async function remoteApi(context) {
   const { router, config } = context
-  log.info(`remoteApi() called with router and config`)
+  log.debug(`remoteApi() called with router and config`)
 
   // populate remoteSourcesMap from config
   if (config.remoteSources?.length) {
@@ -26,16 +26,16 @@ export default async function remoteApi(context) {
   log.info(`Created remoteRouter`)
 
   remoteRouter.use((req, res) => {
-    log.info(`Incoming request to remoteRouter: ${req.method} ${req.originalUrl}`)
-    log.info(`req.path = '${req.path}'`)
+    log.debug(`Incoming request to remoteRouter: ${req.method} ${req.originalUrl}`)
+    log.debug(`req.path = '${req.path}'`)
 
     const parts = req.path.substring(1).split('/').map(decodeURIComponent)
-    log.info(`Parsed path parts: ${JSON.stringify(parts)}`)
+    log.debug(`Parsed path parts: ${JSON.stringify(parts)}`)
 
     const hash = parts.shift()
-    log.info(`Extracted hash: '${hash}'`)
+    log.debug(`Extracted hash: '${hash}'`)
     const rest = parts.join('/')
-    log.info(`Remaining path (rest): '${rest}'`)
+    log.debug(`Remaining path (rest): '${rest}'`)
 
 	const baseUrl =
 	  remoteSourcesMap[hash] ||
@@ -48,10 +48,10 @@ export default async function remoteApi(context) {
 
     const remoteUrl = `${baseUrl.replace(/\/$/, '')}/files/${rest.replace(/^\/+/, '')}`
 
-    log.info(`Proxying remote request to: ${remoteUrl}`)
+    log.debug(`Proxying remote request to: ${remoteUrl}`)
 
     fetch(remoteUrl).then(response => {
-      log.info(`Received response from remote: status=${response.status}`)
+      log.debug(`Received response from remote: status=${response.status}`)
       if (!response.ok) {
         log.warn(`Remote response not ok: ${response.statusText}`)
         return res.status(response.status).send(`Failed to fetch remote file: ${response.statusText}`)
@@ -59,9 +59,9 @@ export default async function remoteApi(context) {
 
       response.headers.forEach((value, key) => {
         res.setHeader(key, value)
-        log.info(`Set header: ${key} = ${value}`)
+        log.debug(`Set header: ${key} = ${value}`)
       })
-      log.info(`Piping remote response body to client`)
+      log.debug(`Piping remote response body to client`)
       response.body.pipe(res)
     }).catch(err => {
       log.error(err, `Error fetching remote file from ${remoteUrl}`)

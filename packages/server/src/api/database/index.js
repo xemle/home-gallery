@@ -15,51 +15,55 @@ export async function databaseApi(context) {
   let database = false
   const databaseCache = cache(3600)
   let entryCache = {}
-
+  
+  
 const mergeDatabases = (localDb, remoteDbs, remoteConfig) => {
   log.info(`Merging local DB (${localDb.data.length} entries) with ${Object.keys(remoteDbs).length} remote sources`)
 
-  const merged = {
-    ...localDb,
-    data: [
-      ...(localDb?.data || []),
-      ...Object.entries(remoteDbs || {}).flatMap(([sourceName, r]) => {
-        const conf = remoteConfig.find(c => c.name === sourceName)
-        if (!conf) throw new Error(`No remote config found for source ${sourceName}`)
+  const mergedData = [
+    ...(localDb?.data || []),
+    ...Object.entries(remoteDbs || {}).flatMap(([sourceName, r]) => {
+      const conf = remoteConfig.find(c => c.name === sourceName)
+      if (!conf) throw new Error(`No remote config found for source ${sourceName}`)
 
-        log.info(`Processing remote source: ${sourceName} with ${r.data.length} entries`)
-        const baseUrl = conf.url.replace(/\/$/, '')
-        const proxy = conf.proxy
-        const sourceHash = sourceName.slice(0, 8)
+      const baseUrl = conf.url.replace(/\/$/, '')
+      // Coerce proxy to boolean, default true
+      const proxy = conf.proxy === undefined ? true : conf.proxy === true || conf.proxy === 'true'
+      const sourceHash = sourceName.slice(0, 8)
+      const tagmask = conf.tagmask
 
-        return r.data.map(entry => {
-          log.debug(`Processing remote entry: ${entry.id}`)
+      log.info(`Source ${sourceName} proxy=${proxy}`)
 
-          const files = entry.files.map(f => ({
-            ...f,
-            url: proxy
-              ? `remote/${sourceHash}/${f.filename}`.replace(/^\/+/, '')
-              : `${baseUrl}/${f.filename}`
-          }))
+      return r.data.map(entry => {
+        const files = entry.files.map(f => ({
+          ...f,
+          url: proxy
+            ? `remote/${sourceHash}/${f.filename}`.replace(/^\/+/, '')
+            : `${baseUrl}/files/${f.filename}`
+        }))
 
-          const previews = entry.previews.map(p =>
-            proxy
-              ? `remote/${sourceHash}/${p}`.replace(/^\/+/, '')
-              : `${baseUrl}/${p}`
-          )
+        const previews = entry.previews.map(p =>
+          proxy
+            ? `remote/${sourceHash}/${p}`.replace(/^\/+/, '')
+            : `${baseUrl}/files/${p}`
+        )
 
-          log.debug(`Merged remote entry: ${entry.id} from source ${sourceName}`)
-          return { ...entry, files, previews }
-        })
+        const tags = tagmask
+          ? Array.from(new Set([...(entry.tags || []), tagmask]))
+          : entry.tags || []
+
+        return { ...entry, files, previews, tags }
       })
-    ]
-  }
+    })
+  ]
+
+  mergedData.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+
+  const merged = { ...localDb, data: mergedData }
 
   log.info(`Merged database contains total ${merged.data.length} entries`)
   return merged
 }
-
-
 
 
 
