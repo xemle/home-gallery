@@ -137,7 +137,8 @@
                           "map",
                           "similar",
                           "annotation",
-                          "edit"
+                          "edit",
+                          "tag"
                         ]
                       },
                       {

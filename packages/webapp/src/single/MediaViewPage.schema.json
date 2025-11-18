@@ -12,7 +12,7 @@
       "items": {
         "anyOf": [
           {
-            "enum": ["detail", "map", "similar", "annotation", "edit"]
+            "enum": ["detail", "map", "similar", "annotation", "edit", "tag"]
           },
           {
             "description": "Disables navigation to overview, prev and next",

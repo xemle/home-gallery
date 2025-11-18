@@ -362,6 +362,7 @@
         #- similar
         #- annotation
         #- edit
+        #- tag
         # Disables navigation to overview, prev and next
         #- nav
   #

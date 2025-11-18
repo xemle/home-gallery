@@ -224,7 +224,7 @@ export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
               </div>
             </>
           )}
-          {(entry.tags?.length > 0 || (!disabledFlags.includes('edit') && !disabledFeatures.includes('edit'))) && (<div className="flex">
+          {!disabledFlags.includes('tag') && (entry.tags?.length > 0 || (!disabledFlags.includes('edit') && !disabledFeatures.includes('edit'))) && (<div className="flex">
             <div className="flex-shrink-0 w-8">
               <FontAwesomeIcon icon={icons.faTags} className="text-gray-300"/>
             </div>
