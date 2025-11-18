@@ -10,9 +10,11 @@ import type { Entry } from "../store/entry";
 import { classNames } from "../utils/class-names";
 import { formatDate, humanizeBytes, humanizeDuration } from "../utils/format";
 import { MediaViewDisableFlags } from "./MediaViewPage";
+import { FeatureFlags } from '../config/AppConfig';
 
 export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
   const appConfig = useAppConfig()
+  const disabledFeatures = appConfig.disabled || [] as FeatureFlags
   const disabledFlags = appConfig.pages?.mediaView?.disabled || [] as MediaViewDisableFlags
   const dateFormat = appConfig.format?.date || '%d.%m.%y'
   const timeFormat = appConfig.format?.time || '%H:%M:%S'
@@ -222,7 +224,7 @@ export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
               </div>
             </>
           )}
-          <div className="flex">
+          {(entry.tags?.length > 0 || (!disabledFlags.includes('edit') && !disabledFeatures.includes('edit'))) && (<div className="flex">
             <div className="flex-shrink-0 w-8">
               <FontAwesomeIcon icon={icons.faTags} className="text-gray-300"/>
             </div>
@@ -231,7 +233,7 @@ export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
                 {entry.tags.map(tag => (
                   <a className="px-2 py-1 text-gray-300 bg-gray-800 rounded hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer" onClick={() => dispatchSearch(`${queryTerm("tag", tag)}`)} title={`Search for tag ${tag}`}>{tag}</a>
                 ))}
-                {!disabledFlags.includes('edit') && (
+                {!disabledFlags.includes('edit') && !disabledFeatures?.includes('edit') && (
                   <a className="flex items-center gap-2 px-2 py-1 text-gray-500 bg-transparent border border-gray-700 rounded group inset-1 hover:bg-gray-700 hover:text-gray-200 hover:cursor-pointer active:bg-gray-600" onClick={editTags} title={`Edit single tags`}>
                     <FontAwesomeIcon icon={icons.faPen} className="text-gray-500 group-hover:text-gray-300"/>
                     <span>Edit tags</span>
@@ -239,7 +241,7 @@ export const Details = ({entry, dispatch}: {entry: Entry, dispatch: any}) => {
                 )}
               </p>
             </div>
-          </div>
+          </div>)}
           <div className="flex">
             <div className="flex-shrink-0 w-8">
               <FontAwesomeIcon icon={icons.faCamera} className="text-gray-300"/>

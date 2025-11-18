@@ -54,13 +54,13 @@ export const ViewNavBar = ({disableEdit}) => {
       icon: icons.faPen,
       text: 'Edit',
       action: () => {
-        if (disableEdit || appConfig.disabledEdit) {
+        if (disableEdit || appConfig.disabled?.includes('edit')) {
           return
         }
         setViewMode(viewMode === ViewMode.VIEW ? ViewMode.EDIT : ViewMode.VIEW)
       },
-      disabled: disableEdit || appConfig.disabled?.includes('edit'),
-      hidden: appConfig.pages?.disabled?.includes('edit'),
+      disabled: disableEdit,
+      hidden: appConfig.pages?.disabled?.includes('edit') || appConfig.disabled?.includes('edit'),
     },
     {
       icon: icons.faTags,
