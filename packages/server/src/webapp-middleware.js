@@ -8,8 +8,6 @@ export async function webappMiddleware(context) {
   const plugins = pluginManager.getBrowserPlugins().plugins
   const pluginEntries = plugins.map(p => '/plugins/' + p.publicEntry)
 
-  const disabled = config?.webapp?.disabled || []
-  
   const sources = (config.sources || []).filter(source => source.downloadable && !source.offline)
     .map(source => {
       const indexName = path.basename(source.index).replace(/\.[^.]+$/, '')
@@ -20,11 +18,13 @@ export async function webappMiddleware(context) {
   });
 
   const staticState = {
+    ...config?.webapp,
+    title: config.webapp?.title || 'Home Gallery',
+    disabled: config.webapp?.disabled || [],
     pluginManager: {
       plugins: pluginEntries
     },
     sources,
-    title: config?.webapp?.title || 'Home Gallery',
   }
 
   const staticProperties = {
@@ -44,7 +44,7 @@ export async function webappMiddleware(context) {
       state: {
         ...req.webapp.state,
         ...staticState,
-        disabled: !!req.username ? [...disabled, 'pwa'] : disabled,
+        disabled: !!req.username ? [...staticState.disabled, 'pwa'] : staticState.disabled,
         entries,
       }
     }
