@@ -75,7 +75,12 @@ export interface MediaViewPage {
  *   %m month, eg 12
  *   %Y 4 full year, eg 2025
  *   %y 2-digit year, eg 25
+ *   %a short weekday name, eg. Mon
+ *   %A full weekday name, eg. Monday
  *   %H hour eg 18
+ *   %I hour eg 06 (12-hour clock)
+ *   %p am/AM
+ *   %P AM/PM
  *   %M minute, eg 06
  *   %S seconds, eg 45
  */

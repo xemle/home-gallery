@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#webapp.format",
   "title": "FormatUtils",
-  "description": "Date format as in linux date command\n  %b month name\n  %d day of month, eg 01\n  %m month, eg 12\n  %Y 4 full year, eg 2025\n  %y 2-digit year, eg 25\n  %H hour eg 18\n  %M minute, eg 06\n  %S seconds, eg 45",
+  "description": "Date format as in linux date command\n  %b month name\n  %d day of month, eg 01\n  %m month, eg 12\n  %Y 4 full year, eg 2025\n  %y 2-digit year, eg 25\n  %a short weekday name, eg. Mon\n  %A full weekday name, eg. Monday\n  %H hour eg 18\n  %I hour eg 06 (12-hour clock)\n  %p am/AM\n  %P AM/PM\n  %M minute, eg 06\n  %S seconds, eg 45",
   "default": [],
   "type": "object",
   "properties": {
