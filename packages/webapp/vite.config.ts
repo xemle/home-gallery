@@ -71,7 +71,7 @@ export default defineConfig(() => {
       pwaConditionalPlugin({ disabled: false }),
       injectAppState({
         // See gallery.config-example.yml for all available options
-        disabled: true,
+        disabled: false,
         state: {
           sources: [
             // enable downloadable sources
