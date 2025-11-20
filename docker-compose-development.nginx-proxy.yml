@@ -1,0 +1,24 @@
+# This is for using with nginx-proxy
+# https://github.com/nginx-proxy/nginx-proxy
+#
+# Usage:
+#   export COMPOSE_FILE="docker-compose-development.yml:docker-compose-development.nginx-proxy.yml"
+#   export HOME_GALLERY_HOST=dev.home-gallery.example.com
+#   docker compose build && docker compose up
+services:
+  gallery:
+    environment:
+      VIRTUAL_PORT: 3000
+      VIRTUAL_HOST_MULTIPORTS: |-
+        "${HOME_GALLERY_HOST:-home-gallery.localhost}":
+          "/api":
+            port: 3000
+          "/files":
+            port: 3000
+    #volumes:
+      #- /home/Pictures:/data/Pictures
+  webapp:
+    environment:
+      VIRTUAL_HOST: '${HOME_GALLERY_HOST:-home-gallery.localhost}'
+      VIRTUAL_PORT: 5173
+      __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: '${HOME_GALLERY_HOST:-home-gallery.localhost}'
