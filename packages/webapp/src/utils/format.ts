@@ -19,7 +19,7 @@ export const formatDate = (format, date) => {
     return 'Unkown'
   }
   const d = new Date(date)
-  return format.replace(/%([dmbyYHMS])/g, (_, code) => {
+  return format.replace(/%([YymbdHIPpMSaA])/g, (_, code) => {
     switch (code) {
       case 'Y': return '' + d.getFullYear()
       case 'y': return ('' + d.getFullYear()).substring(2, 4)
@@ -28,8 +28,8 @@ export const formatDate = (format, date) => {
       case 'd': return pad2(d.getDate())
       case 'H': return pad2(d.getHours())
       case 'I': return pad2(d.getHours() > 12 ? d.getHours() - 12 : d.getHours())
-      case 'P': return pad2(d.getHours() > 12 ? 'pm' : 'am')
-      case 'p': return pad2(d.getHours() > 12 ? 'PM' : 'AM')
+      case 'P': return pad2(d.getHours() >= 12 ? 'pm' : 'am')
+      case 'p': return pad2(d.getHours() >= 12 ? 'PM' : 'AM')
       case 'M': return pad2(d.getMinutes())
       case 'S': return pad2(d.getSeconds())
       case 'a': return shortWeekDays[d.getDay()]
