@@ -54,7 +54,10 @@ function injectSocialMetaTags(req, res, config, entry) {
       return bSize - aSize
     })
     .pop()
-  const previewUrl = `${publicUrl}/files/${preview}`
+  const previewUrl = preview.startsWith('http://') || preview.startsWith('https://')
+  ? preview
+  : `${publicUrl}/files/${preview}`
+
 
   const metaTags = [
     `<meta name="twitter:card" content="summary_large_image">`,

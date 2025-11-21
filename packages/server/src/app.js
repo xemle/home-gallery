@@ -18,6 +18,7 @@ import { browserPlugins } from './browser-plugins.js';
 import Logger from '@home-gallery/logger';
 import { webappMiddleware } from './webapp-middleware.js';
 import { socialMetaTagsMiddleware } from './social-meta-tags-middleware.js';
+import remoteApi from './api/remote.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const webappDir = path.join(__dirname, 'public')
@@ -65,18 +66,21 @@ export async function createApp(context) {
   await browserPlugins(context)
 
   router.use(bodyParser.json({limit: '1mb'}))
-
+   
   await eventsApi(context)
   await databaseApi(context)
   await treeApi(context)
   await sourcesApi(context)
   await debugApi(context)
+  log.info(`initialising proxies - app.js`)
+	await remoteApi(context)
 
   await webappMiddleware(context)
   await socialMetaTagsMiddleware(context)
   await webapp(context)
 
   const prefix = routerPrefix(config.server?.prefix)
+  log.info(`Prefix is: ${prefix}`)
   app.use(prefix, router)
 
   if (prefix != '/') {
