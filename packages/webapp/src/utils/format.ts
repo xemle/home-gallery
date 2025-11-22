@@ -19,7 +19,7 @@ export const formatDate = (format, date) => {
     return 'Unkown'
   }
   const d = new Date(date)
-  return format.replace(/%([YymbdHIPpMSaA])/g, (_, code) => {
+  return format.replace(/%([YymbdHIlPpMSaA])/g, (_, code) => {
     switch (code) {
       case 'Y': return '' + d.getFullYear()
       case 'y': return ('' + d.getFullYear()).substring(2, 4)
@@ -27,9 +27,10 @@ export const formatDate = (format, date) => {
       case 'b': return shortMonths[d.getMonth()]
       case 'd': return pad2(d.getDate())
       case 'H': return pad2(d.getHours())
-      case 'I': return pad2(d.getHours() > 12 ? d.getHours() - 12 : d.getHours())
-      case 'P': return pad2(d.getHours() >= 12 ? 'pm' : 'am')
-      case 'p': return pad2(d.getHours() >= 12 ? 'PM' : 'AM')
+      case 'I': return pad2(d.getHours() % 12 || 12)  // Fixed: was buggy for 12 and 0
+      case 'l': return '' + (d.getHours() % 12 || 12)  // NEW: 12-hour without leading zero
+      case 'P': return d.getHours() >= 12 ? 'pm' : 'am'  // Fixed: removed pad2
+      case 'p': return d.getHours() >= 12 ? 'PM' : 'AM'  // Fixed: removed pad2
       case 'M': return pad2(d.getMinutes())
       case 'S': return pad2(d.getSeconds())
       case 'a': return shortWeekDays[d.getDay()]
