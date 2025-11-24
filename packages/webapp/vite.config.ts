@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import pwaConditionalPlugin from './vite/pwa-conditional-plugin'
 import injectAppState from './vite/inject-app-state'
 
-const proxyTarget = 'http://localhost:3000';
+const proxyTarget = process.env.GALLERY_SERVER_URL || 'http://localhost:3000';
 const serverUrls = [
   '/api',
   '/files'
