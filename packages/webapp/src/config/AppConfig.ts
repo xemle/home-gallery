@@ -42,6 +42,10 @@ export interface WebappConfig {
  * Configuration for webapp module
  */
 export interface AppConfig {
+  /**
+   * Title of the webapp
+   */
+  title?: string;
   pluginManager?: PluginManager;
   disabled?: FeatureFlags;
   sources?: MediaSources;

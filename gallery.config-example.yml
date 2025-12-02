@@ -305,6 +305,8 @@
 
 # Configuration for webapp module
 #webapp:
+  # Title of the webapp
+  #
   # default: 'Home Gallery'
   #title: 'Home Gallery'
   #pluginManager:
