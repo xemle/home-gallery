@@ -59,7 +59,7 @@ function getMediaPreviews(media, downloadableIndices: string[] = []) {
     const file = media.files.find(file => file.type == 'image' && downloadableIndices.includes(file.index))
     if (file) {
       const size = Math.max(media.height, media.width)
-      mediaPreviews.push({size, url: `sources/${file.index}/${file.filename}`})
+      mediaPreviews.push({size, url: `api/sources/${file.index}/${file.filename}`})
     }
   }
 
