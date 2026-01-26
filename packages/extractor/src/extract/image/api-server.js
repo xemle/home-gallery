@@ -10,7 +10,7 @@ const log = Logger('extractor.apiEntry');
 
 const ERROR_THRESHOLD = 5
 const PUBLIC_API_SERVER = 'https://api.home-gallery.org'
-const DOCUMENATION_URL = 'https://docs.home-gallery.org'
+const DOCUMENATION_URL = 'https://home-gallery.org/docs/index.html'
 
 const getEntryFileBySuffixes = (storage, entry, suffixes) => suffixes.find(suffix => storage.hasFile(entry, suffix));
 

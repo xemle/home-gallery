@@ -28,7 +28,7 @@ support this project through any recurring financial support to my
 [Mac](https://dl.home-gallery.org/dist/latest/home-gallery-latest-darwin-x64),
 [Windows](https://dl.home-gallery.org/dist/latest/home-gallery-latest-win-x64.exe)
 [Docker image](https://hub.docker.com/r/xemle/home-gallery)
-* [Documentation](https://docs.home-gallery.org)
+* [Documentation](https://home-gallery.org/docs/index.html)
 * [Changelog](CHANGELOG.md)
 
 ## Motivation
@@ -71,7 +71,7 @@ or [Windows](https://dl.home-gallery.org/dist/latest/home-gallery-latest-win-x64
 
 The configuration `gallery.config.yml` can be found in the current directory for
 fine tuning.
-See [install section](https://docs.home-gallery.org/install/index.html) in the documentation
+See [install section](https://home-gallery.org/docs/install/index.html) in the documentation
 for further information.
 
 ### Quickstart using Docker
@@ -92,18 +92,18 @@ further help of the CLI.
 
 The gallery configuration can be found in `./data/config/gallery.config.yml` for fine tuning.
 
-Want to use docker compose? See [install](https://docs.home-gallery.org/install/index.html)
+Want to use docker compose? See [install](https://home-gallery.org/docs/install/index.html)
 section in the documentation for further information.
 
 ## Documentation
 
-See [docs.home-gallery.org](https://docs.home-gallery.org) for general documentation.
+See [home-gallery.org/docs](https://home-gallery.org/docs/index.html) for general documentation.
 
-* [Installation](https://docs.home-gallery.org/install)
-* [CLI help](https://docs.home-gallery.org/cli)
-* [Configuration](https://docs.home-gallery.org/configuration)
-* [FAQ](https://docs.home-gallery.org/faq)
-* [Architecture](https://docs.home-gallery.org/internals)
+* [Installation](https://home-gallery.org/docs/install/index.html)
+* [CLI help](https://home-gallery.org/docs/cli/index.html)
+* [Configuration](https://home-gallery.org/docs/configuration/index.html)
+* [FAQ](https://home-gallery.org/docs/faq/index.html)
+* [Architecture](https://home-gallery.org/docs/internals/workflow.html)
 
 ## Features
 
@@ -138,7 +138,7 @@ HomeGallery has prebuilt binaries for
 [Windows](https://dl.home-gallery.org/dist/latest/home-gallery-latest-win-x64.exe).
 Further download options can be found [here](https://dl.home-gallery.org/dist).
 
-See [installation](https://docs.home-gallery.org/install) section for usage.
+See [installation](https://home-gallery.org/docs/install/index.html) section for usage.
 
 # External Services and Privacy
 
@@ -159,7 +159,7 @@ low powered devices such as the SoC Raspberry PI and all preview images are
 send to this public API by default. No images or privacy data are kept.
 
 The API can be configured and ran also locally or as Docker container.
-See [installation](https://docs.home-gallery.org/api-server) section for usage.
+See [installation](https://home-gallery.org/docs/api-server/index.html) section for usage.
 
 ## Customized Environments
 
