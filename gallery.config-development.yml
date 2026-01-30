@@ -1,0 +1,4 @@
+# Only used for development to have that one sensible default setting
+sources:
+  - /data/Pictures
+
