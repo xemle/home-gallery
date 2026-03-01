@@ -23,7 +23,7 @@
     "directory": "packages/dev-tools"
   },
   "dependencies": {
-    "esbuild": "^0.25.10",
+    "esbuild": "^0.27.3",
     "glob": "^11.0.3",
     "json-schema-to-typescript": "^15.0.4",
     "yaml": "^2.8.1"

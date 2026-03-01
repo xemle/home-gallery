@@ -49,7 +49,7 @@
     "@types/tar-fs": "^2.0.4",
     "@vitejs/plugin-react": "^5.0.0",
     "cpy-cli": "^6.0.0",
-    "esbuild": "^0.25.9",
+    "esbuild": "^0.27.3",
     "esbuild-register": "^3.6.0",
     "express": "^5.1.0",
     "extract-zip": "^2.0.1",
