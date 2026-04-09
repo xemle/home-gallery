@@ -2,8 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#server.auth",
   "type": "object",
-  "description": "Enable basic authentication users and ip whitelist rules which require no authentication",
+  "description": "Enable authentication and ip whitelist rules. Use type 'cookie' for session-based login or 'basic' (default) for HTTP Basic Auth.",
   "properties": {
+    "type": {
+      "description": "Authentication type. 'basic' uses HTTP Basic Auth (default). 'cookie' enables session-based login with a login page.",
+      "type": "string",
+      "enum": ["basic", "cookie"],
+      "default": "basic"
+    },
     "public": {
       "type": "object",
       "properties": {
@@ -12,6 +18,30 @@
           "type": "string",
           "examples": ["year >= 2024 tag:public"]
         }
+      }
+    },
+    "roles": {
+      "description": "Role definitions. Each role can have an optional database filter and readOnly flag.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "examples": ["admin", "viewer"]
+          },
+          "filter": {
+            "description": "Database filter applied to users with this role (overridden by per-user filter)",
+            "type": "string",
+            "examples": ["path~vacation or tag:public"]
+          },
+          "readOnly": {
+            "description": "Disables tag edition for this role",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": ["name"]
       }
     },
     "users": {
@@ -30,7 +60,7 @@
             }
           },
           {
-            "description": "User object with dedicated username, password properties",
+            "description": "User object with dedicated username, password and optional role properties",
             "type": "object",
             "properties": {
               "username": {
@@ -42,9 +72,19 @@
                 "examples": ["{SHA256-salted}W1jrZgK81z06YLhA.qTSmeyYtPP19ZEpGiiAyVn61nly4jqbuuGoSefzLm98="]
               },
               "filter": {
-                "description": "Database filter for the user",
+                "description": "Database filter for the user (takes priority over role filters)",
                 "type": "string",
                 "examples": ["year >= 2019 not tag:private"]
+              },
+              "roles": {
+                "description": "List of role names assigned to this user",
+                "type": "array",
+                "items": { "type": "string" },
+                "examples": [["admin"], ["viewer"]]
+              },
+              "readOnly": {
+                "description": "Disables tag edition for this user (overrides role readOnly setting)",
+                "type": "boolean"
               }
             }
           }
