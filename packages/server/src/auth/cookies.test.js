@@ -6,7 +6,7 @@ t.test('Set session cookie', t => {
 
     setSessionCookie(res, 'abc123')
 
-    t.equal(calls, [[
+    t.same(calls, [[
         'Set-Cookie',
         'SESSIONID=abc123; HttpOnly; SameSite=Strict; Path=/; Max-Age=604800'
     ]])
@@ -18,7 +18,7 @@ t.test('Clear session cookie', t => {
 
     clearSessionCookie(res)
 
-    t.equal(calls, [[
+    t.same(calls, [[
         'Set-Cookie',
         `SESSIONID=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0`
     ]])
@@ -36,7 +36,7 @@ t.test('Get session cookie', t => {
     t.end()
 })
 
-const mockResponse = () => {
+function mockResponse () {
     const calls = []
     const res = {
         setHeader: (...args) => {
