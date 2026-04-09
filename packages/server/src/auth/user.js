@@ -8,7 +8,7 @@ export const matchesUser = (userMap, username, password) => {
 }
 
 const hashBase64 = (text, hash = 'sha1') => {
-  var digest = crypto.createHash(hash);
+  const digest = crypto.createHash(hash);
   digest.update(text, 'utf8');
   return digest.digest('base64');
 }
@@ -34,4 +34,56 @@ export const users2UserMap = users => {
     }
     return result
   }, {})
+}
+
+const resolveEffectiveFilter = (user, rolesMap) => {
+  if (typeof user.filter === 'string') {
+    return user.filter
+  }
+
+  const userRoleNames = user.roles || []
+  if (!userRoleNames.length) {
+    return undefined
+  }
+
+  const roleFilters = userRoleNames.map(name => rolesMap[name]?.filter)
+  // If any role has no filter restriction, the union is unrestricted
+  if (roleFilters.some(f => typeof f !== 'string')) {
+    return undefined
+  }
+
+  return roleFilters.map(f => `(${f})`).join(' or ')
+}
+
+const resolveEffectiveReadOnly = (user, rolesMap) => {
+  if (typeof user.readOnly === 'boolean') {
+    return user.readOnly
+  }
+
+  const userRoleNames = user.roles || []
+  if (!userRoleNames.length) {
+    return false
+  }
+
+  // readOnly only if all the roles are readOnly
+  return userRoleNames.every(name => rolesMap[name]?.readOnly === true)
+}
+
+/**
+ * Resolve effective filter and readOnly per user, incorporating role settings.
+ * Returns an array of resolved user objects used by the auth and filter plugins.
+ */
+export const resolveUsers = (users, roles) => {
+  const rolesMap = (roles || []).reduce((map, role) => {
+    map[role.name] = role
+    return map
+  }, {})
+
+  return users.map(user => ({
+    username: user.username,
+    testPassword: getTestPassword(user.password),
+    filter: resolveEffectiveFilter(user, rolesMap),
+    roles: user.roles || [],
+    readOnly: resolveEffectiveReadOnly(user, rolesMap),
+  }))
 }
