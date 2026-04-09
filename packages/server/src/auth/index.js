@@ -1,6 +1,7 @@
 import { rules2WhitelistRules, isWhitelistIp } from './ip.js'
 export { defaultIpWhitelistRules } from './ip.js'
-import { users2UserMap, matchesUser } from './user.js'
+import { users2UserMap, matchesUser, resolveUsers } from './user.js'
+import { getSessionCookie } from './cookies.js'
 
 import Logger from '@home-gallery/logger'
 
@@ -50,5 +51,36 @@ export const createBasicAuthMiddleware = (users, rules) => {
 
     res.set('WWW-Authenticate', 'Basic realm="HomeGallery"')
     res.status(401).send('Authentication required')
+  }
+}
+
+export const createCookieAuthMiddleware = (users, roles, rules, sessionStore) => {
+  const resolvedUsers = resolveUsers(users, roles)
+  const whitelistRules = rules2WhitelistRules(rules || [])
+
+  const userNames = resolvedUsers.map(u => u.username).join(', ')
+  log.info(`Set cookie auth for users: ${userNames}`)
+  log.debug(whitelistRules, `Set ip whitelist rules to ${rules.map(({type, value}) => `${type}:${value}`).join(', ')}`)
+
+  return (req, res, next) => {
+    const clientIp = req.ip
+    req.ignoreAuth = isWhitelistIp(whitelistRules, clientIp)
+    if (req.ignoreAuth) {
+      return next()
+    }
+
+    const sessionId = getSessionCookie(req)
+    if (sessionId) {
+      const session = sessionStore.getSession(sessionId)
+      if (session) {
+        req.username = session.username
+        req.roles = session.roles
+        req.readOnly = session.readOnly
+        return next()
+      }
+      log.debug(`Invalid or expired session from ip ${clientIp}`)
+    }
+
+    res.status(401).json({error: 'Authentication required'})
   }
 }
