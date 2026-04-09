@@ -97,12 +97,6 @@ t.test('expired sessions are pruned on startup', async t => {
 })
 
 t.test('getSession deletes a session that expires after startup', async t => {
-  const dateNow = Date.now
-  Date.now = () => NOW.getTime()
-  t.teardown(() => {
-    Date.now = dateNow
-  })
-
   const {createSessionStore, writes} = await loadSessionStore(t, {
     readData: {
       s1: {
@@ -122,7 +116,7 @@ t.test('getSession deletes a session that expires after startup', async t => {
   Date.now = () => addSeconds(NOW, 5).getTime()
 
   t.equal(store.getSession('s1'), null)
-  t.equal(writes[0], '{}')
+  t.equal(writes[0].data, '{}')
 })
 
 t.test('deleteSession removes a session and writes empty', async t => {
@@ -141,7 +135,7 @@ t.test('deleteSession removes a session and writes empty', async t => {
   const store = createSessionStore('/tmp/sessions.json')
   store.deleteSession('s1')
 
-  t.equal(writes[0], '{}')
+  t.equal(writes[0].data, '{}')
 })
 
 t.test('store starts empty when session JSON read fails', async t => {
@@ -171,6 +165,7 @@ async function loadSessionStore(
     randomHex = 'session-id-123',
   } = {}
 ) {
+  freezeDateNow(t);
   const writes = []
 
   const fakeFs = {
@@ -199,7 +194,7 @@ async function loadSessionStore(
     },
   }
 
-  const mod = await t.mockImport('./sessionStore.js', {
+  const mod = await t.mockImport('./session-store.js', {
     fs: {default: fakeFs},
     crypto: {default: fakeCrypto},
     '@home-gallery/logger': {
@@ -218,4 +213,12 @@ async function loadSessionStore(
     createSessionStore: mod.createSessionStore,
     writes,
   }
+}
+
+function freezeDateNow(t) {
+  const dateNow = Date.now
+  Date.now = () => NOW.getTime()
+  t.teardown(() => {
+    Date.now = dateNow
+  })
 }
