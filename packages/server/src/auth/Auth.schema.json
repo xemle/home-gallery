@@ -13,10 +13,19 @@
     "public": {
       "type": "object",
       "properties": {
+        "enabled": {
+          "description": "Access for anonymous users",
+          "type": "boolean",
+          "default": false
+        },
         "filter": {
-          "description": "Database filter for anonymous users",
+          "description": "Database filter for anonymous users and IP-whitelisted users",
           "type": "string",
           "examples": ["year >= 2024 tag:public"]
+        },
+        "readOnly": {
+          "description": "Tag editing for anonymous users",
+          "type": "boolean"
         }
       }
     },
