@@ -98,6 +98,10 @@ export async function eventsApi(context) {
   };
 
   const push = (req, res, next) => {
+    if (req.readOnly) {
+      log.info(`Reject event push from read-only user '${req.username || 'anonymous'}' from ${req.ip}`)
+      return sendError(res, 403, 'Forbidden: read-only access')
+    }
     const event = req.body;
     if (!isValidEvent(event)) {
       log.warn(`Received invalid event: ${JSON.stringify(event).substring(0, 120)}...`);

@@ -26,7 +26,7 @@ export const augmentReqByUserMiddleware = () => (req, _, next) => {
   next()
 }
 
-export const createBasicAuthMiddleware = (users, rules) => {
+export const createBasicAuthMiddleware = (users, rules, anonymousAccess, anonymousReadOnly) => {
   const userMap = users2UserMap(users)
   const whitelistRules = rules2WhitelistRules(rules || [])
 
@@ -42,6 +42,11 @@ export const createBasicAuthMiddleware = (users, rules) => {
 
     const [username, password] = getCredentials(req)
     if (!username) {
+      if (anonymousAccess) {
+        req.readOnly = anonymousReadOnly
+        log.debug(`Anonymous access from ${clientIp} (public mode, readOnly=${anonymousReadOnly})`)
+        return next()
+      }
       log.debug(`Block client with ip ${clientIp}. Request authentication`)
     } else if (matchesUser(userMap, username, password)) {
       return next()
@@ -54,7 +59,7 @@ export const createBasicAuthMiddleware = (users, rules) => {
   }
 }
 
-export const createCookieAuthMiddleware = (users, roles, rules, sessionStore) => {
+export const createCookieAuthMiddleware = (users, roles, rules, sessionStore, anonymousAccess, anonymousReadOnly) => {
   const resolvedUsers = resolveUsers(users, roles)
   const whitelistRules = rules2WhitelistRules(rules || [])
 
@@ -79,6 +84,12 @@ export const createCookieAuthMiddleware = (users, roles, rules, sessionStore) =>
         return next()
       }
       log.debug(`Invalid or expired session from ip ${clientIp}`)
+    }
+
+    if (anonymousAccess) {
+      req.readOnly = anonymousReadOnly
+      log.debug(`Anonymous access from ${clientIp} (public mode, readOnly=${anonymousReadOnly})`)
+      return next()
     }
 
     res.status(401).json({error: 'Authentication required'})
