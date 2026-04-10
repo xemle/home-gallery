@@ -37,22 +37,16 @@ export const users2UserMap = users => {
 }
 
 const resolveEffectiveFilter = (user, rolesMap) => {
-  if (typeof user.filter === 'string') {
-    return user.filter
+  let roleFilters = (user.roles || []).map(name => rolesMap[name]?.filter)
+  if (user.filter) {
+    roleFilters.push(user.filter)
   }
-
-  const userRoleNames = user.roles || []
-  if (!userRoleNames.length) {
+  const filters = [...new Set(roleFilters)];
+  // If any role filter is unset or no filters provided, the union is unrestricted
+  if (!filters.length || filters.some(f => typeof f !== 'string')) {
     return undefined
   }
-
-  const roleFilters = userRoleNames.map(name => rolesMap[name]?.filter)
-  // If any role has no filter restriction, the union is unrestricted
-  if (roleFilters.some(f => typeof f !== 'string')) {
-    return undefined
-  }
-
-  return roleFilters.map(f => `(${f})`).join(' or ')
+  return filters.map(f => `(${f})`).join(' or ')
 }
 
 const resolveEffectiveReadOnly = (user, rolesMap) => {

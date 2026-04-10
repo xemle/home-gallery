@@ -37,15 +37,18 @@ function shouldCompress (req, res) {
 const getAuthMiddleware = (config, sessionStore) => {
   const users = config.server?.auth?.users || []
   const rules = config.server?.auth?.rules || defaultIpWhitelistRules
+  const publicConfig = config.server?.auth?.public
+  const anonymousAccess = publicConfig?.enabled || false
+  const anonymousReadOnly = publicConfig?.readOnly || false
 
   if (!users.length) {
     return (req, _, next) => next()
   }
   if (config.server?.auth?.type === 'cookie') {
     const roles = config.server?.auth?.roles || []
-    return createCookieAuthMiddleware(users, roles, rules, sessionStore)
+    return createCookieAuthMiddleware(users, roles, rules, sessionStore, anonymousAccess, anonymousReadOnly)
   } else {
-    return createBasicAuthMiddleware(users, rules)
+    return createBasicAuthMiddleware(users, rules, anonymousAccess, anonymousReadOnly)
   }
 }
 
