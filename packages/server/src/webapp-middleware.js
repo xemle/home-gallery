@@ -1,4 +1,3 @@
-
 import path from 'path';
 import { browserBasePath } from './utils.js'
 
@@ -25,6 +24,7 @@ export async function webappMiddleware(context) {
       plugins: pluginEntries
     },
     sources,
+    authType: config.server?.auth?.type || 'basic',
   }
 
   const staticProperties = {
@@ -38,6 +38,11 @@ export async function webappMiddleware(context) {
     }
     const entries = await context.database.getFirstEntries(50, req)
 
+    const currentUser = req.username ? {
+      username: req.username,
+      readOnly: req.readOnly || false,
+    } : null
+
     req.webapp = {
       ...req.webapp,
       ...staticProperties,
@@ -46,6 +51,7 @@ export async function webappMiddleware(context) {
         ...staticState,
         disabled: !!req.username ? [...staticState.disabled, 'pwa'] : staticState.disabled,
         entries,
+        currentUser,
       }
     }
 
