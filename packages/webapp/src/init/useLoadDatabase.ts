@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { useEventStore } from '../store/event-store';
 
@@ -10,27 +10,38 @@ import { toNativeFactory } from '../utils/to-worker';
 import { useAppConfig } from '../config/useAppConfig';
 import { useOnEntries } from './useOnEntries';
 import { toAbsoluteUrl } from '../utils/toAbsoluteUrl';
+import { useAuthStore } from '../store/auth-store';
 
 export const useLoadDatabase = () => {
   const removeEntries = useEntryStore(state => state.removeEntries);
+  const resetEntries = useEntryStore(state => state.reset);
   const reapplyEvents = useEventStore(state => state.reapplyEvents);
   const appConfig = useAppConfig()
   const onEntries = useOnEntries()
+  const currentUser = useAuthStore(state => state.currentUser)
+  const previousUser = useRef(currentUser)
 
   useEffect(() => {
+    const authStateChanged = previousUser.current !== currentUser // true a login or logout
+    previousUser.current = currentUser
+    if (authStateChanged) {
+      resetEntries()
+    }
     onEntries(appConfig.entries as [] || [])
 
     if (appConfig.disabled?.includes('database')) {
       return
     }
 
+    let serverListener: ((event: any) => void) | null = null
     const onDatabaseReloaded = cb => {
-      eventBus.addEventListener('server', event => {
+      serverListener = event => {
         if (event.action === 'databaseReloaded') {
           console.log(`Reload database due server event`)
           cb()
         }
-      })
+      }
+      eventBus.addEventListener('server', serverListener)
     }
 
     const loadOfflineDatabase = async () => {
@@ -43,6 +54,10 @@ export const useLoadDatabase = () => {
       const args = [baseUrl, 5000]
       const offlineDb = toNativeFactory('offlineDatabase', createOfflineDatabase, args, handlers)
       await offlineDb('open')
+      if (authStateChanged) {
+        console.log(`Invalidating offline database root after user change`)
+        await offlineDb('deleteRoot')
+      }
       await offlineDb('sync')
 
       reapplyEvents()
@@ -81,5 +96,10 @@ export const useLoadDatabase = () => {
           loadLegacyDatabase()
         })
     }
-  }, []);
+    return () => {
+      if (serverListener) {
+        eventBus.removeEventListener('server', serverListener)
+      }
+    }
+  }, [currentUser]);
 }
