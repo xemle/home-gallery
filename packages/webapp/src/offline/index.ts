@@ -155,6 +155,20 @@ export function createOfflineDatabase(baseUrl, onEntriesSize = 5000) {
       })
     }
 
+    deleteRoot() {
+      return new Promise((resolve, reject) => {
+        const tx = this.db?.transaction(['trees'], 'readwrite')
+        if (!tx) {
+          return reject(new Error(`Failed to create a database transaction`))
+        }
+        const store = tx.objectStore('trees')
+        store.delete('root')
+        tx.oncomplete = () => resolve(null)
+        tx.onabort = reject
+        tx.onerror = reject
+      })
+    }
+
     purgeBy(purgeFn: PurgeFn) {
       return new Promise((resolve, reject) => {
         const tx = this.db?.transaction(['trees'], 'readwrite')
@@ -344,6 +358,9 @@ export function createOfflineDatabase(baseUrl, onEntriesSize = 5000) {
     // methods
     open() {
       return treeDb.open()
+    },
+    deleteRoot() {
+      return treeDb.deleteRoot()
     },
     async sync() {
       const tasks: any[] = []
