@@ -46,13 +46,14 @@ export const createSessionStore = (file) => {
   pruneExpired()
 
   return {
-    createSession(username, roles, readOnly) {
+    createSession(username, roles, readOnly, pages) {
       const id = crypto.randomBytes(32).toString('hex')
       const now = new Date()
       sessions[id] = {
         username,
         roles: roles || [],
         readOnly: readOnly || false,
+        pages: pages || undefined,
         created: now.toISOString(),
         expires: new Date(now.getTime() + SESSION_TTL_MS).toISOString(),
       }

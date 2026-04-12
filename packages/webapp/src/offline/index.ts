@@ -155,20 +155,6 @@ export function createOfflineDatabase(baseUrl, onEntriesSize = 5000) {
       })
     }
 
-    deleteRoot() {
-      return new Promise((resolve, reject) => {
-        const tx = this.db?.transaction(['trees'], 'readwrite')
-        if (!tx) {
-          return reject(new Error(`Failed to create a database transaction`))
-        }
-        const store = tx.objectStore('trees')
-        store.delete('root')
-        tx.oncomplete = () => resolve(null)
-        tx.onabort = reject
-        tx.onerror = reject
-      })
-    }
-
     purgeBy(purgeFn: PurgeFn) {
       return new Promise((resolve, reject) => {
         const tx = this.db?.transaction(['trees'], 'readwrite')
@@ -359,9 +345,6 @@ export function createOfflineDatabase(baseUrl, onEntriesSize = 5000) {
     open() {
       return treeDb.open()
     },
-    deleteRoot() {
-      return treeDb.deleteRoot()
-    },
     async sync() {
       const tasks: any[] = []
       const bulkEntries = createBulkEntries(entries => this.onEntries(entries))
@@ -414,4 +397,23 @@ export function createOfflineDatabase(baseUrl, onEntriesSize = 5000) {
     onEntries() {},
     onRemoveEntries() {}
   }
+}
+
+export const deleteOfflineRoot = (): Promise<void> => {
+  return new Promise((resolve) => {
+    const req = indexedDB.open('gallery')
+    req.onsuccess = () => {
+      const db = req.result
+      if (!db.objectStoreNames.contains('trees')) {
+        db.close()
+        return resolve()
+      }
+      const tx = db.transaction(['trees'], 'readwrite')
+      tx.objectStore('trees').delete('root')
+      tx.oncomplete = () => { db.close(); resolve() }
+      tx.onabort = () => { db.close(); resolve() }
+      tx.onerror = () => { db.close(); resolve() }
+    }
+    req.onerror = () => resolve()
+  })
 }

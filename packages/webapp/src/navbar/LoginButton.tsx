@@ -1,32 +1,31 @@
 import * as React from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as icons from '@fortawesome/free-solid-svg-icons'
-import { NavItem } from './NavItem'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAuthStore } from '../store/auth-store'
 
 export const LoginButton = () => {
-  const { authType, currentUser, logout } = useAuthStore()
+  const {allowPublic, currentUser, logout} = useAuthStore()
   const navigate = useNavigate()
-
-  if (authType !== 'cookie') {
+  if (!allowPublic) {
     return null
   }
-
+  const classes = 'flex px-2 py-2 rounded shadow text-gray-500 hover:bg-gray-700 hover:text-gray-300 hover:cursor-pointer active:bg-gray-600 active:text-gray-200'
   if (currentUser) {
     return (
-      <NavItem
-        icon={icons.faRightFromBracket}
-        text={currentUser.username}
-        onClick={() => logout().then(() => navigate('/', { replace: true }))}
-      />
+      <a className={classes}
+        onClick={() => logout().then(() => window.location.replace('/'))}
+        title='Logout'>
+        <FontAwesomeIcon icon={icons.faRightFromBracket} />
+      </a>
+    )
+  } else {
+    return (
+      <a className={classes}
+        onClick={() => navigate('/login')}
+        title='Login'>
+        <FontAwesomeIcon icon={icons.faUser} />
+      </a>
     )
   }
-
-  return (
-    <NavItem
-      icon={icons.faRightToBracket}
-      text={'Login'}
-      onClick={() => navigate('/login')}
-    />
-  )
 }

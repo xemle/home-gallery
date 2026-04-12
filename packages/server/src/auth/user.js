@@ -49,6 +49,17 @@ const resolveEffectiveFilter = (user, rolesMap) => {
   return filters.map(f => `(${f})`).join(' or ')
 }
 
+const resolveEffectivePages = (user, rolesMap) => {
+  if (user.webapp?.pages) {
+    return user.webapp.pages
+  }
+  const disabled = (user.roles || []).flatMap(name => rolesMap[name]?.webapp?.pages?.disabled || [])
+  if (!disabled.length) {
+    return undefined
+  }
+  return { disabled: [...new Set(disabled)] }
+}
+
 const resolveEffectiveReadOnly = (user, rolesMap) => {
   if (typeof user.readOnly === 'boolean') {
     return user.readOnly
@@ -79,5 +90,6 @@ export const resolveUsers = (users, roles) => {
     filter: resolveEffectiveFilter(user, rolesMap),
     roles: user.roles || [],
     readOnly: resolveEffectiveReadOnly(user, rolesMap),
+    pages: resolveEffectivePages(user, rolesMap),
   }))
 }

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { toAbsoluteUrl } from '../utils/toAbsoluteUrl'
+import { deleteOfflineRoot } from '../offline'
 
 export interface AuthUser {
   username: string
@@ -8,24 +9,26 @@ export interface AuthUser {
 }
 
 interface AuthStore {
-  authType: string
+  allowPublic: boolean
+  readOnly: boolean
   currentUser: AuthUser | null
   loginError: string | null
   isLoggingIn: boolean
 
-  init: (authType: string, currentUser: AuthUser | null) => void
+  init: (allowPublic: boolean, currentUser: AuthUser | null, readOnly: boolean) => void
   login: (username: string, password: string) => Promise<void>
   logout: () => Promise<void>
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
-  authType: 'basic',
+  allowPublic: false,
+  readOnly: false,
   currentUser: null,
   loginError: null,
   isLoggingIn: false,
 
-  init(authType, currentUser) {
-    set({ authType, currentUser })
+  init(allowPublic, currentUser, readOnly) {
+    set({ allowPublic, currentUser, readOnly })
   },
 
   async login(username, password) {
@@ -49,6 +52,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   async logout() {
+    await deleteOfflineRoot()
     await fetch(toAbsoluteUrl('api/auth/logout'), { method: 'POST' }).catch(() => {})
     set({ currentUser: null })
   },

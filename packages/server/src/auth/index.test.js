@@ -14,12 +14,12 @@ const sessionStore = {
   }
 }
 
-t.test('createCookieAuthMiddleware', async t => {
-  const {createCookieAuthMiddleware} = await loadAuth(t)
+t.test('createAuthMiddleware', async t => {
+  const {createAuthMiddleware} = await loadAuth(t)
 
   t.test('whitelisted IP sets ignoreAuth and calls next', t => {
     const rules = [{type: 'allow', value: 'all'}]
-    const middleware = createCookieAuthMiddleware(users, roles, rules, sessionStore, false, false)
+    const middleware = createAuthMiddleware(users, roles, rules, sessionStore, false, false)
     let called = false
     const req = {ip: '1.2.3.4', headers: {}}
     middleware(req, mockRes(), () => { called = true })
@@ -29,8 +29,31 @@ t.test('createCookieAuthMiddleware', async t => {
     t.end()
   })
 
+  t.test('valid basic auth credentials call next', t => {
+    const middleware = createAuthMiddleware(users, roles, denyAllRules, null, false, false)
+    let called = false
+    const req = {ip: '1.2.3.4', headers: {authorization: 'Basic ' + Buffer.from('alice:secret').toString('base64')}}
+    middleware(req, mockRes(), () => { called = true })
+
+    t.equal(req.username, 'alice')
+    t.ok(called)
+    t.end()
+  })
+
+  t.test('invalid basic auth credentials fall through to 401 when no session', t => {
+    const middleware = createAuthMiddleware(users, roles, denyAllRules, null, false, false)
+    let called = false
+    const req = {ip: '1.2.3.4', headers: {authorization: 'Basic ' + Buffer.from('alice:wrong').toString('base64')}}
+    const res = mockRes()
+    middleware(req, res, () => { called = true })
+
+    t.equal(res._status, 401)
+    t.notOk(called)
+    t.end()
+  })
+
   t.test('valid session cookie populates req and calls next', t => {
-    const middleware = createCookieAuthMiddleware(users, roles, denyAllRules, sessionStore, false, false)
+    const middleware = createAuthMiddleware(users, roles, denyAllRules, sessionStore, false, false)
     let called = false
     const req = {ip: '1.2.3.4', headers: {cookie: 'SESSIONID=valid-id'}}
     middleware(req, mockRes(), () => { called = true })
@@ -43,7 +66,7 @@ t.test('createCookieAuthMiddleware', async t => {
   })
 
   t.test('invalid session cookie without anonymous access returns 401', t => {
-    const middleware = createCookieAuthMiddleware(users, roles, denyAllRules, sessionStore, false, false)
+    const middleware = createAuthMiddleware(users, roles, denyAllRules, sessionStore, false, false)
     let called = false
     const req = {ip: '1.2.3.4', headers: {cookie: 'SESSIONID=bad-id'}}
     const res = mockRes()
@@ -55,10 +78,10 @@ t.test('createCookieAuthMiddleware', async t => {
     t.end()
   })
 
-  t.test('invalid session cookie with anonymous access falls through if anonymous mode enabled', t => {
-    const middleware = createCookieAuthMiddleware(users, roles, denyAllRules, sessionStore, true, true)
+  t.test('no auth with anonymous access calls next with readOnly', t => {
+    const middleware = createAuthMiddleware(users, roles, denyAllRules, sessionStore, true, true)
     let called = false
-    const req = {ip: '1.2.3.4', headers: {cookie: 'SESSIONID=bad-id'}}
+    const req = {ip: '1.2.3.4', headers: {}}
     middleware(req, mockRes(), () => { called = true })
 
     t.equal(req.readOnly, true)
@@ -66,19 +89,20 @@ t.test('createCookieAuthMiddleware', async t => {
     t.end()
   })
 
-  t.test('no cookie with anonymous access calls next with readOnly', t => {
-    const middleware = createCookieAuthMiddleware(users, roles, denyAllRules, sessionStore, true, false)
+  t.test('anonymous access sets req.pages from anonymousPages', t => {
+    const anonymousPages = {disabled: ['map', 'tag']}
+    const middleware = createAuthMiddleware(users, roles, denyAllRules, sessionStore, true, false, anonymousPages)
     let called = false
     const req = {ip: '1.2.3.4', headers: {}}
     middleware(req, mockRes(), () => { called = true })
 
-    t.equal(req.readOnly, false)
+    t.same(req.pages, anonymousPages)
     t.ok(called)
     t.end()
   })
 
-  t.test('no cookie without anonymous access returns 401', t => {
-    const middleware = createCookieAuthMiddleware(users, roles, denyAllRules, sessionStore, false, false)
+  t.test('no auth without anonymous access returns 401', t => {
+    const middleware = createAuthMiddleware(users, roles, denyAllRules, sessionStore, false, false)
     let called = false
     const req = {ip: '1.2.3.4', headers: {}}
     const res = mockRes()

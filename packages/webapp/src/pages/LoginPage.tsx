@@ -14,7 +14,7 @@ export const LoginPage = () => {
 
   useEffect(() => {
     if (currentUser) {
-      navigate('/', { replace: true })
+      window.location.replace('/')
     }
   }, [currentUser])
 

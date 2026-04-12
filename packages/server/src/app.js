@@ -11,7 +11,7 @@ import { treeApi } from './api/database/tree/index.js';
 import { eventsApi } from './api/events/index.js';
 import { sourcesApi } from './api/sources.js';
 import { webapp } from './webapp.js';
-import { augmentReqByUserMiddleware, createBasicAuthMiddleware, createCookieAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
+import { augmentReqByUserMiddleware, createAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
 import { isIndex, skipIf, browserBasePath, routerPrefix } from './utils.js'
 import { debugApi } from './api/debug/index.js'
 import { browserPlugins } from './browser-plugins.js';
@@ -36,20 +36,17 @@ function shouldCompress (req, res) {
 
 const getAuthMiddleware = (config, sessionStore) => {
   const users = config.server?.auth?.users || []
+  const roles = config.server?.auth?.roles || []
   const rules = config.server?.auth?.rules || defaultIpWhitelistRules
   const publicConfig = config.server?.auth?.public
-  const anonymousAccess = publicConfig?.enabled || false
+  const anonymousAccess = publicConfig?.allow || false
   const anonymousReadOnly = publicConfig?.readOnly || false
+  const anonymousPages = publicConfig?.webapp?.pages
 
   if (!users.length) {
     return (req, _, next) => next()
   }
-  if (config.server?.auth?.type === 'cookie') {
-    const roles = config.server?.auth?.roles || []
-    return createCookieAuthMiddleware(users, roles, rules, sessionStore, anonymousAccess, anonymousReadOnly)
-  } else {
-    return createBasicAuthMiddleware(users, rules, anonymousAccess, anonymousReadOnly)
-  }
+  return createAuthMiddleware(users, roles, rules, sessionStore, anonymousAccess, anonymousReadOnly, anonymousPages)
 }
 
 /**
@@ -63,8 +60,7 @@ export async function createApp(context) {
   app.use(augmentReqByUserMiddleware())
   app.use(loggerMiddleware())
 
-  const authType = config.server?.auth?.type || 'basic'
-  const sessionStore = authType === 'cookie'
+  const sessionStore = config.server?.auth?.users?.length
     ? createSessionStore(path.join(path.dirname(config.events.file), 'sessions.json'))
     : null
 
