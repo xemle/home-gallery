@@ -29,11 +29,11 @@ export async function authApi(context, sessionStore) {
       return res.status(401).json({error: 'Invalid credentials'})
     }
 
-    const sessionId = sessionStore.createSession(user.username, user.roles, user.readOnly)
+    const sessionId = sessionStore.createSession(user.username, user.roles, user.readOnly, user.pages)
     setSessionCookie(res, sessionId)
     log.info(`User '${username}' logged in from ${req.ip}`)
 
-    res.json({username: user.username, roles: user.roles, readOnly: user.readOnly})
+    res.json({username: user.username, roles: user.roles, readOnly: user.readOnly, pages: user.pages})
   })
 
   router.post('/api/auth/logout', (req, res) => {
@@ -61,6 +61,6 @@ export async function authApi(context, sessionStore) {
       return res.status(401).json({error: 'Session expired'})
     }
 
-    res.json({username: session.username, roles: session.roles, readOnly: session.readOnly})
+    res.json({username: session.username, roles: session.roles, readOnly: session.readOnly, pages: session.pages})
   })
 }

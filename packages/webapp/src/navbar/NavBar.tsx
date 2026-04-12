@@ -91,7 +91,7 @@ export const MobileNavBar = ({disableEdit = false, showDialog}) => {
 export const NavBar = ({disableEdit = false}) => {
   const [ deviceType ] = useDeviceType();
   const { setDialogVisible, openDialog } = useTagDialog()
-  disableEdit = disableEdit || useAuthStore(state => state.currentUser?.readOnly ?? false)
+  disableEdit = disableEdit || useAuthStore(state => state.readOnly)
 
   const selectedIds = useEditModeStore(state => state.selectedIds);
 

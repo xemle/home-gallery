@@ -113,3 +113,34 @@ t.test('user has readOnly false when any role is not readOnly', t => {
   t.end()
 })
 
+t.test('user without pages has undefined pages', t => {
+  const users = [{username: 'alice', password: 'secret'}]
+  const resolved = resolveUsers(users, [])[0]
+  t.equal(resolved.pages, undefined)
+  t.end()
+})
+
+t.test('user inherits pages from role', t => {
+  const users = [{username: 'alice', password: 'secret', roles: ['viewer']}]
+  const roles = [{name: 'viewer', webapp: {pages: {disabled: ['map', 'tag']}}}]
+  const resolved = resolveUsers(users, roles)[0]
+  t.same(resolved.pages, {disabled: ['map', 'tag']})
+  t.end()
+})
+
+t.test('user pages override role pages', t => {
+  const users = [{username: 'alice', password: 'secret', roles: ['viewer'], webapp: {pages: {disabled: ['date']}}}]
+  const roles = [{name: 'viewer', webapp: {pages: {disabled: ['map']}}}]
+  const resolved = resolveUsers(users, roles)[0]
+  t.same(resolved.pages, {disabled: ['date']})
+  t.end()
+})
+
+t.test('user pages disabled are union of all role pages', t => {
+  const users = [{username: 'alice', password: 'secret', roles: ['r1', 'r2', 'r3']}]
+  const roles = [{name: 'r1', webapp: {pages: {disabled: ['map']}}}, {name: 'r2'}, {name: 'r3', webapp: {pages: {disabled: ['video', 'map']}}}]
+  const resolved = resolveUsers(users, roles)[0]
+  t.same(resolved.pages, {disabled: ['map', 'video']})
+  t.end()
+})
+

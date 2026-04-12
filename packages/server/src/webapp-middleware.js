@@ -24,7 +24,7 @@ export async function webappMiddleware(context) {
       plugins: pluginEntries
     },
     sources,
-    authType: config.server?.auth?.type || 'basic',
+    allowPublic: config.server?.auth?.public?.allow || false,
   }
 
   const staticProperties = {
@@ -43,6 +43,13 @@ export async function webappMiddleware(context) {
       readOnly: req.readOnly || false,
     } : null
 
+    const userPagesDisabled = req.pages?.disabled || []
+    const staticPagesDisabled = staticState.pages?.disabled || []
+    const mergedPagesDisabled = [...new Set([...staticPagesDisabled, ...userPagesDisabled])]
+    const mergedPages = mergedPagesDisabled.length
+      ? { ...staticState.pages, disabled: mergedPagesDisabled }
+      : staticState.pages
+
     req.webapp = {
       ...req.webapp,
       ...staticProperties,
@@ -50,8 +57,10 @@ export async function webappMiddleware(context) {
         ...req.webapp.state,
         ...staticState,
         disabled: !!req.username ? [...staticState.disabled, 'pwa'] : staticState.disabled,
+        pages: mergedPages,
         entries,
         currentUser,
+        readOnly: req.readOnly || false,
       }
     }
 

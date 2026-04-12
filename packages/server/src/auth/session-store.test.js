@@ -26,10 +26,24 @@ t.test('createSession creates and writes a new session', async t => {
   t.equal(saved.abc123.username, 'alice')
   t.same(saved.abc123.roles, ['admin'])
   t.equal(saved.abc123.readOnly, true)
+  t.equal(saved.abc123.pages, undefined)
 
   const created = Date.parse(saved.abc123.created)
   const expires = Date.parse(saved.abc123.expires)
   t.equal(expires - created, 604800000) // 7 days in ms
+})
+
+t.test('createSession stores pages when provided', async t => {
+  const {createSessionStore, writes} = await loadSessionStore(t, {
+    randomHex: 'abc456',
+  })
+
+  const store = createSessionStore('/tmp/sessions.json')
+  const pages = {disabled: ['map', 'tag']}
+  store.createSession('bob', [], false, pages)
+
+  const saved = JSON.parse(writes[0].data)
+  t.same(saved.abc456.pages, pages)
 })
 
 t.test('getSession returns an existing valid session', async t => {

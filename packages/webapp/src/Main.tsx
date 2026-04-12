@@ -18,7 +18,7 @@ const AuthInit = () => {
 
   useEffect(() => {
     const injected = window['__homeGallery'] || {}
-    init(injected.authType || 'basic', injected.currentUser || null)
+    init(injected.allowPublic || false, injected.currentUser || null, injected.readOnly || false)
   }, [])
 
   return null
