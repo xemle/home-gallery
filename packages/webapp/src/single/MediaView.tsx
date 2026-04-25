@@ -146,6 +146,8 @@ export const MediaView = () => {
       dispatch({type: 'next'})
     } else if (ev.direction === Hammer.DIRECTION_RIGHT) {
       dispatch({type: 'prev'})
+    } else if (ev.direction === Hammer.DIRECTION_DOWN || ev.direction === Hammer.DIRECTION_UP) {
+      dispatch({type: 'list'})
     }
   }
 
