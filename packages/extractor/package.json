@@ -36,7 +36,7 @@
     "@home-gallery/plugin": "file:../plugin",
     "@home-gallery/storage": "file:../storage",
     "@home-gallery/stream": "file:../stream",
-    "exiftool-vendored": "^24.2.0",
+    "exiftool-vendored": "^35.20.0",
     "fluent-ffmpeg": "^2.1.2",
     "heic-decode": "^2.1.0",
     "jpeg-js": "^0.4.4",

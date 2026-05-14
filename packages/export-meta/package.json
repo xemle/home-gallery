@@ -34,7 +34,7 @@
     "@home-gallery/database": "file:../database",
     "@home-gallery/events": "file:../events",
     "@home-gallery/logger": "file:../logger",
-    "exiftool-vendored": "^24.2.0"
+    "exiftool-vendored": "^35.20.0"
   },
   "devDependencies": {
     "@home-gallery/dev-tools": "file:../dev-tools"
