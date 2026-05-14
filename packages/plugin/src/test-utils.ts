@@ -16,14 +16,12 @@ export async function testEntryStream(streams: TExtractorStream[]) {
     {sha1sum: '2', type: 'video', files: [], meta: {}}
   ]
 
-  const transforms: Transform[] = streams.map(s => s.stream)
-  const pipelineStreams = [
+  await pipeline(
     Readable.from(entries),
     ...streams.map(s => s.stream),
     toList(),
     write((result: TExtractorEntry[]) => data = result)
-  ]
-  await pipeline(pipelineStreams)
+  )
 
   return data
 }

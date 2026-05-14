@@ -60,13 +60,16 @@ export class Storage implements TStorage {
     let data
     const isCompressed = suffix.endsWith('.gz')
     const read = await this.#createReadStream(entry, suffix)
-    const streams = [read]
+    const streams = []
     if (isCompressed) {
       streams.push(createGunzip())
     }
     streams.push(parseJson())
-    streams.push(write((chunk: any) => data = chunk))
-    await pipeline(streams)
+    await pipeline(
+      read,
+      ...streams,
+      write((chunk: any) => data = chunk)
+    )
     entry.meta[metaKey] = data
     return data
   }
@@ -104,14 +107,15 @@ export class Storage implements TStorage {
 
     const write = await this.#createWriteStream(entry, suffix)
     const stringify = JSON.stringify(data)
-    const streams: any[] = [
-      Readable.from(Buffer.from(stringify))
-    ]
+    const streams: any[] = []
     if (isCompressed) {
       streams.push(createGzip())
     }
-    streams.push(write)
-    await pipeline(streams)
+    await pipeline(
+      Readable.from(Buffer.from(stringify)),
+      ...streams,
+      write
+    )
     const metaKey = this.#getMetaKey(suffix)
     entry.meta[metaKey] = data
   }
