@@ -1,6 +1,13 @@
+import { deepMerge } from "./utils/deep-merge.js"
+
 export async function socialMetaTagsMiddleware(context) {
   const { config, router, database: { filterDatabase } } = context
 
+  /**
+   * @param {import('express').Request & { webapp?: any}} req
+   * @param {import('express').Response} res
+   * @param {import('express').NextFunction} next
+   */
   async function addSocialMetaTags(req, res, next) {
     const { id } = req.params
     const entries = []
@@ -79,25 +86,25 @@ function injectSocialMetaTags(req, res, config, entry) {
   }
 }
 
-function disableFeatures(req, res, next) {
-  const state = req.webapp?.state
-  const pages = state?.pages
-  const mediaView = pages?.mediaView
+/**
+ * @param {import('express').Request & { webapp?: any}} req
+ * @param {import('express').Response} _
+ * @param {import('express').NextFunction} next
+ */
+function disableFeatures(req, _, next) {
+  const shareState = {
+    disabled: ['database', 'serverEvents', 'events', 'edit', 'pwa'],
+    pages: {
+      disabled: ['date', 'map', 'edit', 'video', 'tag'],
+      mediaView: {
+        disabled: ['nav', 'edit', 'map', 'similar', 'annotation']
+      }
+    }
+  }
 
   req.webapp = {
     ...req.webapp,
-    state: {
-      ...state,
-      disabled: [...state?.disabled || [], 'database', 'serverEvents', 'events', 'edit', 'pwa'],
-      pages: {
-        ...pages,
-        disabled: [...pages?.disabled || [], 'date', 'map', 'edit', 'video', 'tag'],
-        mediaView: {
-          ...mediaView,
-          disabled: [...mediaView?.disabled || [], 'nav', 'edit', 'map', 'similar', 'annotation'],
-        }
-      }
-    }
+    state: deepMerge(req.webapp?.state, shareState)
   }
 
   next()
