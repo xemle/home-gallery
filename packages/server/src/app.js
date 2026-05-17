@@ -60,7 +60,7 @@ export async function createApp(context) {
 
   // Auth API routes must be registered before the auth middleware allow login for unauthenticated requests
   await authApi(context)
-  authMiddleware(context)
+  await authMiddleware(context)
 
   router.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
 

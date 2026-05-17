@@ -26,7 +26,14 @@ export const mockRouter = () => {
   return {
     post(path, handler) { routes[`POST ${path}`] = handler },
     get(path, handler) { routes[`GET ${path}`] = handler },
-    invoke(method, path, req, res) { return routes[`${method} ${path}`](req, res) }
+    use(path, handler) {
+      if (!handler) {
+        handler = path
+        path = '/'
+      }
+      routes[`* ${path}`] = handler
+    },
+    invoke(method, path, req, res, next) { return routes[`${method} ${path}`](req, res, next) }
   }
 }
 
