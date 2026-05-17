@@ -13,8 +13,8 @@ const log = Logger('server.auth');
  * @param {import('../types.js').TServerContext} context
  * @returns
  */
-export const authMiddleware = (context) => {
-  const { config, auth } = context
+export const authMiddleware = async (context) => {
+  const { config, auth, router } = context
 
   const rules = config.server?.auth?.rules || []
   const allowListRules = rules2AllowListRules(rules || [])
@@ -34,7 +34,7 @@ export const authMiddleware = (context) => {
    * @param {import('express').Response} res
    * @param {import('express').NextFunction} next
    */
-  return async (req, res, next) => {
+  const middleware = async (req, res, next) => {
     const clientIp = req.ip
     const isAllowListed = isAllowListedIp(allowListRules, clientIp)
     if (isAllowListed) {
@@ -82,4 +82,6 @@ export const authMiddleware = (context) => {
     res.set('WWW-Authenticate', 'Basic realm="HomeGallery"')
     res.status(401).json({error: 'Authentication required'})
   }
+
+  router.use(middleware)
 }
