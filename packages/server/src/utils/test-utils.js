@@ -22,18 +22,46 @@ export const loggerMock = () => ({
  * @returns {import('express').Router & {invoke: (method: string, path: string, req: any, res: any) => any}}
  */
 export const mockRouter = () => {
-  const routes = {}
-  return {
-    post(path, handler) { routes[`POST ${path}`] = handler },
-    get(path, handler) { routes[`GET ${path}`] = handler },
-    use(path, handler) {
-      if (!handler) {
-        handler = path
-        path = '/'
+  const routes = []
+
+  function pushRoute(method, args) {
+    const path = typeof args[0] == 'string' ? args.shift() : '/'
+    for (const handler of args) {
+      routes.push({method, path, handler})
+    }
+  }
+
+  async function invokeNext(offset, req, res, next = () => true) {
+    let index = -1
+    for (let i = offset; i < routes.length; i++) {
+      const route = routes[i]
+      const method = req.method || 'GET'
+      if (route.method && route.method != method) {
+        continue
       }
-      routes[`* ${path}`] = handler
-    },
-    invoke(method, path, req, res, next) { return routes[`${method} ${path}`](req, res, next) }
+      const path = req.path || '/'
+      if (route.path.startsWith(path)) {
+        index = i
+        break
+      }
+    }
+    if (index < 0) {
+      return next()
+    }
+    const route = routes[index]
+    let nextCall
+    await Promise.resolve(route.handler(req, res, () => {
+      nextCall = invokeNext(index + 1, req, res, next)
+    }))
+
+    return nextCall
+  }
+
+  return {
+    post(...args) { pushRoute('POST', args) },
+    get(...args) { pushRoute('GET', args) },
+    use(...args) { pushRoute(undefined, args) },
+    invoke(req, res, next) { return invokeNext(0, req, res, next) }
   }
 }
 

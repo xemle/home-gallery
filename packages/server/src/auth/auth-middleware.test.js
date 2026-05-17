@@ -39,7 +39,7 @@ t.test('authMiddleware', async t => {
     await authMiddleware(context)
     let called = false
     const req = {ip: '1.2.3.4', headers: {}}
-    await router.invoke('*', '/', req, mockRes(), () => { called = true })
+    await router.invoke(req, mockRes(), () => { called = true })
 
     t.equal(req.username, '$allow')
     t.ok(called)
@@ -63,7 +63,7 @@ t.test('authMiddleware', async t => {
     await authMiddleware(context)
     let called = false
     const req = {ip: '1.2.3.4', headers: {authorization: 'Basic ' + Buffer.from('alice:secret').toString('base64')}}
-    await router.invoke('*', '/', req, mockRes(), () => { called = true })
+    await router.invoke(req, mockRes(), () => { called = true })
 
     t.equal(req.username, 'alice')
     t.ok(called)
@@ -88,7 +88,7 @@ t.test('authMiddleware', async t => {
     let called = false
     const req = {ip: '1.2.3.4', headers: {authorization: 'Basic ' + Buffer.from('alice:wrong').toString('base64')}}
     const res = mockRes()
-    await router.invoke('*', '/', req, res, () => { called = true })
+    await router.invoke(req, res, () => { called = true })
 
     t.equal(res._status, 401)
     t.notOk(called)
@@ -121,7 +121,7 @@ t.test('authMiddleware', async t => {
     await authMiddleware(context)
     let called = false
     const req = {ip: '1.2.3.4', headers: {}, sessionId: 'valid-id'}
-    await router.invoke('*', '/', req, mockRes(), () => { called = true })
+    await router.invoke(req, mockRes(), () => { called = true })
 
     t.equal(req.username, 'alice')
     t.same(req.user.roles, ['viewer'])
@@ -156,7 +156,7 @@ t.test('authMiddleware', async t => {
     let called = false
     const req = {ip: '1.2.3.4', headers: {}, sessionId: 'bad-id'}
     const res = mockRes()
-    await router.invoke('*', '/', req, res, () => { called = true })
+    await router.invoke(req, res, () => { called = true })
 
     t.equal(res._status, 401)
     t.same(res._body, {error: 'Authentication required'})
@@ -185,7 +185,7 @@ t.test('authMiddleware', async t => {
     await authMiddleware(context)
     let called = false
     const req = {ip: '1.2.3.4', headers: {}}
-    await router.invoke('*', '/', req, mockRes(), () => { called = true })
+    await router.invoke(req, mockRes(), () => { called = true })
 
     t.equal(req.username, '$anonymous')
     t.same(req.user.roles, ['public'])
@@ -214,7 +214,7 @@ t.test('authMiddleware', async t => {
     let called = false
     const req = {ip: '1.2.3.4', headers: {}}
     const res = mockRes()
-    await router.invoke('*', '/', req, res, () => { called = true })
+    await router.invoke(req, res, () => { called = true })
 
     t.equal(res._status, 401)
     t.same(res._body, {error: 'Authentication required'})

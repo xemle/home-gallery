@@ -29,7 +29,7 @@ t.test('POST /api/auth/login', async t => {
     await authApi({config, router, auth})
 
     const res = mockRes()
-    await router.invoke('POST', '/api/auth/login', {ip: '127.0.0.1', body: {username: 'alice'}}, res)
+    await router.invoke({method: 'POST', path: '/api/auth/login', ip: '127.0.0.1', body: {username: 'alice'}}, res)
 
     t.equal(res._status, 401)
     t.match(res._body, {error: /invalid/i})
@@ -48,7 +48,7 @@ t.test('POST /api/auth/login', async t => {
     await authApi({config, router, auth})
 
     const res = mockRes()
-    await router.invoke('POST', '/api/auth/login', {ip: '127.0.0.1', body: {username: 'alice', password: 'wrong'}}, res)
+    await router.invoke({method: 'POST', path: '/api/auth/login', ip: '127.0.0.1', body: {username: 'alice', password: 'wrong'}}, res)
 
     t.equal(res._status, 401)
     t.match(res._body, {error: /invalid/i})
@@ -67,7 +67,7 @@ t.test('POST /api/auth/login', async t => {
     await authApi({config, router, auth})
 
     const res = mockRes()
-    await router.invoke('POST', '/api/auth/login', {ip: '127.0.0.1', body: {username: 'unknown', password: 'x'}}, res)
+    await router.invoke({method: 'POST', path: '/api/auth/login', ip: '127.0.0.1', body: {username: 'unknown', password: 'x'}}, res)
 
     t.equal(res._status, 401)
     t.end()
@@ -91,7 +91,7 @@ t.test('POST /api/auth/login', async t => {
     await authApi({config, router, auth})
 
     const res = mockRes()
-    await router.invoke('POST', '/api/auth/login', {ip: '127.0.0.1', body: {username: 'alice', password: 'secret'}}, res)
+    await router.invoke({method: 'POST', path: '/api/auth/login', ip: '127.0.0.1', body: {username: 'alice', password: 'secret'}}, res)
 
     t.equal(res._status, 200)
     t.equal(res._body.username, 'alice')
@@ -129,7 +129,7 @@ t.test('POST /api/auth/logout', async t => {
     await authApi({config, router, auth})
 
     const res = mockRes()
-    await router.invoke('POST', '/api/auth/logout', {ip: '127.0.0.1', headers: {}, sessionId: 'sid-1'}, res)
+    await router.invoke({method: 'POST', path: '/api/auth/logout', ip: '127.0.0.1', headers: {}, sessionId: 'sid-1'}, res)
 
     t.equal(res._status, 200)
     t.same(res._body, {ok: true})
@@ -148,7 +148,7 @@ t.test('POST /api/auth/logout', async t => {
     await authApi({config, router, auth})
 
     const res = mockRes()
-    await router.invoke('POST', '/api/auth/logout', {ip: '127.0.0.1', headers: {}}, res)
+    await router.invoke({method: 'POST', path: '/api/auth/logout', ip: '127.0.0.1', headers: {}}, res)
 
     t.equal(res._status, 200)
     t.same(res._body, {ok: true})
@@ -171,7 +171,7 @@ t.test('GET /api/auth/me', async t => {
     await authApi({config, router, auth})
 
     const res = mockRes()
-    await router.invoke('GET', '/api/auth/me', {headers: {}}, res)
+    await router.invoke({path: '/api/auth/me', headers: {}}, res)
 
     t.equal(res._status, 401)
   })
@@ -198,7 +198,7 @@ t.test('GET /api/auth/me', async t => {
     await authApi({config, router, auth})
 
     const res = mockRes()
-    await router.invoke('GET', '/api/auth/me', {headers: {}, sessionId: 'bad'}, res)
+    await router.invoke({path: '/api/auth/me', headers: {}, sessionId: 'bad'}, res)
 
     t.equal(res._status, 401)
     t.match(res._body, {error: /expired/i})
@@ -221,7 +221,7 @@ t.test('GET /api/auth/me', async t => {
     await authApi({config, router, auth})
 
     const res = mockRes()
-    await router.invoke('GET', '/api/auth/me', {headers: {}, sessionId: 'good-session'}, res)
+    await router.invoke({path: '/api/auth/me', headers: {}, sessionId: 'good-session'}, res)
 
     t.equal(res._status, 200)
     t.equal(res._body.username, 'alice')
