@@ -1,15 +1,19 @@
-import { stat, statSync } from 'fs'
+import { stat } from 'fs'
 import path from 'path'
 
-import express from 'express'
 
 import Logger from '@home-gallery/logger'
+import { createDisabledFlagMiddleware } from '../auth/disabled-flag-middleware.js'
 import { sendError } from './error/index.js'
 
 const log = Logger('server.api.sources')
 
 const staticConfig = {index: false, maxAge: '2h'}
 
+/**
+ *
+ * @param {import('../types.js').TServerContext} context
+ */
 export async function sourcesApi(context) {
   const { config, router } = context
   /** @type {{index: string, dir: string, offline?: boolean, downloadable?: boolean}[]} */
@@ -30,22 +34,37 @@ export async function sourcesApi(context) {
   const indexNameToDir = downloadableSources.reduce((result, {indexName, dir}) => {
     result[indexName] = dir
     return result
-  }, {})
+  }, /** @type {Record<string, string>} */ ({}))
 
-  const sourcesRouter = express.Router()
-  sourcesRouter.get('/', (_, res) => {
+
+  /**
+   * @param {import('express').Request} _
+   * @param {import('express').Response} res
+   * @returns
+   */
+  const getIndex = (_, res) => {
     res.json({
       data: downloadableSources.map(({indexName}) => ({indexName, downloadable: true}))
     })
-  })
+  }
 
-  sourcesRouter.use('/', createStaticIndex(indexNameToDir))
-
-  router.use('/api/sources', sourcesRouter)
+  const disableSourceFilter = createDisabledFlagMiddleware('source')
+  router.get('/api/sources', disableSourceFilter, getIndex)
+  router.use('/api/sources', disableSourceFilter, createStaticIndex(indexNameToDir))
 }
 
+/**
+ *
+ * @param {Record<string, string>} indexNameToDir
+ * @returns {import('express').RequestHandler}
+ */
 function createStaticIndex(indexNameToDir) {
-  return (req, res) => {
+  /**
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   * @returns
+   */
+  const middleware = (req, res) => {
     if (req.method != 'GET') {
       return sendError(res, 405, `Method is not allowed`)
     }
@@ -57,6 +76,9 @@ function createStaticIndex(indexNameToDir) {
     }
 
     const indexName = parts.shift()
+    if (!indexName) {
+      return sendError(res, 400, `Invalid source`)
+    }
     const dir = indexNameToDir[indexName]
 
     if (!dir || !parts.length) {
@@ -80,4 +102,6 @@ function createStaticIndex(indexNameToDir) {
       return res.sendFile(file)
     })
   }
+
+  return middleware
 }

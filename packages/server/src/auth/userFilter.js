@@ -1,46 +1,36 @@
 import { parse } from '@home-gallery/query'
-import { resolveUsers } from './user.js'
+import { createUserMap } from './user.js'
 
 const logPrefix = 'api.auth.userFilter'
 
-const collectUsersWithFilter = (manager) => {
+/**
+ *
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns
+ */
+const createUsername2FilterAst = async (manager) => {
   const log = manager.createLogger(`${logPrefix}.query`)
-
-  const config = manager.getConfig()
-  const rawUsers = config.server?.auth?.users || []
-  if (!rawUsers.length) {
-    log.trace(`No users defined. Skip user filter`)
-    return []
-  }
-  const roles = config.server?.auth?.roles || []
-  const users = resolveUsers(rawUsers, roles)
-  const usersWithFilter = users.filter(u => typeof u.filter === 'string' && u.filter !== '')
-
-  const publicFilter = config.server?.auth?.public?.filter
-  if (typeof publicFilter == 'string' && users.find(user => user.username == 'anonymous')) {
-    log.warn('Can not set public filter to existing user: anonymous. Public filter is skipped')
-  } else if (typeof publicFilter == 'string') {
-    usersWithFilter.push({username: 'anonymous', filter: publicFilter})
-  }
-
-  const hasUsersButNoFilter = rawUsers.length && !usersWithFilter.length
-  if (hasUsersButNoFilter) {
-    log.debug(`Found ${rawUsers.length} users but no user filters are defined. Use 'filter: "year >= 2024"' in server.auth.users or server.auth.roles configuration to enable user filters`)
-    return []
-  }
-
-  return usersWithFilter
-}
-
-const createUsername2FilterAst = async (manager, users) => {
-  const log = manager.createLogger(`${logPrefix}.query`)
+  /** @type {Record<string, any>} */
   const username2FilterAst = {}
 
-  for (let user of users) {
+  const auth = manager.getConfig()?.server?.auth || {}
+  const users = createUserMap(auth.users || [], auth.roles || [], auth.public?.filter)
+
+  if (!Object.keys(users).length) {
+    log.info('Serve all media files without restrictions. Define users to change it')
+    return username2FilterAst
+  }
+
+  for (const user of Object.values(users)) {
+    if (!user.filter) {
+      continue
+    }
+
     const ast = await parse(user.filter).catch(err => {
       log.warn(err, `Could not parse user filter from user ${user.username}: ${user.filter}. Skip filtering`)
       return false
     })
+
     if (!ast) {
       continue
     } else if (!ast?.value) {
@@ -56,22 +46,28 @@ const createUsername2FilterAst = async (manager, users) => {
   return username2FilterAst
 }
 
+/**
+ *
+ * @param {import('@home-gallery/types').TPluginManager} manager
+ * @returns
+ */
 const createUserFilterQueryPlugin = async manager => {
-  const users = collectUsersWithFilter(manager)
-  if (!users.length) {
-    return false
-  }
-
-  const username2FilterAst = await createUsername2FilterAst(manager, users)
+  const username2FilterAst = await createUsername2FilterAst(manager)
 
   return {
     name: 'userFilterQuery',
     order: 1,
     transformRules: [
       {
+        /**
+         *
+         * @param {any} ast
+         * @param {any} context
+         * @returns
+         */
         transform(ast, context) {
           const isReq = context.plugin?.req
-          const username = context.plugin?.req?.username || 'anonymous'
+          const username = context.plugin?.req?.username || '$allow'
           if (ast.type != 'query' || !isReq || !username2FilterAst[username]) {
             return ast
           }

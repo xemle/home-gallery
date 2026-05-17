@@ -69,6 +69,18 @@
                 ]
               },
               {
+                "description": "Disable original source download",
+                "enum": [
+                  "source"
+                ]
+              },
+              {
+                "description": "Disable login form",
+                "enum": [
+                  "login"
+                ]
+              },
+              {
                 "type": "string",
                 "minLength": 0
               }

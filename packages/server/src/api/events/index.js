@@ -7,6 +7,7 @@ const log = Logger('server.api.events');
 import { readEvents, appendEvent } from '@home-gallery/events';
 
 import { sendError } from '../error/index.js';
+import { createDisabledFlagMiddleware } from '../../auth/disabled-flag-middleware.js';
 
 /**
  * @param {import('../../types.js').TServerContext} context
@@ -165,7 +166,10 @@ export async function eventsApi(context) {
     read: getEvents
   }
 
-  router.get('/api/events.json', read)
-  router.post('/api/events', push)
-  router.get('/api/events/stream', stream)
+  const disableEventsFilter = createDisabledFlagMiddleware('events')
+  const disableEerverEventsFilter = createDisabledFlagMiddleware('serverEvents')
+
+  router.get('/api/events.json', disableEventsFilter, read)
+  router.post('/api/events', disableEventsFilter, push)
+  router.get('/api/events/stream', disableEventsFilter, disableEerverEventsFilter, stream)
 }

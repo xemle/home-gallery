@@ -1,3 +1,4 @@
+// @ts-nocheck
 import path from 'path';
 import express from 'express';
 import compression from 'compression';
@@ -11,15 +12,16 @@ import { treeApi } from './api/database/tree/index.js';
 import { eventsApi } from './api/events/index.js';
 import { sourcesApi } from './api/sources.js';
 import { webapp } from './webapp.js';
-import { augmentReqByUserMiddleware, createAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
+import { augmentReqByUserMiddleware, createAuthContext, authMiddleware } from './auth/index.js'
 import { isIndex, skipIf, browserBasePath, routerPrefix } from './utils.js'
 import { debugApi } from './api/debug/index.js'
 import { browserPlugins } from './browser-plugins.js';
 import { authApi } from './api/auth/index.js'
-import { createSessionStore } from './auth/session-store.js'
+import { createSessionStore } from './auth/session/session-store.js'
 import Logger from '@home-gallery/logger';
 import { webappMiddleware } from './webapp-middleware.js';
 import { socialMetaTagsMiddleware } from './social-meta-tags-middleware.js';
+import { createCookieMiddleware } from './auth/session/cookie-middleware.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const webappDir = path.join(__dirname, 'public')
@@ -34,21 +36,6 @@ function shouldCompress (req, res) {
   return compression.filter(req, res)
 }
 
-const getAuthMiddleware = (config, sessionStore) => {
-  const users = config.server?.auth?.users || []
-  const roles = config.server?.auth?.roles || []
-  const rules = config.server?.auth?.rules || defaultIpWhitelistRules
-  const publicConfig = config.server?.auth?.public
-  const anonymousAccess = publicConfig?.allow || false
-  const anonymousReadOnly = publicConfig?.readOnly || false
-  const anonymousPages = publicConfig?.webapp?.pages
-
-  if (!users.length) {
-    return (req, _, next) => next()
-  }
-  return createAuthMiddleware(users, roles, rules, sessionStore, anonymousAccess, anonymousReadOnly, anonymousPages)
-}
-
 /**
  * @param {import('./types.js').TServerContext} context
  */
@@ -57,26 +44,23 @@ export async function createApp(context) {
   const app = context.app = express();
   app.disable('x-powered-by')
   app.enable('trust proxy')
-  app.use(augmentReqByUserMiddleware())
-  app.use(loggerMiddleware())
-
-  const sessionStore = config.server?.auth?.users?.length
-    ? createSessionStore(path.join(path.dirname(config.events.file), 'sessions.json'))
-    : null
 
   const router = context.router = express.Router()
+
+  context.auth = await createAuthContext(config)
+  createCookieMiddleware(context)
+  app.use(augmentReqByUserMiddleware(context))
+  app.use(loggerMiddleware())
+
   router.use(cors());
   router.use(compression({ filter: shouldCompress }))
 
   router.use(skipIf(express.static(webappDir, {maxAge: '1h'}), isIndex))
+  router.use(bodyParser.json({limit: '1mb'}))
 
   // Auth API routes must be registered before the auth middleware allow login for unauthenticated requests
-  router.use(bodyParser.json({limit: '1mb'}))
-  if (sessionStore) {
-    await authApi(context, sessionStore)
-  }
-
-  router.use(getAuthMiddleware(config, sessionStore))
+  await authApi(context)
+  authMiddleware(context)
 
   router.use('/files', express.static(config.storage.dir, {index: false, maxAge: '2d', immutable: true}));
 

@@ -23,6 +23,14 @@
         "description": "Recommended performance features. Disable them on local dev issues",
         "enum": ["offlineDatabase", "worker"]
       },
+      {
+        "description": "Disable original source download",
+        "enum": ["source"]
+      },
+      {
+        "description": "Disable login form",
+        "enum": ["login"]
+      },
       { "type": "string", "minLength": 0 }
     ]
   }

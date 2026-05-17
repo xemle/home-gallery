@@ -1,34 +1,31 @@
-import { create } from 'zustand'
-import { toAbsoluteUrl } from '../utils/toAbsoluteUrl'
-import { deleteOfflineRoot } from '../offline'
+import { create } from 'zustand';
+import { eventBus } from '../api/ApiService';
+import { toAbsoluteUrl } from '../utils/toAbsoluteUrl';
 
 export interface AuthUser {
   username: string
   roles: string[]
-  readOnly: boolean
 }
 
 interface AuthStore {
-  allowPublic: boolean
-  readOnly: boolean
+  showLogin: boolean
   currentUser: AuthUser | null
   loginError: string | null
   isLoggingIn: boolean
 
-  init: (allowPublic: boolean, currentUser: AuthUser | null, readOnly: boolean) => void
+  init: (showLogin: boolean, currentUser: AuthUser | null) => void
   login: (username: string, password: string) => Promise<void>
   logout: () => Promise<void>
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
-  allowPublic: false,
-  readOnly: false,
+  showLogin: false,
   currentUser: null,
   loginError: null,
   isLoggingIn: false,
 
-  init(allowPublic, currentUser, readOnly) {
-    set({ allowPublic, currentUser, readOnly })
+  init(showLogin, currentUser) {
+    set({ showLogin, currentUser })
   },
 
   async login(username, password) {
@@ -46,14 +43,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
       }
       const user: AuthUser = await res.json()
       set({ currentUser: user, loginError: null, isLoggingIn: false })
+
+      eventBus.dispatch({type: 'user:login'})
     } catch (e) {
       set({ loginError: 'Network error', isLoggingIn: false })
     }
   },
 
   async logout() {
-    await deleteOfflineRoot()
     await fetch(toAbsoluteUrl('api/auth/logout'), { method: 'POST' }).catch(() => {})
     set({ currentUser: null })
+    eventBus.dispatch({type: 'user:logout'})
   },
 }))

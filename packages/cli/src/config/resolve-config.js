@@ -8,7 +8,14 @@ export const resolveConfig = (config, baseDir, env) => {
     resolveAll(source, ['dir', 'index', 'excludeIfPresent', 'excludeFromFile'], config, baseDir, env)
   }
 
-  resolveAll(config, ['storage.dir', 'database.file', 'events.file', 'server.key', 'server.cert'], config, baseDir, env)
+  resolveAll(config, [
+    'storage.dir',
+    'database.file',
+    'events.file',
+    'server.key',
+    'server.cert',
+    'server.auth.session.file'
+  ], config, baseDir, env)
 
   const loggers = config.logger || [];
   for (const logger of loggers) {

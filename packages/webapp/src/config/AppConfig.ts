@@ -19,6 +19,8 @@ export type FeatureFlags = (
   | "database"
   | "pwa"
   | ("offlineDatabase" | "worker")
+  | "source"
+  | "login"
   | string
 )[];
 /**

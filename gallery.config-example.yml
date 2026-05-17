@@ -224,7 +224,108 @@
   # default: '{configDir}/{configPrefix}events.db'
   #file: '{configDir}/{configPrefix}events.db'
 
-#server:
+server:
+  # Enable users authentication (basic or cookie) or apply IP whitelist rules which require no authentication
+  auth:
+    # Role definitions. Each role can have an optional database filter and webapp config
+    roles:
+      # [name property] examples:
+      #   * admin
+      #   * viewer
+      - name: admin
+        # Role database filter. Role filters are applied with OR for multiple roles and applied with AND to the user filter
+        #filter: 'path~vacation or tag:public'
+        # Webapp overrides for this role
+        #webapp:
+          # Flags for this role. See webapp.disabled section for possible values. Disabled features are merged and added for multiple roles
+          #disabled:
+            #- ...any string
+        #
+        # List of nested role names assigned to this role
+        #
+        # examples:
+        #   * ["admin"]
+        #   * ["viewer"]
+        #roles:
+          #- ...any string
+    #public:
+      # *deprecated*
+      # Deprecated. Use special user `$allow`.
+      #
+      # Database filter for `$allow` (IP-allow listed) trusted user
+      #filter: 'year >= 2024 tag:public'
+    #
+    # User list.
+    #
+    # Special users are:
+    #   - `$allow` user of allow rule as local trusted user without authentication
+    #   - `$anonymous` user of deny role as unknown public user
+    #
+    # Define `$anonymous` user to allow unauthenticated and anonymous public access
+    #
+    #users:
+      # Simple username:password pair
+      #- johndoe: s3cr3t
+      # User object with dedicated username, password and optional filter and role properties
+      #- username: guest
+        # Passwords can be in plain text, {SHA} or {SHA256-salted}.
+        #
+        # Hashed password can be generated via
+        #   node -e "pw=process.argv[1];const {createHash,randomBytes}=require('crypto');salt=randomBytes(12);hash=createHash('sha256').update(salt.toString()+pw).digest('base64');console.log('{SHA256-salted}'+salt.toString('base64')+'.'+hash)" 'password'
+        #   {SHA256-salted}FkcbhhcHYW0DdE9u.P9Ik9MG8ldtO0fzGB+RV186vi8PZMomsya5OWC0AEiA=
+        #   node -e "pw=process.argv[1]||'';sha1=require('crypto').createHash('sha1').update(pw).digest('base64');console.log('{SHA}'+sha1)" password
+        #   {SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g=
+        #password: '{SHA256-salted}W1jrZgK81z06YLhA.qTSmeyYtPP19ZEpGiiAyVn61nly4jqbuuGoSefzLm98='
+        # Database filter for the user. The user filter is applied with AND to the users's role filter
+        #filter: 'year >= 2019 not tag:private'
+        #
+        # List of role names assigned to this user
+        #
+        # examples:
+        #   * ["admin"]
+        #   * ["viewer"]
+        #roles:
+          #- ...any string
+    #
+    # Rules when the request needs authentication
+    # First matching rule wins.
+    #
+    # For public gallery use
+    # rules:
+    #   - allow: localhost
+    #   - deny: all
+    #
+    # Use special user `$allow` for trusted hosts without authentication and `$anonymous` for unknown public users with deny rules
+    #
+    #rules:
+      # [allow property] Allow rules without authentication like trusted localhost
+      #
+      # examples:
+      #   * all
+      #   * localhost
+      #   * '192.168/16'
+      #- allow: all
+      # [deny property] Deny rules which hosts requires authentication like all
+      #
+      # examples:
+      #   * all
+      #   * localhost
+      #   * '192.168/16'
+      #- deny: all
+    # Session configuration for cookie-based authentication
+    #session:
+      # Path to the file storing session data.
+      #
+      # default: '{configDir}/{configPrefix}sessions.json'
+      #file: '{configDir}/{configPrefix}sessions.json'
+      # Name of the session cookie
+      #
+      # default: SESSIONID
+      #sessionName: SESSIONID
+      # Max age of the session cookie in seconds
+      #
+      # default: 604800
+      #maxAge: 604800
   # default: 3000
   #port: 3000
   # default: '0.0.0.0'
@@ -242,52 +343,6 @@
   #publicUrl: 'https://acme.com/gallery'
   # Open browser when server starts
   #openBrowser: true
-  # Enable basic authentication users and ip whitelist rules which require no authentication
-  #auth:
-    #public:
-      # Database filter for anonymous users
-      #filter: 'year >= 2024 tag:public'
-    #
-    # Passwords can be in plain text, {SHA} or {SHA256-salted}.
-    #
-    # Hashed password can be generated via
-    #   node -e "pw=process.argv[1];const {createHash,randomBytes}=require('crypto');salt=randomBytes(12);hash=createHash('sha256').update(salt.toString()+pw).digest('base64');console.log('{SHA256-salted}'+salt.toString('base64')+'.'+hash)" 'password'
-    #   {SHA256-salted}FkcbhhcHYW0DdE9u.P9Ik9MG8ldtO0fzGB+RV186vi8PZMomsya5OWC0AEiA=
-    #   node -e "pw=process.argv[1]||'';sha1=require('crypto').createHash('sha1').update(pw).digest('base64');console.log('{SHA}'+sha1)" password
-    #   {SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g=
-    #
-    #users:
-      # Simple username:password pair
-      #- johndoe: s3cr3t
-      # User object with dedicated username, password properties
-      #- username: guest
-        #password: '{SHA256-salted}W1jrZgK81z06YLhA.qTSmeyYtPP19ZEpGiiAyVn61nly4jqbuuGoSefzLm98='
-        # Database filter for the user
-        #filter: 'year >= 2019 not tag:private'
-    #
-    # Rules when the request need authentication
-    # First matching rule wins.
-    #
-    # For public gallery use
-    # rules:
-    #   - allow: localhost
-    #   - deny: all
-    #
-    #rules:
-      # [allow property] Allow rules without authentication like localhost
-      #
-      # examples:
-      #   * all
-      #   * localhost
-      #   * '192.168/16'
-      #- allow: all
-      # [deny property] Deny rules which hosts requires authentication like all
-      #
-      # examples:
-      #   * all
-      #   * localhost
-      #   * '192.168/16'
-      #- deny: all
   # Import sources on server start
   #
   # default: true
@@ -334,6 +389,10 @@
     # Recommended performance features. Disable them on local dev issues
     #- offlineDatabase
     #- worker
+    # Disable original source download
+    #- source
+    # Disable login form
+    #- login
     #- ...any string
   #
   # List of downloadable media sources. This list will be injected from the server

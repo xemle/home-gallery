@@ -427,22 +427,23 @@
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#server.auth",
           "type": "object",
-          "description": "Enable basic authentication users and ip whitelist rules which require no authentication",
+          "description": "Enable users authentication (basic or cookie) or apply IP whitelist rules which require no authentication",
           "properties": {
             "public": {
               "type": "object",
               "properties": {
                 "filter": {
-                  "description": "Database filter for anonymous users",
+                  "description": "Deprecated. Use special user `$allow`.\n\nDatabase filter for `$allow` (IP-allow listed) trusted user",
                   "type": "string",
                   "examples": [
                     "year >= 2024 tag:public"
-                  ]
+                  ],
+                  "deprecated": true
                 }
               }
             },
             "users": {
-              "description": "Passwords can be in plain text, {SHA} or {SHA256-salted}.\n\nHashed password can be generated via\n  node -e \"pw=process.argv[1];const {createHash,randomBytes}=require('crypto');salt=randomBytes(12);hash=createHash('sha256').update(salt.toString()+pw).digest('base64');console.log('{SHA256-salted}'+salt.toString('base64')+'.'+hash)\" 'password'\n  {SHA256-salted}FkcbhhcHYW0DdE9u.P9Ik9MG8ldtO0fzGB+RV186vi8PZMomsya5OWC0AEiA=\n  node -e \"pw=process.argv[1]||'';sha1=require('crypto').createHash('sha1').update(pw).digest('base64');console.log('{SHA}'+sha1)\" password\n  {SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g=",
+              "description": "User list.\n\nSpecial users are:\n  - `$allow` user of allow rule as local trusted user without authentication\n  - `$anonymous` user of deny role as unknown public user\n\nDefine `$anonymous` user to allow unauthenticated and anonymous public access",
               "type": "array",
               "items": {
                 "anyOf": [
@@ -459,7 +460,7 @@
                     }
                   },
                   {
-                    "description": "User object with dedicated username, password properties",
+                    "description": "User object with dedicated username, password and optional filter and role properties",
                     "type": "object",
                     "properties": {
                       "username": {
@@ -469,16 +470,32 @@
                         ]
                       },
                       "password": {
+                        "description": "Passwords can be in plain text, {SHA} or {SHA256-salted}.\n\nHashed password can be generated via\n  node -e \"pw=process.argv[1];const {createHash,randomBytes}=require('crypto');salt=randomBytes(12);hash=createHash('sha256').update(salt.toString()+pw).digest('base64');console.log('{SHA256-salted}'+salt.toString('base64')+'.'+hash)\" 'password'\n  {SHA256-salted}FkcbhhcHYW0DdE9u.P9Ik9MG8ldtO0fzGB+RV186vi8PZMomsya5OWC0AEiA=\n  node -e \"pw=process.argv[1]||'';sha1=require('crypto').createHash('sha1').update(pw).digest('base64');console.log('{SHA}'+sha1)\" password\n  {SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g=",
                         "type": "string",
                         "examples": [
                           "{SHA256-salted}W1jrZgK81z06YLhA.qTSmeyYtPP19ZEpGiiAyVn61nly4jqbuuGoSefzLm98="
                         ]
                       },
                       "filter": {
-                        "description": "Database filter for the user",
+                        "description": "Database filter for the user. The user filter is applied with AND to the users's role filter",
                         "type": "string",
                         "examples": [
                           "year >= 2019 not tag:private"
+                        ]
+                      },
+                      "roles": {
+                        "description": "List of role names assigned to this user",
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "examples": [
+                          [
+                            "admin"
+                          ],
+                          [
+                            "viewer"
+                          ]
                         ]
                       }
                     }
@@ -486,8 +503,70 @@
                 ]
               }
             },
+            "roles": {
+              "description": "Role definitions. Each role can have an optional database filter and webapp config",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "examples": [
+                      "admin",
+                      "viewer"
+                    ]
+                  },
+                  "filter": {
+                    "description": "Role database filter. Role filters are applied with OR for multiple roles and applied with AND to the user filter",
+                    "type": "string",
+                    "examples": [
+                      "path~vacation or tag:public"
+                    ]
+                  },
+                  "webapp": {
+                    "description": "Webapp overrides for this role",
+                    "type": "object",
+                    "properties": {
+                      "disabled": {
+                        "description": "Flags for this role. See webapp.disabled section for possible values. Disabled features are merged and added for multiple roles",
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "pages": {
+                        "description": "Page settings for this role. See webapp.pages section for possible values. Arrays like disabled or flags are merged and added for multiple roles",
+                        "type": "object"
+                      },
+                      "format": {
+                        "description": "Format settings for this role. See webapp.format section for possible values. Arrays like disabled or flags are merged and added for multiple roles",
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "roles": {
+                    "description": "List of nested role names assigned to this role",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "examples": [
+                      [
+                        "admin"
+                      ],
+                      [
+                        "viewer"
+                      ]
+                    ]
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            },
             "rules": {
-              "description": "Rules when the request need authentication\nFirst matching rule wins.\n\nFor public gallery use\nrules:\n  - allow: localhost\n  - deny: all",
+              "description": "Rules when the request needs authentication\nFirst matching rule wins.\n\nFor public gallery use\nrules:\n  - allow: localhost\n  - deny: all\n\nUse special user `$allow` for trusted hosts without authentication and `$anonymous` for unknown public users with deny rules",
               "type": "array",
               "items": {
                 "anyOf": [
@@ -495,7 +574,7 @@
                     "type": "object",
                     "properties": {
                       "allow": {
-                        "description": "Allow rules without authentication like localhost",
+                        "description": "Allow rules without authentication like trusted localhost",
                         "examples": [
                           "all",
                           "localhost",
@@ -520,6 +599,38 @@
                     }
                   }
                 ]
+              }
+            },
+            "session": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#server.auth.session",
+              "description": "Session configuration for cookie-based authentication",
+              "type": "object",
+              "properties": {
+                "file": {
+                  "description": "Path to the file storing session data.",
+                  "type": "string",
+                  "examples": [
+                    "sessions.json"
+                  ],
+                  "default": "{configDir}/{configPrefix}sessions.json"
+                },
+                "sessionName": {
+                  "description": "Name of the session cookie",
+                  "type": "string",
+                  "examples": [
+                    "SESSIONID"
+                  ],
+                  "default": "SESSIONID"
+                },
+                "maxAge": {
+                  "description": "Max age of the session cookie in seconds",
+                  "type": "number",
+                  "examples": [
+                    604800
+                  ],
+                  "default": 604800
+                }
               }
             }
           }
@@ -617,6 +728,18 @@
                 "enum": [
                   "offlineDatabase",
                   "worker"
+                ]
+              },
+              {
+                "description": "Disable original source download",
+                "enum": [
+                  "source"
+                ]
+              },
+              {
+                "description": "Disable login form",
+                "enum": [
+                  "login"
                 ]
               },
               {

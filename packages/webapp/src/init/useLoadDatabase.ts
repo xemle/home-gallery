@@ -12,6 +12,7 @@ import { useOnEntries } from './useOnEntries';
 import { toAbsoluteUrl } from '../utils/toAbsoluteUrl';
 export const useLoadDatabase = () => {
   const removeEntries = useEntryStore(state => state.removeEntries);
+  const resetEntries = useEntryStore(state => state.reset);
   const reapplyEvents = useEventStore(state => state.reapplyEvents);
   const appConfig = useAppConfig()
   const onEntries = useOnEntries()
@@ -28,6 +29,16 @@ export const useLoadDatabase = () => {
           console.log(`Reload database due server event`)
           cb()
         }
+      })
+      eventBus.addEventListener('user:login', () => {
+        console.log(`Reload database due user login`)
+        resetEntries()
+        cb()
+      })
+      eventBus.addEventListener('user:logout', () => {
+        console.log(`Reload database due user logout`)
+        resetEntries()
+        cb()
       })
     }
 

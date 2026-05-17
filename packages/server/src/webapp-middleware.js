@@ -1,9 +1,14 @@
 import path from 'path';
 import { browserBasePath } from './utils.js'
+import { deepMerge } from './utils/deep-merge.js';
 
+/**
+ *
+ * @param {import('./types.js').TServerContext} context
+ */
 export async function webappMiddleware(context) {
-  const { config, pluginManager, router } = context
-  
+  const { config, pluginManager, router, auth } = context
+
   const plugins = pluginManager.getBrowserPlugins().plugins
   const pluginEntries = plugins.map(p => '/plugins/' + p.publicEntry)
 
@@ -16,15 +21,18 @@ export async function webappMiddleware(context) {
       }
   });
 
+  const { allowAnonymous } = auth
   const staticState = {
     ...config?.webapp,
     title: config.webapp?.title || 'Home Gallery',
-    disabled: config.webapp?.disabled || [],
+    disabled: [
+      ...(config.webapp?.disabled || []),
+      ...(allowAnonymous ? [] : ['login'])
+    ],
     pluginManager: {
       plugins: pluginEntries
     },
     sources,
-    allowPublic: config.server?.auth?.public?.allow || false,
   }
 
   const staticProperties = {
@@ -32,38 +40,36 @@ export async function webappMiddleware(context) {
     injectRemoteConsole: !!config.server.remoteConsoleToken,
   }
 
-  router.use(async (req, _, next) => {
-    if (!req.webapp) {
-      req.webapp = {}
-    }
+  /**
+   * @param {import('express').Request & {webapp?: any, username?: string, user?: import('./auth/types.js').TUser}} req
+   * @param {import('express').Response} _
+   * @param {import('express').NextFunction} next
+   */
+  const middleware = async (req, _, next) => {
     const entries = await context.database.getFirstEntries(50, req)
 
-    const currentUser = req.username ? {
-      username: req.username,
-      readOnly: req.readOnly || false,
-    } : null
-
-    const userPagesDisabled = req.pages?.disabled || []
-    const staticPagesDisabled = staticState.pages?.disabled || []
-    const mergedPagesDisabled = [...new Set([...staticPagesDisabled, ...userPagesDisabled])]
-    const mergedPages = mergedPagesDisabled.length
-      ? { ...staticState.pages, disabled: mergedPagesDisabled }
-      : staticState.pages
+    const userWebapp = req.user?.webapp || {}
+    const isUser = typeof req.username == 'string' && req.username != '$allow' && req.username != '$anonymou'
 
     req.webapp = {
-      ...req.webapp,
       ...staticProperties,
       state: {
-        ...req.webapp.state,
         ...staticState,
-        disabled: !!req.username ? [...staticState.disabled, 'pwa'] : staticState.disabled,
-        pages: mergedPages,
+        disabled: deepMerge(staticState.disabled, userWebapp.disabled),
+        pages: deepMerge(staticState.pages, userWebapp.pages),
+        format: deepMerge(staticState.format, userWebapp.format),
         entries,
-        currentUser,
-        readOnly: req.readOnly || false,
+        ...(isUser ? {
+          user: {
+            username: req.username,
+            roles: req.user?.roles || []
+          }
+        } : {}),
       }
     }
 
     next()
-  })
+  }
+
+  router.use(middleware)
 }

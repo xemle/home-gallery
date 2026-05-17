@@ -9,12 +9,20 @@ const log = Logger('server.webapp')
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const indexFile = path.join(__dirname, 'public', 'index.html')
 
+/**
+ * @param {import('./types.js').TServerContext} context
+ * @returns
+ */
 export async function webapp(context) {
   const { router } = context
 
   const readHtml = readFileCached(indexFile)
 
-  router.use((req, res) => {
+  /**
+   * @param {import('express').Request & {username?: string, user?: import('./auth/types.js').TUser}} req
+   * @param {import('express').Response} res
+   */
+  const middleware = (req, res) => {
     readHtml()
       .then(html => inject(html, req))
       .then(html => {
@@ -28,9 +36,15 @@ export async function webapp(context) {
         log.error(err, `Could not read index file ${indexFile}: ${err}`)
         return res.status(404).json({error: `${err}`, message: `Failed to read index.html. Please see server logs for details`});
       })
-  })
+  }
+
+  router.use(middleware)
 }
 
+/**
+ * @param {string} html
+ * @param {import('express').Request & {webapp?: any}} req
+ */
 async function inject(html, req) {
   const { basePath, injectRemoteConsole, state } = req.webapp
 
@@ -45,9 +59,14 @@ async function inject(html, req) {
   return html
 }
 
+/**
+ * @param {string} file
+ * @param {number} [refreshMs]
+ * @returns
+ */
 function readFileCached(file, refreshMs = 10 * 1000) {
-  let data = false
-  let lastStatCache = false
+  let data = ''
+  let lastStatCache = ''
   let lastStatTime = 0
 
   return async () => {

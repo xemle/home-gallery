@@ -26,6 +26,7 @@ export const AppRoutes = () => {
       <Route path="/view/:id" element={<MediaView />} />
       <Route path="/share/:id" element={<MediaView />} />
       <Route path="/search/:term" element={<SearchView />} />
+      <Route path="/login" element={<LoginPage />} />
 
       {/* Optional pages routes */}
       {!appConfig.pages?.disabled?.includes('date') && <Route path="/years" element={<Years />} />}
@@ -37,7 +38,6 @@ export const AppRoutes = () => {
       {<Route path="/similar/:id" element={<SimilarView />} />}
       {<Route path="/faces/:id/:faceIndex" element={<FacesView />} />}
 
-      <Route path="/login" element={<LoginPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
