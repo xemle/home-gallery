@@ -1,3 +1,4 @@
+// @ts-nocheck
 import pinoHttp from 'pino-http'
 import logger from '@home-gallery/logger'
 
@@ -7,7 +8,14 @@ export const loggerMiddleware = () => {
   return pinoHttp({
     logger: logger('server.request'),
     serializers: {
-      req: req => req.raw.username ? ({...req, user: req.raw.username}) : req
+      req: req => {
+        const { username, sessionId } = req.raw
+        return {
+          username,
+          sessionId,
+          ...req,
+        }
+      }
     },
     redact: {
       paths: ['req.headers.authorization'],

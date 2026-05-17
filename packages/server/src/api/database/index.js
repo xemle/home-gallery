@@ -33,6 +33,11 @@ export async function databaseApi(context) {
     return {...database, data}
   }
 
+  /**
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   * @returns
+   */
   function send(req, res) {
     if (!database) {
       log.info(`Database file is not loaded yet.`);
@@ -124,5 +129,5 @@ export async function databaseApi(context) {
     },
   }
 
-  router.get('/api/database.json', (req, res) => databaseCache.middleware(req, res, () => send(req, res)))
+  router.get('/api/database.json', databaseCache.middleware, send)
 }

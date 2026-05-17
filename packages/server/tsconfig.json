@@ -3,6 +3,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
+
+    "checkJs": true,
   },
   "include": ["src"],
 }

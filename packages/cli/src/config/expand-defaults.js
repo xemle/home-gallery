@@ -96,7 +96,14 @@ export const expandConfigDefaults = (config, env) => {
     openBrowser: true,
     basePath: '/',
     watchSources: true,
-    ...config.server
+    ...config.server,
+    auth: {
+      ...config.server?.auth,
+      session: {
+        file: '{configDir}/{configPrefix}sessions.json',
+        ...config.server?.auth?.session
+      }
+    },
   }
 
   config.pluginManager = {

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/xemle/home-gallery/master/gallery.config.schema.json#server.auth.session",
+  "description": "Session configuration for cookie-based authentication",
+  "type": "object",
+  "properties": {
+    "file": {
+      "description": "Path to the file storing session data.",
+      "type": "string",
+      "examples": ["sessions.json"],
+      "default": "{configDir}/{configPrefix}sessions.json"
+    },
+    "sessionName": {
+      "description": "Name of the session cookie",
+      "type": "string",
+      "examples": ["SESSIONID"],
+      "default": "SESSIONID"
+    },
+    "maxAge": {
+      "description": "Max age of the session cookie in seconds",
+      "type": "number",
+      "examples": [604800],
+      "default": 604800
+    }
+  }
+}

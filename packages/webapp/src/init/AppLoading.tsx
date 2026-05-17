@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useAppConfig } from "../config/useAppConfig";
+import { AuthUser, useAuthStore } from "../store/auth-store";
 type TAppLoadingProps = {
   isLoading: boolean
   hasError: boolean
@@ -48,10 +49,16 @@ const AppIcon : React.FC<{state: TAppLoadingProps}> = ({state}) => {
 
 export const AppLoading : React.FC<{state: TAppLoadingProps}> = ({state}) => {
   const appConfig = useAppConfig();
+  const authStore = useAuthStore()
 
   useEffect(() => {
     if (appConfig.title) {
       document.title = appConfig.title;
+    }
+    if (appConfig.disabled?.includes('login')) {
+      authStore.init(false, null)
+    } else {
+      authStore.init(true, appConfig.user as AuthUser)
     }
   }, []);
 

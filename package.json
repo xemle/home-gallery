@@ -36,6 +36,7 @@
     "@home-gallery/types": "file:packages/types",
     "@react-leaflet/core": "^3.0.0",
     "@tailwindcss/vite": "^4.1.12",
+    "@types/express": "^5.0.6",
     "@types/glob-to-regexp": "^0.4.4",
     "@types/hammerjs": "^2.0.46",
     "@types/leaflet": "^1.9.20",

@@ -1,66 +1,90 @@
-import { resolveUsers } from '../../auth/user.js'
-import { setSessionCookie, clearSessionCookie, getSessionCookie } from '../../auth/cookies.js'
+import { clearSessionCookie, setSessionCookie } from '../../auth/session/cookies.js'
 
 import Logger from '@home-gallery/logger'
 
+const SESSION_COOKIE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60 // 7 days in seconds
 const log = Logger('server.api.auth')
 
 /**
  * @param {import('../../types.js').TServerContext} context
- * @param {import('../../auth/session-store.js').SessionStore} sessionStore
  */
-export async function authApi(context, sessionStore) {
-  const { config, router } = context
-  const users = config.server?.auth?.users || []
-  const roles = config.server?.auth?.roles || []
-  const resolvedUsers = resolveUsers(users, roles)
-  const userMap = resolvedUsers.reduce((map, u) => { map[u.username] = u; return map }, {})
+export async function authApi(context) {
+  const { config, router, auth } = context
+  const { users, sessionStore } = auth || {}
 
-  router.post('/api/auth/login', (req, res) => {
-    const { username, password } = req.body || {}
+  if (!users['$anonymous']) {
+    log.info(`Anonymous access is disabled, basic authentication is required for all users. Disable /api/auth routes`)
+    return
+  }
 
-    if (!username || !password) {
-      return res.status(400).json({error: 'Username and password are required'})
-    }
+  log.debug(`Enable /api/auth for user authentication`)
 
-    const user = userMap[username]
-    if (!user || !user.testPassword(password)) {
-      log.info(`Failed login attempt for user '${username}' from ${req.ip}`)
-      return res.status(401).json({error: 'Invalid credentials'})
-    }
+  const sessionName = config.server?.auth?.session?.sessionName || 'SESSIONID'
+  const maxAge = config.server?.auth?.session?.maxAge || SESSION_COOKIE_MAX_AGE_SECONDS
 
-    const sessionId = sessionStore.createSession(user.username, user.roles, user.readOnly, user.pages)
-    setSessionCookie(res, sessionId)
-    log.info(`User '${username}' logged in from ${req.ip}`)
+  router.post(
+    '/api/auth/login',
+    async (req, res) => {
+      const { username, password } = req.body || {}
 
-    res.json({username: user.username, roles: user.roles, readOnly: user.readOnly, pages: user.pages})
-  })
-
-  router.post('/api/auth/logout', (req, res) => {
-    const sessionId = getSessionCookie(req)
-    if (sessionId) {
-      const session = sessionStore.getSession(sessionId)
-      if (session) {
-        log.info(`User '${session.username}' logged out from ${req.ip}`)
+      if (!username || !password) {
+        return res.status(401).json({error: 'Invalid credentials'})
       }
-      sessionStore.deleteSession(sessionId)
-    }
-    clearSessionCookie(res)
-    res.json({ok: true})
-  })
 
-  router.get('/api/auth/me', (req, res) => {
-    const sessionId = getSessionCookie(req)
-    if (!sessionId) {
-      return res.status(401).json({error: 'Not authenticated'})
-    }
+      const user = users[username]
+      if (!user || !user.testPassword(password)) {
+        log.info(`Failed login attempt for user '${username}' from ${req.ip}`)
+        return res.status(401).json({error: 'Invalid credentials'})
+      }
 
-    const session = sessionStore.getSession(sessionId)
+      const sessionId = await sessionStore?.createSession(user.username, user.roles)
+      setSessionCookie(res, sessionId, sessionName, maxAge)
+      log.info(`User '${username}' logged in from ${req.ip}`)
+
+      res.json({username: user.username, roles: user.roles})
+    }
+  )
+
+  router.post(
+    '/api/auth/logout',
+    /**
+     * @param {import('express').Request & {sessionId?: string}} req
+     * @param {import('express').Response} res
+     */
+    async (req, res) => {
+      const sessionId = req.sessionId
+      if (sessionId) {
+        const session = await sessionStore.getSession(sessionId)
+        if (session) {
+          log.info(`User '${session.username}' logged out from ${req.ip}`)
+        }
+        await sessionStore.deleteSession(sessionId)
+      }
+      clearSessionCookie(res, sessionName)
+      res.json({ok: true})
+    }
+  )
+
+  router.get(
+    '/api/auth/me',
+    /**
+     * @param {import('express').Request & {sessionId?: string}} req
+     * @param {import('express').Response} res
+     */
+    async (req, res) => {
+      const sessionId = req.sessionId
+      if (!sessionId) {
+        return res.status(401).json({error: 'Not authenticated'})
+      }
+
+    const session = await sessionStore.getSession(sessionId)
     if (!session) {
-      clearSessionCookie(res)
+      clearSessionCookie(res, sessionName)
       return res.status(401).json({error: 'Session expired'})
     }
 
-    res.json({username: session.username, roles: session.roles, readOnly: session.readOnly, pages: session.pages})
+    const user = users[session.username]
+
+    res.json({username: user.username, roles: user.roles})
   })
 }

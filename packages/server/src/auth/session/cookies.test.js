@@ -1,3 +1,4 @@
+// @ts-nocheck
 import t from 'tap'
 import {clearSessionCookie, getSessionCookie, setSessionCookie} from './cookies.js'
 
