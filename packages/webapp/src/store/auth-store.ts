@@ -25,11 +25,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isLoggingIn: false,
 
   init(showLogin, currentUser) {
-    set({ showLogin, currentUser })
+    set(prev => ({ ...prev, showLogin, currentUser }))
   },
 
   async login(username, password) {
-    set({ isLoggingIn: true, loginError: null })
+    set(prev => ({ ...prev, isLoggingIn: true, loginError: null }))
     try {
       const res = await fetch(toAbsoluteUrl('api/auth/login'), {
         method: 'POST',
@@ -38,21 +38,21 @@ export const useAuthStore = create<AuthStore>((set) => ({
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        set({ loginError: data.error || 'Login failed', isLoggingIn: false })
+        set(prev => ({ ...prev, loginError: data.error || 'Login failed', isLoggingIn: false }))
         return
       }
       const user: AuthUser = await res.json()
-      set({ currentUser: user, loginError: null, isLoggingIn: false })
+      set(prev => ({ ...prev, currentUser: user, loginError: null, isLoggingIn: false }))
 
       eventBus.dispatch({type: 'user:login'})
     } catch (e) {
-      set({ loginError: 'Network error', isLoggingIn: false })
+      set(prev => ({ ...prev, loginError: 'Network error', isLoggingIn: false }))
     }
   },
 
   async logout() {
     await fetch(toAbsoluteUrl('api/auth/logout'), { method: 'POST' }).catch(() => {})
-    set({ currentUser: null })
+    set(prev => ({ ...prev, currentUser: null }))
     eventBus.dispatch({type: 'user:logout'})
   },
 }))

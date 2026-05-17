@@ -49,22 +49,20 @@ export async function webappMiddleware(context) {
     const entries = await context.database.getFirstEntries(50, req)
 
     const userWebapp = req.user?.webapp || {}
-    const isUser = typeof req.username == 'string' && req.username != '$allow' && req.username != '$anonymou'
+    const isUser = typeof req.username == 'string' && req.username != '$allow' && req.username != '$anonymous'
 
     req.webapp = {
       ...staticProperties,
       state: {
         ...staticState,
-        disabled: deepMerge(staticState.disabled, userWebapp.disabled),
-        pages: deepMerge(staticState.pages, userWebapp.pages),
-        format: deepMerge(staticState.format, userWebapp.format),
-        entries,
+        ...deepMerge(staticState, req.webapp?.state, userWebapp),
         ...(isUser ? {
           user: {
             username: req.username,
             roles: req.user?.roles || []
           }
         } : {}),
+        entries,
       }
     }
 
