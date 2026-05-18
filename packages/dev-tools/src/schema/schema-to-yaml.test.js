@@ -507,6 +507,35 @@ test('renderYaml()', async t => {
       assert.deepEqual(output.join('\n'), '# *deprecated*\n# default: 3000\n#port: 3000')
     })
 
+    await t.test('Array with objects having required properties are not rendered', async () => {
+      const output = []
+
+
+      renderYaml({
+        type: 'object',
+        properties: {
+          "roles": {
+            description: "List of user roles",
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: {
+                  description: "Role identifier name",
+                  type: 'string',
+                  examples: ['admin', 'user']
+                }
+              },
+              required: ['name']
+            }
+          }
+        }
+      }, output)
+
+
+      assert.deepEqual(output.join('\n'), '# List of user roles\n#roles:\n  # [name property] Role identifier name\n  #\n  # examples:\n  #   * admin\n  #   * user\n  #- name: admin')
+    })
+
   })
 
   await t.test('full', async t => {
