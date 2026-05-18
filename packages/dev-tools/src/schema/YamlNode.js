@@ -13,6 +13,8 @@ export class YamlNode {
   children = []
   /* @type {boolean} */
   required = false
+  /* @type {boolean} */
+  requiredFullPath = false
 
   /**
    * @param {string} name
@@ -46,9 +48,20 @@ export class YamlNode {
 
   setRequired() {
     this.required = true
-    if (this.parent) {
+    if (this.parent && this.parent.isParentRequired()) {
+      this.requiredFullPath = true
       this.parent.setRequired()
     }
+  }
+
+  isParentRequired() {
+    if (!this.parent) {
+      return true
+    }
+    if (this.schema.deprecated || this.schema.type != 'object') {
+      return false
+    }
+    return this.parent.isParentRequired()
   }
 
   /**
@@ -121,7 +134,7 @@ export class YamlNode {
    * @params {boolean} isObjectProperty
    */
   #renderNode(output, isArrayItem, isObjectProperty) {
-    const hash = this.required ? '' : '#'
+    const hash = this.requiredFullPath ? '' : '#'
     const depth = isArrayItem ? Math.max(0, this.depth - 1) : this.depth
     const prefix = isArrayItem ? YamlNode.IDENT.repeat(depth) + hash + '- ' : YamlNode.IDENT.repeat(depth) + hash
 
