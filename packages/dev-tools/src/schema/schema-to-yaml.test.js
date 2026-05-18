@@ -126,6 +126,24 @@ test('renderYaml()', async t => {
 
       assert.deepEqual(output.join('\n'), '# Choose between\n# first option\n#foo: one\n# second option\n#foo: two')
     })
+
+    await t.test('empty properties', async () => {
+      const output = []
+
+
+      renderYaml({
+        type: 'object',
+        properties: {
+          config: {
+            description: 'Configuration object with no defined properties',
+            type: 'object'
+          }
+        }
+      }, output)
+
+
+      assert.deepEqual(output.join('\n'), '# Configuration object with no defined properties\n#config: {}')
+    })
   })
 
   await t.test('array', async t => {
