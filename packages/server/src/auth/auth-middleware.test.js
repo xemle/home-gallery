@@ -19,7 +19,7 @@ const mockSessionStore = {
 t.test('authMiddleware', async t => {
   const {authMiddleware} = await loadAuth(t)
 
-  t.test('whitelisted IP sets ignoreAuth and calls next', async t => {
+  t.test('allow listed IP sets $allow user and calls next', async t => {
     const router = mockRouter()
     const context = {
       config: {
@@ -46,6 +46,70 @@ t.test('authMiddleware', async t => {
     t.end()
   })
 
+  t.test('allow listed IP sets $allow user over anonymous and calls next', async t => {
+    const router = mockRouter()
+    const context = {
+      config: {
+        server: {
+          auth: {
+            rules: [
+              {type: 'allow', value: 'localhost'},
+              {type: 'deny', value: 'all'},
+            ]
+          }
+        }
+      },
+      auth: {
+        allowAnonymous: true,
+        users: {
+          '$allow': {username: '$allow'},
+          '$anonymous': {username: '$anonymous'}
+        },
+      },
+      router
+    }
+    await authMiddleware(context)
+    let called = false
+    const req = {ip: '127.0.0.1', headers: {}}
+    await router.invoke(req, mockRes(), () => { called = true })
+
+    t.equal(req.username, '$allow')
+    t.ok(called)
+    t.end()
+  })
+
+  t.test('deny listed IP sets $anonymous user and calls next', async t => {
+    const router = mockRouter()
+    const context = {
+      config: {
+        server: {
+          auth: {
+            rules: [
+              {type: 'allow', value: 'localhost'},
+              {type: 'deny', value: 'all'},
+            ]
+          }
+        }
+      },
+      auth: {
+        allowAnonymous: true,
+        users: {
+          '$allow': {username: '$allow'},
+          '$anonymous': {username: '$anonymous'}
+        },
+      },
+      router
+    }
+    await authMiddleware(context)
+    let called = false
+    const req = {ip: '192.168.1.1', headers: {}}
+    await router.invoke(req, mockRes(), () => { called = true })
+
+    t.equal(req.username, '$anonymous')
+    t.ok(called)
+    t.end()
+  })
+
   t.test('valid basic auth credentials call next', async t => {
     const router = mockRouter()
     const context = {
@@ -53,6 +117,69 @@ t.test('authMiddleware', async t => {
         server: {
           auth: {
             rules: [{type: 'deny', value: 'all'}],
+            users: [{username: 'alice', password: 'secret'}]
+          }
+        }
+      },
+      router
+    }
+    context.auth = await createAuthContext(context.config)
+    await authMiddleware(context)
+    let called = false
+    const req = {ip: '1.2.3.4', headers: {authorization: 'Basic ' + Buffer.from('alice:secret').toString('base64')}}
+    await router.invoke(req, mockRes(), () => { called = true })
+
+    t.equal(req.username, 'alice')
+    t.ok(called)
+    t.end()
+  })
+
+  t.test('valid basic auth credentials over valid session call next', async t => {
+    const router = mockRouter()
+    const context = {
+      config: {
+        server: {
+          auth: {
+            rules: [{type: 'allow', value: 'all'}],
+            users: [
+              {username: 'alice', password: 'secret'},
+              {username: 'bob', password: 'secret'},
+            ]
+          }
+        }
+      },
+      auth: {
+        allowAnonymous: true,
+        users: {
+          alice: {username: 'alice', roles: ['viewer'], filter: 'tag:photos', testPassword: () => true},
+          bob: {username: 'bob', roles: ['viewer'], filter: 'tag:photos', testPassword: () => true},
+        },
+        sessionStore: {
+          async getSession(id) {
+            return id === 'valid-id' ? {username: 'bob'} : null
+          }
+        }
+      },
+      router
+    }
+    context.auth = await createAuthContext(context.config)
+    await authMiddleware(context)
+    let called = false
+    const req = {ip: '1.2.3.4', headers: {authorization: 'Basic ' + Buffer.from('alice:secret').toString('base64')}, sessionId: 'valid-id'}
+    await router.invoke(req, mockRes(), () => { called = true })
+
+    t.equal(req.username, 'alice')
+    t.ok(called)
+    t.end()
+  })
+
+  t.test('valid basic auth credentials over allow listed IP call next', async t => {
+    const router = mockRouter()
+    const context = {
+      config: {
+        server: {
+          auth: {
+            rules: [{type: 'allow', value: 'all'}],
             users: [{username: 'alice', password: 'secret'}]
           }
         }
@@ -102,6 +229,41 @@ t.test('authMiddleware', async t => {
         server: {
           auth: {
             rules: [{type: 'deny', value: 'all'}],
+          }
+        }
+      },
+      auth: {
+        allowAnonymous: true,
+        users: {
+          alice: {username: 'alice', roles: ['viewer'], filter: 'tag:photos', testPassword: () => true}
+        },
+        sessionStore: {
+          async getSession(id) {
+            return id === 'valid-id' ? {username: 'alice'} : null
+          }
+        }
+      },
+      router,
+    }
+    await authMiddleware(context)
+    let called = false
+    const req = {ip: '1.2.3.4', headers: {}, sessionId: 'valid-id'}
+    await router.invoke(req, mockRes(), () => { called = true })
+
+    t.equal(req.username, 'alice')
+    t.same(req.user.roles, ['viewer'])
+    t.same(req.user.filter, 'tag:photos')
+    t.ok(called)
+    t.end()
+  })
+
+  t.test('valid session cookie populates req over allow listed ip and calls next', async t => {
+    const router = mockRouter()
+    const context = {
+      config: {
+        server: {
+          auth: {
+            rules: [{type: 'allow', value: 'all'}],
           }
         }
       },
