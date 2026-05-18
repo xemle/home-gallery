@@ -240,6 +240,10 @@ server:
           # Flags for this role. See webapp.disabled section for possible values. Disabled features are merged and added for multiple roles
           #disabled:
             #- ...any string
+          # Page settings for this role. See webapp.pages section for possible values. Arrays like disabled or flags are merged and added for multiple roles
+          #pages: {}
+          # Format settings for this role. See webapp.format section for possible values. Arrays like disabled or flags are merged and added for multiple roles
+          #format: {}
         #
         # List of nested role names assigned to this role
         #
