@@ -56,7 +56,8 @@
                 },
                 "examples": [["admin"], ["viewer"]]
               }
-            }
+            },
+            "required": ["username"]
           }
         ]
       }
@@ -68,6 +69,7 @@
         "type": "object",
         "properties": {
           "name": {
+            "description": "Role identifier name. This is used for user role assignment and nested role definitions",
             "type": "string",
             "examples": ["admin", "viewer"]
           },

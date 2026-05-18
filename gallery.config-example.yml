@@ -224,34 +224,26 @@
   # default: '{configDir}/{configPrefix}events.db'
   #file: '{configDir}/{configPrefix}events.db'
 
-server:
+#server:
+  # default: 3000
+  #port: 3000
+  # default: '0.0.0.0'
+  #host: '0.0.0.0'
+  # Optional https certificate key
+  #key: '{configDir}/server.key'
+  # Optional https certificate
+  #cert: '{configDir}/server.crt'
+  # Prefix of application, including basePath of http page
+  #prefix: /gallery
+  # Prefix path for browser only. basePath is Overwritten by prefix
+  # Use this if you use prefix by a http proxy which strips the prefix to / towards the gallery app
+  #basePath: /
+  # The public URL of the gallery instance
+  #publicUrl: 'https://acme.com/gallery'
+  # Open browser when server starts
+  #openBrowser: true
   # Enable users authentication (basic or cookie) or apply IP whitelist rules which require no authentication
-  auth:
-    # Role definitions. Each role can have an optional database filter and webapp config
-    roles:
-      # [name property] examples:
-      #   * admin
-      #   * viewer
-      - name: admin
-        # Role database filter. Role filters are applied with OR for multiple roles and applied with AND to the user filter
-        #filter: 'path~vacation or tag:public'
-        # Webapp overrides for this role
-        #webapp:
-          # Flags for this role. See webapp.disabled section for possible values. Disabled features are merged and added for multiple roles
-          #disabled:
-            #- ...any string
-          # Page settings for this role. See webapp.pages section for possible values. Arrays like disabled or flags are merged and added for multiple roles
-          #pages: {}
-          # Format settings for this role. See webapp.format section for possible values. Arrays like disabled or flags are merged and added for multiple roles
-          #format: {}
-        #
-        # List of nested role names assigned to this role
-        #
-        # examples:
-        #   * ["admin"]
-        #   * ["viewer"]
-        #roles:
-          #- ...any string
+  #auth:
     #public:
       # *deprecated*
       # Deprecated. Use special user `$allow`.
@@ -284,6 +276,33 @@ server:
         #filter: 'year >= 2019 not tag:private'
         #
         # List of role names assigned to this user
+        #
+        # examples:
+        #   * ["admin"]
+        #   * ["viewer"]
+        #roles:
+          #- ...any string
+    # Role definitions. Each role can have an optional database filter and webapp config
+    #roles:
+      # [name property] Role identifier name. This is used for user role assignment and nested role definitions
+      #
+      # examples:
+      #   * admin
+      #   * viewer
+      #- name: admin
+        # Role database filter. Role filters are applied with OR for multiple roles and applied with AND to the user filter
+        #filter: 'path~vacation or tag:public'
+        # Webapp overrides for this role
+        #webapp:
+          # Flags for this role. See webapp.disabled section for possible values. Disabled features are merged and added for multiple roles
+          #disabled:
+            #- ...any string
+          # Page settings for this role. See webapp.pages section for possible values. Arrays like disabled or flags are merged and added for multiple roles
+          #pages: {}
+          # Format settings for this role. See webapp.format section for possible values. Arrays like disabled or flags are merged and added for multiple roles
+          #format: {}
+        #
+        # List of nested role names assigned to this role
         #
         # examples:
         #   * ["admin"]
@@ -330,23 +349,6 @@ server:
       #
       # default: 604800
       #maxAge: 604800
-  # default: 3000
-  #port: 3000
-  # default: '0.0.0.0'
-  #host: '0.0.0.0'
-  # Optional https certificate key
-  #key: '{configDir}/server.key'
-  # Optional https certificate
-  #cert: '{configDir}/server.crt'
-  # Prefix of application, including basePath of http page
-  #prefix: /gallery
-  # Prefix path for browser only. basePath is Overwritten by prefix
-  # Use this if you use prefix by a http proxy which strips the prefix to / towards the gallery app
-  #basePath: /
-  # The public URL of the gallery instance
-  #publicUrl: 'https://acme.com/gallery'
-  # Open browser when server starts
-  #openBrowser: true
   # Import sources on server start
   #
   # default: true
