@@ -2,22 +2,16 @@ const fs = require('fs').promises
 const path = require('path')
 const http = require('http')
 const assert = require('assert')
+const crypto = require('crypto')
 
 const { getEventsFilename } = require('../utils');
 
-const createUUID = () => {
-  return 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'.replace(/x/g, () => {
-    const r = Math.floor((Math.random() * 16))
-    return r < 10 ? String.fromCharCode(48 + r) : String.fromCharCode(87 + r)
-  })
-}
-
 const createUserAction = (tag, id) => {
   return {
-    id: createUUID(),
+    id: crypto.randomUUID().toString(),
     type: 'userAction',
     targetIds: id.split(','),
-    actions: tag.split(',').map(t => { return { action: tag.startsWith('-') ? 'removeTag' : 'addTag', value: tag.replace(/^-/, '') } }),
+    actions: tag.split(',').map(t => ({action: t.startsWith('-') ? 'removeTag' : 'addTag', value: t.replace(/^-/, '')})),
     date: new Date().toISOString()
   }
 }

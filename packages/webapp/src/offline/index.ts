@@ -398,3 +398,22 @@ export function createOfflineDatabase(baseUrl, onEntriesSize = 5000) {
     onRemoveEntries() {}
   }
 }
+
+export const deleteOfflineRoot = (): Promise<void> => {
+  return new Promise((resolve) => {
+    const req = indexedDB.open('gallery')
+    req.onsuccess = () => {
+      const db = req.result
+      if (!db.objectStoreNames.contains('trees')) {
+        db.close()
+        return resolve()
+      }
+      const tx = db.transaction(['trees'], 'readwrite')
+      tx.objectStore('trees').delete('root')
+      tx.oncomplete = () => { db.close(); resolve() }
+      tx.onabort = () => { db.close(); resolve() }
+      tx.onerror = () => { db.close(); resolve() }
+    }
+    req.onerror = () => resolve()
+  })
+}
