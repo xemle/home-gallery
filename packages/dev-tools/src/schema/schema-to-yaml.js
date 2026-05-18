@@ -65,9 +65,9 @@ export function renderYaml(schema, output) {
  * @param {boolean} isArrayItem
  */
 function expandNode(parent, schema, name = '', depth = 0, isArrayItem = false, isObjectProperty = false) {
-  if (schema.type == 'object' && typeof schema.properties == 'object') {
+  if (schema.type == 'object') {
     const object = new YamlNode(parent, schema, name, depth)
-    for (const [key, value] of Object.entries(schema.properties)) {
+    for (const [key, value] of Object.entries(schema.properties || {})) {
       expandNode(object, value, key, depth + (isArrayItem ? 0 : 1), false, true)
     }
     return
