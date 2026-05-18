@@ -9,9 +9,9 @@ export const loggerMiddleware = () => {
     logger: logger('server.request'),
     serializers: {
       req: req => {
-        const { username, sessionId } = req.raw
+        const { username: user, sessionId } = req.raw
         return {
-          username,
+          user,
           sessionId,
           ...req,
         }

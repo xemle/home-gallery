@@ -10,7 +10,7 @@ import { createUserMap } from "./user.js"
  * @returns {Promise<import('./types.js').TAuthContext>}
  */
 export async function createAuthContext(config) {
-  const { auth } = config?.server || {}
+  const auth = config?.server?.auth || {}
 
   const users = createUserMap(auth.users || [], auth.roles || [], auth.public?.filter)
 

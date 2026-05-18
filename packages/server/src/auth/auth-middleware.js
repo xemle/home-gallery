@@ -22,7 +22,7 @@ export const authMiddleware = async (context) => {
   const usernames = Object.keys(auth?.users || {})
   const ordinaryUsernames = usernames.filter(u => u !== '$allow' && u !== '$anonymous')
   if (ordinaryUsernames.length) {
-    log.info(`Enabled authentication for users: ${ordinaryUsernames.join(', ')}`)
+    log.info({users: redact(auth?.users || {})}, `Enabled authentication for users: ${ordinaryUsernames.join(', ')}`)
   }
   if (usernames.includes('$anonymous')) {
     log.info(`Enabled anonymous public access`)
@@ -36,12 +36,6 @@ export const authMiddleware = async (context) => {
    */
   const middleware = async (req, res, next) => {
     const clientIp = req.ip
-    const isAllowListed = isAllowListedIp(allowListRules, clientIp)
-    if (isAllowListed) {
-      req.username = '$allow'
-      req.user = auth.users['$allow']
-      return next()
-    }
 
     // 1. Try Basic auth credentials
     const [username, password] = getCredentials(req)
@@ -70,18 +64,40 @@ export const authMiddleware = async (context) => {
       log.debug(`Invalid or expired session from ip ${clientIp}`)
     }
 
-    // 3. Anonymous access
+    // 3. Check IP from allow list
+    const isAllowListed = isAllowListedIp(allowListRules, clientIp)
+    if (isAllowListed) {
+      req.username = '$allow'
+      req.user = auth.users['$allow']
+      return next()
+    }
+
+    // 4. Anonymous access
     if (auth?.allowAnonymous) {
       req.username = '$anonymous'
       req.user = auth.users['$anonymous']
       return next()
     }
 
-    // 4. Deny
+    // 5. Deny
     log.debug(`Unauthorized access attempt to ${req.path} from ip ${clientIp}`)
     res.set('WWW-Authenticate', 'Basic realm="HomeGallery"')
     res.status(401).json({error: 'Authentication required'})
   }
 
   router.use(middleware)
+}
+
+/**
+ * Redact sensitive information from user objects for logging
+ *
+ * @param {Record<string, import('./types.js').TUser>} users
+ * @returns {Record<string, Omit<import('./types.js').TUser, 'testPassword'>>}
+ */
+function redact(users) {
+  return Object.fromEntries(Object.entries(users)
+    .filter(([username, user]) => {
+      const reductedUser = Object.fromEntries(Object.entries(user).filter(([key]) => key !== 'testPassword'))
+      return [username, reductedUser]
+    }))
 }
