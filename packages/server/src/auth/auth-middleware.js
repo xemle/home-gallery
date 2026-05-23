@@ -64,22 +64,12 @@ export const authMiddleware = async (context) => {
       log.debug(`Invalid or expired session from ip ${clientIp}`)
     }
 
-    // 3. Check IP from allow list
-    const isAllowListed = isAllowListedIp(allowListRules, clientIp)
-    if (isAllowListed) {
-      req.username = '$allow'
-      req.user = auth.users['$allow']
+    // 3. Set default user based on allow-list or anonymous access
+    if (auth.setDefaultUser(req)) {
       return next()
     }
 
-    // 4. Anonymous access
-    if (auth?.allowAnonymous) {
-      req.username = '$anonymous'
-      req.user = auth.users['$anonymous']
-      return next()
-    }
-
-    // 5. Deny
+    // 4. Deny
     log.debug(`Unauthorized access attempt to ${req.path} from ip ${clientIp}`)
     res.set('WWW-Authenticate', 'Basic realm="HomeGallery"')
     res.status(401).json({error: 'Authentication required'})

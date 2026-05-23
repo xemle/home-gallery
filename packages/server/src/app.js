@@ -42,10 +42,9 @@ function shouldCompress (req, res) {
 export async function createApp(context) {
   const { config } = context
   const app = context.app = express();
+  const router = context.router = express.Router()
   app.disable('x-powered-by')
   app.enable('trust proxy')
-
-  const router = context.router = express.Router()
 
   context.auth = await createAuthContext(config)
   createCookieMiddleware(context)

@@ -73,6 +73,10 @@ export default defineConfig(() => {
         // See gallery.config-example.yml for all available options
         disabled: false,
         state: {
+          user: {
+            username: 'cool',
+            roles: ['foo', 'bar']
+          },
           sources: [
             // enable downloadable sources
             //{ indexName: "Camera roll", downloadable: true }

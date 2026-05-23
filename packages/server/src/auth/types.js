@@ -4,7 +4,9 @@
  * @property {boolean} allowAnonymous
  * @property {Record<string, TUser>} users
  * @property {TSessionStore} sessionStore
- *  *
+ * @property {function(import('express').Request): boolean} isAllowListed - Check if the request is allow-listed based on the client's IP address
+ * @property {function(import('express').Request): boolean} setDefaultUser - Set the user in the request based on allow-list or anonymous access, returns true if user was set successfully
+ *
  * @typedef {object} TSessionStore
  * @property {function(string, string[]): Promise<string>} createSession - Create a new session for a given username and roles, returns the session ID
  * @property {function(string): Promise<TSession | null>} getSession - Get session data by session ID, returns null if session does not exist or is expired
