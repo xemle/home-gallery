@@ -12,15 +12,16 @@ export async function authApi(context) {
   const { config, router, auth } = context
   const { users, sessionStore } = auth || {}
 
-  if (!users['$anonymous']) {
+  if (!auth.allowAnonymous) {
     log.info(`Anonymous access is disabled, basic authentication is required for all users. Disable /api/auth routes`)
     return
   }
 
   log.debug(`Enable /api/auth for user authentication`)
 
-  const sessionName = config.server?.auth?.session?.sessionName || 'SESSIONID'
-  const maxAge = config.server?.auth?.session?.maxAge || SESSION_COOKIE_MAX_AGE_SECONDS
+  const sessionConfig = config.server?.auth?.session || {}
+  const sessionName = sessionConfig.sessionName || 'SESSIONID'
+  const maxAge = sessionConfig.maxAge || SESSION_COOKIE_MAX_AGE_SECONDS
 
   router.post(
     '/api/auth/login',
@@ -41,18 +42,25 @@ export async function authApi(context) {
       setSessionCookie(res, sessionId, sessionName, maxAge)
       log.info(`User '${username}' logged in from ${req.ip}`)
 
-      res.json({username: user.username, roles: user.roles})
+      res.json({
+        data: {
+          username: user.username,
+          roles: user.roles,
+          webapp: user.webapp
+        }
+      })
     }
   )
 
   router.post(
     '/api/auth/logout',
     /**
-     * @param {import('express').Request & {sessionId?: string}} req
+     * @param {import('express').Request & {sessionId?: string, user?: import("../../auth/types.js").TUser}} req
      * @param {import('express').Response} res
      */
     async (req, res) => {
       const sessionId = req.sessionId
+      clearSessionCookie(res, sessionName)
       if (sessionId) {
         const session = await sessionStore.getSession(sessionId)
         if (session) {
@@ -60,15 +68,26 @@ export async function authApi(context) {
         }
         await sessionStore.deleteSession(sessionId)
       }
-      clearSessionCookie(res, sessionName)
-      res.json({ok: true})
+      if (!auth.setDefaultUser(req)) {
+        return res.json({ok: true})
+      }
+
+      const user = /** @type {import("../../auth/types.js").TUser} */ (req.user)
+      res.json({
+        ok: true,
+        data: {
+          username: user.username,
+          roles: user.roles,
+          webapp: req.user?.webapp
+        }
+      })
     }
   )
 
   router.get(
     '/api/auth/me',
     /**
-     * @param {import('express').Request & {sessionId?: string}} req
+     * @param {import('express').Request & {sessionId?: string, user?: import("../../auth/types.js").TUser}} req
      * @param {import('express').Response} res
      */
     async (req, res) => {
@@ -78,13 +97,18 @@ export async function authApi(context) {
       }
 
     const session = await sessionStore.getSession(sessionId)
-    if (!session) {
+    if (!session || !auth.users[session.username]) {
       clearSessionCookie(res, sessionName)
-      return res.status(401).json({error: 'Session expired'})
+      return res.status(401).json({error: 'Invalid session'})
     }
-
-    const user = users[session.username]
-
-    res.json({username: user.username, roles: user.roles})
+    
+    const user = auth.users[session.username]
+    res.json({
+      data: {
+        username: user.username,
+        roles: user.roles,
+        webapp: user.webapp
+      }
+    })
   })
 }

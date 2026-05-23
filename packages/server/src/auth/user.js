@@ -64,7 +64,7 @@ export const createUserMap = (users, roles = [], deprecatedPublicFilter = '') =>
     return map
   }, /** @type {Record<string, import('./types.js').TRoleConfig>} */ ({}))
 
-  const usersMap = users.map(toUserObject).reduce((map, user) => {
+  const usersMap = users.map(toUserObject).filter(u => !!u).reduce((map, user) => {
     map[user.username] = {
       username: user.username,
       testPassword: getTestPassword(user.password),
@@ -91,7 +91,7 @@ export const createUserMap = (users, roles = [], deprecatedPublicFilter = '') =>
 /**
  *
  * @param {import('./types.js').TUserConfig} user
- * @returns {import('./types.js').TUserConfigObject}
+ * @returns {import('./types.js').TUserConfigObject | false} user object with username and password properties, or false if the input is invalid
  */
 function toUserObject(user) {
   if (typeof user === 'string') {
@@ -107,6 +107,12 @@ function toUserObject(user) {
       password: user.substring(pos + 1)
     }
   }
+
+  // allow only objects
+  if (typeof user !== 'object' || typeof user.username != 'string') {
+    return false
+  }
+
   return user
 }
 

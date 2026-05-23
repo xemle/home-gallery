@@ -29,13 +29,9 @@ t.test('authMiddleware', async t => {
           }
         }
       },
-      auth: {
-        users: {
-          '$allow': {username: '$allow'}
-        },
-      },
       router
     }
+    context.auth = await createAuthContext(context.config)
     await authMiddleware(context)
     let called = false
     const req = {ip: '1.2.3.4', headers: {}}
@@ -52,6 +48,9 @@ t.test('authMiddleware', async t => {
       config: {
         server: {
           auth: {
+            users: [
+              '$anonymous'
+            ],
             rules: [
               {type: 'allow', value: 'localhost'},
               {type: 'deny', value: 'all'},
@@ -59,15 +58,9 @@ t.test('authMiddleware', async t => {
           }
         }
       },
-      auth: {
-        allowAnonymous: true,
-        users: {
-          '$allow': {username: '$allow'},
-          '$anonymous': {username: '$anonymous'}
-        },
-      },
       router
     }
+    context.auth = await createAuthContext(context.config)
     await authMiddleware(context)
     let called = false
     const req = {ip: '127.0.0.1', headers: {}}
@@ -84,6 +77,9 @@ t.test('authMiddleware', async t => {
       config: {
         server: {
           auth: {
+            users: [
+              '$anonymous',
+            ],
             rules: [
               {type: 'allow', value: 'localhost'},
               {type: 'deny', value: 'all'},
@@ -91,15 +87,9 @@ t.test('authMiddleware', async t => {
           }
         }
       },
-      auth: {
-        allowAnonymous: true,
-        users: {
-          '$allow': {username: '$allow'},
-          '$anonymous': {username: '$anonymous'}
-        },
-      },
       router
     }
+    context.auth = await createAuthContext(context.config)
     await authMiddleware(context)
     let called = false
     const req = {ip: '192.168.1.1', headers: {}}
@@ -148,21 +138,14 @@ t.test('authMiddleware', async t => {
           }
         }
       },
-      auth: {
-        allowAnonymous: true,
-        users: {
-          alice: {username: 'alice', roles: ['viewer'], filter: 'tag:photos', testPassword: () => true},
-          bob: {username: 'bob', roles: ['viewer'], filter: 'tag:photos', testPassword: () => true},
-        },
-        sessionStore: {
-          async getSession(id) {
-            return id === 'valid-id' ? {username: 'bob'} : null
-          }
-        }
-      },
       router
     }
     context.auth = await createAuthContext(context.config)
+    context.auth.sessionStore = {
+      async getSession(id) {
+        return id === 'valid-id' ? {username: 'bob'} : null
+      }
+    }
     await authMiddleware(context)
     let called = false
     const req = {ip: '1.2.3.4', headers: {authorization: 'Basic ' + Buffer.from('alice:secret').toString('base64')}, sessionId: 'valid-id'}
@@ -263,22 +246,24 @@ t.test('authMiddleware', async t => {
       config: {
         server: {
           auth: {
+            users: [
+              '$anonymous',
+              {username: 'alice', password: 'secret', roles: ['viewer']}
+            ],
+            roles: [
+              {name: 'viewer', filter: 'tag:photos'},
+            ],
             rules: [{type: 'allow', value: 'all'}],
           }
         }
       },
-      auth: {
-        allowAnonymous: true,
-        users: {
-          alice: {username: 'alice', roles: ['viewer'], filter: 'tag:photos', testPassword: () => true}
-        },
-        sessionStore: {
-          async getSession(id) {
-            return id === 'valid-id' ? {username: 'alice'} : null
-          }
-        }
-      },
       router,
+    }
+    context.auth = await createAuthContext(context.config)
+    context.auth.sessionStore =  {
+      async getSession(id) {
+        return id === 'valid-id' ? {username: 'alice'} : null
+      }
     }
     await authMiddleware(context)
     let called = false
@@ -302,17 +287,13 @@ t.test('authMiddleware', async t => {
           }
         }
       },
-      auth: {
-        allowAnonymous: false,
-        users: {
-        },
-        sessionStore: {
-          async getSession(id) {
-            return id === 'valid-id' ? {username: 'alice'} : null
-          }
-        }
-      },
       router,
+    }
+    context.auth = await createAuthContext(context.config)
+    context.auth.sessionStore = {
+      async getSession(id) {
+        return id === 'valid-id' ? {username: 'alice'} : null
+      }
     }
     await authMiddleware(context)
     let called = false
@@ -326,24 +307,21 @@ t.test('authMiddleware', async t => {
     t.end()
   })
 
-  t.test('no auth with anonymous access calls next with public filter', async t => {
+  t.test('th anonymous access calls next with public filter', async t => {
     const router = mockRouter()
     const context = {
       config: {
         server: {
           auth: {
+            users: [{username: '$anonymous', roles: ['public']}],
+            roles: [{name: 'public', filter: 'tag:public'}],
             rules: [{type: 'deny', value: 'all'}]
           }
         }
       },
-      auth: {
-        allowAnonymous: true,
-        users: {
-          '$anonymous': {username: '$anonymous', roles: ['public'], filter: 'tag:public', testPassword: () => false}
-        },
-      },
       router,
     }
+    context.auth = await createAuthContext(context.config)
     await authMiddleware(context)
     let called = false
     const req = {ip: '1.2.3.4', headers: {}}
@@ -356,7 +334,7 @@ t.test('authMiddleware', async t => {
     t.end()
   })
 
-  t.test('no auth without anonymous access returns 401', async t => {
+  t.test('thout anonymous access returns 401', async t => {
     const router = mockRouter()
     const context = {
       config: {
@@ -366,12 +344,9 @@ t.test('authMiddleware', async t => {
           }
         }
       },
-      auth: {
-        users: {
-        }
-      },
       router,
     }
+    context.auth = await createAuthContext(context.config)
     await authMiddleware(context)
     let called = false
     const req = {ip: '1.2.3.4', headers: {}}

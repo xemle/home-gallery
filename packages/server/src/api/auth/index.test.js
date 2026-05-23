@@ -2,14 +2,25 @@
 import t from 'tap'
 import {getLogMessages, loggerMock, mockRes, mockRouter} from "../../utils/test-utils.js";
 import { get } from 'node:http';
+import { createAuthContext } from '../../auth/auth-context.js';
+import { userInfo } from 'node:os';
 
 const loadAuthApi = t => t.mockImport('./index.js', {...loggerMock()})
 
 const config = {
   server: {
     auth: {
-      users: [{username: 'alice', password: 'secret'}],
-      roles: []
+      users: [
+        '$anonymous',
+        {username: 'alice', password: 'secret', roles: ['admin']}
+      ],
+      roles: [
+        {name: 'admin', filter: 'tag:private'}
+      ],
+      rules: [
+        {type: 'allow', value: 'localhost'},
+        {type: 'deny', value: 'all'}
+      ]
     }
   }
 }
@@ -19,14 +30,12 @@ t.test('POST /api/auth/login', async t => {
 
   t.test('missing username or password returns 401', async t => {
     const router = mockRouter()
-    const auth = {
-      users: {
-        $anonymous: {username: '$anonymous', testPassword: () => false, roles: []},
-        alice: {username: 'alice', testPassword: p => p === 'secret', roles: []},
-      },
-      sessionStore: {}
+    const context = {
+      config,
+      router
     }
-    await authApi({config, router, auth})
+    context.auth = await createAuthContext(context.config)
+    await authApi(context)
 
     const res = mockRes()
     await router.invoke({method: 'POST', path: '/api/auth/login', ip: '127.0.0.1', body: {username: 'alice'}}, res)
@@ -38,14 +47,12 @@ t.test('POST /api/auth/login', async t => {
 
   t.test('wrong password returns 401', async t => {
     const router = mockRouter()
-    const auth = {
-      users: {
-        $anonymous: {username: '$anonymous', testPassword: () => false, roles: []},
-        alice: {username: 'alice', testPassword: p => p === 'secret', roles: []},
-      },
-      sessionStore: {}
+    const context = {
+      config,
+      router
     }
-    await authApi({config, router, auth})
+    context.auth = await createAuthContext(context.config)
+    await authApi(context)
 
     const res = mockRes()
     await router.invoke({method: 'POST', path: '/api/auth/login', ip: '127.0.0.1', body: {username: 'alice', password: 'wrong'}}, res)
@@ -57,14 +64,12 @@ t.test('POST /api/auth/login', async t => {
 
   t.test('unknown user returns 401', async t => {
     const router = mockRouter()
-    const auth = {
-      users: {
-        $anonymous: {username: '$anonymous', testPassword: () => false, roles: []},
-        alice: {username: 'alice', testPassword: p => p === 'secret', roles: []},
-      },
-      sessionStore: {}
+    const context = {
+      config,
+      router
     }
-    await authApi({config, router, auth})
+    context.auth = await createAuthContext(context.config)
+    await authApi(context)
 
     const res = mockRes()
     await router.invoke({method: 'POST', path: '/api/auth/login', ip: '127.0.0.1', body: {username: 'unknown', password: 'x'}}, res)
@@ -75,29 +80,29 @@ t.test('POST /api/auth/login', async t => {
 
   t.test('valid credentials creates session, sets cookie, returns user info', async t => {
     const router = mockRouter()
-    let createdSession = null
-    const auth = {
-      users: {
-        $anonymous: {username: '$anonymous', testPassword: () => false, roles: []},
-        alice: {username: 'alice', testPassword: p => p === 'secret', roles: []},
-      },
-      sessionStore: {
-        async createSession(username, roles) {
-          createdSession = {username, roles}
-          return 'new-session-id'
-        }
+    const sessions = {}
+    const context = {
+      config,
+      router
+    }
+    context.auth = await createAuthContext(context.config)
+    context.auth.sessionStore = {
+      async createSession(username) {
+        const sessionId = 'new-session-id'
+        sessions[sessionId] = {username}
+        return sessionId
       }
     }
-    await authApi({config, router, auth})
+    await authApi(context)
 
     const res = mockRes()
     await router.invoke({method: 'POST', path: '/api/auth/login', ip: '127.0.0.1', body: {username: 'alice', password: 'secret'}}, res)
 
     t.equal(res._status, 200)
-    t.equal(res._body.username, 'alice')
+    t.equal(res._body.data?.username, 'alice')
     t.ok(res._setCookies.find(v => v.includes('new-session-id')))
-    t.ok(createdSession)
-    t.equal(createdSession.username, 'alice')
+    t.ok(sessions['new-session-id'])
+    t.equal(sessions['new-session-id'].username, 'alice')
     t.end()
   })
 
@@ -107,32 +112,75 @@ t.test('POST /api/auth/login', async t => {
 t.test('POST /api/auth/logout', async t => {
   const {authApi} = await loadAuthApi(t)
 
-  t.test('deletes session and clears cookie', async t => {
+  t.test('deletes session, clears cookie returns $allow user', async t => {
     const router = mockRouter()
     const sessions = {
       'sid-1': {username: 'alice'}
     }
-    const auth = {
-      users: {
-        $anonymous: {username: '$anonymous', testPassword: () => false, roles: []},
-        alice: {username: 'alice', testPassword: p => p === 'secret', roles: []},
+    const context = {
+      config,
+      router
+    }
+    context.auth = await createAuthContext(context.config)
+    context.auth.sessionStore = {
+      async getSession(id) {
+        return sessions[id] || null
       },
-      sessionStore: {
-        async getSession(id) {
-          return sessions[id] || null
-        },
-        async deleteSession(id) {
-          delete sessions[id]
-        }
+      async deleteSession(id) {
+        delete sessions[id]
       }
     }
-    await authApi({config, router, auth})
+    await authApi(context)
 
     const res = mockRes()
     await router.invoke({method: 'POST', path: '/api/auth/logout', ip: '127.0.0.1', headers: {}, sessionId: 'sid-1'}, res)
 
     t.equal(res._status, 200)
-    t.same(res._body, {ok: true})
+    t.same(res._body, {
+      ok: true,
+      data: {
+        username: '$allow',
+        roles: [],
+        webapp: {}
+      }
+    })
+    t.notOk(sessions['sid-1'])
+    t.ok(res._setCookies.find(v => v.includes('Max-Age=0')))
+    t.end()
+  })
+
+  t.test('deletes session, clears cookie returns $anonymous user', async t => {
+    const router = mockRouter()
+    const sessions = {
+      'sid-1': {username: 'alice'}
+    }
+    const context = {
+      config,
+      router
+    }
+    context.auth = await createAuthContext(context.config)
+    context.auth.sessionStore = {
+      async getSession(id) {
+        return sessions[id] || null
+      },
+      async deleteSession(id) {
+        delete sessions[id]
+      }
+    }
+    await authApi(context)
+
+    const res = mockRes()
+    await router.invoke({method: 'POST', path: '/api/auth/logout', ip: '1.1.1.1', headers: {}, sessionId: 'sid-1'}, res)
+
+    t.equal(res._status, 200)
+    t.same(res._body, {
+      ok: true,
+      data: {
+        username: '$anonymous',
+        roles: [],
+        webapp: {}
+      }
+    })
     t.notOk(sessions['sid-1'])
     t.ok(res._setCookies.find(v => v.includes('Max-Age=0')))
     t.end()
@@ -140,18 +188,34 @@ t.test('POST /api/auth/logout', async t => {
 
   t.test('no cookie is a graceful no-op', async t => {
     const router = mockRouter()
-    const auth = {
-      users: {
-        $anonymous: {username: '$anonymous', testPassword: () => false, roles: []}
-      },
+    const sessions = {}
+    const context = {
+      config,
+      router
     }
-    await authApi({config, router, auth})
+    context.auth = await createAuthContext(context.config)
+    context.auth.sessionStore = {
+      async getSession(id) {
+        return sessions[id] || null
+      },
+      async deleteSession(id) {
+        delete sessions[id]
+      }
+    }
+    await authApi(context)
 
     const res = mockRes()
     await router.invoke({method: 'POST', path: '/api/auth/logout', ip: '127.0.0.1', headers: {}}, res)
 
     t.equal(res._status, 200)
-    t.same(res._body, {ok: true})
+    t.same(res._body, {
+      ok: true,
+      data: {
+        username: '$allow',
+        roles: [],
+        webapp: {}
+      }
+    })
     t.end()
   })
 
@@ -163,12 +227,12 @@ t.test('GET /api/auth/me', async t => {
 
   t.test('no cookie returns 401', async t => {
     const router = mockRouter()
-    const auth = {
-      users: {
-        $anonymous: {username: '$anonymous', testPassword: () => false, roles: []}
-      }
+    const context = {
+      config,
+      router
     }
-    await authApi({config, router, auth})
+    context.auth = await createAuthContext(context.config)
+    await authApi(context)
 
     const res = mockRes()
     await router.invoke({path: '/api/auth/me', headers: {}}, res)
@@ -179,53 +243,80 @@ t.test('GET /api/auth/me', async t => {
   t.test('invalid session returns 401 and clears cookie', async t => {
     const router = mockRouter()
     const sessions = {
-      'sid-1': {username: 'alice'}
+      'good-session': {username: 'alice'}
     }
-    const auth = {
-      users: {
-        $anonymous: {username: '$anonymous', testPassword: () => false, roles: []},
-        alice: {username: 'alice', testPassword: p => p === 'secret', roles: []},
-      },
-      sessionStore: {
-        async getSession(id) {
-          return sessions[id] || null
-        },
-        async deleteSession(id) {
-          delete sessions[id]
-        }
+    const context = {
+      config,
+      router
+    }
+    context.auth = await createAuthContext(context.config)
+    context.auth.sessionStore = {
+      async getSession(id) {
+        return sessions[id] || null
       }
     }
-    await authApi({config, router, auth})
+    await authApi(context)
 
     const res = mockRes()
     await router.invoke({path: '/api/auth/me', headers: {}, sessionId: 'bad'}, res)
 
     t.equal(res._status, 401)
-    t.match(res._body, {error: /expired/i})
+    t.match(res._body, {error: /Invalid session/i})
     t.ok(res._setCookies.find(v => v.includes('Max-Age=0')))
+  })
+
+  t.test('valid session returns 401 for unknown user', async t => {
+    const router = mockRouter()
+    const sessions = {
+      'good-session': {username: 'unknown'}
+    }
+    const context = {
+      config,
+      router
+    }
+    context.auth = await createAuthContext(context.config)
+    context.auth.sessionStore = {
+      async getSession(id) {
+        return sessions[id] || null
+      }
+    }
+    await authApi(context)
+
+    const res = mockRes()
+    await router.invoke({path: '/api/auth/me', headers: {}, sessionId: 'good-session'}, res)
+
+    t.equal(res._status, 401)
+    t.match(res._body, {error: /Invalid session/i})
   })
 
   t.test('valid session returns user data', async t => {
     const router = mockRouter()
-    const auth = {
-      users: {
-        $anonymous: {username: '$anonymous', testPassword: () => false, roles: []},
-        alice: {username: 'alice', testPassword: p => p === 'secret', roles: ['admin']},
-      },
-      sessionStore: {
-        async getSession(id) {
-          return id === 'good-session' ? {username: 'alice'} : null
-        }
+    const sessions = {
+      'good-session': {username: 'alice'}
+    }
+    const context = {
+      config,
+      router
+    }
+    context.auth = await createAuthContext(context.config)
+    context.auth.sessionStore = {
+      async getSession(id) {
+        return sessions[id] || null
       }
     }
-    await authApi({config, router, auth})
+    await authApi(context)
 
     const res = mockRes()
     await router.invoke({path: '/api/auth/me', headers: {}, sessionId: 'good-session'}, res)
 
     t.equal(res._status, 200)
-    t.equal(res._body.username, 'alice')
-    t.same(res._body.roles, ['admin'])
+    t.same(res._body, {
+      data: {
+        username: 'alice',
+        roles: ['admin'],
+        webapp: {}
+      }
+    })
   })
 
   t.end()
