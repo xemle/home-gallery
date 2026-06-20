@@ -161,7 +161,7 @@ t.test('$allow user has deprecated public filter', t => {
   const publicFilter = 'tag:photos'
 
 
-  const userMap = createUserMap(users, roles, publicFilter)
+  const userMap = createUserMap(users, roles, {}, publicFilter)
 
 
   t.same(userMap['$allow'].filter, 'tag:photos')
@@ -174,7 +174,7 @@ t.test('$allow user has dedicated filter', t => {
   const publicFilter = 'tag:photos'
 
 
-  const userMap = createUserMap(users, roles, publicFilter)
+  const userMap = createUserMap(users, roles, {}, publicFilter)
 
 
   t.same(userMap['$allow'].filter, 'tag:videos')

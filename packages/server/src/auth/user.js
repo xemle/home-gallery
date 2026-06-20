@@ -55,10 +55,11 @@ const getTestPassword = password => {
  *
  * @param {import('./types.js').TUserConfig[]} users - The list of user definitions from the config
  * @param {import('./types.js').TRoleConfig[]} roles - The list of role definitions from the config
+ * @param {import('./types.js').TUserWebapp} configWebapp - The webapp configuration
  * @param {string} deprecatedPublicFilter - Deprecated. The filter for the public user, used if `$allow` user is not defined
  * @returns {Record<string, import('./types.js').TUser>} Map of username to user object
  */
-export const createUserMap = (users, roles = [], deprecatedPublicFilter = '') => {
+export const createUserMap = (users, roles = [], configWebapp = {}, deprecatedPublicFilter = '') => {
   const rolesMap = roles.reduce((map, role) => {
     map[role.name] = role
     return map
@@ -70,18 +71,19 @@ export const createUserMap = (users, roles = [], deprecatedPublicFilter = '') =>
       testPassword: getTestPassword(user.password),
       filter: resolveEffectiveFilter(user, rolesMap),
       roles: resolveUserRoles(user, rolesMap),
-      webapp: resolveEffectiveWebapp(user, rolesMap),
+      webapp: resolveEffectiveWebapp(user, rolesMap, configWebapp),
     }
     return map
   }, /** @type {Record<string, import('./types.js').TUser>} */ ({}))
 
+  // Add required system user $allow if not defined
   if (!usersMap['$allow']) {
     usersMap['$allow'] = {
       username: '$allow',
       testPassword: () => false,
       filter: deprecatedPublicFilter || '',
       roles: [],
-      webapp: {},
+      webapp: configWebapp,
     }
   }
 
@@ -172,12 +174,13 @@ function resolveUserRoles(user, rolesMap) {
 /**
  * @param {import('./types.js').TUserConfig} user
  * @param {Record<string, import('./types.js').TRoleConfig>} rolesMap
+ * @param {import('./types.js').TUserWebapp} configWebapp
  * @returns {Object} Effective webapp configuration for the user
  */
-function resolveEffectiveWebapp(user, rolesMap) {
+function resolveEffectiveWebapp(user, rolesMap, configWebapp) {
   return resolveUserRoles(user, rolesMap)
     .map(name => rolesMap[name])
     .filter(role => !!role?.webapp)
-    .reduce((webapp, role) => deepMerge(webapp, role.webapp), {})
+    .reduce((webapp, role) => deepMerge(webapp, role.webapp), configWebapp)
 }
 

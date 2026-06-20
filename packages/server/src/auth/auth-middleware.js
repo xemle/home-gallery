@@ -64,7 +64,7 @@ export const authMiddleware = async (context) => {
       log.debug(`Invalid or expired session from ip ${clientIp}`)
     }
 
-    // 3. Set default user based on allow-list or anonymous access
+    // 3. Set system user based on allow-list or anonymous access
     if (auth.setDefaultUser(req)) {
       return next()
     }

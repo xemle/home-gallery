@@ -12,8 +12,9 @@ import { createUserMap } from "./user.js"
  */
 export async function createAuthContext(config) {
   const auth = config?.server?.auth || {}
+  const webapp = config?.webapp || {}
 
-  const users = createUserMap(auth.users || [], auth.roles || [], auth.public?.filter)
+  const users = createUserMap(auth.users || [], auth.roles || [], webapp, auth.public?.filter)
   const allowListRules = rules2AllowListRules(auth.rules || [])
 
   const sessionFile = auth?.session?.file
@@ -23,6 +24,10 @@ export async function createAuthContext(config) {
   const usernames = Object.keys(users)
   const hasUsers = usernames.filter(name => name != '$allow' && name != '$anonymous').length > 0
   const allowAnonymous = usernames.filter(name => name == '$anonymous').length > 0
+
+  if (hasUsers && !allowAnonymous) {
+    webappDisableLogin(users)
+  }
 
   /**
    * @param {import('express').Request} req
@@ -61,4 +66,18 @@ export async function createAuthContext(config) {
   }
 
   return authContext
+}
+
+/**
+ * Add login flag to users disabled list
+ *
+ * @param {Record<string, import("./types.js").TUser>} users
+ */
+function webappDisableLogin(users) {
+  Object.values(users).forEach(user => {
+    user.webapp = {
+      ...user.webapp,
+      disabled: [...new Set(...(user.webapp?.disabled || []), 'login')]
+    }
+  })
 }

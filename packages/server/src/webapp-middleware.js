@@ -7,7 +7,7 @@ import { deepMerge } from './utils/deep-merge.js';
  * @param {import('./types.js').TServerContext} context
  */
 export async function webappMiddleware(context) {
-  const { config, pluginManager, router, auth } = context
+  const { config, pluginManager, router } = context
 
   const plugins = pluginManager.getBrowserPlugins().plugins
   const pluginEntries = plugins.map(p => '/plugins/' + p.publicEntry)
@@ -21,14 +21,8 @@ export async function webappMiddleware(context) {
       }
   });
 
-  const { allowAnonymous } = auth
   const staticState = {
-    ...config?.webapp,
     title: config.webapp?.title || 'Home Gallery',
-    disabled: [
-      ...(config.webapp?.disabled || []),
-      ...(allowAnonymous ? [] : ['login'])
-    ],
     pluginManager: {
       plugins: pluginEntries
     },
@@ -48,20 +42,15 @@ export async function webappMiddleware(context) {
   const middleware = async (req, _, next) => {
     const entries = await context.database.getFirstEntries(50, req)
 
-    const userWebapp = req.user?.webapp || {}
-    const isUser = typeof req.username == 'string' && req.username != '$allow' && req.username != '$anonymous'
-
     req.webapp = {
       ...staticProperties,
       state: {
+        ...deepMerge(req.webapp?.state, req.user?.webapp),
         ...staticState,
-        ...deepMerge(staticState, req.webapp?.state, userWebapp),
-        ...(isUser ? {
-          user: {
-            username: req.username,
-            roles: req.user?.roles || []
-          }
-        } : {}),
+        user: {
+          username: req.user?.username || 'gallery',
+          roles: req.user?.roles || [],
+        },
         entries,
       }
     }
