@@ -62,7 +62,7 @@ export const isAllowListedIp = (rules, ip) => {
       return rule.type == 'allow'
     }
   }
-  return true
+  return false
 }
 
 /**

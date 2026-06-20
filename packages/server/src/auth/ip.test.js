@@ -57,3 +57,10 @@ t.test('Allow default local network', t => {
   t.equal(isAllowListedIp(rules, '128.0.0.1'), false)
   t.end()
 })
+
+t.test('Deny on fallback', t => {
+  const rules = rules2AllowListRules([{type: 'allow', value: '192.168.0.1'}])
+  t.equal(isAllowListedIp(rules, '192.168.0.1'), true)
+  t.equal(isAllowListedIp(rules, '192.168.0.2'), false)
+  t.end()
+})
