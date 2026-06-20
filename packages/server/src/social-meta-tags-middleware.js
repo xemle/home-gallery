@@ -69,8 +69,8 @@ function injectSocialMetaTags(req, res, config, entry) {
     `<meta property="og:title" content="${title}">`,
     `<meta property="og:description" content="${description}">`,
     `<meta property="og:image" content="${previewUrl}"/>`,
-    `<meta property="og:image:width" content="${entry.height}">`,
-    `<meta property="og:image:height" content="${entry.width}"/>`,
+    `<meta property="og:image:width" content="${+entry.width}">`,
+    `<meta property="og:image:height" content="${+entry.height}"/>`,
     `<meta property="og:url" content="${publicUrl}/share/${entry.id.substring(0, 7)}"/>`,
   ].map(m => '  ' + m).join('\n') + '\n'
 
