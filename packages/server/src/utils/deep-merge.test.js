@@ -57,6 +57,10 @@ t.test('merge with scalar', async t => {
     t.equal(deepMerge('foo', 3), 3)
     t.equal(deepMerge('foo', 'bar'), 'bar')
   })
+  t.test('null as scalar', async t => {
+    const merged = deepMerge('foo', null)
+    t.equal(merged, null)
+  })
 })
 
 t.test('merge multiple', async t => {
