@@ -66,8 +66,8 @@ function injectSocialMetaTags(req, res, config, entry) {
   const metaTags = [
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta property="og:type" content="article">`,
-    `<meta property="og:title" content="${title}">`,
-    `<meta property="og:description" content="${description}">`,
+    `<meta property="og:title" content="${htmlEscape(title)}">`,
+    `<meta property="og:description" content="${htmlEscape(description)}">`,
     `<meta property="og:image" content="${previewUrl}"/>`,
     `<meta property="og:image:width" content="${+entry.width}">`,
     `<meta property="og:image:height" content="${+entry.height}"/>`,
@@ -108,4 +108,22 @@ function disableFeatures(req, _, next) {
   }
 
   next()
+}
+
+/**
+ * Escapes test with HTML enties
+ *
+ * @param {string} text
+ */
+function htmlEscape(text) {
+  return text.replace(/[&<>"']/g, c => {
+    switch (c) {
+      case '&': return '&amp;'
+      case '<': return '&lt;'
+      case '>': return '&gt;'
+      case '"': return '&quot;'
+      case "'": return '&apos;'
+      default: return c;
+    }
+  })
 }
