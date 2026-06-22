@@ -141,7 +141,11 @@ t.test('POST /api/auth/logout', async t => {
       data: {
         username: '$allow',
         roles: [],
-        webapp: {}
+        webapp: {
+          disabled: [],
+          pages: {},
+          format: {}
+        }
       }
     })
     t.notOk(sessions['sid-1'])
@@ -178,7 +182,11 @@ t.test('POST /api/auth/logout', async t => {
       data: {
         username: '$anonymous',
         roles: [],
-        webapp: {}
+        webapp: {
+          disabled: [],
+          pages: {},
+          format: {}
+        }
       }
     })
     t.notOk(sessions['sid-1'])
@@ -213,7 +221,11 @@ t.test('POST /api/auth/logout', async t => {
       data: {
         username: '$allow',
         roles: [],
-        webapp: {}
+        webapp: {
+          disabled: [],
+          pages: {},
+          format: {}
+        }
       }
     })
     t.end()
@@ -314,7 +326,11 @@ t.test('GET /api/auth/me', async t => {
       data: {
         username: 'alice',
         roles: ['admin'],
-        webapp: {}
+        webapp: {
+          disabled: [],
+          pages: {},
+          format: {}
+        }
       }
     })
   })

@@ -5,6 +5,15 @@ import { createSessionStore } from "./session/session-store.js"
 import { createUserMap } from "./user.js"
 
 /**
+ * Ensure default properties for webapp config
+ */
+const defaultWebapp = {
+  disabled: [],
+  pages: {},
+  format: {}
+}
+
+/**
  * Create the authentication context based on the provided configuration
  *
  * @param {any} config
@@ -12,7 +21,7 @@ import { createUserMap } from "./user.js"
  */
 export async function createAuthContext(config) {
   const auth = config?.server?.auth || {}
-  const webapp = config?.webapp || {}
+  const webapp = {...defaultWebapp, ...(config?.webapp || {})}
 
   const users = createUserMap(auth.users || [], auth.roles || [], webapp, auth.public?.filter)
   const allowListRules = rules2AllowListRules(auth.rules || [])
