@@ -35,7 +35,7 @@
     "watch:test": "tap repl w"
   },
   "dependencies": {
-    "caxa": "^1.0.0",
+    "caxa": "^3.0.1",
     "glob-to-regexp": "^0.4.1",
     "picomatch": "^4.0.2",
     "pino": "^9.9.5",
