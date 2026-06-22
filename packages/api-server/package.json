@@ -24,7 +24,7 @@
   "dependencies": {
     "@tensorflow-models/coco-ssd": "2.2.2",
     "@tensorflow-models/mobilenet": "2.1.0",
-    "@tensorflow/tfjs": "3.21.0",
+    "@tensorflow/tfjs": "4.22.0",
     "@tensorflow/tfjs-backend-cpu": "3.21.0",
     "@tensorflow/tfjs-backend-wasm": "3.21.0",
     "@tensorflow/tfjs-converter": "3.21.0",
