@@ -1,10 +1,13 @@
 import { create } from 'zustand';
 import { eventBus } from '../api/ApiService';
+import { AppConfig } from '../config/AppConfig';
 import { toAbsoluteUrl } from '../utils/toAbsoluteUrl';
+import { useConfigStore } from '../config/config-store';
 
 export interface AuthUser {
   username: string
   roles: string[]
+  webapp: Pick<AppConfig, 'disabled' | 'pages' | 'format'>
 }
 
 interface AuthStore {
@@ -41,8 +44,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
         set(prev => ({ ...prev, loginError: data.error || 'Login failed', isLoggingIn: false }))
         return
       }
-      const user: AuthUser = await res.json()
+      const data = await res.json()
+      const user: AuthUser = data.data
+      // Update config to unauthorized user
+      useConfigStore.getState().updateConfig(user.webapp || {})
       set(prev => ({ ...prev, currentUser: user, loginError: null, isLoggingIn: false }))
+
 
       eventBus.dispatch({type: 'user:login'})
     } catch (e) {
@@ -51,7 +58,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   async logout() {
-    await fetch(toAbsoluteUrl('api/auth/logout'), { method: 'POST' }).catch(() => {})
+    const res = await fetch(toAbsoluteUrl('api/auth/logout'), { method: 'POST' })
+    if (!res.ok) {
+      throw new Error('Logout failed')
+    }
+
+    const data = await res.json()
+    const user: AuthUser = data.data
+
+    // Update config to unauthorized user
+    useConfigStore.getState().updateConfig(user.webapp || {})
     set(prev => ({ ...prev, currentUser: null }))
     eventBus.dispatch({type: 'user:logout'})
   },
