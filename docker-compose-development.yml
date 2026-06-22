@@ -1,0 +1,50 @@
+# This docker-compose file is meant to make development easier as no part of the app will run on the host system
+# For even easier use it's recommended to use the docker-compose-development.nginx-proxy.yml file as well.
+name: home-gallery-development
+services:
+  api:
+    build:
+      context: packages/api-server
+      dockerfile: Dockerfile-development
+    volumes:
+      - ./packages/api-server:/app
+    user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
+    environment:
+      # TensorflowJS backends
+      # - cpu: slowest and best support
+      # - wasm: good perfromance for arm64 and amd64 platforms
+      # - node: best performance on amd64 platform
+      #- BACKEND=cpu
+      - BACKEND=wasm
+      #- BACKEND=node
+  gallery:
+    build:
+      context: .
+      dockerfile: Dockerfile-development
+    environment:
+      #- NODE_OPTIONS=--max-old-space-size=4096 # On larger galleries increase memory limit
+      - GALLERY_API_SERVER=http://api:3000
+      - GALLERY_API_SERVER_CONCURRENT=5 # for SoC devices like Rasperry Pi. Use 5 otherwise
+      - GALLERY_API_SERVER_TIMEOUT=30 # for SoC devices like Rasperry Pi. Use 30 otherwise
+      #- GALLERY_USE_NATIVE=ffprobe,ffmpeg,vipsthumbnail # On issues with sharp resizer
+      # Use polling for safety of possible network mounts. Try 0 to use inotify via fs.watch
+      - GALLERY_WATCH_POLL_INTERVAL=0
+    user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
+    volumes:
+      - .:/app
+      - ./data:/data
+      - ${GALLERY_CONFIG_FILE:-./gallery.config-development.yml}:/data/config/gallery.config.yml
+    ports: ["3000"]
+  webapp:
+    depends_on:
+      - gallery
+      - api
+    build:
+      context: .
+      dockerfile: Dockerfile-development
+    ports: ["5173"]
+    volumes:
+      - .:/app
+    working_dir: "/app/packages/webapp"
+    command: "npm run dev -- --host"
+    user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
