@@ -31,6 +31,7 @@ export interface EventStore {
 
   addEvents: (events: Event[]) => void
   reapplyEvents: () => void
+  reset: () => void
 }
 
 const _applyEvents = (events: Event[]) => {
@@ -66,4 +67,7 @@ export const useEventStore = create<EventStore>((set) => ({
     _applyEvents(state.events)
     return state
   }),
+  reset: () => set((state) => {
+    return {...state, events: [], recentTags: []}
+  })
 }))
