@@ -72,44 +72,6 @@ export const getEvents = () => fetchJsonWorker(`api/events.json`)
 
 export const getTree = async (hash: string) => fetchJsonWorker(`api/database/tree/${hash}.json`)
 
-let eventSourceReconnectTimeout = 1000;
-const eventSourceReconnectTimeoutMax = 2 * 60 * 1000;
-
-export interface ServerEvent {
-  type: string;
-  id: string;
-  date: string;
-  action?: string;
-}
-
-export declare type ServerEventListener = (event: ServerEvent) => void;
-
-export const eventStream = (onEvent) => {
-  const events = new EventSource(toAbsoluteUrl('api/events/stream'));
-
-  events.addEventListener('open', () => {
-    eventSourceReconnectTimeout = 1000;
-  })
-
-  events.addEventListener('message', (event: MessageEvent) => {
-    try {
-      const data = JSON.parse(event.data);
-      if (data.type == 'pong') {
-        console.log(`Connected to server events`);
-      }
-      onEvent(data)
-    } catch (e) {
-      console.log(`Could not read Event: ${e}`);
-    }
-  })
-
-  events.addEventListener('error', event => {
-    console.log(`EventSource error. Try to reconnect ${JSON.stringify(event)}`);
-    events.close();
-    setTimeout(() => eventStream(onEvent), eventSourceReconnectTimeout);
-    eventSourceReconnectTimeout = Math.min(eventSourceReconnectTimeoutMax, eventSourceReconnectTimeout * 2);
-  });
-}
 
 export const pushEvent = async (event: Event) => {
   console.log(`push event `, event);
