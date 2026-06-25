@@ -10,7 +10,7 @@ export const injectState = (database, dir, basePath, disableEdit, cb) => {
   const t0 = Date.now();
   const indexFilename = path.join(dir, basePath, 'index.html')
   rewriteFile(indexFilename, data => {
-    const disabled = ['offlineDatabase']
+    const disabled = ['offlineDatabase', 'login']
     if (disableEdit) {
       disabled.push('edit', 'serverEvent')
     }
