@@ -52,6 +52,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
 
       eventBus.dispatch({type: 'user:login'})
+      console.log('Logged in', user)
     } catch (e) {
       set(prev => ({ ...prev, loginError: 'Network error', isLoggingIn: false }))
     }
@@ -70,5 +71,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
     useConfigStore.getState().updateConfig(user.webapp || {})
     set(prev => ({ ...prev, currentUser: null }))
     eventBus.dispatch({type: 'user:logout'})
+    console.log('Logged out', user)
   },
 }))
