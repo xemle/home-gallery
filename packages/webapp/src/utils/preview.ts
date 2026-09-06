@@ -32,7 +32,6 @@ export const getLowerPreviewUrl = (previews, size) => {
 
 export const getHigherPreviewUrl = (previews, size) => {
   const preview = previews?.filter(preview => getPreviewSize(preview) >= size).pop()
-  console.log("getHigherPreviewUrl ", preview);
   if (!preview) {
     return getLowerPreviewUrl(previews, size)
   }
