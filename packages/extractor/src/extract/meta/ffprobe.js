@@ -55,8 +55,8 @@ async function spawnFfprobe(ffprobePath, src) {
       if (errorHandled) {
         return
       }
-      const stdout = stdoutData.join('')
-      const stderr = stderrData.join('')
+      const stdout = Buffer.concat(stdoutData).toString('utf-8')
+      const stderr = Buffer.concat(stderrData).toString('utf-8')
       const lastErrLine = stderr.split('\n').filter(Boolean).pop()
       if (signal) {
         return reject(new Error(`Failed to run ffprobe. Terminated with signal ${signal}: ${lastErrLine}`))
@@ -72,8 +72,8 @@ async function spawnFfprobe(ffprobePath, src) {
       reject(new Error(`Failed to run ffprobe: ${cause}`, { cause }))
     })
 
-    ffprobe.stdout.on('data', data => stdoutData.push(data.toString()))
-    ffprobe.stderr.on('data', data => stderrData.push(data.toString()))
+    ffprobe.stdout.on('data', data => stdoutData.push(data))
+    ffprobe.stderr.on('data', data => stderrData.push(data))
   })
 }
 
