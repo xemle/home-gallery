@@ -14,7 +14,7 @@ const log = Logger('database.writeStream')
  * @returns {Promise<Transform[]>}
  */
 export const createWriteStream = async (filename, created = new Date()) => {
-  const fileStream = await createAtomicWriteStream(filename)
+  const fileStream = await createAtomicWriteStream(filename, { encoding: 'utf8' })
   const databaseFileType = getDatabaseFileType()
 
   return compose(

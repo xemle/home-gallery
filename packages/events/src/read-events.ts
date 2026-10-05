@@ -16,7 +16,7 @@ const readEventsCb = (filename: fs.PathLike, cb: (...args: any[]) => void) => {
   let reader: readline.Interface;
   let lineNumber = 0;
 
-  const readStream = fs.createReadStream(filename);
+  const readStream = fs.createReadStream(filename, { encoding: 'utf8' });
   readStream.on('error', (err) => {
     isClosed = true;
     cb(err);
