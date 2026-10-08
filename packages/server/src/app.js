@@ -75,6 +75,7 @@ export async function createApp(context) {
   await databaseApi(context)
   await treeApi(context)
   await sourcesApi(context)
+  router.get('/api/version', (_, res) => res.json(context.buildInfo))
   await debugApi(context)
 
   await webappMiddleware(context)
