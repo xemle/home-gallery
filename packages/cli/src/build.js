@@ -10,4 +10,5 @@ export const createBuildMiddleware = buildInfo => async (argv) => {
     console.log(`Build version: ${buildInfo.version} (commit ${buildInfo.commit}) created by ${buildInfo.createdBy} at ${buildInfo.created}`)
     process.exit(0)
   }
+  argv.buildInfo = buildInfo
 }
