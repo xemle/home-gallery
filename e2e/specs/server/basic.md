@@ -10,6 +10,14 @@ Tags: server,docker
 * Server has file "/index.html"
 * Server has file "/api/database.json"
 
+## Version
+
+* Init dir from "database/basic"
+* Create database
+* Start only server
+* Request file "/api/version"
+* Response status is "200"
+
 ## Database query
 
 * Init dir from "database/basic"
