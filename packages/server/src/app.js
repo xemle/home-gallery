@@ -10,6 +10,7 @@ import { databaseApi } from './api/database/index.js';
 import { treeApi } from './api/database/tree/index.js';
 import { eventsApi } from './api/events/index.js';
 import { sourcesApi } from './api/sources.js';
+import { versionApi } from './api/version.js';
 import { webapp } from './webapp.js';
 import { augmentReqByUserMiddleware, createBasicAuthMiddleware, defaultIpWhitelistRules } from './auth/index.js'
 import { isIndex, skipIf, browserBasePath, routerPrefix } from './utils.js'
@@ -75,6 +76,7 @@ export async function createApp(context) {
   await databaseApi(context)
   await treeApi(context)
   await sourcesApi(context)
+  await versionApi(context)
   await debugApi(context)
 
   await webappMiddleware(context)

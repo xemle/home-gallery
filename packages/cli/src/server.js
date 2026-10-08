@@ -1,6 +1,7 @@
 import Logger from '@home-gallery/logger'
 
 import { load, mapArgs, validatePaths } from './config/index.js';
+import { getBuildInfo } from './build.js'
 
 const log = Logger('cli.server');
 
@@ -157,7 +158,7 @@ const command = {
       setDefaults(options.config, serverPluginFiles)
       validatePaths(options.config, ['database.file', 'events.file', 'storage.dir'])
 
-      const [server, shutdown] = await startServer(options)
+      const [server, shutdown] = await startServer({...options, buildInfo: getBuildInfo()})
       return new Promise(resolve => {
         process.once('SIGINT', () => {
           log.debug(`Stopping server`)

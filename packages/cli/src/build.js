@@ -5,6 +5,12 @@ export const buildOptions = {
   },
 }
 
+let currentBuildInfo = {}
+
+export const setBuildInfo = buildInfo => currentBuildInfo = buildInfo || {}
+
+export const getBuildInfo = () => currentBuildInfo
+
 export const createBuildMiddleware = buildInfo => async (argv) => {
   if (argv.fullVersion && buildInfo?.version) {
     console.log(`Build version: ${buildInfo.version} (commit ${buildInfo.commit}) created by ${buildInfo.createdBy} at ${buildInfo.created}`)
