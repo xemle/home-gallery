@@ -157,7 +157,7 @@ const command = {
       setDefaults(options.config, serverPluginFiles)
       validatePaths(options.config, ['database.file', 'events.file', 'storage.dir'])
 
-      const [server, shutdown] = await startServer(options)
+      const [server, shutdown] = await startServer({...options, buildInfo: argv.buildInfo})
       return new Promise(resolve => {
         process.once('SIGINT', () => {
           log.debug(`Stopping server`)
