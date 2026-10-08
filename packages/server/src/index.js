@@ -74,6 +74,7 @@ export async function startServer(options) {
     type: 'serverContext',
     plugin: {},
     config,
+    buildInfo: options.buildInfo || {},
     eventbus: new EventBus(),
     processManager: new ProcessManager(),
   }

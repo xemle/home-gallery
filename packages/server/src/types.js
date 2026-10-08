@@ -10,8 +10,17 @@
  */
 
 /**
+ * @typedef {object} TBuildInfo
+ * @property {string} [version]
+ * @property {string} [commit]
+ * @property {string} [created]
+ * @property {string} [createdBy]
+ */
+
+/**
  * @typedef {object} TServerContext
  * @property {any} config
+ * @property {TBuildInfo} buildInfo
  * @property {EventBus} eventbus
  * @property {ProcessManager} processManager
  * @property {import('@home-gallery/types').TServerPluginManager} pluginManager

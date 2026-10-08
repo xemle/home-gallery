@@ -345,6 +345,12 @@ step("Response body has property <property> with value <value>", async (property
   }
 })
 
+step("Response body has property <property>", async (property) => {
+  const body = gauge.dataStore.scenarioStore.get('response.body')
+  const resolvedProperty = resolveProperty(body, property)
+  assert(resolvedProperty !== undefined && resolvedProperty !== null && resolvedProperty !== '', `Expected body property ${property} to be set`)
+})
+
 const getAppState = () => {
   const body = gauge.dataStore.scenarioStore.get('response.body') || ''
   const script = body.split('\n').filter(line => line.match(/__homeGallery/)).filter(line => line.match(/script/)).pop() || ''
