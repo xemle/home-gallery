@@ -27,7 +27,7 @@
     "@tensorflow/tfjs": "3.21.0",
     "@tensorflow/tfjs-backend-cpu": "3.21.0",
     "@tensorflow/tfjs-backend-wasm": "3.21.0",
-    "@tensorflow/tfjs-converter": "3.21.0",
+    "@tensorflow/tfjs-converter": "4.22.0",
     "@tensorflow/tfjs-node": "3.21.1",
     "@vladmandic/face-api": "0.13.3",
     "express": "^5.1.0",
