@@ -10,13 +10,11 @@ import { toNativeFactory } from '../utils/to-worker';
 import { useAppConfig } from '../config/useAppConfig';
 import { useOnEntries } from './useOnEntries';
 import { toAbsoluteUrl } from '../utils/toAbsoluteUrl';
-
 export const useLoadDatabase = () => {
   const removeEntries = useEntryStore(state => state.removeEntries);
   const reapplyEvents = useEventStore(state => state.reapplyEvents);
   const appConfig = useAppConfig()
   const onEntries = useOnEntries()
-
   useEffect(() => {
     onEntries(appConfig.entries as [] || [])
 

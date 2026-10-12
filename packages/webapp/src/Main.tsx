@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect } from "react";
 import {
   BrowserRouter,
 } from "react-router-dom";
@@ -9,7 +10,19 @@ import { LastLocationProvider } from './utils/lastLocation/LastLocationProvider'
 import { AppRoutes } from "./AppRoutes";
 import { AppContextProvider } from "./AppContext";
 import LoadDatabaseAndEvents from "./init/LoadDatabaseAndEvents";
+import { useAuthStore } from "./store/auth-store";
 
+
+const AuthInit = () => {
+  const init = useAuthStore(state => state.init)
+
+  useEffect(() => {
+    const injected = window['__homeGallery'] || {}
+    init(injected.allowPublic || false, injected.currentUser || null, injected.readOnly || false)
+  }, [])
+
+  return null
+}
 
 export const Main = () => {
   const base = document.querySelector('base')?.getAttribute('href') || '/';
@@ -20,6 +33,7 @@ export const Main = () => {
 
   return (
     <BrowserRouter basename={basename}>
+      <AuthInit />
       <LastLocationProvider>
         <AppContextProvider>
           <LoadDatabaseAndEvents>

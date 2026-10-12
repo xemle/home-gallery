@@ -1,4 +1,3 @@
-
 import path from 'path';
 import { browserBasePath } from './utils.js'
 
@@ -25,6 +24,7 @@ export async function webappMiddleware(context) {
       plugins: pluginEntries
     },
     sources,
+    allowPublic: config.server?.auth?.public?.allow || false,
   }
 
   const staticProperties = {
@@ -38,6 +38,18 @@ export async function webappMiddleware(context) {
     }
     const entries = await context.database.getFirstEntries(50, req)
 
+    const currentUser = req.username ? {
+      username: req.username,
+      readOnly: req.readOnly || false,
+    } : null
+
+    const userPagesDisabled = req.pages?.disabled || []
+    const staticPagesDisabled = staticState.pages?.disabled || []
+    const mergedPagesDisabled = [...new Set([...staticPagesDisabled, ...userPagesDisabled])]
+    const mergedPages = mergedPagesDisabled.length
+      ? { ...staticState.pages, disabled: mergedPagesDisabled }
+      : staticState.pages
+
     req.webapp = {
       ...req.webapp,
       ...staticProperties,
@@ -45,7 +57,10 @@ export async function webappMiddleware(context) {
         ...req.webapp.state,
         ...staticState,
         disabled: !!req.username ? [...staticState.disabled, 'pwa'] : staticState.disabled,
+        pages: mergedPages,
         entries,
+        currentUser,
+        readOnly: req.readOnly || false,
       }
     }
 

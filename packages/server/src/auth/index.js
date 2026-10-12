@@ -1,6 +1,7 @@
 import { rules2WhitelistRules, isWhitelistIp } from './ip.js'
 export { defaultIpWhitelistRules } from './ip.js'
-import { users2UserMap, matchesUser } from './user.js'
+import { users2UserMap, matchesUser, resolveUsers } from './user.js'
+import { getSessionCookie } from './cookies.js'
 
 import Logger from '@home-gallery/logger'
 
@@ -25,11 +26,14 @@ export const augmentReqByUserMiddleware = () => (req, _, next) => {
   next()
 }
 
-export const createBasicAuthMiddleware = (users, rules) => {
+export const createAuthMiddleware = (users, roles, rules, sessionStore, anonymousAccess, anonymousReadOnly, anonymousPages) => {
   const userMap = users2UserMap(users)
+  const resolvedUsers = resolveUsers(users, roles)
+  const resolvedUserMap = resolvedUsers.reduce((map, u) => { map[u.username] = u; return map }, {})
   const whitelistRules = rules2WhitelistRules(rules || [])
 
-  log.info(`Set basic auth for users: ${Object.keys(userMap).join(', ')}`)
+  const userNames = resolvedUsers.map(u => u.username).join(', ')
+  log.info(`Set auth for users: ${userNames}`)
   log.debug(whitelistRules, `Set ip whitelist rules to ${rules.map(({type, value}) => `${type}:${value}`).join(', ')}`)
 
   return (req, res, next) => {
@@ -39,16 +43,46 @@ export const createBasicAuthMiddleware = (users, rules) => {
       return next()
     }
 
+    // 1. Try Basic auth credentials
     const [username, password] = getCredentials(req)
-    if (!username) {
-      log.debug(`Block client with ip ${clientIp}. Request authentication`)
-    } else if (matchesUser(userMap, username, password)) {
-      return next()
-    } else {
-      log.info(`Invalid credentials for user '${username}'. Block client with ip ${clientIp}. Request authentication`)
+    if (username) {
+      if (matchesUser(userMap, username, password)) {
+        const resolvedUser = resolvedUserMap[username]
+        req.username = username
+        req.readOnly = resolvedUser?.readOnly || false
+        req.pages = resolvedUser?.pages
+        log.debug(`Basic auth accepted for user '${username}' from ${clientIp}`)
+        return next()
+      }
+      log.info(`Invalid basic credentials for user '${username}' from ${clientIp}`)
     }
 
-    res.set('WWW-Authenticate', 'Basic realm="HomeGallery"')
-    res.status(401).send('Authentication required')
+    // 2. Try Cookie session
+    const sessionId = getSessionCookie(req)
+    if (sessionId) {
+      const session = sessionStore ? sessionStore.getSession(sessionId) : null
+      if (session) {
+        req.username = session.username
+        req.roles = session.roles
+        req.readOnly = session.readOnly
+        req.pages = session.pages
+        return next()
+      }
+      log.debug(`Invalid or expired session from ip ${clientIp}`)
+    }
+
+    // 3. Anonymous access
+    if (anonymousAccess) {
+      req.readOnly = anonymousReadOnly
+      req.pages = anonymousPages
+      log.debug(`Anonymous access from ${clientIp} (public mode, readOnly=${anonymousReadOnly})`)
+      return next()
+    }
+
+    // 4. Deny
+    if (username) {
+      res.set('WWW-Authenticate', 'Basic realm="HomeGallery"')
+    }
+    res.status(401).json({error: 'Authentication required'})
   }
 }
