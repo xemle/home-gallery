@@ -95,6 +95,10 @@ The gallery configuration can be found in `./data/config/gallery.config.yml` for
 Want to use docker compose? See [install](https://home-gallery.org/docs/install/index.html)
 section in the documentation for further information.
 
+## One-Click Deploy
+
+[![Deploy on RepoCloud](https://d16t0pc4846x52.cloudfront.net/deploylobe.svg)](https://repocloud.io/details/HomeGallery/)
+
 ## Documentation
 
 See [home-gallery.org/docs](https://home-gallery.org/docs/index.html) for general documentation.
