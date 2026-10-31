@@ -3,6 +3,7 @@ import { access } from 'fs/promises'
 import { pipeline, Readable } from 'stream'
 import { pipeline as pipelineAsync } from 'stream/promises'
 import { createGunzip } from 'zlib'
+import { StringDecoder } from 'string_decoder'
 import { through, toList, write } from '@home-gallery/stream'
 
 import Logger from '@home-gallery/logger'
@@ -66,8 +67,10 @@ export const createEntrySplitter = (filename) => {
   let data = ''
   let totalPos = 0
 
+  const decoder = new StringDecoder('utf8')
+
   const stream = through(function(chunk, enc, cb) {
-    data += chunk.toString('utf8')
+    data += decoder.write(chunk)
     let pos = 0
     if (isFirstChunk) {
       const [err, end, header] = findHeader(data)
@@ -99,6 +102,7 @@ export const createEntrySplitter = (filename) => {
     cb()
 
   }, function(cb) {
+    data += decoder.end()
     if (isFirstChunk) {
       return cb(new Error(`Could not find database header`))
     } else if (data == ']}') {

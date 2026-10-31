@@ -233,4 +233,43 @@ t.test('createEntrySplitter', async t => {
     t.same(entries.length, 2)
   })
 
+  t.test('umlauts splitted at buffer boundary', async t => {
+    let data = '{"type":"home-gallery/database@1.3","created":"2024-07-10T20:07:25.084Z","data":['
+    data += '{"id":"4b157a9dc0e4baf45ab0ef65c32832566ab0d1e5","hash":"99e61930141e8afff0d6d8c52997ec7295d62fd2","type":"image","files":[{"id":"4b157a9dc0e4baf45ab0ef65c32832566ab0d1e5","index":"files"}],"tags":["Grüße aus Österreich"]},'
+    data += '{"id":"d8b25bd1674e0f4b23695e7518a1e5932dac6ad8","hash":"d7496b6da889280fc0c175b9b6e3a5326097d023","type":"image","files":[{"id":"d8b25bd1674e0f4b23695e7518a1e5932dac6ad8","index":"files"}],"tags":["A Krügerl im Häusl"]}'
+    data += ']}'
+    const bytes = Buffer.from(data)
+    // split in the middle of each 2-byte umlaut
+    const splitPositions = []
+    for (let i = 0; i < bytes.length; i++) {
+      if (bytes[i] == 0xc3) {
+        splitPositions.push(i + 1)
+      }
+    }
+    const buffers = []
+    let start = 0
+    for (const pos of splitPositions) {
+      buffers.push(bytes.subarray(start, pos))
+      console
+      start = pos
+    }
+    buffers.push(bytes.subarray(start))
+    const entries = []
+
+
+    await pipeline(
+      Readable.from(buffers),
+      createEntrySplitter(),
+      through(function(entry, _, cb) {
+        entries.push(entry)
+        cb()
+      })
+    )
+
+
+    t.same(entries.length, 2)
+    t.same(entries[0].tags, ['Grüße aus Österreich'])
+    t.same(entries[1].tags, ['A Krügerl im Häusl'])
+  })
+
 })
