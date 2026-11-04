@@ -14,6 +14,7 @@ import { Years, YearView } from './year/Years';
 import { Tags } from './tags/Tags';
 import { Map } from './map';
 import { MediaView } from './single/MediaView';
+import { LoginPage } from './pages/LoginPage';
 import { useAppConfig } from "./config/useAppConfig";
 
 export const AppRoutes = () => {
@@ -36,6 +37,7 @@ export const AppRoutes = () => {
       {<Route path="/similar/:id" element={<SimilarView />} />}
       {<Route path="/faces/:id/:faceIndex" element={<FacesView />} />}
 
+      <Route path="/login" element={<LoginPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

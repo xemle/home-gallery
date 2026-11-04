@@ -1,17 +1,19 @@
 import * as React from "react";
-import { useState } from "react";
+import {useState} from "react";
 import * as icons from '@fortawesome/free-solid-svg-icons'
 
-import { useEditModeStore, ViewMode } from '../store/edit-mode-store';
-import { useTagDialog } from "../dialog/use-tag-dialog";
-import { addTags } from '../api/ApiService';
-import { useDeviceType, DeviceType } from "../utils/useDeviceType";
-import { type Tag } from "../api/models";
+import {useEditModeStore, ViewMode} from '../store/edit-mode-store';
+import {useTagDialog} from "../dialog/use-tag-dialog";
+import {addTags} from '../api/ApiService';
+import {DeviceType, useDeviceType} from "../utils/useDeviceType";
+import {type Tag} from "../api/models";
+import {useAuthStore} from '../store/auth-store';
 
-import { EditNavBar } from './EditNavBar';
-import { NavItem } from './NavItem';
-import { ViewNavBar } from './ViewNavBar';
-import { SearchInput, SearchButton } from "./SearchInput";
+import {EditNavBar} from './EditNavBar';
+import {NavItem} from './NavItem';
+import {ViewNavBar} from './ViewNavBar';
+import {SearchButton, SearchInput} from "./SearchInput";
+import {LoginButton} from './LoginButton';
 
 export const DesktopNavBar = ({disableEdit = false, showDialog}) => {
   const viewMode = useEditModeStore(state => state.viewMode);
@@ -29,8 +31,9 @@ export const DesktopNavBar = ({disableEdit = false, showDialog}) => {
                 <EditNavBar showDialog={showDialog}/>
               )}
             </div>
-            <div className="flex pr-2 space-x-4">
+            <div className="flex pr-2 space-x-2">
               <SearchInput focus={false} />
+              <LoginButton />
             </div>
           </div>
         </div>
@@ -58,10 +61,11 @@ export const MobileNavBar = ({disableEdit = false, showDialog}) => {
                     <EditNavBar showDialog={showDialog}/>
                   )}
                 </div>
-                <div className="flex pr-2 space-x-4">
+                <div className="flex pr-2 space-x-2">
                   <div className="overflow-hidden border-gray-500 rounded">
                     <SearchButton onClick={() => setShowSearch(true)}/>
                   </div>
+                  <LoginButton />
                 </div>
               </>
             )}
@@ -87,6 +91,7 @@ export const MobileNavBar = ({disableEdit = false, showDialog}) => {
 export const NavBar = ({disableEdit = false}) => {
   const [ deviceType ] = useDeviceType();
   const { setDialogVisible, openDialog } = useTagDialog()
+  disableEdit = disableEdit || useAuthStore(state => state.readOnly)
 
   const selectedIds = useEditModeStore(state => state.selectedIds);
 

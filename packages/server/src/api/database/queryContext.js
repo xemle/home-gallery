@@ -20,7 +20,9 @@ export const createQueryContext = (context, req = {}) => {
       req: req.method ? {
         remoteAddress: req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress,
         ignoreAuth: req.ignoreAuth,
-        username: req.username || 'anonymous'
+        username: req.username || 'anonymous',
+        roles: req.roles || [],
+        readOnly: req.readOnly || false,
       } : false
     },
     config,

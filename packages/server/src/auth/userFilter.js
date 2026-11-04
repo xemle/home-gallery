@@ -1,31 +1,35 @@
 import { parse } from '@home-gallery/query'
+import { resolveUsers } from './user.js'
 
 const logPrefix = 'api.auth.userFilter'
 
-const findUsersWithFilter = manager => {
+const collectUsersWithFilter = (manager) => {
   const log = manager.createLogger(`${logPrefix}.query`)
 
   const config = manager.getConfig()
-  const allUsers = config.server?.auth?.users || []
-  const users = allUsers.filter(user => typeof user.filter == 'string')
-  if (!allUsers.length) {
+  const rawUsers = config.server?.auth?.users || []
+  if (!rawUsers.length) {
     log.trace(`No users defined. Skip user filter`)
+    return []
   }
+  const roles = config.server?.auth?.roles || []
+  const users = resolveUsers(rawUsers, roles)
+  const usersWithFilter = users.filter(u => typeof u.filter === 'string' && u.filter !== '')
 
   const publicFilter = config.server?.auth?.public?.filter
   if (typeof publicFilter == 'string' && users.find(user => user.username == 'anonymous')) {
     log.warn('Can not set public filter to existing user: anonymous. Public filter is skipped')
   } else if (typeof publicFilter == 'string') {
-    users.push({username: 'anonymous', filter: publicFilter})
+    usersWithFilter.push({username: 'anonymous', filter: publicFilter})
   }
 
-  const hasUsersButNoFilter = allUsers.length && !users.length
+  const hasUsersButNoFilter = rawUsers.length && !usersWithFilter.length
   if (hasUsersButNoFilter) {
-    log.debug(`Found ${allUsers.length} users but no user filters are defined. Use 'filter: "year >= 2024"' in server.auth.users configuration to enable user filters`)
+    log.debug(`Found ${rawUsers.length} users but no user filters are defined. Use 'filter: "year >= 2024"' in server.auth.users or server.auth.roles configuration to enable user filters`)
     return []
   }
 
-  return users
+  return usersWithFilter
 }
 
 const createUsername2FilterAst = async (manager, users) => {
@@ -53,7 +57,7 @@ const createUsername2FilterAst = async (manager, users) => {
 }
 
 const createUserFilterQueryPlugin = async manager => {
-  const users = findUsersWithFilter(manager)
+  const users = collectUsersWithFilter(manager)
   if (!users.length) {
     return false
   }
