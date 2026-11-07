@@ -5,15 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.22.0] - 2026-11-07
+
+### Added
+
+- server: Add version API
 
 ### Fixed
 
+- webapp: Use fallback preview if dimension is not available
 - server: Escape social media title and description agains injections
 - server: Fix social media dimension
+- database: Harden database update with UTF-8 multi byte chars (eg. umlaut)
 
 ### Changed
 
+- Use latest node >= 26.13.0
 - server: Add server.trustProxy option and disable proxy trust by default
 
 ## [1.21.0] - 2026-03-01
