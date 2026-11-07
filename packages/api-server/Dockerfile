@@ -1,4 +1,4 @@
-FROM node:24 AS builder
+FROM node:26 AS builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY *.js ./
 
 RUN node download-models.js
 
-FROM node:24
+FROM node:26
 
 WORKDIR /app
 COPY --from=builder /app ./
