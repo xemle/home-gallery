@@ -44,9 +44,8 @@ class EqualHeightRow {
 			return
 		}
 		const { width, height } = item
-		// if the ratio is NaN we default to 1, fixes the issue that some images without preview 
-		// get listed alone per row
-		const ratio = isNaN(width / height)? 1:width / height
+		const isValid = !isNaN(width) && !isNaN(height) && width > 0 && height > 0
+		const ratio = isValid ? width / height : 1
 		this.indices.push(index)
 		this.ratios.push(ratio)
 		this.ratioSum += ratio
