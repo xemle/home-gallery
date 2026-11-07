@@ -44,7 +44,8 @@ class EqualHeightRow {
 			return
 		}
 		const { width, height } = item
-		const ratio = width / height
+		const isValid = !isNaN(width) && !isNaN(height) && width > 0 && height > 0
+		const ratio = isValid ? width / height : 1
 		this.indices.push(index)
 		this.ratios.push(ratio)
 		this.ratioSum += ratio
