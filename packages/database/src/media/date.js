@@ -19,7 +19,7 @@ function parseExiftoolDate(entry, date) {
   }
 
   let iso8601 = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}${match[7] ? match[7] : ''}`
-  if (date.tzoffsetMinutes && !match[8]) {
+  if (typeof date.tzoffsetMinutes === 'number' && !match[8]) {
     const offset = Math.abs(date.tzoffsetMinutes)
     const negative = date.tzoffsetMinutes < 0
     const hour = '' + Math.floor(offset / 60)
