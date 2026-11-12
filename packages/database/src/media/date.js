@@ -22,7 +22,7 @@ function parseExiftoolDate(entry, date) {
   if (date.tzoffsetMinutes && !match[8]) {
     const offset = Math.abs(date.tzoffsetMinutes)
     const negative = date.tzoffsetMinutes < 0
-    const hour = '' + (offset / 60).toFixed()
+    const hour = '' + Math.floor(offset / 60)
     const minute = '' + (offset % 60)
     const offsetText = (negative ? '-' : '+') + hour.padStart(2, '0') + ':' + minute.padStart(2, '0')
     iso8601 += offsetText
