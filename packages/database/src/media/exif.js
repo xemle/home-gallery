@@ -77,7 +77,11 @@ const getExif = (entry) => {
     aperture: exif.ApertureValue || exif.Aperture,
     exposureMode: exif.ExposureMode,
     focalLength: exif.FocalLength ? +(exif.FocalLength.replace(' mm', '')) : -1,
-    focalLength33mm: exif.FocalLengthIn35mmFormat ? +(exif.FocalLengthIn35mmFormat.replace(' mm', '')) : -1,
+    focalLength33mm: typeof exif?.FocalLengthIn35mmFormat === 'number' 
+      ? exif.FocalLengthIn35mmFormat 
+        : (typeof exif?.FocalLengthIn35mmFormat === 'string' 
+        ? +(exif.FocalLengthIn35mmFormat.replace(' mm', '')) 
+          : -1),
     whiteBalance: exif.WhiteBalance
   }, getExposerTime(), getShutterSpeed())
 }
